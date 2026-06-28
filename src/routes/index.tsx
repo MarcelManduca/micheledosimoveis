@@ -75,6 +75,56 @@ function brl(n: number | null) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 }
 
+const BIO_FULL = [
+  "Sou Michele Prietsch, corretora de imóveis com 16 anos de experiência no mercado imobiliário e atuação especializada em imóveis de alto padrão em Florianópolis. Gaúcha de origem e apaixonada pela Ilha, encontrei em Florianópolis o cenário ideal para unir minha trajetória profissional à qualidade de vida, à arquitetura e ao estilo de vida que tornam a cidade uma das mais desejadas do Brasil.",
+  "Embora meu nome seja Michele Prietsch, muitos clientes passaram a me chamar carinhosamente de Michele dos Imóveis — um apelido que nasceu da minha presença constante no mercado imobiliário, da forma próxima como conduzo cada atendimento e da dedicação em conectar pessoas aos imóveis certos em Florianópolis. Com o tempo, esse nome se tornou parte da minha identidade profissional e da minha marca pessoal.",
+  "Atendo compradores, vendedores e investidores que buscam uma experiência imobiliária personalizada, segura e transparente. Meu trabalho vai além da intermediação: envolve escuta ativa, curadoria criteriosa, análise de perfil, leitura de mercado e acompanhamento próximo em cada etapa da negociação.",
+  "Atuo em regiões valorizadas de Florianópolis, incluindo Jurerê Internacional, Praia Brava, Cacupé, Lagoa da Conceição, Campeche, Morro das Pedras, Beira-Mar Norte, Agronômica, Itacorubi, Trindade, Santa Mônica e Córrego Grande, sempre com foco em imóveis que combinam localização, arquitetura, conforto, liquidez e estilo de vida.",
+  "Apaixonada por arquitetura, fotografia e produção de conteúdo, apresento cada imóvel de forma autêntica e estratégica, destacando não apenas suas características técnicas, mas também a experiência de morar, investir ou viver naquele endereço.",
+  "Meu compromisso é tornar a compra ou venda de imóveis em Florianópolis uma jornada mais leve, segura e memorável, conectando pessoas a imóveis que fazem sentido para seu momento de vida.",
+  "Será um prazer acompanhar você nessa escolha.",
+];
+
+function AboutBio() {
+  const [expanded, setExpanded] = useState(false);
+  // Preview limits: ~650 chars desktop, ~480 mobile. We render the full text
+  // in the DOM (for SEO) and use CSS line-clamp to control visible length.
+  return (
+    <div className="mt-6">
+      <div
+        className={
+          expanded
+            ? "space-y-4 text-muted-foreground leading-relaxed"
+            : "space-y-4 text-muted-foreground leading-relaxed [&>p:nth-child(n+2)]:hidden sm:[&>p:nth-child(n+2)]:hidden"
+        }
+      >
+        {BIO_FULL.map((p, i) => (
+          <p key={i}>
+            {i === 0 ? (
+              <>
+                Sou <strong className="text-foreground font-medium">Michele Prietsch</strong>
+                {p.slice("Sou Michele Prietsch".length)}
+              </>
+            ) : (
+              p
+            )}
+          </p>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-foreground underline-offset-4 hover:underline transition"
+      >
+        {expanded ? "Mostrar menos" : "Ler mais sobre Michele"}
+        <ArrowRight className={`h-4 w-4 transition-transform ${expanded ? "rotate-90" : ""}`} />
+      </button>
+    </div>
+  );
+}
+
+
 
 function Index() {
   const dbProperties = (Route.useLoaderData() ?? []) as PropertyListItem[];
