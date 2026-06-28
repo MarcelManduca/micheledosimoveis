@@ -227,10 +227,14 @@ export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty
     clearTimeout(timer);
   }
 
+  const stripPriceSuffix = (s: string) =>
+    s.replace(/\s*-\s*Gralha Imóveis\s*$/i, "")
+     .replace(/\s+por\s+R\$\s*[\d.,]+\s*$/i, "")
+     .trim();
   const title =
-    pickMeta(html, "og:title")?.replace(/\s*-\s*Gralha Imóveis\s*$/i, "") ||
-    (html.match(/<title>([^<]+)<\/title>/i)?.[1].replace(/\s*-\s*Gralha Imóveis\s*$/i, "") ??
-      "Imóvel");
+    stripPriceSuffix(pickMeta(html, "og:title") ?? "") ||
+    stripPriceSuffix(html.match(/<title>([^<]+)<\/title>/i)?.[1] ?? "") ||
+    "Imóvel";
   const cover = pickMeta(html, "og:image");
 
   // All gallery images
