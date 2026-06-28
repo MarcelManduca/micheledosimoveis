@@ -95,8 +95,10 @@ function Index() {
           <nav className="hidden md:flex items-center gap-9 text-sm text-white/90">
             <a href="#top" className="hover:text-white transition">Início</a>
             <a href="#imoveis" className="hover:text-white transition">Imóveis</a>
+            <a href="#regioes" className="hover:text-white transition">Regiões</a>
             <a href="#sobre" className="hover:text-white transition">Sobre</a>
             <a href="#contato" className="hover:text-white transition">Contato</a>
+
           </nav>
 
           <a
