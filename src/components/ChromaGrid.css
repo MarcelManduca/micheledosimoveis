@@ -28,11 +28,12 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  border-radius: 24px;
+  border-radius: 20px;
   overflow: hidden;
   border: 1px solid #2a2a2a;
-  transition: border-color 0.3s ease, filter 0.45s ease, opacity 0.45s ease, transform 0.45s ease;
+  transition: border-color 0.3s ease, filter 0.45s ease, opacity 0.45s ease, transform 0.45s ease, box-shadow 0.45s ease;
   background: var(--card-gradient, #111);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.14);
 
   --mouse-x: 50%;
   --mouse-y: 50%;
@@ -54,6 +55,7 @@
   opacity: 1;
   transform: translateY(-2px);
   z-index: 2;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.24);
 }
 
 .chroma-card::before {
@@ -99,39 +101,103 @@
 .chroma-info {
   position: relative;
   z-index: 1;
-  padding: 1rem 1.25rem 1.25rem;
+  padding: 1rem 1.1rem 1.15rem;
   color: #fff;
   font-family: inherit;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  row-gap: 0.35rem;
-  column-gap: 0.75rem;
+  display: flex;
+  min-height: 178px;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.chroma-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .chroma-info .name {
-  font-size: 1.05rem;
+  display: -webkit-box;
+  min-height: 3.9rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  font-size: 1.08rem;
   font-weight: 500;
-  line-height: 1.25;
-  grid-column: 1 / -1;
+  line-height: 1.22;
 }
 
 .chroma-info .handle {
-  font-size: 0.75rem;
-  color: #bbb;
-  align-self: center;
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.28rem 0.55rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .chroma-info .role {
-  font-size: 0.8rem;
-  color: #cfcfcf;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.chroma-info .role span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chroma-cta {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.78);
+  transition: transform 0.35s ease, background-color 0.35s ease, color 0.35s ease;
+}
+
+.chroma-card:hover .chroma-cta,
+.chroma-card.is-active .chroma-cta {
+  transform: translateX(2px);
+  background: rgba(255, 255, 255, 0.9);
+  color: #111;
+}
+
+.price-block {
+  margin-top: auto;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 0.9rem;
+}
+
+.price-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.48);
 }
 
 .chroma-info .location {
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 1.15rem;
+  font-weight: 600;
   color: #fff;
   text-align: right;
-  align-self: end;
+  white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {
