@@ -8,8 +8,10 @@ import {
   getMyAdminStatus,
   importGralhaProperty,
   setPropertyFeatured,
+  syncPropertiesAvailability,
 } from "@/lib/properties.functions";
-import { ArrowRight, ExternalLink, LogOut, Star, Trash2 } from "lucide-react";
+import { ArrowRight, ExternalLink, LogOut, RefreshCw, Star, Trash2 } from "lucide-react";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Painel · Michele Prietsch" }] }),
@@ -78,6 +80,12 @@ function AdminPage() {
     mutationFn: (id: string) => deleteProperty({ data: { id } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
   });
+
+  const syncMut = useMutation({
+    mutationFn: () => syncPropertiesAvailability(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
+  });
+
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -177,7 +185,32 @@ function AdminPage() {
           </div>
         )}
 
-        <h2 className="mt-16 font-display text-2xl tracking-tight">Imóveis cadastrados</h2>
+        <div className="mt-16 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="font-display text-2xl tracking-tight">Imóveis cadastrados</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              A verificação automática roda diariamente e despublica imóveis removidos do site da Gralha.
+            </p>
+          </div>
+          <button
+            onClick={() => syncMut.mutate()}
+            disabled={syncMut.isPending}
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium hover:bg-secondary transition disabled:opacity-60"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${syncMut.isPending ? "animate-spin" : ""}`} />
+            {syncMut.isPending ? "Verificando..." : "Verificar disponibilidade agora"}
+          </button>
+        </div>
+        {syncMut.data && (
+          <div className="mt-3 rounded-xl bg-secondary/60 px-4 py-3 text-xs text-foreground">
+            Verificados {syncMut.data.checked} · disponíveis {syncMut.data.available} · despublicados {syncMut.data.unpublished} · erros {syncMut.data.errors}
+          </div>
+        )}
+        {syncMut.error && (
+          <div className="mt-3 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {(syncMut.error as Error).message}
+          </div>
+        )}
         <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
           <table className="w-full text-sm">
             <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wider text-muted-foreground">

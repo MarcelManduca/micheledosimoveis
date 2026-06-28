@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ImovelCodeRouteImport } from './routes/imovel.$code'
+import { Route as ApiPublicHooksSyncPropertiesRouteImport } from './routes/api/public/hooks/sync-properties'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -34,18 +35,26 @@ const ImovelCodeRoute = ImovelCodeRouteImport.update({
   path: '/imovel/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksSyncPropertiesRoute =
+  ApiPublicHooksSyncPropertiesRouteImport.update({
+    id: '/api/public/hooks/sync-properties',
+    path: '/api/public/hooks/sync-properties',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +62,30 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/auth' | '/imovel/$code'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/imovel/$code'
+    | '/api/public/hooks/sync-properties'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/auth' | '/imovel/$code'
-  id: '__root__' | '/' | '/admin' | '/auth' | '/imovel/$code'
+  to:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/imovel/$code'
+    | '/api/public/hooks/sync-properties'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/imovel/$code'
+    | '/api/public/hooks/sync-properties'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +93,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   ImovelCodeRoute: typeof ImovelCodeRoute
+  ApiPublicHooksSyncPropertiesRoute: typeof ApiPublicHooksSyncPropertiesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +126,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImovelCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/sync-properties': {
+      id: '/api/public/hooks/sync-properties'
+      path: '/api/public/hooks/sync-properties'
+      fullPath: '/api/public/hooks/sync-properties'
+      preLoaderRoute: typeof ApiPublicHooksSyncPropertiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +141,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   ImovelCodeRoute: ImovelCodeRoute,
+  ApiPublicHooksSyncPropertiesRoute: ApiPublicHooksSyncPropertiesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
