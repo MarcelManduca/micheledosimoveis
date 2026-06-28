@@ -32,8 +32,9 @@ export const Route = createFileRoute("/")({
 });
 
 const WHATSAPP_URL =
-  "https://api.whatsapp.com/send?phone=5548999999999&text=" +
+  "https://api.whatsapp.com/send?phone=5548991828828&text=" +
   encodeURIComponent("Olá Michele! Vi sua página e gostaria de saber mais sobre imóveis na Beira Mar Norte.");
+
 
 const fallbackProperties = [
   { img: prop1, code: "MP-1042", name: "Edifício Mira Mare", neighborhood: "Beira Mar Norte, Florianópolis", beds: 4, baths: 5, area: "320 m²", price: "R$ 6.900.000" },
