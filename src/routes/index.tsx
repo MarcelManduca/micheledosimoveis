@@ -422,10 +422,16 @@ function Index() {
             </h2>
             <p className="mt-6 text-muted-foreground leading-relaxed">
               Sou <strong className="text-foreground font-medium">Michele Prietsch</strong>, corretora
-              especializada em imóveis de alto padrão em Florianópolis, com atuação dedicada à
-              Av. Beira Mar Norte e entorno. Trabalho com escuta, curadoria criteriosa e
-              total discrição — para que cada negociação seja tão única quanto o imóvel que a representa.
+              especializada em imóveis de alto padrão em Florianópolis. Atendo
+              compradores e investidores nos bairros e praias mais valorizados
+              da Ilha — de Jurerê Internacional, Praia Brava e Cacupé, no Norte,
+              à Lagoa da Conceição, Campeche e Morro das Pedras, no Sul, passando
+              por Beira Mar Norte, Agronômica, Itacorubi, Trindade, Santa Mônica
+              e Córrego Grande. Trabalho com escuta, curadoria criteriosa e total
+              discrição — para que cada negociação seja tão única quanto o imóvel
+              que a representa.
             </p>
+
 
             <div className="mt-10 grid grid-cols-3 gap-4">
               {[
