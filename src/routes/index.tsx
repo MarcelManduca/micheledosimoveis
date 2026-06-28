@@ -410,15 +410,26 @@ function Index() {
       <section id="sobre" className="bg-secondary/60 border-y border-border">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 py-24 sm:py-32 grid gap-14 lg:grid-cols-2 lg:items-center">
           <div className="relative">
-            <img
-              src={portrait}
-              alt="Michele Prietsch, corretora de imóveis de alto padrão em Florianópolis"
-              loading="lazy"
-              width={800}
-              height={800}
-              className="w-full max-w-md rounded-[28px] object-cover aspect-square shadow-xl"
-            />
-            <div className="absolute -bottom-6 -right-2 sm:right-10 rounded-2xl bg-background px-5 py-4 shadow-xl ring-1 ring-black/5">
+            <div
+              className="relative w-full max-w-md mx-auto aspect-square rounded-[28px] overflow-hidden shadow-xl ring-1 ring-black/5 bg-foreground"
+              aria-label="Galeria de fotos de Michele Prietsch"
+            >
+              <DomeGallery
+                images={DOME_IMAGES}
+                grayscale={false}
+                fit={0.62}
+                minRadius={260}
+                maxRadius={520}
+                padFactor={0.18}
+                overlayBlurColor="#0b0b0b"
+                openedImageWidth="320px"
+                openedImageHeight="320px"
+                imageBorderRadius="14px"
+                openedImageBorderRadius="22px"
+                segments={28}
+              />
+            </div>
+            <div className="absolute -bottom-6 -right-2 sm:right-4 rounded-2xl bg-background px-5 py-4 shadow-xl ring-1 ring-black/5 z-10">
               <div className="font-display text-3xl">+16 anos</div>
               <div className="text-xs text-muted-foreground mt-1">no mercado imobiliário</div>
             </div>
