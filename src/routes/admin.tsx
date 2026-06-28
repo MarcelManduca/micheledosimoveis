@@ -281,35 +281,44 @@ function AdminPage() {
                   </td>
                   <td className="px-4 py-3">{brl(p.price_brl)}</td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() =>
-                        featuredMut.mutate({ id: p.id, featured: !p.featured })
-                      }
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs ${
-                        p.featured
-                          ? "bg-amber-100 text-amber-800"
-                          : "bg-secondary text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      <Star className={`h-3.5 w-3.5 ${p.featured ? "fill-current" : ""}`} />
-                      {p.featured ? "Em destaque" : "Destacar"}
-                    </button>
+                    <label className="inline-flex items-center gap-2 cursor-pointer text-xs">
+                      <input
+                        type="checkbox"
+                        checked={p.featured}
+                        disabled={featuredMut.isPending}
+                        onChange={(e) =>
+                          featuredMut.mutate({ id: p.id, featured: e.target.checked })
+                        }
+                        className="h-4 w-4 rounded border-border accent-amber-500"
+                      />
+                      <Star
+                        className={`h-3.5 w-3.5 ${p.featured ? "fill-amber-500 text-amber-500" : "text-muted-foreground"}`}
+                      />
+                      <span className={p.featured ? "text-amber-800" : "text-muted-foreground"}>
+                        {p.featured ? "Em destaque" : "Destacar"}
+                      </span>
+                    </label>
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      onClick={() =>
-                        launchMut.mutate({ id: p.id, is_launch: !p.is_launch })
-                      }
-                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs ${
-                        p.is_launch
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-secondary text-muted-foreground hover:text-foreground"
-                      }`}
-                    >
-                      <Rocket className="h-3.5 w-3.5" />
-                      {p.is_launch ? "Lançamento" : "Marcar"}
-                    </button>
+                    <label className="inline-flex items-center gap-2 cursor-pointer text-xs">
+                      <input
+                        type="checkbox"
+                        checked={p.is_launch}
+                        disabled={launchMut.isPending}
+                        onChange={(e) =>
+                          launchMut.mutate({ id: p.id, is_launch: e.target.checked })
+                        }
+                        className="h-4 w-4 rounded border-border accent-emerald-600"
+                      />
+                      <Rocket
+                        className={`h-3.5 w-3.5 ${p.is_launch ? "text-emerald-600" : "text-muted-foreground"}`}
+                      />
+                      <span className={p.is_launch ? "text-emerald-800" : "text-muted-foreground"}>
+                        {p.is_launch ? "Lançamento" : "Marcar"}
+                      </span>
+                    </label>
                   </td>
+
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-3">
                       <Link
