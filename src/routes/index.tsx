@@ -131,16 +131,18 @@ function Index() {
             <div className="mx-auto w-full max-w-7xl px-6 sm:px-10">
               <div className="max-w-2xl text-white">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs uppercase tracking-[0.18em] ring-1 ring-white/20">
-                  <MapPin className="h-3.5 w-3.5" /> Beira Mar Norte · Florianópolis
+                  <MapPin className="h-3.5 w-3.5" /> Florianópolis · Alto padrão
                 </span>
                 <h1 className="mt-6 font-display font-light leading-[0.95] tracking-tight text-[clamp(3rem,8vw,6.5rem)]">
                   Michele<br />
                   <span className="italic">dos Imóveis.</span>
                 </h1>
-                <p className="mt-6 max-w-md text-base sm:text-lg text-white/85">
-                  Imóveis de alto padrão em frente ao mar. Curadoria, discrição e
-                  atendimento sob medida para quem busca morar — ou investir — bem.
+                <p className="mt-6 max-w-xl text-base sm:text-lg text-white/85">
+                  Imóveis de alto padrão nos melhores endereços de Florianópolis —
+                  de Jurerê Internacional à Lagoa da Conceição, da Beira Mar Norte
+                  ao Campeche. Curadoria, discrição e atendimento sob medida.
                 </p>
+
                 <div className="mt-9 flex flex-wrap items-center gap-3">
                   <a
                     href="#imoveis"
