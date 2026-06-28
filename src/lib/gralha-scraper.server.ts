@@ -106,9 +106,9 @@ export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty
   if (u.protocol !== "https:" || !ALLOWED_HOSTS.has(u.hostname.toLowerCase())) {
     throw new Error("URL inválida. Use um link https://www.gralhaimoveis.com.br/imovel/...");
   }
-  const codeMatch = u.pathname.match(/(\d{4,})/);
-  const code = codeMatch ? codeMatch[1] : u.pathname.split("/").filter(Boolean).pop() || "";
-  if (!code) throw new Error("Não foi possível identificar o código do imóvel na URL.");
+  const urlCodeMatch = u.pathname.match(/(\d{4,})/);
+  const urlCode = urlCodeMatch ? urlCodeMatch[1] : u.pathname.split("/").filter(Boolean).pop() || "";
+  if (!urlCode) throw new Error("Não foi possível identificar o código do imóvel na URL.");
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -229,6 +229,10 @@ export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty
       "Gostou deste im",
     ]),
   );
+
+  // Internal Gralha reference code (e.g. "Cod: 42345") — preferred over the URL id
+  const internalCodeMatch = text.match(/\bCod(?:igo|\.)?\s*[:#]?\s*(\d{3,7})\b/i);
+  const code = internalCodeMatch ? internalCodeMatch[1] : urlCode;
 
   return {
     code,
