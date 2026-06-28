@@ -11,13 +11,16 @@ import { listProperties, type PropertyListItem } from "@/lib/properties.function
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Michele Prietsch — Imóveis de alto padrão na Beira Mar Norte" },
-      { name: "description", content: "Corretora especialista em imóveis de alto padrão em Florianópolis, com foco na Av. Beira Mar Norte." },
-      { property: "og:title", content: "Michele Prietsch — Imóveis de alto padrão" },
-      { property: "og:description", content: "Apartamentos exclusivos na Beira Mar Norte, Florianópolis." },
+      { title: "Michele dos Imóveis — Alto padrão em Florianópolis | Jurerê, Beira Mar, Lagoa, Campeche" },
+      { name: "description", content: "Corretora de imóveis de alto padrão em Florianópolis: Jurerê Internacional, Beira Mar Norte, Praia Brava, Lagoa da Conceição, Campeche, Santo Antônio de Lisboa e principais bairros e praias da Ilha." },
+      { property: "og:title", content: "Michele dos Imóveis — Alto padrão em Florianópolis" },
+      { property: "og:description", content: "Apartamentos, casas e coberturas de luxo nos melhores endereços de Florianópolis." },
       { property: "og:image", content: heroImg },
+      { property: "og:url", content: "https://micheledosimoveis.lovable.app/" },
     ],
+    links: [{ rel: "canonical", href: "https://micheledosimoveis.lovable.app/" }],
   }),
+
   loader: () => listProperties(),
   errorComponent: ({ error, reset }) => (
     <div className="min-h-screen grid place-items-center px-6 text-center">
@@ -33,7 +36,30 @@ export const Route = createFileRoute("/")({
 
 const WHATSAPP_URL =
   "https://api.whatsapp.com/send?phone=5548991828828&text=" +
-  encodeURIComponent("Olá Michele! Vi sua página e gostaria de saber mais sobre imóveis na Beira Mar Norte.");
+  encodeURIComponent("Olá Michele! Vi sua página e gostaria de saber mais sobre imóveis de alto padrão em Florianópolis.");
+
+const REGIOES = [
+  { nome: "Centro / Beira Mar Norte", desc: "Vista mar e localização central" },
+  { nome: "Agronômica", desc: "Próximo ao centro, vista privilegiada" },
+  { nome: "Jurerê Internacional", desc: "Endereço mais exclusivo da Ilha" },
+  { nome: "Jurerê Tradicional", desc: "Praia familiar e tranquila" },
+  { nome: "Praia Brava", desc: "Mar aberto e arquitetura contemporânea" },
+  { nome: "João Paulo", desc: "Vista para a baía, alto padrão residencial" },
+  { nome: "Cacupé", desc: "Mar calmo, pôr do sol e exclusividade" },
+  { nome: "Santo Antônio de Lisboa", desc: "Charme açoriano à beira-mar" },
+  { nome: "Itacorubi", desc: "Bairro nobre, próximo a tudo" },
+  { nome: "Trindade", desc: "Centralidade e valorização constante" },
+  { nome: "Santa Mônica", desc: "Residencial, arborizado, alto padrão" },
+  { nome: "Córrego Grande", desc: "Tranquilidade a minutos do centro" },
+  { nome: "Lagoa da Conceição", desc: "Estilo de vida único na Ilha" },
+  { nome: "Canto da Lagoa", desc: "Reserva, natureza e exclusividade" },
+  { nome: "Campeche", desc: "Praia, lifestyle e novos lançamentos" },
+  { nome: "Novo Campeche", desc: "Empreendimentos contemporâneos pé na areia" },
+  { nome: "Rio Tavares", desc: "Casas em condomínio com amplo terreno" },
+  { nome: "Morro das Pedras", desc: "Vista mar aberta e privacidade" },
+];
+
+
 
 
 const fallbackProperties = [
@@ -69,8 +95,10 @@ function Index() {
           <nav className="hidden md:flex items-center gap-9 text-sm text-white/90">
             <a href="#top" className="hover:text-white transition">Início</a>
             <a href="#imoveis" className="hover:text-white transition">Imóveis</a>
+            <a href="#regioes" className="hover:text-white transition">Regiões</a>
             <a href="#sobre" className="hover:text-white transition">Sobre</a>
             <a href="#contato" className="hover:text-white transition">Contato</a>
+
           </nav>
 
           <a
@@ -94,7 +122,7 @@ function Index() {
         <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px]">
           <img
             src={heroImg}
-            alt="Apartamento de alto padrão na Beira Mar Norte com vista para o mar"
+            alt="Imóvel de alto padrão em Florianópolis com vista para o mar"
             width={1920}
             height={1280}
             className="h-[88vh] min-h-[600px] w-full object-cover"
@@ -105,16 +133,18 @@ function Index() {
             <div className="mx-auto w-full max-w-7xl px-6 sm:px-10">
               <div className="max-w-2xl text-white">
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs uppercase tracking-[0.18em] ring-1 ring-white/20">
-                  <MapPin className="h-3.5 w-3.5" /> Beira Mar Norte · Florianópolis
+                  <MapPin className="h-3.5 w-3.5" /> Florianópolis · Alto padrão
                 </span>
                 <h1 className="mt-6 font-display font-light leading-[0.95] tracking-tight text-[clamp(3rem,8vw,6.5rem)]">
                   Michele<br />
                   <span className="italic">dos Imóveis.</span>
                 </h1>
-                <p className="mt-6 max-w-md text-base sm:text-lg text-white/85">
-                  Imóveis de alto padrão em frente ao mar. Curadoria, discrição e
-                  atendimento sob medida para quem busca morar — ou investir — bem.
+                <p className="mt-6 max-w-xl text-base sm:text-lg text-white/85">
+                  Imóveis de alto padrão nos melhores endereços de Florianópolis —
+                  de Jurerê Internacional à Lagoa da Conceição, da Beira Mar Norte
+                  ao Campeche. Curadoria, discrição e atendimento sob medida.
                 </p>
+
                 <div className="mt-9 flex flex-wrap items-center gap-3">
                   <a
                     href="#imoveis"
@@ -190,13 +220,14 @@ function Index() {
               Imóveis em destaque
             </div>
             <h2 className="mt-3 font-display font-light text-4xl sm:text-5xl tracking-tight">
-              Uma seleção <span className="italic">à beira-mar.</span>
+              Uma seleção <span className="italic">para morar bem em Floripa.</span>
             </h2>
           </div>
           <p className="max-w-sm text-muted-foreground">
-            Apartamentos, coberturas e lançamentos com vista para a Baía Norte —
-            todos vistoriados pessoalmente pela Michele.
+            Apartamentos, coberturas, casas e lançamentos nos bairros mais
+            valorizados da Ilha — todos vistoriados pessoalmente pela Michele.
           </p>
+
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -310,7 +341,62 @@ function Index() {
         </div>
       </section>
 
+      {/* Regiões de atuação — SEO/GEO */}
+      <section id="regioes" className="border-t border-border bg-background">
+        <div className="mx-auto max-w-7xl px-6 sm:px-10 py-24 sm:py-28">
+          <div className="flex flex-wrap items-end justify-between gap-6 mb-12">
+            <div className="max-w-2xl">
+              <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                Onde a Michele atua
+              </div>
+              <h2 className="mt-3 font-display font-light text-4xl sm:text-5xl tracking-tight">
+                Os melhores endereços de <span className="italic">Florianópolis.</span>
+              </h2>
+              <p className="mt-5 text-muted-foreground leading-relaxed">
+                Cobertura completa nos bairros e praias mais valorizados da Ilha de
+                Santa Catarina — do Norte ao Sul, da orla à reserva. Conheço cada
+                rua, cada empreendimento e cada vista. Selecione a região do seu
+                interesse e receba opções sob medida.
+              </p>
+            </div>
+          </div>
+
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {REGIOES.map((r) => (
+              <li key={r.nome}>
+                <a
+                  href={`${WHATSAPP_URL.split("&text=")[0]}&text=${encodeURIComponent(`Olá Michele! Tenho interesse em imóveis de alto padrão em ${r.nome}, Florianópolis.`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="group flex items-start gap-4 rounded-2xl bg-card ring-1 ring-black/5 px-5 py-4 hover:shadow-lg hover:ring-black/10 transition"
+                >
+                  <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
+                    <MapPin className="h-4 w-4" />
+                  </span>
+                  <span className="flex-1">
+                    <span className="block font-display text-lg tracking-tight">{r.nome}</span>
+                    <span className="block text-xs text-muted-foreground mt-0.5">{r.desc}</span>
+                  </span>
+                  <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <p className="mt-10 text-sm text-muted-foreground text-center max-w-3xl mx-auto">
+            Imóveis de alto padrão em Florianópolis: apartamentos frente mar,
+            coberturas duplex, casas em condomínio fechado e lançamentos
+            exclusivos em Jurerê Internacional, Jurerê Tradicional, Praia Brava,
+            Beira Mar Norte, Agronômica, João Paulo, Cacupé, Santo Antônio de
+            Lisboa, Itacorubi, Trindade, Santa Mônica, Córrego Grande, Lagoa da
+            Conceição, Canto da Lagoa, Campeche, Novo Campeche, Rio Tavares e
+            Morro das Pedras.
+          </p>
+        </div>
+      </section>
+
       {/* About */}
+
       <section id="sobre" className="bg-secondary/60 border-y border-border">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 py-24 sm:py-32 grid gap-14 lg:grid-cols-2 lg:items-center">
           <div className="relative">
@@ -336,10 +422,16 @@ function Index() {
             </h2>
             <p className="mt-6 text-muted-foreground leading-relaxed">
               Sou <strong className="text-foreground font-medium">Michele Prietsch</strong>, corretora
-              especializada em imóveis de alto padrão em Florianópolis, com atuação dedicada à
-              Av. Beira Mar Norte e entorno. Trabalho com escuta, curadoria criteriosa e
-              total discrição — para que cada negociação seja tão única quanto o imóvel que a representa.
+              especializada em imóveis de alto padrão em Florianópolis. Atendo
+              compradores e investidores nos bairros e praias mais valorizados
+              da Ilha — de Jurerê Internacional, Praia Brava e Cacupé, no Norte,
+              à Lagoa da Conceição, Campeche e Morro das Pedras, no Sul, passando
+              por Beira Mar Norte, Agronômica, Itacorubi, Trindade, Santa Mônica
+              e Córrego Grande. Trabalho com escuta, curadoria criteriosa e total
+              discrição — para que cada negociação seja tão única quanto o imóvel
+              que a representa.
             </p>
+
 
             <div className="mt-10 grid grid-cols-3 gap-4">
               {[
@@ -367,12 +459,14 @@ function Index() {
               </div>
               <h2 className="mt-4 font-display font-light text-4xl sm:text-6xl leading-[1] tracking-tight">
                 Encontre o seu<br />
-                <span className="italic">endereço à beira-mar.</span>
+                <span className="italic">endereço em Floripa.</span>
               </h2>
               <p className="mt-6 max-w-md text-background/70">
-                Conte o que você procura. Em poucas horas eu retorno com uma seleção
-                personalizada — inclusive opções fora do mercado.
+                Conte o bairro, o estilo de vida e o orçamento que você procura.
+                Em poucas horas eu retorno com uma seleção personalizada —
+                inclusive imóveis fora do mercado.
               </p>
+
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
@@ -415,7 +509,7 @@ function Index() {
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
                   <MapPin className="h-4 w-4" />
                 </span>
-                Av. Beira Mar Norte · Florianópolis/SC
+                Florianópolis/SC · Norte, Centro, Leste e Sul da Ilha
               </li>
             </ul>
           </div>
