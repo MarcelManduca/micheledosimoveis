@@ -161,9 +161,8 @@ export default function DomeGallery({
       applyTransform(rotationRef.current.x, rotationRef.current.y);
 
       const enlargedOverlay = viewerRef.current?.querySelector('.enlarge');
-      if (enlargedOverlay && frameRef.current && mainRef.current) {
+      if (enlargedOverlay && frameRef.current) {
         const frameR = frameRef.current.getBoundingClientRect();
-        const mainR = mainRef.current.getBoundingClientRect();
         const hasCustomSize = openedImageWidth && openedImageHeight;
         if (hasCustomSize) {
           const tempDiv = document.createElement('div');
@@ -171,13 +170,13 @@ export default function DomeGallery({
           document.body.appendChild(tempDiv);
           const tempRect = tempDiv.getBoundingClientRect();
           document.body.removeChild(tempDiv);
-          const centeredLeft = frameR.left - mainR.left + (frameR.width - tempRect.width) / 2;
-          const centeredTop = frameR.top - mainR.top + (frameR.height - tempRect.height) / 2;
+          const centeredLeft = frameR.left + (frameR.width - tempRect.width) / 2;
+          const centeredTop = frameR.top + (frameR.height - tempRect.height) / 2;
           enlargedOverlay.style.left = `${centeredLeft}px`;
           enlargedOverlay.style.top = `${centeredTop}px`;
         } else {
-          enlargedOverlay.style.left = `${frameR.left - mainR.left}px`;
-          enlargedOverlay.style.top = `${frameR.top - mainR.top}px`;
+          enlargedOverlay.style.left = `${frameR.left}px`;
+          enlargedOverlay.style.top = `${frameR.top}px`;
           enlargedOverlay.style.width = `${frameR.width}px`;
           enlargedOverlay.style.height = `${frameR.height}px`;
         }
