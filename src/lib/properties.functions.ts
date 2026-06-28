@@ -16,10 +16,9 @@ export type PropertyListItem = {
   bathrooms: number | null;
   cover_image: string | null;
   featured: boolean;
+  is_launch?: boolean;
 };
 
-// Server-only publishable client (no session persistence, RLS as anon).
-// Created lazily so cold-start envs are read at handler time.
 function getPublicClient() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_PUBLISHABLE_KEY;
@@ -29,13 +28,11 @@ function getPublicClient() {
   });
 }
 
-// Friendly wrapper so internal Supabase messages never leak to clients.
 function safeError(message: string, err: unknown): never {
   console.error(message, err);
   throw new Error(message);
 }
 
-// Confirm caller has admin role via SECURITY DEFINER function (RLS-aware).
 async function assertAdmin(ctx: {
   supabase: Awaited<ReturnType<typeof getPublicClient>>;
   userId: string;
@@ -48,6 +45,9 @@ async function assertAdmin(ctx: {
   if (!data) throw new Error("Acesso negado: apenas administradores.");
 }
 
+const LIST_COLS =
+  "id, code, title, neighborhood, city, price_brl, area_m2, bedrooms, bathrooms, cover_image, featured, is_launch";
+
 // ───────── Public reads ─────────
 
 export const listProperties = createServerFn({ method: "GET" }).handler(
@@ -55,17 +55,62 @@ export const listProperties = createServerFn({ method: "GET" }).handler(
     const supabase = getPublicClient();
     const { data, error } = await supabase
       .from("properties")
-      .select(
-        "id, code, title, neighborhood, city, price_brl, area_m2, bedrooms, bathrooms, cover_image, featured",
-      )
+      .select(LIST_COLS)
       .eq("published", true)
-      .order("featured", { ascending: false })
+      .eq("featured", true)
       .order("created_at", { ascending: false })
       .limit(12);
     if (error) safeError("Não foi possível carregar os imóveis.", error);
-    return data ?? [];
+    return (data ?? []) as PropertyListItem[];
   },
 );
+
+export const listLaunches = createServerFn({ method: "GET" }).handler(
+  async (): Promise<PropertyListItem[]> => {
+    const supabase = getPublicClient();
+    const { data, error } = await supabase
+      .from("properties")
+      .select(LIST_COLS)
+      .eq("published", true)
+      .eq("is_launch", true)
+      .order("created_at", { ascending: false })
+      .limit(12);
+    if (error) safeError("Não foi possível carregar os lançamentos.", error);
+    return (data ?? []) as PropertyListItem[];
+  },
+);
+
+const searchSchema = z.object({
+  tipo: z.string().trim().max(60).optional().nullable(),
+  bairro: z.string().trim().max(120).optional().nullable(),
+  dorms: z.number().int().min(0).max(10).optional().nullable(),
+  precoMin: z.number().int().min(0).optional().nullable(),
+  precoMax: z.number().int().min(0).optional().nullable(),
+});
+
+export const searchProperties = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) => searchSchema.parse(d))
+  .handler(async ({ data }): Promise<PropertyListItem[]> => {
+    const supabase = getPublicClient();
+    let q = supabase
+      .from("properties")
+      .select(LIST_COLS)
+      .eq("published", true);
+    if (data.tipo) q = q.ilike("property_type", `%${data.tipo}%`);
+    if (data.bairro) q = q.ilike("neighborhood", `%${data.bairro}%`);
+    if (data.dorms != null) {
+      if (data.dorms >= 4) q = q.gte("bedrooms", 4);
+      else q = q.eq("bedrooms", data.dorms);
+    }
+    if (data.precoMin != null) q = q.gte("price_brl", data.precoMin);
+    if (data.precoMax != null) q = q.lte("price_brl", data.precoMax);
+    const { data: rows, error } = await q
+      .order("featured", { ascending: false })
+      .order("created_at", { ascending: false })
+      .limit(60);
+    if (error) safeError("Não foi possível pesquisar os imóveis.", error);
+    return (rows ?? []) as PropertyListItem[];
+  });
 
 const codeSchema = z.object({
   code: z.string().trim().min(1).max(64).regex(/^[A-Za-z0-9_-]+$/),
@@ -100,7 +145,6 @@ export const getMyAdminStatus = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const userId = context.userId;
 
-    // Fast path: user already admin
     const { data: mine, error: mineErr } = await supabaseAdmin
       .from("user_roles")
       .select("id")
@@ -110,7 +154,6 @@ export const getMyAdminStatus = createServerFn({ method: "GET" })
     if (mineErr) safeError("Não foi possível verificar seu acesso.", mineErr);
     if (mine) return { isAdmin: true, bootstrapped: false };
 
-    // Bootstrap: only if NO admin exists yet
     const { count, error: countErr } = await supabaseAdmin
       .from("user_roles")
       .select("id", { count: "exact", head: true })
@@ -118,7 +161,6 @@ export const getMyAdminStatus = createServerFn({ method: "GET" })
     if (countErr) safeError("Não foi possível verificar o estado do sistema.", countErr);
 
     if ((count ?? 0) === 0) {
-      // Upsert (idempotent) – race-safe with the (user_id, role) unique constraint
       const { error: insErr } = await supabaseAdmin
         .from("user_roles")
         .upsert({ user_id: userId, role: "admin" }, { onConflict: "user_id,role" });
@@ -151,6 +193,8 @@ const importSchema = z.object({
       },
       { message: "Use um link https://www.gralhaimoveis.com.br/imovel/..." },
     ),
+  featured: z.boolean().optional().default(false),
+  isLaunch: z.boolean().optional().default(false),
 });
 
 export const importGralhaProperty = createServerFn({ method: "POST" })
@@ -165,7 +209,6 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
     try {
       scraped = await scrapeGralhaProperty(data.url);
     } catch (err) {
-      // Bubble scraper messages — they're already user-facing
       throw new Error((err as Error).message || "Falha ao importar o imóvel.");
     }
 
@@ -195,6 +238,8 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
           condo_features: scraped.condo_features,
           cover_image: scraped.cover_image,
           published: true,
+          featured: data.featured,
+          is_launch: data.isLaunch,
         },
         { onConflict: "code" },
       )
@@ -229,7 +274,7 @@ export const adminListProperties = createServerFn({ method: "GET" })
     const { data, error } = await supabaseAdmin
       .from("properties")
       .select(
-        "id, code, title, neighborhood, city, price_brl, featured, published, created_at, cover_image",
+        "id, code, title, neighborhood, city, price_brl, featured, is_launch, published, created_at, cover_image",
       )
       .order("created_at", { ascending: false });
     if (error) safeError("Não foi possível listar os imóveis.", error);
@@ -238,6 +283,7 @@ export const adminListProperties = createServerFn({ method: "GET" })
 
 const idSchema = z.object({ id: z.string().uuid() });
 const featuredSchema = idSchema.extend({ featured: z.boolean() });
+const launchSchema = idSchema.extend({ is_launch: z.boolean() });
 
 export const setPropertyFeatured = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -253,6 +299,20 @@ export const setPropertyFeatured = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const setPropertyLaunch = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => launchSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("properties")
+      .update({ is_launch: data.is_launch })
+      .eq("id", data.id);
+    if (error) safeError("Não foi possível atualizar o lançamento.", error);
+    return { ok: true };
+  });
+
 export const deleteProperty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => idSchema.parse(d))
@@ -265,8 +325,6 @@ export const deleteProperty = createServerFn({ method: "POST" })
   });
 
 // ───────── Availability sync ─────────
-// Visit each imported property's source URL and verify the Gralha listing
-// still exists. If it no longer does, auto-unpublish.
 
 export type SyncSummary = {
   checked: number;
@@ -309,7 +367,6 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
           last_checked_at: now,
           last_check_status: "available",
           unavailable_since: null,
-          // Re-publish if it had been auto-unpublished and is back
           published: row.published,
         })
         .eq("id", row.id);
@@ -338,7 +395,6 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
   return summary;
 }
 
-// Admin-triggered manual sync
 export const syncPropertiesAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
@@ -346,8 +402,6 @@ export const syncPropertiesAvailability = createServerFn({ method: "POST" })
     return runAvailabilitySync();
   });
 
-// Internal helper for the cron route to call (same code path)
 export async function _runAvailabilitySyncInternal() {
   return runAvailabilitySync();
 }
-

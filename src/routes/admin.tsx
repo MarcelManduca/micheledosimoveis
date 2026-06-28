@@ -8,9 +8,10 @@ import {
   getMyAdminStatus,
   importGralhaProperty,
   setPropertyFeatured,
+  setPropertyLaunch,
   syncPropertiesAvailability,
 } from "@/lib/properties.functions";
-import { ArrowRight, ExternalLink, LogOut, RefreshCw, Star, Trash2 } from "lucide-react";
+import { ArrowRight, ExternalLink, LogOut, RefreshCw, Rocket, Star, Trash2 } from "lucide-react";
 
 
 export const Route = createFileRoute("/admin")({
@@ -63,16 +64,26 @@ function AdminPage() {
   });
 
   const [url, setUrl] = useState("");
+  const [importFeatured, setImportFeatured] = useState(false);
+  const [importLaunch, setImportLaunch] = useState(false);
   const importMut = useMutation({
-    mutationFn: (u: string) => importGralhaProperty({ data: { url: u } }),
+    mutationFn: (vars: { url: string; featured: boolean; isLaunch: boolean }) =>
+      importGralhaProperty({ data: vars }),
     onSuccess: () => {
       setUrl("");
+      setImportFeatured(false);
+      setImportLaunch(false);
       qc.invalidateQueries({ queryKey: ["admin-properties"] });
     },
   });
 
   const featuredMut = useMutation({
     mutationFn: (v: { id: string; featured: boolean }) => setPropertyFeatured({ data: v }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
+  });
+
+  const launchMut = useMutation({
+    mutationFn: (v: { id: string; is_launch: boolean }) => setPropertyLaunch({ data: v }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
   });
 
@@ -151,28 +162,51 @@ function AdminPage() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (url.trim()) importMut.mutate(url.trim());
+            if (url.trim())
+              importMut.mutate({ url: url.trim(), featured: importFeatured, isLaunch: importLaunch });
           }}
-          className="mt-8 flex flex-col sm:flex-row gap-3"
+          className="mt-8 space-y-4"
         >
-          <input
-            type="url"
-            required
-            placeholder="https://www.gralhaimoveis.com.br/imovel/codigo/..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="flex-1 rounded-full border border-border bg-background px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
-          />
-          <button
-            type="submit"
-            disabled={importMut.isPending}
-            className="group inline-flex items-center justify-between gap-3 rounded-full bg-foreground text-background pl-6 pr-2 py-3 text-sm font-medium hover:bg-foreground/90 transition disabled:opacity-60"
-          >
-            {importMut.isPending ? "Importando..." : "Importar imóvel"}
-            <span className="grid h-9 w-9 place-items-center rounded-full bg-background text-foreground">
-              <ArrowRight className="h-4 w-4" />
-            </span>
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="url"
+              required
+              placeholder="https://www.gralhaimoveis.com.br/imovel/codigo/..."
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              className="flex-1 rounded-full border border-border bg-background px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
+            />
+            <button
+              type="submit"
+              disabled={importMut.isPending}
+              className="group inline-flex items-center justify-between gap-3 rounded-full bg-foreground text-background pl-6 pr-2 py-3 text-sm font-medium hover:bg-foreground/90 transition disabled:opacity-60"
+            >
+              {importMut.isPending ? "Importando..." : "Importar imóvel"}
+              <span className="grid h-9 w-9 place-items-center rounded-full bg-background text-foreground">
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-5 text-sm">
+            <label className="inline-flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={importFeatured}
+                onChange={(e) => setImportFeatured(e.target.checked)}
+                className="h-4 w-4 rounded border-border"
+              />
+              <Star className="h-4 w-4 text-amber-500" /> Marcar como destaque na home
+            </label>
+            <label className="inline-flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={importLaunch}
+                onChange={(e) => setImportLaunch(e.target.checked)}
+                className="h-4 w-4 rounded border-border"
+              />
+              <Rocket className="h-4 w-4 text-emerald-600" /> Marcar como lançamento
+            </label>
+          </div>
         </form>
         {importMut.error && (
           <div className="mt-3 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -219,6 +253,7 @@ function AdminPage() {
                 <th className="px-4 py-3">Bairro</th>
                 <th className="px-4 py-3">Preço</th>
                 <th className="px-4 py-3">Destaque</th>
+                <th className="px-4 py-3">Lançamento</th>
                 <th className="px-4 py-3 text-right">Ações</th>
               </tr>
             </thead>
@@ -261,6 +296,21 @@ function AdminPage() {
                     </button>
                   </td>
                   <td className="px-4 py-3">
+                    <button
+                      onClick={() =>
+                        launchMut.mutate({ id: p.id, is_launch: !p.is_launch })
+                      }
+                      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs ${
+                        p.is_launch
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-secondary text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Rocket className="h-3.5 w-3.5" />
+                      {p.is_launch ? "Lançamento" : "Marcar"}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-3">
                       <Link
                         to="/imovel/$code"
@@ -283,7 +333,7 @@ function AdminPage() {
               ))}
               {list.data && list.data.length === 0 && (
                 <tr>
-                  <td className="px-4 py-10 text-center text-muted-foreground" colSpan={5}>
+                  <td className="px-4 py-10 text-center text-muted-foreground" colSpan={6}>
                     Nenhum imóvel ainda. Cole um link da Gralha acima para começar.
                   </td>
                 </tr>

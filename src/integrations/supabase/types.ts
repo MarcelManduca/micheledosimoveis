@@ -32,6 +32,7 @@ export type Database = {
           features: string[]
           id: string
           iptu_brl: number | null
+          is_launch: boolean
           last_check_status: string | null
           last_checked_at: string | null
           neighborhood: string | null
@@ -63,6 +64,7 @@ export type Database = {
           features?: string[]
           id?: string
           iptu_brl?: number | null
+          is_launch?: boolean
           last_check_status?: string | null
           last_checked_at?: string | null
           neighborhood?: string | null
@@ -94,6 +96,7 @@ export type Database = {
           features?: string[]
           id?: string
           iptu_brl?: number | null
+          is_launch?: boolean
           last_check_status?: string | null
           last_checked_at?: string | null
           neighborhood?: string | null

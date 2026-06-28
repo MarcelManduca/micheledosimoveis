@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AnuncieRouteImport } from './routes/anuncie'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ImovelCodeRouteImport } from './routes/imovel.$code'
@@ -21,9 +23,19 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BuscarRoute = BuscarRouteImport.update({
+  id: '/buscar',
+  path: '/buscar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnuncieRoute = AnuncieRouteImport.update({
+  id: '/anuncie',
+  path: '/anuncie',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -51,7 +63,9 @@ const ApiPublicHooksSyncPropertiesRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
+  '/buscar': typeof BuscarRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
@@ -59,7 +73,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
+  '/buscar': typeof BuscarRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
@@ -68,7 +84,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
+  '/buscar': typeof BuscarRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
@@ -78,7 +96,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/admin'
+    | '/anuncie'
     | '/auth'
+    | '/buscar'
     | '/sitemap.xml'
     | '/imovel/$code'
     | '/api/public/hooks/sync-properties'
@@ -86,7 +106,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin'
+    | '/anuncie'
     | '/auth'
+    | '/buscar'
     | '/sitemap.xml'
     | '/imovel/$code'
     | '/api/public/hooks/sync-properties'
@@ -94,7 +116,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/admin'
+    | '/anuncie'
     | '/auth'
+    | '/buscar'
     | '/sitemap.xml'
     | '/imovel/$code'
     | '/api/public/hooks/sync-properties'
@@ -103,7 +127,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AnuncieRoute: typeof AnuncieRoute
   AuthRoute: typeof AuthRoute
+  BuscarRoute: typeof BuscarRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ImovelCodeRoute: typeof ImovelCodeRoute
   ApiPublicHooksSyncPropertiesRoute: typeof ApiPublicHooksSyncPropertiesRoute
@@ -118,11 +144,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/buscar': {
+      id: '/buscar'
+      path: '/buscar'
+      fullPath: '/buscar'
+      preLoaderRoute: typeof BuscarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/anuncie': {
+      id: '/anuncie'
+      path: '/anuncie'
+      fullPath: '/anuncie'
+      preLoaderRoute: typeof AnuncieRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -159,7 +199,9 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AnuncieRoute: AnuncieRoute,
   AuthRoute: AuthRoute,
+  BuscarRoute: BuscarRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ImovelCodeRoute: ImovelCodeRoute,
   ApiPublicHooksSyncPropertiesRoute: ApiPublicHooksSyncPropertiesRoute,

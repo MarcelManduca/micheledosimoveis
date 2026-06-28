@@ -1,15 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowRight, MapPin, Bath, BedDouble, Maximize, Star, Phone, Instagram, Mail, ShieldCheck, Camera, LineChart, Users, Sparkles, Lock, EyeOff } from "lucide-react";
+import { ArrowRight, MapPin, Star, Phone, Instagram, Mail, ShieldCheck, Rocket, Sparkles } from "lucide-react";
 import heroImg from "@/assets/hero-beiramar.jpg";
 import portrait from "@/assets/michele-portrait.jpg";
 import prop1 from "@/assets/property-1.jpg";
 import prop2 from "@/assets/property-2.jpg";
 import prop3 from "@/assets/property-3.jpg";
-import { listProperties, type PropertyListItem } from "@/lib/properties.functions";
+import { listLaunches, listProperties, type PropertyListItem } from "@/lib/properties.functions";
 import { ChromaGrid, type ChromaItem } from "@/components/ChromaGrid";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { PropertyFilters } from "@/components/PropertyFilters";
+import { PropertyCard } from "@/components/PropertyCard";
 
 
 export const Route = createFileRoute("/")({
@@ -150,7 +152,7 @@ function Index() {
             <a href="#top" className="hover:text-white transition">Início</a>
             <a href="#imoveis" className="hover:text-white transition">Imóveis</a>
             <a href="#regioes" className="hover:text-white transition">Regiões</a>
-            <a href="#anuncie" className="hover:text-white transition">Anuncie</a>
+            <Link to="/anuncie" className="hover:text-white transition">Anuncie</Link>
             <a href="#sobre" className="hover:text-white transition">Sobre</a>
             <a href="#contato" className="hover:text-white transition">Contato</a>
 
@@ -267,26 +269,26 @@ function Index() {
         </div>
       </section>
 
-      {/* Featured Properties */}
-      <section id="imoveis" className="mx-auto max-w-7xl px-6 sm:px-10 py-24 sm:py-32">
-        <div className="flex flex-wrap items-end justify-between gap-6 mb-12">
-          <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              Imóveis em destaque
-            </div>
-            <h2 className="mt-3 font-display font-light text-4xl sm:text-5xl tracking-tight">
-              Uma seleção <span className="italic">para morar bem em Floripa.</span>
-            </h2>
+      {/* Filtros de busca */}
+      <section id="filtros" className="mx-auto max-w-7xl px-6 sm:px-10 pt-20 sm:pt-28">
+        <div className="text-center max-w-2xl mx-auto">
+          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Pesquisa de imóveis
           </div>
-          <p className="max-w-sm text-muted-foreground">
-            Apartamentos, coberturas, casas e lançamentos nos bairros mais
-            valorizados da Ilha — todos vistoriados pessoalmente pela Michele.
+          <h2 className="mt-3 font-display font-light text-3xl sm:text-4xl tracking-tight">
+            Encontre o imóvel <span className="italic">ideal para você.</span>
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Filtre por tipo, bairro, dormitórios e faixa de preço.
           </p>
-
         </div>
-
-        <ChromaGridProperties items={items} />
+        <div className="mt-8">
+          <PropertyFilters />
+        </div>
       </section>
+
+      {/* Featured Properties */}
+      <LaunchesAndFeatured items={items} />
 
       {/* Regiões de atuação — SEO/GEO */}
       <section id="regioes" className="border-t border-border bg-background">
@@ -342,128 +344,45 @@ function Index() {
         </div>
       </section>
 
-      {/* Anuncie seu imóvel — captação de alto padrão */}
-      <section id="anuncie" className="relative bg-foreground text-background">
-        <div className="mx-auto max-w-7xl px-6 sm:px-10 py-24 sm:py-32">
-          <div className="grid gap-14 lg:grid-cols-[1.1fr,1fr] lg:items-start">
+      {/* CTA — Anuncie seu imóvel (link para página dedicada) */}
+      <section id="anuncie" className="mx-auto max-w-7xl px-6 sm:px-10 py-20 sm:py-28">
+        <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px] bg-gradient-to-br from-[#0f0f0f] via-[#1a1a1a] to-[#0b0b0b] text-background p-10 sm:p-16 ring-1 ring-[#C8A464]/30">
+          <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#C8A464]/15 blur-3xl" />
+          <div className="relative grid gap-10 lg:grid-cols-[1.4fr,1fr] lg:items-center">
             <div>
-              <div className="text-xs uppercase tracking-[0.2em] text-background/60">
-                Para proprietários
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#C8A464]/15 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-[#E6C68A] ring-1 ring-[#C8A464]/30">
+                <Sparkles className="h-3.5 w-3.5" /> Para proprietários
               </div>
-              <h2 className="mt-4 font-display font-light text-4xl sm:text-5xl leading-[1.05] tracking-tight">
-                Anuncie seu imóvel de alto padrão em <span className="italic">Florianópolis.</span>
+              <h2 className="mt-5 font-display font-light text-3xl sm:text-5xl leading-[1.05] tracking-tight">
+                Anuncie seu imóvel com <span className="italic text-[#E6C68A]">curadoria de alto padrão.</span>
               </h2>
-              <h3 className="mt-5 font-display text-xl sm:text-2xl text-background/80 tracking-tight">
-                Venda com estratégia, discrição e acesso aos compradores certos.
-              </h3>
-              <p className="mt-6 text-background/75 leading-relaxed">
-                Vender um imóvel de alto padrão exige mais do que simplesmente anunciar. Exige leitura de mercado, posicionamento correto, precificação estratégica, apresentação visual de qualidade e acesso aos compradores certos.
+              <p className="mt-5 max-w-xl text-background/75 leading-relaxed">
+                Venda com estratégia, discrição e acesso aos compradores certos. Precificação,
+                produção visual profissional, divulgação qualificada e a opção de venda{" "}
+                <strong className="text-background font-medium">Off Market</strong> sigilosa.
               </p>
-              <p className="mt-4 text-background/75 leading-relaxed">
-                <strong className="text-background font-medium">Michele Prietsch</strong>, também conhecida como <em>Michele dos Imóveis</em>, oferece uma curadoria imobiliária personalizada para proprietários que desejam vender imóveis de luxo e alto luxo em Florianópolis com segurança, discrição e alto nível de profissionalismo.
-              </p>
-              <p className="mt-4 text-background/75 leading-relaxed">
-                O trabalho envolve análise criteriosa do imóvel, ferramentas avançadas de precificação, produção de fotos e vídeos profissionais, estratégia de divulgação nas redes sociais e endereçamento direto a clientes de carteira com perfil compatível.
-              </p>
-
-              <div className="mt-9 flex flex-wrap items-center gap-3">
-                <a
-                  href={`https://api.whatsapp.com/send?phone=5548991828828&text=${encodeURIComponent("Olá, Michele. Tenho interesse em anunciar meu imóvel com curadoria de alto padrão e gostaria de entender como funciona o processo.")}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group inline-flex items-center gap-3 rounded-full bg-background text-foreground pl-6 pr-2 py-2 text-sm font-medium hover:bg-background/95 transition"
-                >
-                  Quero anunciar meu imóvel
-                  <span className="grid h-9 w-9 place-items-center rounded-full bg-foreground text-background group-hover:translate-x-0.5 transition">
-                    <ArrowRight className="h-4 w-4" />
-                  </span>
-                </a>
-                <a
-                  href={`https://api.whatsapp.com/send?phone=5548991828828&text=${encodeURIComponent("Olá, Michele. Tenho um imóvel de alto padrão e gostaria de conversar sobre uma venda Off Market, com sigilo e discrição.")}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-sm text-background/85 underline-offset-4 hover:underline px-2 py-2"
-                >
-                  Tenho interesse em venda Off Market
-                </a>
-              </div>
             </div>
-
-            <ul className="grid gap-3 sm:grid-cols-2">
-              {[
-                { icon: LineChart, title: "Precificação estratégica", desc: "Ferramentas avançadas e leitura de mercado para uma faixa de valor competitiva e coerente com o alto padrão de Florianópolis." },
-                { icon: Camera, title: "Fotos e vídeos profissionais", desc: "Produção visual que valoriza arquitetura, acabamentos, ambientes e o estilo de vida que o imóvel proporciona." },
-                { icon: Sparkles, title: "Divulgação qualificada", desc: "Exposição em redes sociais, canais digitais e base de relacionamento, sempre respeitando o posicionamento premium do imóvel." },
-                { icon: Users, title: "Clientes de carteira", desc: "Endereçamento ativo a compradores e investidores com perfil compatível — sem exposição genérica." },
-                { icon: ShieldCheck, title: "Atendimento consultivo", desc: "Acompanhamento próximo da avaliação à negociação, com transparência, critério e discrição." },
-              ].map(({ icon: Icon, title, desc }) => (
-                <li
-                  key={title}
-                  className="rounded-2xl bg-background/[0.06] ring-1 ring-background/10 p-5 backdrop-blur-sm"
-                >
-                  <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10 ring-1 ring-background/15">
-                    <Icon className="h-4 w-4 text-background" />
-                  </span>
-                  <div className="mt-4 font-display text-lg tracking-tight text-background">{title}</div>
-                  <p className="mt-1.5 text-sm text-background/70 leading-relaxed">{desc}</p>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Off Market — card premium destacado */}
-          <div className="mt-16 sm:mt-20 relative overflow-hidden rounded-[28px] sm:rounded-[36px] ring-1 ring-[#C8A464]/40 bg-gradient-to-br from-[#1a1a1a] via-[#0f0f0f] to-black p-8 sm:p-14">
-            <div className="absolute -top-24 -right-24 h-72 w-72 rounded-full bg-[#C8A464]/10 blur-3xl" />
-            <div className="relative grid gap-10 lg:grid-cols-[1fr,1.2fr] lg:items-center">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-[#C8A464]/15 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-[#E6C68A] ring-1 ring-[#C8A464]/30">
-                  <Lock className="h-3.5 w-3.5" /> Exclusivo · Sigiloso
-                </div>
-                <h3 className="mt-5 font-display font-light text-3xl sm:text-4xl leading-[1.1] tracking-tight text-background">
-                  Venda <span className="italic text-[#E6C68A]">Off Market</span>: sigilo para imóveis de luxo e alto luxo.
-                </h3>
-                <div className="mt-6 flex items-center gap-4 text-sm text-background/70">
-                  <span className="inline-flex items-center gap-2">
-                    <EyeOff className="h-4 w-4 text-[#E6C68A]" /> Sem exposição em portais
-                  </span>
-                  <span className="hidden sm:inline">·</span>
-                  <span className="hidden sm:inline-flex items-center gap-2">
-                    <Users className="h-4 w-4 text-[#E6C68A]" /> Rede com +200 corretores
-                  </span>
-                </div>
-              </div>
-
-              <div>
-                <p className="text-background/80 leading-relaxed">
-                  Nem todo proprietário deseja expor publicamente a venda do seu imóvel. No mercado de luxo e alto luxo, cresce a busca por negociações <strong className="text-background font-medium">Off Market</strong> — uma estratégia em que o imóvel é apresentado de forma reservada, apenas para compradores e profissionais selecionados.
-                </p>
-                <p className="mt-4 text-background/75 leading-relaxed">
-                  Para proprietários que valorizam privacidade, discrição e controle sobre a exposição, Michele Prietsch atua com divulgação interna e sigilosa. Por meio de uma rede com conexão a mais de 200 corretores, o imóvel é apresentado a profissionais qualificados e potenciais compradores sem exposição aberta nos portais ou redes sociais.
-                </p>
-                <p className="mt-4 text-background/75 leading-relaxed">
-                  Essa abordagem preserva a imagem do proprietário, protege informações sensíveis e aumenta a precisão na busca por compradores realmente alinhados ao perfil do imóvel.
-                </p>
-
-                <a
-                  href={`https://api.whatsapp.com/send?phone=5548991828828&text=${encodeURIComponent("Olá, Michele. Tenho um imóvel de alto padrão e gostaria de conversar sobre uma venda Off Market, com sigilo e discrição.")}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group mt-8 inline-flex items-center gap-3 rounded-full bg-[#C8A464] text-black pl-6 pr-2 py-2 text-sm font-medium hover:bg-[#d4b478] transition"
-                >
-                  Conversar sobre venda Off Market
-                  <span className="grid h-9 w-9 place-items-center rounded-full bg-black text-[#E6C68A] group-hover:translate-x-0.5 transition">
-                    <ArrowRight className="h-4 w-4" />
-                  </span>
-                </a>
-              </div>
+            <div className="flex flex-col sm:flex-row lg:flex-col gap-3 lg:items-end">
+              <Link
+                to="/anuncie"
+                className="group inline-flex items-center justify-between gap-3 rounded-full bg-[#C8A464] text-black pl-6 pr-2 py-3 text-sm font-medium hover:bg-[#d4b478] transition"
+              >
+                Quero anunciar meu imóvel
+                <span className="grid h-9 w-9 place-items-center rounded-full bg-black text-[#E6C68A] group-hover:translate-x-0.5 transition">
+                  <ArrowRight className="h-4 w-4" />
+                </span>
+              </Link>
+              <Link
+                to="/anuncie"
+                className="inline-flex items-center justify-center gap-2 rounded-full ring-1 ring-background/30 text-background/90 px-5 py-3 text-sm hover:bg-background/10 transition"
+              >
+                Saber mais sobre venda Off Market
+              </Link>
             </div>
           </div>
-
-          <p className="mt-10 text-center text-sm text-background/60 max-w-3xl mx-auto">
-            Seu imóvel merece mais do que um anúncio. Merece estratégia, curadoria e compradores qualificados.
-          </p>
         </div>
       </section>
+
 
       {/* About */}
 
@@ -717,3 +636,68 @@ function ChromaGridProperties({ items }: { items: PropertyListItem[] }) {
   );
 }
 
+
+function LaunchesAndFeatured({ items }: { items: PropertyListItem[] }) {
+  const launches = useQuery({
+    queryKey: ["launches-home"],
+    queryFn: () => listLaunches(),
+    initialData: [] as PropertyListItem[],
+  });
+  const launchItems = launches.data ?? [];
+
+  return (
+    <>
+      <section id="imoveis" className="mx-auto max-w-7xl px-6 sm:px-10 py-20 sm:py-24">
+        <div className="flex flex-wrap items-end justify-between gap-6 mb-12">
+          <div>
+            <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Imóveis em destaque
+            </div>
+            <h2 className="mt-3 font-display font-light text-4xl sm:text-5xl tracking-tight">
+              Uma seleção <span className="italic">para morar bem em Floripa.</span>
+            </h2>
+          </div>
+          <p className="max-w-sm text-muted-foreground">
+            Apartamentos, coberturas, casas e lançamentos nos bairros mais
+            valorizados da Ilha — todos vistoriados pessoalmente pela Michele.
+          </p>
+        </div>
+
+        {items.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Nenhum imóvel marcado como destaque no momento. Veja todos os imóveis na{" "}
+            <Link to="/buscar" className="underline">pesquisa</Link>.
+          </p>
+        ) : (
+          <ChromaGridProperties items={items} />
+        )}
+      </section>
+
+      {launchItems.length > 0 && (
+        <section id="lancamentos" className="border-t border-border bg-secondary/30">
+          <div className="mx-auto max-w-7xl px-6 sm:px-10 py-20 sm:py-24">
+            <div className="flex flex-wrap items-end justify-between gap-6 mb-12">
+              <div>
+                <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-emerald-700">
+                  <Rocket className="h-3.5 w-3.5" /> Lançamentos imobiliários
+                </div>
+                <h2 className="mt-3 font-display font-light text-4xl sm:text-5xl tracking-tight">
+                  Novos empreendimentos em <span className="italic">Florianópolis.</span>
+                </h2>
+              </div>
+              <p className="max-w-sm text-muted-foreground">
+                Empreendimentos contemporâneos e oportunidades de investimento em
+                lançamentos selecionados nas regiões mais valorizadas da Ilha.
+              </p>
+            </div>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {launchItems.map((p) => (
+                <PropertyCard key={p.id} p={p} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </>
+  );
+}
