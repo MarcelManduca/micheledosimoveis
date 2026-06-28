@@ -11,13 +11,16 @@ import { listProperties, type PropertyListItem } from "@/lib/properties.function
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Michele Prietsch — Imóveis de alto padrão na Beira Mar Norte" },
-      { name: "description", content: "Corretora especialista em imóveis de alto padrão em Florianópolis, com foco na Av. Beira Mar Norte." },
-      { property: "og:title", content: "Michele Prietsch — Imóveis de alto padrão" },
-      { property: "og:description", content: "Apartamentos exclusivos na Beira Mar Norte, Florianópolis." },
+      { title: "Michele dos Imóveis — Alto padrão em Florianópolis | Jurerê, Beira Mar, Lagoa, Campeche" },
+      { name: "description", content: "Corretora de imóveis de alto padrão em Florianópolis: Jurerê Internacional, Beira Mar Norte, Praia Brava, Lagoa da Conceição, Campeche, Santo Antônio de Lisboa e principais bairros e praias da Ilha." },
+      { property: "og:title", content: "Michele dos Imóveis — Alto padrão em Florianópolis" },
+      { property: "og:description", content: "Apartamentos, casas e coberturas de luxo nos melhores endereços de Florianópolis." },
       { property: "og:image", content: heroImg },
+      { property: "og:url", content: "https://micheledosimoveis.lovable.app/" },
     ],
+    links: [{ rel: "canonical", href: "https://micheledosimoveis.lovable.app/" }],
   }),
+
   loader: () => listProperties(),
   errorComponent: ({ error, reset }) => (
     <div className="min-h-screen grid place-items-center px-6 text-center">
