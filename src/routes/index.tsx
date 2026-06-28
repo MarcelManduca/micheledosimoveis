@@ -36,7 +36,30 @@ export const Route = createFileRoute("/")({
 
 const WHATSAPP_URL =
   "https://api.whatsapp.com/send?phone=5548991828828&text=" +
-  encodeURIComponent("Olá Michele! Vi sua página e gostaria de saber mais sobre imóveis na Beira Mar Norte.");
+  encodeURIComponent("Olá Michele! Vi sua página e gostaria de saber mais sobre imóveis de alto padrão em Florianópolis.");
+
+const REGIOES = [
+  { nome: "Centro / Beira Mar Norte", desc: "Vista mar e localização central" },
+  { nome: "Agronômica", desc: "Próximo ao centro, vista privilegiada" },
+  { nome: "Jurerê Internacional", desc: "Endereço mais exclusivo da Ilha" },
+  { nome: "Jurerê Tradicional", desc: "Praia familiar e tranquila" },
+  { nome: "Praia Brava", desc: "Mar aberto e arquitetura contemporânea" },
+  { nome: "João Paulo", desc: "Vista para a baía, alto padrão residencial" },
+  { nome: "Cacupé", desc: "Mar calmo, pôr do sol e exclusividade" },
+  { nome: "Santo Antônio de Lisboa", desc: "Charme açoriano à beira-mar" },
+  { nome: "Itacorubi", desc: "Bairro nobre, próximo a tudo" },
+  { nome: "Trindade", desc: "Centralidade e valorização constante" },
+  { nome: "Santa Mônica", desc: "Residencial, arborizado, alto padrão" },
+  { nome: "Córrego Grande", desc: "Tranquilidade a minutos do centro" },
+  { nome: "Lagoa da Conceição", desc: "Estilo de vida único na Ilha" },
+  { nome: "Canto da Lagoa", desc: "Reserva, natureza e exclusividade" },
+  { nome: "Campeche", desc: "Praia, lifestyle e novos lançamentos" },
+  { nome: "Novo Campeche", desc: "Empreendimentos contemporâneos pé na areia" },
+  { nome: "Rio Tavares", desc: "Casas em condomínio com amplo terreno" },
+  { nome: "Morro das Pedras", desc: "Vista mar aberta e privacidade" },
+];
+
+
 
 
 const fallbackProperties = [
