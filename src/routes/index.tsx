@@ -296,42 +296,34 @@ function Index() {
           <div className="relative">
             <img
               src={portrait}
-              alt="Retrato da corretora Michele Prietsch"
+              alt="Michele Prietsch, corretora de imóveis de alto padrão em Florianópolis"
               loading="lazy"
               width={800}
               height={800}
               className="w-full max-w-md rounded-[28px] object-cover aspect-square shadow-xl"
             />
             <div className="absolute -bottom-6 -right-2 sm:right-10 rounded-2xl bg-background px-5 py-4 shadow-xl ring-1 ring-black/5">
-              <div className="font-display text-3xl">+12 anos</div>
-              <div className="text-xs text-muted-foreground mt-1">no mercado de alto padrão</div>
+              <div className="font-display text-3xl">+16 anos</div>
+              <div className="text-xs text-muted-foreground mt-1">no mercado imobiliário</div>
             </div>
           </div>
 
           <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Sobre</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Corretora de imóveis de alto padrão em Florianópolis
+            </div>
             <h2 className="mt-3 font-display font-light text-4xl sm:text-5xl tracking-tight">
               Mais que vender imóveis,<br />
-              <span className="italic">conectar histórias.</span>
+              <span className="italic">conectar histórias em Florianópolis.</span>
             </h2>
-            <p className="mt-6 text-muted-foreground leading-relaxed">
-              Sou <strong className="text-foreground font-medium">Michele Prietsch</strong>, corretora
-              especializada em imóveis de alto padrão em Florianópolis. Atendo
-              compradores e investidores nos bairros e praias mais valorizados
-              da Ilha — de Jurerê Internacional, Praia Brava e Cacupé, no Norte,
-              à Lagoa da Conceição, Campeche e Morro das Pedras, no Sul, passando
-              por Beira Mar Norte, Agronômica, Itacorubi, Trindade, Santa Mônica
-              e Córrego Grande. Trabalho com escuta, curadoria criteriosa e total
-              discrição — para que cada negociação seja tão única quanto o imóvel
-              que a representa.
-            </p>
 
+            <AboutBio />
 
             <div className="mt-10 grid grid-cols-3 gap-4">
               {[
+                { n: "+16 anos", l: "no mercado imobiliário" },
                 { n: "150+", l: "imóveis negociados" },
                 { n: "R$ 380M", l: "em VGV transacionado" },
-                { n: "98%", l: "clientes recorrentes" },
               ].map((s) => (
                 <div key={s.l} className="rounded-2xl bg-background p-5 ring-1 ring-black/5">
                   <div className="font-display text-2xl">{s.n}</div>
@@ -342,6 +334,7 @@ function Index() {
           </div>
         </div>
       </section>
+
 
       {/* CTA / Contato */}
       <section id="contato" className="mx-auto max-w-7xl px-6 sm:px-10 py-24 sm:py-32">
