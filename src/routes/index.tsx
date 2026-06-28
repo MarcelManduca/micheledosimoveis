@@ -32,8 +32,9 @@ export const Route = createFileRoute("/")({
 });
 
 const WHATSAPP_URL =
-  "https://api.whatsapp.com/send?phone=5548999999999&text=" +
+  "https://api.whatsapp.com/send?phone=5548991828828&text=" +
   encodeURIComponent("Olá Michele! Vi sua página e gostaria de saber mais sobre imóveis na Beira Mar Norte.");
+
 
 const fallbackProperties = [
   { img: prop1, code: "MP-1042", name: "Edifício Mira Mare", neighborhood: "Beira Mar Norte, Florianópolis", beds: 4, baths: 5, area: "320 m²", price: "R$ 6.900.000" },
@@ -398,14 +399,20 @@ function Index() {
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
                   <Phone className="h-4 w-4" />
                 </span>
-                +55 (48) 9 9999-9999
+                +55 (48) 9 9182-8828
               </li>
-              <li className="flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
-                  <Mail className="h-4 w-4" />
-                </span>
-                contato@micheleprietsch.com.br
+              <li>
+                <a
+                  href="mailto:micheledosimoveis@gmail.com"
+                  className="flex items-center gap-3 hover:text-background transition"
+                >
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
+                    <Mail className="h-4 w-4" />
+                  </span>
+                  Enviar e-mail
+                </a>
               </li>
+
               <li className="flex items-center gap-3">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
                   <Instagram className="h-4 w-4" />
