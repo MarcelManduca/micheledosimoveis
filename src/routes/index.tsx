@@ -218,13 +218,14 @@ function Index() {
               Imóveis em destaque
             </div>
             <h2 className="mt-3 font-display font-light text-4xl sm:text-5xl tracking-tight">
-              Uma seleção <span className="italic">à beira-mar.</span>
+              Uma seleção <span className="italic">para morar bem em Floripa.</span>
             </h2>
           </div>
           <p className="max-w-sm text-muted-foreground">
-            Apartamentos, coberturas e lançamentos com vista para a Baía Norte —
-            todos vistoriados pessoalmente pela Michele.
+            Apartamentos, coberturas, casas e lançamentos nos bairros mais
+            valorizados da Ilha — todos vistoriados pessoalmente pela Michele.
           </p>
+
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
