@@ -1,5 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useCallback, useEffect, useState } from "react";
 import { getPropertyByCode } from "@/lib/properties.functions";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 type Photo = { url: string; position: number };
 import {
@@ -8,6 +10,8 @@ import {
   BedDouble,
   Building2,
   Check,
+  ChevronLeft,
+  ChevronRight,
   MapPin,
   Maximize,
   Car,
