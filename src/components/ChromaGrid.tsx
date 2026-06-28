@@ -1,5 +1,4 @@
-import { useRef, useEffect, type CSSProperties } from "react";
-import { gsap } from "gsap";
+import { useState, type CSSProperties } from "react";
 import "./ChromaGrid.css";
 
 export type ChromaItem = {
@@ -27,53 +26,9 @@ type Props = {
 export function ChromaGrid({
   items,
   className = "",
-  radius = 300,
   columns = 3,
-  rows = 2,
-  damping = 0.45,
-  fadeOut = 0.6,
-  ease = "power3.out",
 }: Props) {
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const fadeRef = useRef<HTMLDivElement | null>(null);
-  const setX = useRef<((v: number) => void) | null>(null);
-  const setY = useRef<((v: number) => void) | null>(null);
-  const pos = useRef({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    setX.current = gsap.quickSetter(el, "--x", "px") as (v: number) => void;
-    setY.current = gsap.quickSetter(el, "--y", "px") as (v: number) => void;
-    const { width, height } = el.getBoundingClientRect();
-    pos.current = { x: width / 2, y: height / 2 };
-    setX.current(pos.current.x);
-    setY.current(pos.current.y);
-  }, []);
-
-  const moveTo = (x: number, y: number) => {
-    gsap.to(pos.current, {
-      x,
-      y,
-      duration: damping,
-      ease,
-      onUpdate: () => {
-        setX.current?.(pos.current.x);
-        setY.current?.(pos.current.y);
-      },
-      overwrite: true,
-    });
-  };
-
-  const handleMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const r = rootRef.current!.getBoundingClientRect();
-    moveTo(e.clientX - r.left, e.clientY - r.top);
-    gsap.to(fadeRef.current, { opacity: 0, duration: 0.25, overwrite: true });
-  };
-
-  const handleLeave = () => {
-    gsap.to(fadeRef.current, { opacity: 1, duration: fadeOut, overwrite: true });
-  };
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   const handleCardClick = (url?: string) => {
     if (!url) return;
@@ -90,20 +45,17 @@ export function ChromaGrid({
 
   return (
     <div
-      ref={rootRef}
-      className={`chroma-grid ${className}`}
+      className={`chroma-grid ${activeIndex !== null ? "is-hovering" : ""} ${className}`}
       style={{
-        ["--r" as any]: `${radius}px`,
         ["--cols" as any]: columns,
-        ["--rows" as any]: rows,
       } as CSSProperties}
-      onPointerMove={handleMove}
-      onPointerLeave={handleLeave}
+      onPointerLeave={() => setActiveIndex(null)}
     >
       {items.map((c, i) => (
         <article
           key={i}
-          className="chroma-card"
+          className={`chroma-card ${activeIndex === i ? "is-active" : ""} ${activeIndex !== null && activeIndex !== i ? "is-muted" : ""}`}
+          onMouseEnter={() => setActiveIndex(i)}
           onMouseMove={handleCardMove}
           onClick={() => handleCardClick(c.url)}
           style={{
@@ -123,8 +75,6 @@ export function ChromaGrid({
           </footer>
         </article>
       ))}
-      <div className="chroma-overlay" />
-      <div ref={fadeRef} className="chroma-fade" />
     </div>
   );
 }
