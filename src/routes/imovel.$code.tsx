@@ -27,9 +27,33 @@ export const Route = createFileRoute("/imovel/$code")({
           { property: "og:title", content: loaderData.property.title },
           { property: "og:image", content: loaderData.property.cover_image ?? "" },
         ]
-      : [],
+      : [{ title: "Imóvel · Michele Prietsch" }],
   }),
   component: PropertyPage,
+  notFoundComponent: () => (
+    <div className="min-h-screen grid place-items-center px-6 text-center">
+      <div>
+        <h1 className="font-display text-3xl">Imóvel não encontrado</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          O link pode ter expirado ou o imóvel foi removido.
+        </p>
+        <Link to="/" className="mt-6 inline-block text-sm underline">
+          Voltar para a página inicial
+        </Link>
+      </div>
+    </div>
+  ),
+  errorComponent: ({ error, reset }) => (
+    <div className="min-h-screen grid place-items-center px-6 text-center">
+      <div>
+        <h1 className="font-display text-3xl">Algo deu errado</h1>
+        <p className="mt-3 text-sm text-muted-foreground">{error.message}</p>
+        <button onClick={reset} className="mt-6 text-sm underline">
+          Tentar novamente
+        </button>
+      </div>
+    </div>
+  ),
 });
 
 function brl(n: number | null) {
