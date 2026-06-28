@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 export type PropertyListItem = {
   id: string;
@@ -16,9 +18,41 @@ export type PropertyListItem = {
   featured: boolean;
 };
 
-// Public: list properties for the homepage
+// Server-only publishable client (no session persistence, RLS as anon).
+// Created lazily so cold-start envs are read at handler time.
+function getPublicClient() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) throw new Error("Backend indisponível no momento.");
+  return createClient<Database>(url, key, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
+}
+
+// Friendly wrapper so internal Supabase messages never leak to clients.
+function safeError(message: string, err: unknown): never {
+  console.error(message, err);
+  throw new Error(message);
+}
+
+// Confirm caller has admin role via SECURITY DEFINER function (RLS-aware).
+async function assertAdmin(ctx: {
+  supabase: Awaited<ReturnType<typeof getPublicClient>>;
+  userId: string;
+}) {
+  const { data, error } = await ctx.supabase.rpc("has_role", {
+    _user_id: ctx.userId,
+    _role: "admin",
+  });
+  if (error) safeError("Não foi possível verificar suas permissões.", error);
+  if (!data) throw new Error("Acesso negado: apenas administradores.");
+}
+
+// ───────── Public reads ─────────
+
 export const listProperties = createServerFn({ method: "GET" }).handler(
   async (): Promise<PropertyListItem[]> => {
+    const supabase = getPublicClient();
     const { data, error } = await supabase
       .from("properties")
       .select(
@@ -28,81 +62,113 @@ export const listProperties = createServerFn({ method: "GET" }).handler(
       .order("featured", { ascending: false })
       .order("created_at", { ascending: false })
       .limit(12);
-    if (error) throw new Error(error.message);
+    if (error) safeError("Não foi possível carregar os imóveis.", error);
     return data ?? [];
   },
 );
 
-// Public: get a property and its photos by code
+const codeSchema = z.object({
+  code: z.string().trim().min(1).max(64).regex(/^[A-Za-z0-9_-]+$/),
+});
+
 export const getPropertyByCode = createServerFn({ method: "GET" })
-  .inputValidator((d: unknown) => {
-    if (typeof d !== "object" || d === null || !("code" in d)) throw new Error("code required");
-    const code = String((d as { code: unknown }).code);
-    return { code };
-  })
+  .inputValidator((d: unknown) => codeSchema.parse(d))
   .handler(async ({ data }) => {
+    const supabase = getPublicClient();
     const { data: prop, error } = await supabase
       .from("properties")
       .select("*")
       .eq("code", data.code)
       .eq("published", true)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) safeError("Não foi possível carregar o imóvel.", error);
     if (!prop) return null;
-    const { data: photos } = await supabase
+    const { data: photos, error: phErr } = await supabase
       .from("property_photos")
       .select("url, position")
       .eq("property_id", prop.id)
       .order("position", { ascending: true });
+    if (phErr) safeError("Não foi possível carregar as fotos.", phErr);
     return { property: prop, photos: photos ?? [] };
   });
 
-// Auth: check if current user is admin / claim admin if none exists yet
+// ───────── Admin status / bootstrap ─────────
+
 export const getMyAdminStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const userId = context.userId;
-    const { count } = await supabaseAdmin
-      .from("user_roles")
-      .select("id", { count: "exact", head: true })
-      .eq("role", "admin");
-    if ((count ?? 0) === 0) {
-      // Bootstrap: first authenticated user becomes admin
-      await supabaseAdmin.from("user_roles").insert({ user_id: userId, role: "admin" });
-      return { isAdmin: true, bootstrapped: true };
-    }
-    const { data } = await supabaseAdmin
+
+    // Fast path: user already admin
+    const { data: mine, error: mineErr } = await supabaseAdmin
       .from("user_roles")
       .select("id")
       .eq("user_id", userId)
       .eq("role", "admin")
       .maybeSingle();
-    return { isAdmin: !!data, bootstrapped: false };
+    if (mineErr) safeError("Não foi possível verificar seu acesso.", mineErr);
+    if (mine) return { isAdmin: true, bootstrapped: false };
+
+    // Bootstrap: only if NO admin exists yet
+    const { count, error: countErr } = await supabaseAdmin
+      .from("user_roles")
+      .select("id", { count: "exact", head: true })
+      .eq("role", "admin");
+    if (countErr) safeError("Não foi possível verificar o estado do sistema.", countErr);
+
+    if ((count ?? 0) === 0) {
+      // Upsert (idempotent) – race-safe with the (user_id, role) unique constraint
+      const { error: insErr } = await supabaseAdmin
+        .from("user_roles")
+        .upsert({ user_id: userId, role: "admin" }, { onConflict: "user_id,role" });
+      if (insErr) safeError("Não foi possível concluir o cadastro de admin.", insErr);
+      return { isAdmin: true, bootstrapped: true };
+    }
+    return { isAdmin: false, bootstrapped: false };
   });
 
-// Admin: import a property from a Gralha Imóveis URL
+// ───────── Admin actions ─────────
+
+const importSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .min(1)
+    .max(500)
+    .url()
+    .refine(
+      (u) => {
+        try {
+          const p = new URL(u);
+          return (
+            p.protocol === "https:" &&
+            (p.hostname === "gralhaimoveis.com.br" || p.hostname === "www.gralhaimoveis.com.br")
+          );
+        } catch {
+          return false;
+        }
+      },
+      { message: "Use um link https://www.gralhaimoveis.com.br/imovel/..." },
+    ),
+});
+
 export const importGralhaProperty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => {
-    if (typeof d !== "object" || d === null || !("url" in d)) throw new Error("url required");
-    return { url: String((d as { url: unknown }).url) };
-  })
+  .inputValidator((d: unknown) => importSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // Verify admin
-    const { data: roleRow } = await supabaseAdmin
-      .from("user_roles")
-      .select("id")
-      .eq("user_id", context.userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!roleRow) throw new Error("Acesso negado: apenas administradores.");
-
     const { scrapeGralhaProperty } = await import("./gralha-scraper.server");
-    const scraped = await scrapeGralhaProperty(data.url);
 
-    // Upsert property by code
+    let scraped;
+    try {
+      scraped = await scrapeGralhaProperty(data.url);
+    } catch (err) {
+      // Bubble scraper messages — they're already user-facing
+      throw new Error((err as Error).message || "Falha ao importar o imóvel.");
+    }
+
     const { data: upserted, error: upErr } = await supabaseAdmin
       .from("properties")
       .upsert(
@@ -134,79 +200,66 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
       )
       .select("id, code")
       .single();
-    if (upErr) throw new Error(upErr.message);
+    if (upErr || !upserted) safeError("Não foi possível salvar o imóvel.", upErr);
 
-    // Reset photos and insert fresh set
-    await supabaseAdmin.from("property_photos").delete().eq("property_id", upserted.id);
+    const { error: delErr } = await supabaseAdmin
+      .from("property_photos")
+      .delete()
+      .eq("property_id", upserted!.id);
+    if (delErr) safeError("Não foi possível atualizar as fotos.", delErr);
+
     if (scraped.photos.length > 0) {
-      const rows = scraped.photos.map((url, i) => ({
-        property_id: upserted.id,
+      const rows = scraped.photos.slice(0, 80).map((url, i) => ({
+        property_id: upserted!.id,
         url,
         position: i,
       }));
       const { error: phErr } = await supabaseAdmin.from("property_photos").insert(rows);
-      if (phErr) throw new Error(phErr.message);
+      if (phErr) safeError("Não foi possível salvar as fotos.", phErr);
     }
 
-    return { id: upserted.id, code: upserted.code, photos: scraped.photos.length };
+    return { id: upserted!.id, code: upserted!.code, photos: scraped.photos.length };
   });
 
-// Admin: list all properties (including unpublished)
 export const adminListProperties = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
+    await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: roleRow } = await supabaseAdmin
-      .from("user_roles")
-      .select("id")
-      .eq("user_id", context.userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (!roleRow) throw new Error("Acesso negado.");
     const { data, error } = await supabaseAdmin
       .from("properties")
       .select(
         "id, code, title, neighborhood, city, price_brl, featured, published, created_at, cover_image",
       )
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) safeError("Não foi possível listar os imóveis.", error);
     return data ?? [];
   });
 
-// Admin: toggle featured / delete
+const idSchema = z.object({ id: z.string().uuid() });
+const featuredSchema = idSchema.extend({ featured: z.boolean() });
+
 export const setPropertyFeatured = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => {
-    const o = d as { id?: string; featured?: boolean };
-    if (!o?.id) throw new Error("id required");
-    return { id: String(o.id), featured: !!o.featured };
-  })
+  .inputValidator((d: unknown) => featuredSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: roleRow } = await supabaseAdmin
-      .from("user_roles").select("id").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
-    if (!roleRow) throw new Error("Acesso negado.");
     const { error } = await supabaseAdmin
       .from("properties")
       .update({ featured: data.featured })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) safeError("Não foi possível atualizar o destaque.", error);
     return { ok: true };
   });
 
 export const deleteProperty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => {
-    const o = d as { id?: string };
-    if (!o?.id) throw new Error("id required");
-    return { id: String(o.id) };
-  })
+  .inputValidator((d: unknown) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: roleRow } = await supabaseAdmin
-      .from("user_roles").select("id").eq("user_id", context.userId).eq("role", "admin").maybeSingle();
-    if (!roleRow) throw new Error("Acesso negado.");
     const { error } = await supabaseAdmin.from("properties").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) safeError("Não foi possível excluir o imóvel.", error);
     return { ok: true };
   });
