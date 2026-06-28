@@ -145,7 +145,11 @@ async function fetchGralhaApiItem(codeOrId: string): Promise<GralhaApiItem | nul
     });
     if (!resp.ok) return null;
     const data = (await resp.json()) as { items?: GralhaApiItem[] };
-    return data.items?.[0] ?? null;
+    const item = data.items?.[0] ?? null;
+    if (!item) return null;
+    const requested = String(codeOrId);
+    if (String(item.codigo ?? "") !== requested && String(item.id ?? "") !== requested) return null;
+    return item;
   } catch {
     return null;
   } finally {
