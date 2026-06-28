@@ -8,8 +8,10 @@ import {
   getMyAdminStatus,
   importGralhaProperty,
   setPropertyFeatured,
+  syncPropertiesAvailability,
 } from "@/lib/properties.functions";
-import { ArrowRight, ExternalLink, LogOut, Star, Trash2 } from "lucide-react";
+import { ArrowRight, ExternalLink, LogOut, RefreshCw, Star, Trash2 } from "lucide-react";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Painel · Michele Prietsch" }] }),
