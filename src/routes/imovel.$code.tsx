@@ -67,10 +67,44 @@ function brl(n: number | null) {
 
 function PropertyPage() {
   const { property: p, photos } = Route.useLoaderData();
+  const photoList = photos as Photo[];
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const open = lightboxIndex !== null;
+
+  const close = useCallback(() => setLightboxIndex(null), []);
+  const prev = useCallback(
+    () =>
+      setLightboxIndex((i) =>
+        i === null ? i : (i - 1 + photoList.length) % photoList.length,
+      ),
+    [photoList.length],
+  );
+  const next = useCallback(
+    () => setLightboxIndex((i) => (i === null ? i : (i + 1) % photoList.length)),
+    [photoList.length],
+  );
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prev();
+      else if (e.key === "ArrowRight") next();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, prev, next]);
+
   const whatsappText = encodeURIComponent(
     `Olá Michele! Tenho interesse no imóvel cód. ${p.code} — ${p.title}. ${typeof window !== "undefined" ? window.location.href : ""}`,
   );
   const whatsapp = `https://api.whatsapp.com/send?phone=5548999999999&text=${whatsappText}`;
+
+  const mapQuery = [p.address, p.neighborhood, p.city, p.state]
+    .filter(Boolean)
+    .join(", ");
+  const mapSrc = mapQuery
+    ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`
+    : null;
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
@@ -92,22 +126,45 @@ function PropertyPage() {
 
       {/* Gallery */}
       <section className="mx-auto max-w-6xl px-6 sm:px-10 pt-6">
-        {photos.length > 0 ? (
-          <div className="grid gap-2 sm:grid-cols-4 sm:grid-rows-2 sm:aspect-[16/8] rounded-3xl overflow-hidden">
-            <img
-              src={photos[0]?.url ?? p.cover_image ?? ""}
-              alt={p.title}
-              className="sm:col-span-2 sm:row-span-2 h-full w-full object-cover aspect-[4/3]"
-            />
-            {(photos as Photo[]).slice(1, 5).map((ph) => (
+        {photoList.length > 0 ? (
+          <div className="relative grid gap-2 sm:grid-cols-4 sm:grid-rows-2 sm:aspect-[16/8] rounded-3xl overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setLightboxIndex(0)}
+              className="sm:col-span-2 sm:row-span-2 h-full w-full overflow-hidden group"
+              aria-label="Abrir galeria"
+            >
               <img
-                key={ph.url}
-                src={ph.url}
-                alt=""
-                loading="lazy"
-                className="h-full w-full object-cover aspect-[4/3] hidden sm:block"
+                src={photoList[0]?.url ?? p.cover_image ?? ""}
+                alt={p.title}
+                className="h-full w-full object-cover aspect-[4/3] group-hover:scale-[1.02] transition-transform duration-500"
               />
+            </button>
+            {photoList.slice(1, 5).map((ph, i) => (
+              <button
+                type="button"
+                key={ph.url}
+                onClick={() => setLightboxIndex(i + 1)}
+                className="h-full w-full overflow-hidden hidden sm:block group"
+                aria-label={`Abrir foto ${i + 2}`}
+              >
+                <img
+                  src={ph.url}
+                  alt=""
+                  loading="lazy"
+                  className="h-full w-full object-cover aspect-[4/3] group-hover:scale-[1.02] transition-transform duration-500"
+                />
+              </button>
             ))}
+            {photoList.length > 1 && (
+              <button
+                type="button"
+                onClick={() => setLightboxIndex(0)}
+                className="absolute bottom-4 right-4 rounded-full bg-background/95 backdrop-blur px-4 py-2 text-xs font-medium shadow-md hover:bg-background transition"
+              >
+                Ver todas as {photoList.length} fotos
+              </button>
+            )}
           </div>
         ) : (
           p.cover_image && (
@@ -191,19 +248,18 @@ function PropertyPage() {
             </div>
           )}
 
-          {photos.length > 5 && (
+          {mapSrc && (
             <div className="mt-12">
-              <h2 className="font-display text-2xl tracking-tight">Galeria completa</h2>
-              <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {(photos as Photo[]).slice(5).map((ph) => (
-                  <img
-                    key={ph.url}
-                    src={ph.url}
-                    alt=""
-                    loading="lazy"
-                    className="aspect-[4/3] w-full object-cover rounded-xl"
-                  />
-                ))}
+              <h2 className="font-display text-2xl tracking-tight">Localização</h2>
+              <p className="mt-2 text-sm text-muted-foreground">{mapQuery}</p>
+              <div className="mt-4 overflow-hidden rounded-3xl ring-1 ring-black/5">
+                <iframe
+                  title={`Mapa de ${p.title}`}
+                  src={mapSrc}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="w-full h-[360px] sm:h-[420px] border-0"
+                />
               </div>
             </div>
           )}
@@ -245,6 +301,68 @@ function PropertyPage() {
           </div>
         </aside>
       </section>
+
+      {/* Lightbox */}
+      <Dialog open={open} onOpenChange={(o) => !o && close()}>
+        <DialogContent className="max-w-6xl w-[95vw] p-0 bg-black/95 border-none text-white">
+          {lightboxIndex !== null && (
+            <div className="flex flex-col">
+              <div className="relative flex items-center justify-center h-[70vh] bg-black">
+                <img
+                  src={photoList[lightboxIndex].url}
+                  alt=""
+                  className="max-h-full max-w-full object-contain"
+                />
+                {photoList.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={prev}
+                      aria-label="Foto anterior"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur p-3 transition"
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={next}
+                      aria-label="Próxima foto"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur p-3 transition"
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </button>
+                  </>
+                )}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 text-xs bg-black/60 px-3 py-1 rounded-full">
+                  {lightboxIndex + 1} / {photoList.length}
+                </div>
+              </div>
+              {photoList.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto p-3 bg-black/80">
+                  {photoList.map((ph, i) => (
+                    <button
+                      type="button"
+                      key={ph.url}
+                      onClick={() => setLightboxIndex(i)}
+                      aria-label={`Ver foto ${i + 1}`}
+                      className={`flex-shrink-0 overflow-hidden rounded-md ring-2 transition ${
+                        i === lightboxIndex ? "ring-white" : "ring-transparent opacity-60 hover:opacity-100"
+                      }`}
+                    >
+                      <img
+                        src={ph.url}
+                        alt=""
+                        loading="lazy"
+                        className="h-16 w-24 object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
