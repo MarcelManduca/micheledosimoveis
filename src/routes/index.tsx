@@ -445,3 +445,48 @@ function Index() {
     </div>
   );
 }
+
+const CHROMA_PALETTE: Array<{ border: string; gradient: string }> = [
+  { border: "#C8A464", gradient: "linear-gradient(145deg, #C8A464, #0b0b0b)" },
+  { border: "#1E3A5F", gradient: "linear-gradient(180deg, #1E3A5F, #0b0b0b)" },
+  { border: "#0F766E", gradient: "linear-gradient(165deg, #0F766E, #0b0b0b)" },
+  { border: "#8B5E3C", gradient: "linear-gradient(195deg, #8B5E3C, #0b0b0b)" },
+  { border: "#4B5563", gradient: "linear-gradient(225deg, #4B5563, #0b0b0b)" },
+  { border: "#9CA3AF", gradient: "linear-gradient(135deg, #9CA3AF, #0b0b0b)" },
+];
+
+function ChromaGridProperties({ items }: { items: PropertyListItem[] }) {
+  const chromaItems: ChromaItem[] = items.length > 0
+    ? items.map((p, i) => {
+        const tone = CHROMA_PALETTE[i % CHROMA_PALETTE.length];
+        return {
+          image: p.cover_image ?? "",
+          title: p.title,
+          subtitle: [p.neighborhood, p.city].filter(Boolean).join(", "),
+          handle: `Cód. ${p.code}`,
+          location: brl(p.price_brl),
+          borderColor: tone.border,
+          gradient: tone.gradient,
+          url: `/imovel/${p.code}`,
+        };
+      })
+    : fallbackProperties.map((p, i) => {
+        const tone = CHROMA_PALETTE[i % CHROMA_PALETTE.length];
+        return {
+          image: p.img,
+          title: p.name,
+          subtitle: p.neighborhood,
+          handle: `Cód. ${p.code}`,
+          location: p.price,
+          borderColor: tone.border,
+          gradient: tone.gradient,
+          url: WHATSAPP_URL,
+        };
+      });
+
+  return (
+    <div className="relative" style={{ minHeight: 600 }}>
+      <ChromaGrid items={chromaItems} radius={320} damping={0.45} fadeOut={0.6} ease="power3.out" />
+    </div>
+  );
+}
