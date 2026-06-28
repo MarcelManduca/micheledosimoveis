@@ -509,7 +509,7 @@ function Index() {
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
                   <MapPin className="h-4 w-4" />
                 </span>
-                Av. Beira Mar Norte · Florianópolis/SC
+                Florianópolis/SC · Norte, Centro, Leste e Sul da Ilha
               </li>
             </ul>
           </div>
