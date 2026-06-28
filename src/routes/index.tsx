@@ -1,10 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowRight, MapPin, Bath, BedDouble, Maximize, Star, Phone, Instagram, Mail } from "lucide-react";
 import heroImg from "@/assets/hero-beiramar.jpg";
 import portrait from "@/assets/michele-portrait.jpg";
 import prop1 from "@/assets/property-1.jpg";
 import prop2 from "@/assets/property-2.jpg";
 import prop3 from "@/assets/property-3.jpg";
+import { listProperties, type PropertyListItem } from "@/lib/properties.functions";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,6 +18,7 @@ export const Route = createFileRoute("/")({
       { property: "og:image", content: heroImg },
     ],
   }),
+  loader: () => listProperties(),
   component: Index,
 });
 
@@ -23,38 +26,17 @@ const WHATSAPP_URL =
   "https://api.whatsapp.com/send?phone=5548999999999&text=" +
   encodeURIComponent("Olá Michele! Vi sua página e gostaria de saber mais sobre imóveis na Beira Mar Norte.");
 
-const properties = [
-  {
-    img: prop1,
-    code: "MP-1042",
-    name: "Edifício Mira Mare",
-    neighborhood: "Beira Mar Norte, Florianópolis",
-    beds: 4,
-    baths: 5,
-    area: "320 m²",
-    price: "R$ 6.900.000",
-  },
-  {
-    img: prop2,
-    code: "MP-1078",
-    name: "Cobertura Vista Baía",
-    neighborhood: "Beira Mar Norte, Florianópolis",
-    beds: 4,
-    baths: 6,
-    area: "480 m²",
-    price: "R$ 12.500.000",
-  },
-  {
-    img: prop3,
-    code: "MP-1101",
-    name: "Residencial Costa Norte",
-    neighborhood: "Beira Mar Norte, Florianópolis",
-    beds: 3,
-    baths: 4,
-    area: "245 m²",
-    price: "R$ 4.200.000",
-  },
+const fallbackProperties = [
+  { img: prop1, code: "MP-1042", name: "Edifício Mira Mare", neighborhood: "Beira Mar Norte, Florianópolis", beds: 4, baths: 5, area: "320 m²", price: "R$ 6.900.000" },
+  { img: prop2, code: "MP-1078", name: "Cobertura Vista Baía", neighborhood: "Beira Mar Norte, Florianópolis", beds: 4, baths: 6, area: "480 m²", price: "R$ 12.500.000" },
+  { img: prop3, code: "MP-1101", name: "Residencial Costa Norte", neighborhood: "Beira Mar Norte, Florianópolis", beds: 3, baths: 4, area: "245 m²", price: "R$ 4.200.000" },
 ];
+
+function brl(n: number | null) {
+  if (n == null) return "Sob consulta";
+  return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+}
+
 
 function Index() {
   return (
