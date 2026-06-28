@@ -19,6 +19,15 @@ export const Route = createFileRoute("/")({
     ],
   }),
   loader: () => listProperties(),
+  errorComponent: ({ error, reset }) => (
+    <div className="min-h-screen grid place-items-center px-6 text-center">
+      <div>
+        <h1 className="font-display text-3xl">Não foi possível carregar</h1>
+        <p className="mt-3 text-sm text-muted-foreground">{error.message}</p>
+        <button onClick={reset} className="mt-6 text-sm underline">Tentar novamente</button>
+      </div>
+    </div>
+  ),
   component: Index,
 });
 
