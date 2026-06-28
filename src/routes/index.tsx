@@ -62,17 +62,9 @@ function Index() {
       <header className="absolute top-0 left-0 right-0 z-30">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 py-5 flex items-center justify-between">
           <a href="#top" className="flex items-center gap-3">
-            <img
-              src={portrait}
-              alt="Michele Prietsch"
-              width={44}
-              height={44}
-              className="h-11 w-11 rounded-full object-cover ring-2 ring-white/70"
-            />
-            <span className="hidden sm:block font-display text-lg text-white drop-shadow tracking-tight">
-              Michele Prietsch
-            </span>
+            <span className="sr-only">Michele Prietsch</span>
           </a>
+
 
           <nav className="hidden md:flex items-center gap-9 text-sm text-white/90">
             <a href="#top" className="hover:text-white transition">Início</a>
