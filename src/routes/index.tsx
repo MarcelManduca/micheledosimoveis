@@ -12,6 +12,27 @@ import { ChromaGrid, type ChromaItem } from "@/components/ChromaGrid";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PropertyFilters } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
+import DomeGallery from "@/components/DomeGallery.jsx";
+import dome01 from "@/assets/dome/michele-01.jpg.asset.json";
+import dome02 from "@/assets/dome/michele-02.jpg.asset.json";
+import dome03 from "@/assets/dome/michele-03.jpg.asset.json";
+import dome04 from "@/assets/dome/michele-04.jpg.asset.json";
+import dome05 from "@/assets/dome/michele-05.jpg.asset.json";
+import dome06 from "@/assets/dome/michele-06.jpg.asset.json";
+import dome07 from "@/assets/dome/michele-07.jpg.asset.json";
+import dome08 from "@/assets/dome/michele-08.jpg.asset.json";
+import dome09 from "@/assets/dome/michele-09.jpg.asset.json";
+import dome10 from "@/assets/dome/michele-10.jpg.asset.json";
+import dome11 from "@/assets/dome/michele-11.jpg.asset.json";
+import dome12 from "@/assets/dome/michele-12.jpg.asset.json";
+import dome13 from "@/assets/dome/michele-13.jpg.asset.json";
+import dome14 from "@/assets/dome/michele-14.jpg.asset.json";
+import dome15 from "@/assets/dome/michele-15.jpg.asset.json";
+
+const DOME_IMAGES = [
+  dome01, dome02, dome03, dome04, dome05, dome06, dome07, dome08,
+  dome09, dome10, dome11, dome12, dome13, dome14, dome15,
+].map((a, i) => ({ src: a.url, alt: `Michele Prietsch - foto ${i + 1}` }));
 
 
 export const Route = createFileRoute("/")({
@@ -389,15 +410,26 @@ function Index() {
       <section id="sobre" className="bg-secondary/60 border-y border-border">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 py-24 sm:py-32 grid gap-14 lg:grid-cols-2 lg:items-center">
           <div className="relative">
-            <img
-              src={portrait}
-              alt="Michele Prietsch, corretora de imóveis de alto padrão em Florianópolis"
-              loading="lazy"
-              width={800}
-              height={800}
-              className="w-full max-w-md rounded-[28px] object-cover aspect-square shadow-xl"
-            />
-            <div className="absolute -bottom-6 -right-2 sm:right-10 rounded-2xl bg-background px-5 py-4 shadow-xl ring-1 ring-black/5">
+            <div
+              className="relative w-full max-w-md mx-auto aspect-square rounded-[28px] overflow-hidden shadow-xl ring-1 ring-black/5 bg-foreground"
+              aria-label="Galeria de fotos de Michele Prietsch"
+            >
+              <DomeGallery
+                images={DOME_IMAGES}
+                grayscale={false}
+                fit={0.62}
+                minRadius={260}
+                maxRadius={520}
+                padFactor={0.18}
+                overlayBlurColor="#0b0b0b"
+                openedImageWidth="320px"
+                openedImageHeight="320px"
+                imageBorderRadius="14px"
+                openedImageBorderRadius="22px"
+                segments={28}
+              />
+            </div>
+            <div className="absolute -bottom-6 -right-2 sm:right-4 rounded-2xl bg-background px-5 py-4 shadow-xl ring-1 ring-black/5 z-10">
               <div className="font-display text-3xl">+16 anos</div>
               <div className="text-xs text-muted-foreground mt-1">no mercado imobiliário</div>
             </div>
