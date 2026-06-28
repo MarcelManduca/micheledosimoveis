@@ -91,26 +91,79 @@ function splitFeatures(s: string | null): string[] {
   return merged.slice(0, 60);
 }
 
+const ALLOWED_HOSTS = new Set(["gralhaimoveis.com.br", "www.gralhaimoveis.com.br"]);
+const MAX_HTML_BYTES = 4 * 1024 * 1024; // 4 MB
+const FETCH_TIMEOUT_MS = 15_000;
+
 export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty> {
-  const u = new URL(url);
-  if (!/gralhaimoveis\.com\.br$/i.test(u.hostname.replace(/^www\./, ""))) {
-    throw new Error("URL inválida. Use um link de www.gralhaimoveis.com.br/imovel/codigo/...");
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    throw new Error("URL inválida.");
+  }
+  // Strict host check (anti-SSRF / domain-suffix bypass)
+  if (u.protocol !== "https:" || !ALLOWED_HOSTS.has(u.hostname.toLowerCase())) {
+    throw new Error("URL inválida. Use um link https://www.gralhaimoveis.com.br/imovel/...");
   }
   const codeMatch = u.pathname.match(/(\d{4,})/);
   const code = codeMatch ? codeMatch[1] : u.pathname.split("/").filter(Boolean).pop() || "";
+  if (!code) throw new Error("Não foi possível identificar o código do imóvel na URL.");
 
-  const resp = await fetch(url, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
-      Accept: "text/html,application/xhtml+xml",
-      "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
-    },
-  });
-  if (!resp.ok) {
-    throw new Error(`Falha ao buscar a página da Gralha (HTTP ${resp.status}).`);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  let html: string;
+  try {
+    const resp = await fetch(u.toString(), {
+      signal: controller.signal,
+      redirect: "follow",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+        Accept: "text/html,application/xhtml+xml",
+        "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+      },
+    });
+    if (!resp.ok) {
+      throw new Error(`Falha ao buscar a página da Gralha (HTTP ${resp.status}).`);
+    }
+    const ct = resp.headers.get("content-type") ?? "";
+    if (!/text\/html|application\/xhtml/i.test(ct)) {
+      throw new Error("Resposta inesperada do servidor (não é HTML).");
+    }
+    // Read with size cap
+    const reader = resp.body?.getReader();
+    if (!reader) {
+      html = await resp.text();
+    } else {
+      const chunks: Uint8Array[] = [];
+      let total = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        total += value.byteLength;
+        if (total > MAX_HTML_BYTES) {
+          await reader.cancel();
+          throw new Error("Página muito grande para processar.");
+        }
+        chunks.push(value);
+      }
+      const merged = new Uint8Array(total);
+      let offset = 0;
+      for (const c of chunks) {
+        merged.set(c, offset);
+        offset += c.byteLength;
+      }
+      html = new TextDecoder("utf-8").decode(merged);
+    }
+  } catch (err) {
+    if ((err as Error).name === "AbortError") {
+      throw new Error("Tempo esgotado ao buscar a página da Gralha.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
   }
-  const html = await resp.text();
 
   const title =
     pickMeta(html, "og:title")?.replace(/\s*-\s*Gralha Imóveis\s*$/i, "") ||
