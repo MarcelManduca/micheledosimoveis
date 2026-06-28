@@ -13,10 +13,10 @@ import { ChromaGrid, type ChromaItem } from "@/components/ChromaGrid";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Michele dos Imóveis — Alto padrão em Florianópolis | Jurerê, Beira Mar, Lagoa, Campeche" },
-      { name: "description", content: "Corretora de imóveis de alto padrão em Florianópolis: Jurerê Internacional, Beira Mar Norte, Praia Brava, Lagoa da Conceição, Campeche, Santo Antônio de Lisboa e principais bairros e praias da Ilha." },
-      { property: "og:title", content: "Michele dos Imóveis — Alto padrão em Florianópolis" },
-      { property: "og:description", content: "Apartamentos, casas e coberturas de luxo nos melhores endereços de Florianópolis." },
+      { title: "Michele Prietsch | Michele dos Imóveis em Florianópolis" },
+      { name: "description", content: "Michele Prietsch, conhecida como Michele dos Imóveis, é corretora especializada em imóveis de alto padrão em Florianópolis, com atendimento personalizado para compra, venda e curadoria imobiliária." },
+      { property: "og:title", content: "Michele Prietsch | Michele dos Imóveis em Florianópolis" },
+      { property: "og:description", content: "Corretora especializada em imóveis de alto padrão em Florianópolis — curadoria, discrição e atendimento sob medida em Jurerê Internacional, Praia Brava, Cacupé, Lagoa da Conceição, Campeche e Beira-Mar Norte." },
       { property: "og:image", content: heroImg },
       { property: "og:url", content: "https://micheledosimoveis.lovable.app/" },
     ],
