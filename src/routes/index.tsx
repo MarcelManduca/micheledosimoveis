@@ -12,6 +12,27 @@ import { ChromaGrid, type ChromaItem } from "@/components/ChromaGrid";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PropertyFilters } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
+import DomeGallery from "@/components/DomeGallery.jsx";
+import dome01 from "@/assets/dome/michele-01.jpg.asset.json";
+import dome02 from "@/assets/dome/michele-02.jpg.asset.json";
+import dome03 from "@/assets/dome/michele-03.jpg.asset.json";
+import dome04 from "@/assets/dome/michele-04.jpg.asset.json";
+import dome05 from "@/assets/dome/michele-05.jpg.asset.json";
+import dome06 from "@/assets/dome/michele-06.jpg.asset.json";
+import dome07 from "@/assets/dome/michele-07.jpg.asset.json";
+import dome08 from "@/assets/dome/michele-08.jpg.asset.json";
+import dome09 from "@/assets/dome/michele-09.jpg.asset.json";
+import dome10 from "@/assets/dome/michele-10.jpg.asset.json";
+import dome11 from "@/assets/dome/michele-11.jpg.asset.json";
+import dome12 from "@/assets/dome/michele-12.jpg.asset.json";
+import dome13 from "@/assets/dome/michele-13.jpg.asset.json";
+import dome14 from "@/assets/dome/michele-14.jpg.asset.json";
+import dome15 from "@/assets/dome/michele-15.jpg.asset.json";
+
+const DOME_IMAGES = [
+  dome01, dome02, dome03, dome04, dome05, dome06, dome07, dome08,
+  dome09, dome10, dome11, dome12, dome13, dome14, dome15,
+].map((a, i) => ({ src: a.url, alt: `Michele Prietsch - foto ${i + 1}` }));
 
 
 export const Route = createFileRoute("/")({
