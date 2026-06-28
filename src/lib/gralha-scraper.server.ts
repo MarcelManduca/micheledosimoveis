@@ -95,6 +95,68 @@ const ALLOWED_HOSTS = new Set(["gralhaimoveis.com.br", "www.gralhaimoveis.com.br
 const MAX_HTML_BYTES = 4 * 1024 * 1024; // 4 MB
 const FETCH_TIMEOUT_MS = 15_000;
 
+type GralhaApiItem = {
+  id?: number;
+  codigo?: string;
+  tipo?: string | null;
+  valorVenda?: number | null;
+  valorPromocional?: number | null;
+  ocultarValor?: boolean | null;
+  empreendimento?: string | null;
+  condominio?: string | null;
+  logradouro?: string | null;
+  numero?: string | null;
+  bairro?: string | null;
+  cidade?: string | null;
+  estadoSigla?: string | null;
+  quartos?: number | null;
+  suites?: number | null;
+  vagas?: number | null;
+  banheiros?: number | null;
+  areaConstruida?: number | null;
+  url?: string | null;
+  imagens?: string[];
+  caracteristicas?: string[];
+};
+
+function numberOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+async function fetchGralhaApiItem(codeOrId: string): Promise<GralhaApiItem | null> {
+  const apiUrl = new URL("https://www.gralhaimoveis.com.br/api/anuncios/search");
+  apiUrl.searchParams.set("finalidade", "venda");
+  apiUrl.searchParams.set("codigo", codeOrId);
+  apiUrl.searchParams.set("page", "1");
+  apiUrl.searchParams.set("pagesize", "1");
+  apiUrl.searchParams.set("somenteImoveis", "true");
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  try {
+    const resp = await fetch(apiUrl.toString(), {
+      signal: controller.signal,
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+        Accept: "application/json",
+        "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+      },
+    });
+    if (!resp.ok) return null;
+    const data = (await resp.json()) as { items?: GralhaApiItem[] };
+    const item = data.items?.[0] ?? null;
+    if (!item) return null;
+    const requested = String(codeOrId);
+    if (String(item.codigo ?? "") !== requested && String(item.id ?? "") !== requested) return null;
+    return item;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty> {
   let u: URL;
   try {
@@ -233,27 +295,32 @@ export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty
   // Internal Gralha reference code (e.g. "Cod: 42345") — preferred over the URL id
   const internalCodeMatch = text.match(/\bCod(?:igo|\.)?\s*[:#]?\s*(\d{3,7})\b/i);
   const code = internalCodeMatch ? internalCodeMatch[1] : urlCode;
+  const apiItem = (await fetchGralhaApiItem(code)) ?? (await fetchGralhaApiItem(urlCode));
+  const apiPrice = apiItem?.ocultarValor ? null : numberOrNull(apiItem?.valorPromocional) ?? numberOrNull(apiItem?.valorVenda);
+  const apiCondoName = apiItem?.condominio || apiItem?.empreendimento || null;
+  const apiAddress = [apiItem?.logradouro, apiItem?.numero].filter(Boolean).join(", ") || null;
+  const apiArea = numberOrNull(apiItem?.areaConstruida);
 
   return {
-    code,
+    code: apiItem?.codigo || code,
     source_url: url,
     title: title.trim(),
-    property_type: typeMatch ? typeMatch[1].toLowerCase() : null,
-    neighborhood: bairroMatch?.[1].trim() ?? null,
-    city: bairroMatch?.[2].trim() ?? null,
-    state: bairroMatch?.[3].trim() ?? null,
-    address: enderecoMatch ? enderecoMatch[1].trim() : null,
-    condo_name: condoNameMatch ? condoNameMatch[1].trim() : null,
-    price_brl: parseBrlNumber(priceMatch?.[1] ?? null),
+    property_type: apiItem?.tipo?.toLowerCase() ?? (typeMatch ? typeMatch[1].toLowerCase() : null),
+    neighborhood: apiItem?.bairro ?? bairroMatch?.[1].trim() ?? null,
+    city: apiItem?.cidade ?? bairroMatch?.[2].trim() ?? null,
+    state: apiItem?.estadoSigla ?? bairroMatch?.[3].trim() ?? null,
+    address: apiAddress ?? (enderecoMatch ? enderecoMatch[1].trim() : null),
+    condo_name: apiCondoName ?? (condoNameMatch ? condoNameMatch[1].trim() : null),
+    price_brl: apiPrice ?? parseBrlNumber(priceMatch?.[1] ?? null),
     condo_fee_brl: parseBrlNumber(condoFeeMatch?.[1] ?? null),
     iptu_brl: parseBrlNumber(iptuMatch?.[1] ?? null),
-    area_m2: areaMatch ? Number(areaMatch[1]) : null,
-    bedrooms: bedroomsMatch ? Number(bedroomsMatch[1]) : null,
-    suites: suitesMatch ? Number(suitesMatch[1]) : null,
-    bathrooms: bathroomsMatch ? Number(bathroomsMatch[1]) : null,
-    parking_spots: parkingMatch ? Number(parkingMatch[1]) : null,
+    area_m2: apiArea ?? (areaMatch ? Number(areaMatch[1]) : null),
+    bedrooms: numberOrNull(apiItem?.quartos) ?? (bedroomsMatch ? Number(bedroomsMatch[1]) : null),
+    suites: numberOrNull(apiItem?.suites) ?? (suitesMatch ? Number(suitesMatch[1]) : null),
+    bathrooms: numberOrNull(apiItem?.banheiros) ?? (bathroomsMatch ? Number(bathroomsMatch[1]) : null),
+    parking_spots: numberOrNull(apiItem?.vagas) ?? (parkingMatch ? Number(parkingMatch[1]) : null),
     description,
-    features,
+    features: apiItem?.caracteristicas?.length ? apiItem.caracteristicas : features,
     condo_features: condoFeatures,
     cover_image: cover || photos[0] || null,
     photos,
