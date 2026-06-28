@@ -1,5 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { getPropertyByCode } from "@/lib/properties.functions";
+
+type Photo = { url: string; position: number };
 import {
   ArrowLeft,
   Bath,
@@ -69,7 +71,7 @@ function PropertyPage() {
               alt={p.title}
               className="sm:col-span-2 sm:row-span-2 h-full w-full object-cover aspect-[4/3]"
             />
-            {photos.slice(1, 5).map((ph) => (
+            {(photos as Photo[]).slice(1, 5).map((ph) => (
               <img
                 key={ph.url}
                 src={ph.url}
@@ -139,7 +141,7 @@ function PropertyPage() {
             <div className="mt-10">
               <h2 className="font-display text-2xl tracking-tight">Diferenciais do imóvel</h2>
               <ul className="mt-4 grid sm:grid-cols-2 gap-2 text-sm">
-                {p.features.map((f) => (
+                {(p.features as string[]).map((f: string) => (
                   <li key={f} className="inline-flex items-center gap-2">
                     <Check className="h-4 w-4 text-emerald-600" /> {f}
                   </li>
@@ -152,7 +154,7 @@ function PropertyPage() {
             <div className="mt-10">
               <h2 className="font-display text-2xl tracking-tight">Estrutura do condomínio</h2>
               <ul className="mt-4 grid sm:grid-cols-2 gap-2 text-sm">
-                {p.condo_features.map((f) => (
+                {(p.condo_features as string[]).map((f: string) => (
                   <li key={f} className="inline-flex items-center gap-2">
                     <Building2 className="h-4 w-4 text-foreground/70" /> {f}
                   </li>
@@ -165,7 +167,7 @@ function PropertyPage() {
             <div className="mt-12">
               <h2 className="font-display text-2xl tracking-tight">Galeria completa</h2>
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {photos.slice(5).map((ph) => (
+                {(photos as Photo[]).slice(5).map((ph) => (
                   <img
                     key={ph.url}
                     src={ph.url}
