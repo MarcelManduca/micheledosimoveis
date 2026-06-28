@@ -111,9 +111,9 @@ main.sphere-main {
 }
 
 .viewer {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 20;
+  z-index: 9999;
   pointer-events: none;
   display: flex;
   align-items: center;
