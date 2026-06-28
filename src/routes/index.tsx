@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowRight, MapPin, Bath, BedDouble, Maximize, Star, Phone, Instagram, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, MapPin, Bath, BedDouble, Maximize, Star, Phone, Instagram, Mail, ShieldCheck, Camera, LineChart, Users, Sparkles, Lock, EyeOff } from "lucide-react";
 import heroImg from "@/assets/hero-beiramar.jpg";
 import portrait from "@/assets/michele-portrait.jpg";
 import prop1 from "@/assets/property-1.jpg";
