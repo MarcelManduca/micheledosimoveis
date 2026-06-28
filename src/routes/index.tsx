@@ -459,12 +459,14 @@ function Index() {
               </div>
               <h2 className="mt-4 font-display font-light text-4xl sm:text-6xl leading-[1] tracking-tight">
                 Encontre o seu<br />
-                <span className="italic">endereço à beira-mar.</span>
+                <span className="italic">endereço em Floripa.</span>
               </h2>
               <p className="mt-6 max-w-md text-background/70">
-                Conte o que você procura. Em poucas horas eu retorno com uma seleção
-                personalizada — inclusive opções fora do mercado.
+                Conte o bairro, o estilo de vida e o orçamento que você procura.
+                Em poucas horas eu retorno com uma seleção personalizada —
+                inclusive imóveis fora do mercado.
               </p>
+
               <a
                 href={WHATSAPP_URL}
                 target="_blank"
