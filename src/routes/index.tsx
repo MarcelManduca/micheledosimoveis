@@ -630,10 +630,11 @@ function ChromaGridProperties({ items }: { items: PropertyListItem[] }) {
   }
 
   return (
-    <div className="relative" style={{ minHeight: 600 }}>
+    <div className="relative">
       <ChromaGrid items={chromaItems} radius={320} damping={0.45} fadeOut={0.6} ease="power3.out" />
     </div>
   );
+
 }
 
 
