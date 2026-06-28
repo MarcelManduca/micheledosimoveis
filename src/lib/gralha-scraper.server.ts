@@ -230,6 +230,10 @@ export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty
     ]),
   );
 
+  // Internal Gralha reference code (e.g. "Cod: 42345") — preferred over the URL id
+  const internalCodeMatch = text.match(/\bCod(?:igo|\.)?\s*[:#]?\s*(\d{3,7})\b/i);
+  const code = internalCodeMatch ? internalCodeMatch[1] : urlCode;
+
   return {
     code,
     source_url: url,
