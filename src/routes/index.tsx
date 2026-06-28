@@ -117,8 +117,8 @@ function Index() {
                   <MapPin className="h-3.5 w-3.5" /> Beira Mar Norte · Florianópolis
                 </span>
                 <h1 className="mt-6 font-display font-light leading-[0.95] tracking-tight text-[clamp(3rem,8vw,6.5rem)]">
-                  Fala com<br />
-                  <span className="italic">Michele.</span>
+                  Michele<br />
+                  <span className="italic">dos Imóveis.</span>
                 </h1>
                 <p className="mt-6 max-w-md text-base sm:text-lg text-white/85">
                   Imóveis de alto padrão em frente ao mar. Curadoria, discrição e
