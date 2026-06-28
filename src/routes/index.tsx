@@ -609,19 +609,31 @@ function ChromaGridProperties({ items }: { items: PropertyListItem[] }) {
             href={c.url ?? "#"}
             target={c.url?.startsWith("http") ? "_blank" : undefined}
             rel={c.url?.startsWith("http") ? "noopener noreferrer" : undefined}
-            className="block overflow-hidden rounded-2xl border border-border bg-card"
+            className="block overflow-hidden rounded-2xl border border-border bg-card shadow-sm"
             style={{ background: c.gradient }}
           >
             <div className="aspect-[4/3] overflow-hidden p-2">
-              <img src={c.image} alt={c.title} loading="lazy" className="h-full w-full rounded-xl object-cover" />
+              <img src={c.image} alt={c.title} loading="lazy" className="h-full w-full rounded-xl object-cover transition-transform duration-700 hover:scale-[1.04]" />
             </div>
-            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2 px-4 pb-4 pt-2 text-white">
-              <div className="min-w-0">
-                <h3 className="truncate text-base font-medium">{c.title}</h3>
-                {c.subtitle && <p className="truncate text-xs text-white/70">{c.subtitle}</p>}
-                {c.handle && <span className="text-[11px] text-white/60">{c.handle}</span>}
+            <div className="space-y-3 px-4 pb-4 pt-2 text-white">
+              <div className="flex items-center justify-between gap-3">
+                {c.handle && (
+                  <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/70 ring-1 ring-white/15">
+                    {c.handle}
+                  </span>
+                )}
+                <span className="text-xs text-white/55">Ver detalhes →</span>
               </div>
-              {c.location && <span className="shrink-0 text-sm font-medium">{c.location}</span>}
+              <div>
+                <h3 className="line-clamp-2 text-base font-medium leading-snug">{c.title}</h3>
+                {c.subtitle && <p className="mt-1 truncate text-xs text-white/65">{c.subtitle}</p>}
+              </div>
+              {c.location && (
+                <div className="flex items-end justify-between gap-3 border-t border-white/10 pt-3">
+                  <span className="text-[10px] uppercase tracking-[0.16em] text-white/45">Valor</span>
+                  <span className="shrink-0 text-lg font-semibold">{c.location}</span>
+                </div>
+              )}
             </div>
           </a>
         ))}
