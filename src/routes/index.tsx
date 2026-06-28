@@ -1,15 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowRight, MapPin, Bath, BedDouble, Maximize, Star, Phone, Instagram, Mail, ShieldCheck, Camera, LineChart, Users, Sparkles, Lock, EyeOff } from "lucide-react";
+import { ArrowRight, MapPin, Star, Phone, Instagram, Mail, ShieldCheck, Rocket, Sparkles } from "lucide-react";
 import heroImg from "@/assets/hero-beiramar.jpg";
 import portrait from "@/assets/michele-portrait.jpg";
 import prop1 from "@/assets/property-1.jpg";
 import prop2 from "@/assets/property-2.jpg";
 import prop3 from "@/assets/property-3.jpg";
-import { listProperties, type PropertyListItem } from "@/lib/properties.functions";
+import { listLaunches, listProperties, type PropertyListItem } from "@/lib/properties.functions";
 import { ChromaGrid, type ChromaItem } from "@/components/ChromaGrid";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { PropertyFilters } from "@/components/PropertyFilters";
+import { PropertyCard } from "@/components/PropertyCard";
 
 
 export const Route = createFileRoute("/")({
