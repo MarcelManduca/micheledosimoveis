@@ -396,7 +396,12 @@ function Index() {
       <footer className="border-t border-border">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 py-10 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
           <div className="font-display text-base text-foreground">Michele Prietsch · Imóveis</div>
-          <div>© {new Date().getFullYear()} · CRECI/SC · Todos os direitos reservados.</div>
+          <div className="flex items-center gap-5">
+            <span>© {new Date().getFullYear()} · CRECI/SC · Todos os direitos reservados.</span>
+            <Link to="/auth" className="text-xs text-muted-foreground/70 hover:text-foreground transition">
+              Admin
+            </Link>
+          </div>
         </div>
       </footer>
     </div>
