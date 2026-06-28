@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BedDouble, Bath, Maximize, MapPin } from "lucide-react";
+import { BedDouble, Bath, Maximize, MapPin, ArrowRight } from "lucide-react";
 import type { PropertyListItem } from "@/lib/properties.functions";
 
 function brl(n: number | null) {
@@ -12,7 +12,7 @@ export function PropertyCard({ p }: { p: PropertyListItem }) {
     <Link
       to="/imovel/$code"
       params={{ code: p.code }}
-      className="group block overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 hover:shadow-xl hover:ring-black/10 transition"
+      className="group block overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-black/10"
     >
       <div className="aspect-[4/3] overflow-hidden bg-secondary">
         {p.cover_image ? (
@@ -29,7 +29,16 @@ export function PropertyCard({ p }: { p: PropertyListItem }) {
         )}
       </div>
       <div className="p-5">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
+          <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+            Cód. {p.code}
+          </span>
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-foreground/5 text-muted-foreground transition group-hover:bg-foreground group-hover:text-background">
+            <ArrowRight className="h-4 w-4" />
+          </span>
+        </div>
+
+        <div className="mt-4">
           <h3 className="font-display text-lg leading-tight tracking-tight line-clamp-2">
             {p.title}
           </h3>
@@ -57,12 +66,12 @@ export function PropertyCard({ p }: { p: PropertyListItem }) {
             </span>
           )}
         </div>
-        <div className="mt-5 flex items-end justify-between gap-3">
+        <div className="mt-5 flex items-end justify-between gap-3 border-t border-border pt-4">
           <div>
             <div className="text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
-              Cód. {p.code}
+              Valor
             </div>
-            <div className="mt-1 font-display text-xl tracking-tight">{brl(p.price_brl)}</div>
+            <div className="mt-1 font-display text-2xl tracking-tight">{brl(p.price_brl)}</div>
           </div>
           <span className="text-xs text-muted-foreground group-hover:text-foreground transition">
             Ver detalhes →
