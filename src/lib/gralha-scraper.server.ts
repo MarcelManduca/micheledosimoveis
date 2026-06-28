@@ -123,6 +123,13 @@ function numberOrNull(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function stripPriceSuffix(s: string) {
+  return s
+    .replace(/\s*-\s*Gralha Imóveis\s*$/i, "")
+    .replace(/\s+por\s+R\$\s*[\d.,]+\s*$/i, "")
+    .trim();
+}
+
 async function fetchGralhaApiItem(codeOrId: string): Promise<GralhaApiItem | null> {
   const apiUrl = new URL("https://www.gralhaimoveis.com.br/api/anuncios/search");
   apiUrl.searchParams.set("finalidade", "venda");
@@ -227,10 +234,6 @@ export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty
     clearTimeout(timer);
   }
 
-  const stripPriceSuffix = (s: string) =>
-    s.replace(/\s*-\s*Gralha Imóveis\s*$/i, "")
-     .replace(/\s+por\s+R\$\s*[\d.,]+\s*$/i, "")
-     .trim();
   const title =
     stripPriceSuffix(pickMeta(html, "og:title") ?? "") ||
     stripPriceSuffix(html.match(/<title>([^<]+)<\/title>/i)?.[1] ?? "") ||
@@ -300,7 +303,7 @@ export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty
   const internalCodeMatch = text.match(/\bCod(?:igo|\.)?\s*[:#]?\s*(\d{3,7})\b/i);
   const code = internalCodeMatch ? internalCodeMatch[1] : urlCode;
   const apiItem = (await fetchGralhaApiItem(code)) ?? (await fetchGralhaApiItem(urlCode));
-  const apiPrice = apiItem?.ocultarValor ? null : numberOrNull(apiItem?.valorPromocional) ?? numberOrNull(apiItem?.valorVenda);
+  const apiPrice = numberOrNull(apiItem?.valorPromocional) ?? numberOrNull(apiItem?.valorVenda);
   const apiCondoName = apiItem?.condominio || apiItem?.empreendimento || null;
   const apiAddress = [apiItem?.logradouro, apiItem?.numero].filter(Boolean).join(", ") || null;
   const apiArea = numberOrNull(apiItem?.areaConstruida);
