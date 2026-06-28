@@ -7,6 +7,7 @@ import prop1 from "@/assets/property-1.jpg";
 import prop2 from "@/assets/property-2.jpg";
 import prop3 from "@/assets/property-3.jpg";
 import { listProperties, type PropertyListItem } from "@/lib/properties.functions";
+import { ChromaGrid, type ChromaItem } from "@/components/ChromaGrid";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -230,115 +231,7 @@ function Index() {
 
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {items.length > 0
-            ? items.map((p) => (
-                <Link
-                  key={p.id}
-                  to="/imovel/$code"
-                  params={{ code: p.code }}
-                  className="group block overflow-hidden rounded-3xl bg-card ring-1 ring-black/5 hover:shadow-2xl transition-shadow"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
-                    {p.cover_image && (
-                      <img
-                        src={p.cover_image}
-                        alt={p.title}
-                        loading="lazy"
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
-                    )}
-                    <span className="absolute top-4 left-4 rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-foreground">
-                      Venda
-                    </span>
-                    <span className="absolute top-4 right-4 rounded-full bg-black/55 backdrop-blur px-3 py-1 text-xs text-white">
-                      Cód. {p.code}
-                    </span>
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" />
-                      {[p.neighborhood, p.city].filter(Boolean).join(", ")}
-                    </div>
-                    <h3 className="mt-2 font-display text-2xl tracking-tight line-clamp-2">
-                      {p.title}
-                    </h3>
-                    <div className="mt-4 flex items-center gap-5 text-sm text-muted-foreground">
-                      {p.bedrooms != null && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <BedDouble className="h-4 w-4" /> {p.bedrooms}
-                        </span>
-                      )}
-                      {p.bathrooms != null && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Bath className="h-4 w-4" /> {p.bathrooms}
-                        </span>
-                      )}
-                      {p.area_m2 != null && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Maximize className="h-4 w-4" /> {p.area_m2} m²
-                        </span>
-                      )}
-                    </div>
-                    <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
-                      <div>
-                        <div className="text-xs text-muted-foreground">A partir de</div>
-                        <div className="font-display text-xl">{brl(p.price_brl)}</div>
-                      </div>
-                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:text-accent transition">
-                        Detalhes <ArrowRight className="h-4 w-4" />
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))
-            : fallbackProperties.map((p) => (
-                <article
-                  key={p.code}
-                  className="group overflow-hidden rounded-3xl bg-card ring-1 ring-black/5 hover:shadow-2xl transition-shadow"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden">
-                    <img
-                      src={p.img}
-                      alt={p.name}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <span className="absolute top-4 left-4 rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-foreground">
-                      Venda
-                    </span>
-                    <span className="absolute top-4 right-4 rounded-full bg-black/55 backdrop-blur px-3 py-1 text-xs text-white">
-                      Cód. {p.code}
-                    </span>
-                  </div>
-                  <div className="p-6">
-                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      <MapPin className="h-3.5 w-3.5" /> {p.neighborhood}
-                    </div>
-                    <h3 className="mt-2 font-display text-2xl tracking-tight">{p.name}</h3>
-                    <div className="mt-4 flex items-center gap-5 text-sm text-muted-foreground">
-                      <span className="inline-flex items-center gap-1.5"><BedDouble className="h-4 w-4" /> {p.beds}</span>
-                      <span className="inline-flex items-center gap-1.5"><Bath className="h-4 w-4" /> {p.baths}</span>
-                      <span className="inline-flex items-center gap-1.5"><Maximize className="h-4 w-4" /> {p.area}</span>
-                    </div>
-                    <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
-                      <div>
-                        <div className="text-xs text-muted-foreground">A partir de</div>
-                        <div className="font-display text-xl">{p.price}</div>
-                      </div>
-                      <a
-                        href={WHATSAPP_URL}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent transition"
-                      >
-                        Detalhes <ArrowRight className="h-4 w-4" />
-                      </a>
-                    </div>
-                  </div>
-                </article>
-              ))}
-        </div>
+        <ChromaGridProperties items={items} />
       </section>
 
       {/* Regiões de atuação — SEO/GEO */}
@@ -549,6 +442,51 @@ function Index() {
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+const CHROMA_PALETTE: Array<{ border: string; gradient: string }> = [
+  { border: "#C8A464", gradient: "linear-gradient(145deg, #C8A464, #0b0b0b)" },
+  { border: "#1E3A5F", gradient: "linear-gradient(180deg, #1E3A5F, #0b0b0b)" },
+  { border: "#0F766E", gradient: "linear-gradient(165deg, #0F766E, #0b0b0b)" },
+  { border: "#8B5E3C", gradient: "linear-gradient(195deg, #8B5E3C, #0b0b0b)" },
+  { border: "#4B5563", gradient: "linear-gradient(225deg, #4B5563, #0b0b0b)" },
+  { border: "#9CA3AF", gradient: "linear-gradient(135deg, #9CA3AF, #0b0b0b)" },
+];
+
+function ChromaGridProperties({ items }: { items: PropertyListItem[] }) {
+  const chromaItems: ChromaItem[] = items.length > 0
+    ? items.map((p, i) => {
+        const tone = CHROMA_PALETTE[i % CHROMA_PALETTE.length];
+        return {
+          image: p.cover_image ?? "",
+          title: p.title,
+          subtitle: [p.neighborhood, p.city].filter(Boolean).join(", "),
+          handle: `Cód. ${p.code}`,
+          location: brl(p.price_brl),
+          borderColor: tone.border,
+          gradient: tone.gradient,
+          url: `/imovel/${p.code}`,
+        };
+      })
+    : fallbackProperties.map((p, i) => {
+        const tone = CHROMA_PALETTE[i % CHROMA_PALETTE.length];
+        return {
+          image: p.img,
+          title: p.name,
+          subtitle: p.neighborhood,
+          handle: `Cód. ${p.code}`,
+          location: p.price,
+          borderColor: tone.border,
+          gradient: tone.gradient,
+          url: WHATSAPP_URL,
+        };
+      });
+
+  return (
+    <div className="relative" style={{ minHeight: 600 }}>
+      <ChromaGrid items={chromaItems} radius={320} damping={0.45} fadeOut={0.6} ease="power3.out" />
     </div>
   );
 }
