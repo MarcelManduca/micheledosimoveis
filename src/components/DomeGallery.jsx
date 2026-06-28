@@ -391,9 +391,9 @@ export default function DomeGallery({
     el.style.zIndex = 0;
     const overlay = document.createElement('div');
     overlay.className = 'enlarge';
-    overlay.style.position = 'absolute';
-    overlay.style.left = frameR.left - mainR.left + 'px';
-    overlay.style.top = frameR.top - mainR.top + 'px';
+    overlay.style.position = 'fixed';
+    overlay.style.left = frameR.left + 'px';
+    overlay.style.top = frameR.top + 'px';
     overlay.style.width = frameR.width + 'px';
     overlay.style.height = frameR.height + 'px';
     overlay.style.opacity = '0';
