@@ -9,6 +9,8 @@ import prop2 from "@/assets/property-2.jpg";
 import prop3 from "@/assets/property-3.jpg";
 import { listProperties, type PropertyListItem } from "@/lib/properties.functions";
 import { ChromaGrid, type ChromaItem } from "@/components/ChromaGrid";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -652,9 +654,41 @@ function ChromaGridProperties({ items }: { items: PropertyListItem[] }) {
         };
       });
 
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div className="grid grid-cols-1 gap-4">
+        {chromaItems.map((c, i) => (
+          <a
+            key={i}
+            href={c.url ?? "#"}
+            target={c.url?.startsWith("http") ? "_blank" : undefined}
+            rel={c.url?.startsWith("http") ? "noopener noreferrer" : undefined}
+            className="block overflow-hidden rounded-2xl border border-border bg-card"
+            style={{ background: c.gradient }}
+          >
+            <div className="aspect-[4/3] overflow-hidden p-2">
+              <img src={c.image} alt={c.title} loading="lazy" className="h-full w-full rounded-xl object-cover" />
+            </div>
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2 px-4 pb-4 pt-2 text-white">
+              <div className="min-w-0">
+                <h3 className="truncate text-base font-medium">{c.title}</h3>
+                {c.subtitle && <p className="truncate text-xs text-white/70">{c.subtitle}</p>}
+                {c.handle && <span className="text-[11px] text-white/60">{c.handle}</span>}
+              </div>
+              {c.location && <span className="shrink-0 text-sm font-medium">{c.location}</span>}
+            </div>
+          </a>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="relative" style={{ minHeight: 600 }}>
       <ChromaGrid items={chromaItems} radius={320} damping={0.45} fadeOut={0.6} ease="power3.out" />
     </div>
   );
 }
+
