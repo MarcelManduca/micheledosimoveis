@@ -1,4 +1,5 @@
-import { useState, type CSSProperties } from "react";
+import { useState, type CSSProperties, type MouseEvent } from "react";
+import { ArrowRight, MapPin } from "lucide-react";
 import "./ChromaGrid.css";
 
 export type ChromaItem = {
@@ -36,7 +37,7 @@ export function ChromaGrid({
     else window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const handleCardMove = (e: React.MouseEvent<HTMLElement>) => {
+  const handleCardMove = (e: MouseEvent<HTMLElement>) => {
     const card = e.currentTarget as HTMLElement;
     const rect = card.getBoundingClientRect();
     card.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
@@ -68,10 +69,25 @@ export function ChromaGrid({
             <img src={c.image} alt={c.title} loading="lazy" />
           </div>
           <footer className="chroma-info">
+            <div className="chroma-meta-row">
+              {c.handle && <span className="handle">{c.handle}</span>}
+              <span className="chroma-cta" aria-hidden="true">
+                <ArrowRight size={14} />
+              </span>
+            </div>
             <h3 className="name">{c.title}</h3>
-            {c.handle && <span className="handle">{c.handle}</span>}
-            {c.subtitle && <p className="role">{c.subtitle}</p>}
-            {c.location && <span className="location">{c.location}</span>}
+            {c.subtitle && (
+              <p className="role">
+                <MapPin size={14} />
+                <span>{c.subtitle}</span>
+              </p>
+            )}
+            {c.location && (
+              <div className="price-block">
+                <span className="price-label">Valor</span>
+                <span className="location">{c.location}</span>
+              </div>
+            )}
           </footer>
         </article>
       ))}
