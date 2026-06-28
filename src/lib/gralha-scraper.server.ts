@@ -244,7 +244,7 @@ export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty
     state: bairroMatch?.[3].trim() ?? null,
     address: enderecoMatch ? enderecoMatch[1].trim() : null,
     condo_name: condoNameMatch ? condoNameMatch[1].trim() : null,
-    price_brl: (() => { const v = parseBrlNumber(priceMatch?.[1] ?? null); return v != null && v >= 18000000 ? null : v; })(),
+    price_brl: parseBrlNumber(priceMatch?.[1] ?? null),
     condo_fee_brl: parseBrlNumber(condoFeeMatch?.[1] ?? null),
     iptu_brl: parseBrlNumber(iptuMatch?.[1] ?? null),
     area_m2: areaMatch ? Number(areaMatch[1]) : null,

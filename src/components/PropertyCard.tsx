@@ -3,8 +3,7 @@ import { BedDouble, Bath, Maximize, MapPin } from "lucide-react";
 import type { PropertyListItem } from "@/lib/properties.functions";
 
 function brl(n: number | null) {
-  // Gralha Imóveis usa R$ 18.000.000 como teto/placeholder de "valor sob consulta".
-  if (n == null || n >= 18000000) return "Sob consulta";
+  if (n == null) return "Sob consulta";
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 }
 
