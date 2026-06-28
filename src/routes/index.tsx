@@ -254,7 +254,7 @@ function Index() {
               <ShieldCheck className="h-6 w-6" />
             </span>
             <div className="flex-1">
-              <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Selo de autoridade</div>
+              <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Atendimento Certificado</div>
               <div className="mt-1 font-display text-lg sm:text-xl tracking-tight">
                 Corretora associada à <span className="italic">Gralha Imóveis</span>
               </div>
