@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, MapPin, Bath, BedDouble, Maximize, Star, Phone, Instagram, Mail } from "lucide-react";
+import { ArrowRight, MapPin, Bath, BedDouble, Maximize, Star, Phone, Instagram, Mail, ShieldCheck } from "lucide-react";
 import heroImg from "@/assets/hero-beiramar.jpg";
 import portrait from "@/assets/michele-portrait.jpg";
 import prop1 from "@/assets/property-1.jpg";
@@ -162,6 +162,28 @@ function Index() {
                 </span>
                 <span className="ml-1">5,0 · CRECI/SC</span>
               </div>
+              <div className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700 ring-1 ring-emerald-200">
+                <ShieldCheck className="h-3 w-3" /> Corretora associada · Gralha Imóveis
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Trust strip — Gralha badge */}
+        <div className="mx-auto max-w-7xl mt-8 sm:mt-10">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 rounded-2xl bg-secondary/60 ring-1 ring-black/5 px-6 py-5 text-center sm:text-left">
+            <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-emerald-600/10 text-emerald-700 ring-1 ring-emerald-600/20">
+              <ShieldCheck className="h-6 w-6" />
+            </span>
+            <div className="flex-1">
+              <div className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Selo de autoridade</div>
+              <div className="mt-1 font-display text-lg sm:text-xl tracking-tight">
+                Corretora associada à <span className="italic">Gralha Imóveis</span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground max-w-xl">
+                Respaldo de uma das imobiliárias mais tradicionais de Florianópolis —
+                segurança jurídica, curadoria e portfólio exclusivo.
+              </p>
             </div>
           </div>
         </div>
@@ -403,11 +425,32 @@ function Index() {
 
       {/* Footer */}
       <footer className="border-t border-border">
-        <div className="mx-auto max-w-7xl px-6 sm:px-10 py-10 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
-          <div className="font-display text-base text-foreground">Michele Prietsch · Imóveis</div>
-          <div className="flex items-center gap-5">
-            <span>© {new Date().getFullYear()} · CRECI/SC · Todos os direitos reservados.</span>
-            <Link to="/auth" className="text-xs text-muted-foreground/70 hover:text-foreground transition">
+        <div className="mx-auto max-w-7xl px-6 sm:px-10 py-12 grid gap-8 md:grid-cols-3 text-sm text-muted-foreground">
+          <div>
+            <div className="font-display text-base text-foreground">Michele Prietsch · Imóveis</div>
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-200">
+              <ShieldCheck className="h-3.5 w-3.5" /> Corretora associada · Gralha Imóveis
+            </div>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-[0.2em] text-foreground/70">Credenciais</div>
+            <p className="mt-2 leading-relaxed">
+              Michele Prietsch<br />
+              CRECI 69502 · CRECI 11463J
+            </p>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-[0.2em] text-foreground/70">Endereço</div>
+            <p className="mt-2 leading-relaxed">
+              Rua Alvares de Brito, 285<br />
+              Centro · Florianópolis/SC
+            </p>
+          </div>
+        </div>
+        <div className="border-t border-border">
+          <div className="mx-auto max-w-7xl px-6 sm:px-10 py-5 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+            <span>© {new Date().getFullYear()} Michele Prietsch · Todos os direitos reservados.</span>
+            <Link to="/auth" className="text-muted-foreground/70 hover:text-foreground transition">
               Admin
             </Link>
           </div>
