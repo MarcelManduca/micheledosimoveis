@@ -457,7 +457,7 @@ function Index() {
             Bastidores · Michele em cena
           </div>
           <div
-            className="relative w-full overflow-hidden rounded-[24px] ring-1 ring-black/5 bg-foreground"
+            className="relative w-full overflow-hidden rounded-[24px] ring-1 ring-black/5 bg-secondary/60"
             style={{ aspectRatio: "21 / 9" }}
             aria-label="Galeria de fotos de Michele Prietsch"
           >
@@ -469,13 +469,14 @@ function Index() {
               minRadius={320}
               maxRadius={900}
               padFactor={0.14}
-              overlayBlurColor="#0b0b0b"
+              overlayBlurColor="#ece8df"
               openedImageWidth="360px"
               openedImageHeight="360px"
               imageBorderRadius="12px"
               openedImageBorderRadius="20px"
               segments={30}
             />
+
           </div>
         </div>
       </section>
