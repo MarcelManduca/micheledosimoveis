@@ -399,14 +399,20 @@ function Index() {
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
                   <Phone className="h-4 w-4" />
                 </span>
-                +55 (48) 9 9999-9999
+                +55 (48) 9 9182-8828
               </li>
-              <li className="flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
-                  <Mail className="h-4 w-4" />
-                </span>
-                contato@micheleprietsch.com.br
+              <li>
+                <a
+                  href="mailto:micheledosimoveis@gmail.com"
+                  className="flex items-center gap-3 hover:text-background transition"
+                >
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
+                    <Mail className="h-4 w-4" />
+                  </span>
+                  Enviar e-mail
+                </a>
               </li>
+
               <li className="flex items-center gap-3">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
                   <Instagram className="h-4 w-4" />
