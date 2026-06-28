@@ -562,11 +562,18 @@ function Index() {
                 </a>
               </li>
 
-              <li className="flex items-center gap-3">
-                <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
-                  <Instagram className="h-4 w-4" />
-                </span>
-                @michele.prietsch
+              <li>
+                <a
+                  href="https://www.instagram.com/micheledosimoveis"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-3 hover:text-background transition"
+                >
+                  <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
+                    <Instagram className="h-4 w-4" />
+                  </span>
+                  @micheledosimoveis
+                </a>
               </li>
               <li className="flex items-center gap-3">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-background/10">
