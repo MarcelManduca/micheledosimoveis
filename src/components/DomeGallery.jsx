@@ -282,18 +282,17 @@ export default function DomeGallery({
         return;
       }
       const currentRect = overlay.getBoundingClientRect();
-      const rootRect = rootRef.current.getBoundingClientRect();
-      const originalPosRelativeToRoot = {
-        left: originalPos.left - rootRect.left, top: originalPos.top - rootRect.top,
+      const originalPosViewport = {
+        left: originalPos.left, top: originalPos.top,
         width: originalPos.width, height: originalPos.height
       };
-      const overlayRelativeToRoot = {
-        left: currentRect.left - rootRect.left, top: currentRect.top - rootRect.top,
+      const overlayViewport = {
+        left: currentRect.left, top: currentRect.top,
         width: currentRect.width, height: currentRect.height
       };
       const animatingOverlay = document.createElement('div');
       animatingOverlay.className = 'enlarge-closing';
-      animatingOverlay.style.cssText = `position:absolute;left:${overlayRelativeToRoot.left}px;top:${overlayRelativeToRoot.top}px;width:${overlayRelativeToRoot.width}px;height:${overlayRelativeToRoot.height}px;z-index:9999;border-radius: var(--enlarge-radius, 32px);overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:all ${enlargeTransitionMs}ms ease-out;pointer-events:none;margin:0;transform:none;`;
+      animatingOverlay.style.cssText = `position:fixed;left:${overlayViewport.left}px;top:${overlayViewport.top}px;width:${overlayViewport.width}px;height:${overlayViewport.height}px;z-index:9999;border-radius: var(--enlarge-radius, 32px);overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:all ${enlargeTransitionMs}ms ease-out;pointer-events:none;margin:0;transform:none;`;
       const originalImg = overlay.querySelector('img');
       if (originalImg) {
         const img = originalImg.cloneNode();
@@ -301,13 +300,13 @@ export default function DomeGallery({
         animatingOverlay.appendChild(img);
       }
       overlay.remove();
-      rootRef.current.appendChild(animatingOverlay);
+      document.body.appendChild(animatingOverlay);
       void animatingOverlay.getBoundingClientRect();
       requestAnimationFrame(() => {
-        animatingOverlay.style.left = originalPosRelativeToRoot.left + 'px';
-        animatingOverlay.style.top = originalPosRelativeToRoot.top + 'px';
-        animatingOverlay.style.width = originalPosRelativeToRoot.width + 'px';
-        animatingOverlay.style.height = originalPosRelativeToRoot.height + 'px';
+        animatingOverlay.style.left = originalPosViewport.left + 'px';
+        animatingOverlay.style.top = originalPosViewport.top + 'px';
+        animatingOverlay.style.width = originalPosViewport.width + 'px';
+        animatingOverlay.style.height = originalPosViewport.height + 'px';
         animatingOverlay.style.opacity = '0';
       });
       const cleanup = () => {
