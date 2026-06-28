@@ -61,8 +61,7 @@ export const Route = createFileRoute("/imovel/$code")({
 });
 
 function brl(n: number | null) {
-  // Gralha Imóveis usa R$ 18.000.000 como teto/placeholder de "valor sob consulta".
-  if (n == null || n >= 18000000) return "Sob consulta";
+  if (n == null) return "Sob consulta";
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 }
 
