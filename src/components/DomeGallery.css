@@ -78,13 +78,28 @@ main.sphere-main {
   background: transparent;
   overflow: hidden;
   backface-visibility: hidden;
-  transition: transform 300ms;
+  transition: transform 380ms cubic-bezier(.2,.7,.2,1), box-shadow 380ms ease;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   pointer-events: auto;
   -webkit-transform: translateZ(0);
   transform: translateZ(0);
+}
+
+.item__image:hover {
+  transform: translateZ(60px) scale(1.18);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+  z-index: 5;
+}
+
+.item__image img {
+  transition: transform 380ms cubic-bezier(.2,.7,.2,1), filter 380ms ease;
+}
+
+.item__image:hover img {
+  filter: var(--image-filter-hover, none);
+  transform: scale(1.05);
 }
 
 .item__image:focus { outline: none; }
