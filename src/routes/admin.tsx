@@ -81,6 +81,12 @@ function AdminPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
   });
 
+  const syncMut = useMutation({
+    mutationFn: () => syncPropertiesAvailability(),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
+  });
+
+
   async function signOut() {
     await supabase.auth.signOut();
     navigate({ to: "/auth" });
