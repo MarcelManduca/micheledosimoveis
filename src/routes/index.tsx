@@ -495,11 +495,12 @@ function Index() {
 
             <AboutBio />
 
-            <div className="mt-10 grid grid-cols-3 gap-4">
+            <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-4">
               {[
                 { n: "+16 anos", l: "no mercado imobiliário" },
                 { n: "150+", l: "imóveis negociados" },
                 { n: "R$ 380M", l: "em VGV transacionado" },
+                { n: "16k", l: "seguidores no Instagram" },
               ].map((s) => (
                 <div key={s.l} className="rounded-2xl bg-background p-5 ring-1 ring-black/5">
                   <div className="font-display text-2xl">{s.n}</div>
