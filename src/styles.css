@@ -2,6 +2,11 @@
 @source "../src";
 @import "tw-animate-css";
 
+@theme {
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /*
@@ -62,21 +67,21 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
+  --radius: 1rem;
+  --background: oklch(0.985 0.005 90);
+  --foreground: oklch(0.18 0.015 60);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
+  --card-foreground: oklch(0.18 0.015 60);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
+  --popover-foreground: oklch(0.18 0.015 60);
+  --primary: oklch(0.32 0.04 50);
+  --primary-foreground: oklch(0.985 0.005 90);
+  --secondary: oklch(0.94 0.015 75);
+  --secondary-foreground: oklch(0.25 0.025 60);
+  --muted: oklch(0.95 0.012 80);
+  --muted-foreground: oklch(0.45 0.02 60);
+  --accent: oklch(0.72 0.12 60);
+  --accent-foreground: oklch(0.15 0.02 60);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(0.929 0.013 255.508);
