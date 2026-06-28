@@ -32,6 +32,8 @@ export type Database = {
           features: string[]
           id: string
           iptu_brl: number | null
+          last_check_status: string | null
+          last_checked_at: string | null
           neighborhood: string | null
           parking_spots: number | null
           price_brl: number | null
@@ -41,6 +43,7 @@ export type Database = {
           state: string | null
           suites: number | null
           title: string
+          unavailable_since: string | null
           updated_at: string
         }
         Insert: {
@@ -60,6 +63,8 @@ export type Database = {
           features?: string[]
           id?: string
           iptu_brl?: number | null
+          last_check_status?: string | null
+          last_checked_at?: string | null
           neighborhood?: string | null
           parking_spots?: number | null
           price_brl?: number | null
@@ -69,6 +74,7 @@ export type Database = {
           state?: string | null
           suites?: number | null
           title: string
+          unavailable_since?: string | null
           updated_at?: string
         }
         Update: {
@@ -88,6 +94,8 @@ export type Database = {
           features?: string[]
           id?: string
           iptu_brl?: number | null
+          last_check_status?: string | null
+          last_checked_at?: string | null
           neighborhood?: string | null
           parking_spots?: number | null
           price_brl?: number | null
@@ -97,6 +105,7 @@ export type Database = {
           state?: string | null
           suites?: number | null
           title?: string
+          unavailable_since?: string | null
           updated_at?: string
         }
         Relationships: []
