@@ -263,3 +263,91 @@ export const deleteProperty = createServerFn({ method: "POST" })
     if (error) safeError("Não foi possível excluir o imóvel.", error);
     return { ok: true };
   });
+
+// ───────── Availability sync ─────────
+// Visit each imported property's source URL and verify the Gralha listing
+// still exists. If it no longer does, auto-unpublish.
+
+export type SyncSummary = {
+  checked: number;
+  available: number;
+  unpublished: number;
+  errors: number;
+  details: Array<{ code: string; status: string; detail: string }>;
+};
+
+async function runAvailabilitySync(): Promise<SyncSummary> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { checkGralhaAvailability } = await import("./gralha-availability.server");
+
+  const { data: rows, error } = await supabaseAdmin
+    .from("properties")
+    .select("id, code, source_url, published")
+    .not("source_url", "is", null);
+  if (error) safeError("Não foi possível listar imóveis para sincronizar.", error);
+
+  const summary: SyncSummary = {
+    checked: 0,
+    available: 0,
+    unpublished: 0,
+    errors: 0,
+    details: [],
+  };
+
+  for (const row of rows ?? []) {
+    if (!row.source_url) continue;
+    summary.checked += 1;
+    const result = await checkGralhaAvailability(row.source_url);
+    summary.details.push({ code: row.code, status: result.status, detail: result.detail });
+
+    const now = new Date().toISOString();
+    if (result.status === "available") {
+      summary.available += 1;
+      await supabaseAdmin
+        .from("properties")
+        .update({
+          last_checked_at: now,
+          last_check_status: "available",
+          unavailable_since: null,
+          // Re-publish if it had been auto-unpublished and is back
+          published: row.published,
+        })
+        .eq("id", row.id);
+    } else if (result.status === "not_found") {
+      summary.unpublished += 1;
+      await supabaseAdmin
+        .from("properties")
+        .update({
+          last_checked_at: now,
+          last_check_status: `not_found: ${result.detail}`,
+          unavailable_since: now,
+          published: false,
+        })
+        .eq("id", row.id);
+    } else {
+      summary.errors += 1;
+      await supabaseAdmin
+        .from("properties")
+        .update({
+          last_checked_at: now,
+          last_check_status: `error: ${result.detail}`,
+        })
+        .eq("id", row.id);
+    }
+  }
+  return summary;
+}
+
+// Admin-triggered manual sync
+export const syncPropertiesAvailability = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
+    return runAvailabilitySync();
+  });
+
+// Internal helper for the cron route to call (same code path)
+export async function _runAvailabilitySyncInternal() {
+  return runAvailabilitySync();
+}
+
