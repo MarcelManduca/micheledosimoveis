@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { ArrowRight, MapPin, Bath, BedDouble, Maximize, Star, Phone, Instagram, Mail, ShieldCheck } from "lucide-react";
 import heroImg from "@/assets/hero-beiramar.jpg";
 import portrait from "@/assets/michele-portrait.jpg";
@@ -12,10 +13,10 @@ import { ChromaGrid, type ChromaItem } from "@/components/ChromaGrid";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Michele dos Imóveis — Alto padrão em Florianópolis | Jurerê, Beira Mar, Lagoa, Campeche" },
-      { name: "description", content: "Corretora de imóveis de alto padrão em Florianópolis: Jurerê Internacional, Beira Mar Norte, Praia Brava, Lagoa da Conceição, Campeche, Santo Antônio de Lisboa e principais bairros e praias da Ilha." },
-      { property: "og:title", content: "Michele dos Imóveis — Alto padrão em Florianópolis" },
-      { property: "og:description", content: "Apartamentos, casas e coberturas de luxo nos melhores endereços de Florianópolis." },
+      { title: "Michele Prietsch | Michele dos Imóveis em Florianópolis" },
+      { name: "description", content: "Michele Prietsch, conhecida como Michele dos Imóveis, é corretora especializada em imóveis de alto padrão em Florianópolis, com atendimento personalizado para compra, venda e curadoria imobiliária." },
+      { property: "og:title", content: "Michele Prietsch | Michele dos Imóveis em Florianópolis" },
+      { property: "og:description", content: "Corretora especializada em imóveis de alto padrão em Florianópolis — curadoria, discrição e atendimento sob medida em Jurerê Internacional, Praia Brava, Cacupé, Lagoa da Conceição, Campeche e Beira-Mar Norte." },
       { property: "og:image", content: heroImg },
       { property: "og:url", content: "https://micheledosimoveis.lovable.app/" },
     ],
@@ -73,6 +74,56 @@ function brl(n: number | null) {
   if (n == null) return "Sob consulta";
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 }
+
+const BIO_FULL = [
+  "Sou Michele Prietsch, corretora de imóveis com 16 anos de experiência no mercado imobiliário e atuação especializada em imóveis de alto padrão em Florianópolis. Gaúcha de origem e apaixonada pela Ilha, encontrei em Florianópolis o cenário ideal para unir minha trajetória profissional à qualidade de vida, à arquitetura e ao estilo de vida que tornam a cidade uma das mais desejadas do Brasil.",
+  "Embora meu nome seja Michele Prietsch, muitos clientes passaram a me chamar carinhosamente de Michele dos Imóveis — um apelido que nasceu da minha presença constante no mercado imobiliário, da forma próxima como conduzo cada atendimento e da dedicação em conectar pessoas aos imóveis certos em Florianópolis. Com o tempo, esse nome se tornou parte da minha identidade profissional e da minha marca pessoal.",
+  "Atendo compradores, vendedores e investidores que buscam uma experiência imobiliária personalizada, segura e transparente. Meu trabalho vai além da intermediação: envolve escuta ativa, curadoria criteriosa, análise de perfil, leitura de mercado e acompanhamento próximo em cada etapa da negociação.",
+  "Atuo em regiões valorizadas de Florianópolis, incluindo Jurerê Internacional, Praia Brava, Cacupé, Lagoa da Conceição, Campeche, Morro das Pedras, Beira-Mar Norte, Agronômica, Itacorubi, Trindade, Santa Mônica e Córrego Grande, sempre com foco em imóveis que combinam localização, arquitetura, conforto, liquidez e estilo de vida.",
+  "Apaixonada por arquitetura, fotografia e produção de conteúdo, apresento cada imóvel de forma autêntica e estratégica, destacando não apenas suas características técnicas, mas também a experiência de morar, investir ou viver naquele endereço.",
+  "Meu compromisso é tornar a compra ou venda de imóveis em Florianópolis uma jornada mais leve, segura e memorável, conectando pessoas a imóveis que fazem sentido para seu momento de vida.",
+  "Será um prazer acompanhar você nessa escolha.",
+];
+
+function AboutBio() {
+  const [expanded, setExpanded] = useState(false);
+  // Preview limits: ~650 chars desktop, ~480 mobile. We render the full text
+  // in the DOM (for SEO) and use CSS line-clamp to control visible length.
+  return (
+    <div className="mt-6">
+      <div
+        className={
+          expanded
+            ? "space-y-4 text-muted-foreground leading-relaxed"
+            : "space-y-4 text-muted-foreground leading-relaxed [&>p:nth-child(n+2)]:hidden sm:[&>p:nth-child(n+2)]:hidden"
+        }
+      >
+        {BIO_FULL.map((p, i) => (
+          <p key={i}>
+            {i === 0 ? (
+              <>
+                Sou <strong className="text-foreground font-medium">Michele Prietsch</strong>
+                {p.slice("Sou Michele Prietsch".length)}
+              </>
+            ) : (
+              p
+            )}
+          </p>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        className="mt-5 inline-flex items-center gap-2 text-sm font-medium text-foreground underline-offset-4 hover:underline transition"
+      >
+        {expanded ? "Mostrar menos" : "Ler mais sobre Michele"}
+        <ArrowRight className={`h-4 w-4 transition-transform ${expanded ? "rotate-90" : ""}`} />
+      </button>
+    </div>
+  );
+}
+
 
 
 function Index() {
@@ -295,42 +346,34 @@ function Index() {
           <div className="relative">
             <img
               src={portrait}
-              alt="Retrato da corretora Michele Prietsch"
+              alt="Michele Prietsch, corretora de imóveis de alto padrão em Florianópolis"
               loading="lazy"
               width={800}
               height={800}
               className="w-full max-w-md rounded-[28px] object-cover aspect-square shadow-xl"
             />
             <div className="absolute -bottom-6 -right-2 sm:right-10 rounded-2xl bg-background px-5 py-4 shadow-xl ring-1 ring-black/5">
-              <div className="font-display text-3xl">+12 anos</div>
-              <div className="text-xs text-muted-foreground mt-1">no mercado de alto padrão</div>
+              <div className="font-display text-3xl">+16 anos</div>
+              <div className="text-xs text-muted-foreground mt-1">no mercado imobiliário</div>
             </div>
           </div>
 
           <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Sobre</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Corretora de imóveis de alto padrão em Florianópolis
+            </div>
             <h2 className="mt-3 font-display font-light text-4xl sm:text-5xl tracking-tight">
               Mais que vender imóveis,<br />
-              <span className="italic">conectar histórias.</span>
+              <span className="italic">conectar histórias em Florianópolis.</span>
             </h2>
-            <p className="mt-6 text-muted-foreground leading-relaxed">
-              Sou <strong className="text-foreground font-medium">Michele Prietsch</strong>, corretora
-              especializada em imóveis de alto padrão em Florianópolis. Atendo
-              compradores e investidores nos bairros e praias mais valorizados
-              da Ilha — de Jurerê Internacional, Praia Brava e Cacupé, no Norte,
-              à Lagoa da Conceição, Campeche e Morro das Pedras, no Sul, passando
-              por Beira Mar Norte, Agronômica, Itacorubi, Trindade, Santa Mônica
-              e Córrego Grande. Trabalho com escuta, curadoria criteriosa e total
-              discrição — para que cada negociação seja tão única quanto o imóvel
-              que a representa.
-            </p>
 
+            <AboutBio />
 
             <div className="mt-10 grid grid-cols-3 gap-4">
               {[
+                { n: "+16 anos", l: "no mercado imobiliário" },
                 { n: "150+", l: "imóveis negociados" },
                 { n: "R$ 380M", l: "em VGV transacionado" },
-                { n: "98%", l: "clientes recorrentes" },
               ].map((s) => (
                 <div key={s.l} className="rounded-2xl bg-background p-5 ring-1 ring-black/5">
                   <div className="font-display text-2xl">{s.n}</div>
@@ -341,6 +384,7 @@ function Index() {
           </div>
         </div>
       </section>
+
 
       {/* CTA / Contato */}
       <section id="contato" className="mx-auto max-w-7xl px-6 sm:px-10 py-24 sm:py-32">
