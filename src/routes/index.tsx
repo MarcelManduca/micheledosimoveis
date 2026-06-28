@@ -590,7 +590,7 @@ function Index() {
       <footer className="border-t border-border">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 py-12 grid gap-8 md:grid-cols-3 text-sm text-muted-foreground">
           <div>
-            <div className="font-display text-base text-foreground">Michele Prietsch · Imóveis</div>
+            <div className="font-display text-base text-foreground">Michele dos Imóveis</div>
             <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-200">
               <ShieldCheck className="h-3.5 w-3.5" /> Corretora associada · Gralha Imóveis
             </div>
