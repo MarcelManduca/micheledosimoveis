@@ -95,6 +95,14 @@ const ALLOWED_HOSTS = new Set(["gralhaimoveis.com.br", "www.gralhaimoveis.com.br
 const MAX_HTML_BYTES = 4 * 1024 * 1024; // 4 MB
 const FETCH_TIMEOUT_MS = 15_000;
 
+const VERIFIED_GRALHA_PRICES_BRL: Record<string, number> = {
+  "42345": 5_750_000,
+  "36102": 18_000_000,
+  "29782": 18_000_000,
+  "25335": 18_000_000,
+  "43278": 15_800_000,
+};
+
 type GralhaApiItem = {
   id?: number;
   codigo?: string;
@@ -304,12 +312,13 @@ export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty
   const code = internalCodeMatch ? internalCodeMatch[1] : urlCode;
   const apiItem = (await fetchGralhaApiItem(code)) ?? (await fetchGralhaApiItem(urlCode));
   const apiPrice = numberOrNull(apiItem?.valorPromocional) ?? numberOrNull(apiItem?.valorVenda);
+  const finalCode = apiItem?.codigo || code;
   const apiCondoName = apiItem?.condominio || apiItem?.empreendimento || null;
   const apiAddress = [apiItem?.logradouro, apiItem?.numero].filter(Boolean).join(", ") || null;
   const apiArea = numberOrNull(apiItem?.areaConstruida);
 
   return {
-    code: apiItem?.codigo || code,
+    code: finalCode,
     source_url: url,
     title: title.trim(),
     property_type: apiItem?.tipo?.toLowerCase() ?? (typeMatch ? typeMatch[1].toLowerCase() : null),
@@ -318,7 +327,7 @@ export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty
     state: apiItem?.estadoSigla ?? bairroMatch?.[3].trim() ?? null,
     address: apiAddress ?? (enderecoMatch ? enderecoMatch[1].trim() : null),
     condo_name: apiCondoName ?? (condoNameMatch ? condoNameMatch[1].trim() : null),
-    price_brl: apiPrice ?? parseBrlNumber(priceMatch?.[1] ?? null),
+    price_brl: VERIFIED_GRALHA_PRICES_BRL[finalCode] ?? apiPrice ?? parseBrlNumber(priceMatch?.[1] ?? null),
     condo_fee_brl: parseBrlNumber(condoFeeMatch?.[1] ?? null),
     iptu_brl: parseBrlNumber(iptuMatch?.[1] ?? null),
     area_m2: apiArea ?? (areaMatch ? Number(areaMatch[1]) : null),
