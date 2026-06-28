@@ -152,7 +152,7 @@ function Index() {
             <a href="#top" className="hover:text-white transition">Início</a>
             <a href="#imoveis" className="hover:text-white transition">Imóveis</a>
             <a href="#regioes" className="hover:text-white transition">Regiões</a>
-            <a href="#anuncie" className="hover:text-white transition">Anuncie</a>
+            <Link to="/anuncie" className="hover:text-white transition">Anuncie</Link>
             <a href="#sobre" className="hover:text-white transition">Sobre</a>
             <a href="#contato" className="hover:text-white transition">Contato</a>
 
@@ -269,26 +269,26 @@ function Index() {
         </div>
       </section>
 
-      {/* Featured Properties */}
-      <section id="imoveis" className="mx-auto max-w-7xl px-6 sm:px-10 py-24 sm:py-32">
-        <div className="flex flex-wrap items-end justify-between gap-6 mb-12">
-          <div>
-            <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-              Imóveis em destaque
-            </div>
-            <h2 className="mt-3 font-display font-light text-4xl sm:text-5xl tracking-tight">
-              Uma seleção <span className="italic">para morar bem em Floripa.</span>
-            </h2>
+      {/* Filtros de busca */}
+      <section id="filtros" className="mx-auto max-w-7xl px-6 sm:px-10 pt-20 sm:pt-28">
+        <div className="text-center max-w-2xl mx-auto">
+          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Pesquisa de imóveis
           </div>
-          <p className="max-w-sm text-muted-foreground">
-            Apartamentos, coberturas, casas e lançamentos nos bairros mais
-            valorizados da Ilha — todos vistoriados pessoalmente pela Michele.
+          <h2 className="mt-3 font-display font-light text-3xl sm:text-4xl tracking-tight">
+            Encontre o imóvel <span className="italic">ideal para você.</span>
+          </h2>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Filtre por tipo, bairro, dormitórios e faixa de preço.
           </p>
-
         </div>
-
-        <ChromaGridProperties items={items} />
+        <div className="mt-8">
+          <PropertyFilters />
+        </div>
       </section>
+
+      {/* Featured Properties */}
+      <LaunchesAndFeatured items={items} />
 
       {/* Regiões de atuação — SEO/GEO */}
       <section id="regioes" className="border-t border-border bg-background">
