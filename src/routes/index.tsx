@@ -425,11 +425,32 @@ function Index() {
 
       {/* Footer */}
       <footer className="border-t border-border">
-        <div className="mx-auto max-w-7xl px-6 sm:px-10 py-10 flex flex-wrap items-center justify-between gap-4 text-sm text-muted-foreground">
-          <div className="font-display text-base text-foreground">Michele Prietsch · Imóveis</div>
-          <div className="flex items-center gap-5">
-            <span>© {new Date().getFullYear()} · CRECI/SC · Todos os direitos reservados.</span>
-            <Link to="/auth" className="text-xs text-muted-foreground/70 hover:text-foreground transition">
+        <div className="mx-auto max-w-7xl px-6 sm:px-10 py-12 grid gap-8 md:grid-cols-3 text-sm text-muted-foreground">
+          <div>
+            <div className="font-display text-base text-foreground">Michele Prietsch · Imóveis</div>
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-200">
+              <ShieldCheck className="h-3.5 w-3.5" /> Corretora associada · Gralha Imóveis
+            </div>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-[0.2em] text-foreground/70">Credenciais</div>
+            <p className="mt-2 leading-relaxed">
+              Michele Prietsch<br />
+              CRECI 69502 · CRECI 11463J
+            </p>
+          </div>
+          <div>
+            <div className="text-xs uppercase tracking-[0.2em] text-foreground/70">Endereço</div>
+            <p className="mt-2 leading-relaxed">
+              Rua Alvares de Brito, 285<br />
+              Centro · Florianópolis/SC
+            </p>
+          </div>
+        </div>
+        <div className="border-t border-border">
+          <div className="mx-auto max-w-7xl px-6 sm:px-10 py-5 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+            <span>© {new Date().getFullYear()} Michele Prietsch · Todos os direitos reservados.</span>
+            <Link to="/auth" className="text-muted-foreground/70 hover:text-foreground transition">
               Admin
             </Link>
           </div>
