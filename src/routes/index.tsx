@@ -9,6 +9,8 @@ import prop2 from "@/assets/property-2.jpg";
 import prop3 from "@/assets/property-3.jpg";
 import { listProperties, type PropertyListItem } from "@/lib/properties.functions";
 import { ChromaGrid, type ChromaItem } from "@/components/ChromaGrid";
+import { useIsMobile } from "@/hooks/use-mobile";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
