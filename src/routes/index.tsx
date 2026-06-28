@@ -39,6 +39,13 @@ function brl(n: number | null) {
 
 
 function Index() {
+  const dbProperties = (Route.useLoaderData() ?? []) as PropertyListItem[];
+  const live = useQuery({
+    queryKey: ["properties-home"],
+    queryFn: () => listProperties(),
+    initialData: dbProperties,
+  });
+  const items = live.data ?? dbProperties;
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased">
       {/* Nav */}
@@ -169,54 +176,113 @@ function Index() {
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {properties.map((p) => (
-            <article
-              key={p.code}
-              className="group overflow-hidden rounded-3xl bg-card ring-1 ring-black/5 hover:shadow-2xl transition-shadow"
-            >
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <img
-                  src={p.img}
-                  alt={p.name}
-                  loading="lazy"
-                  width={1200}
-                  height={900}
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-                <span className="absolute top-4 left-4 rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-foreground">
-                  Venda
-                </span>
-                <span className="absolute top-4 right-4 rounded-full bg-black/55 backdrop-blur px-3 py-1 text-xs text-white">
-                  Cód. {p.code}
-                </span>
-              </div>
-              <div className="p-6">
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <MapPin className="h-3.5 w-3.5" /> {p.neighborhood}
-                </div>
-                <h3 className="mt-2 font-display text-2xl tracking-tight">{p.name}</h3>
-                <div className="mt-4 flex items-center gap-5 text-sm text-muted-foreground">
-                  <span className="inline-flex items-center gap-1.5"><BedDouble className="h-4 w-4" /> {p.beds}</span>
-                  <span className="inline-flex items-center gap-1.5"><Bath className="h-4 w-4" /> {p.baths}</span>
-                  <span className="inline-flex items-center gap-1.5"><Maximize className="h-4 w-4" /> {p.area}</span>
-                </div>
-                <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
-                  <div>
-                    <div className="text-xs text-muted-foreground">A partir de</div>
-                    <div className="font-display text-xl">{p.price}</div>
+          {items.length > 0
+            ? items.map((p) => (
+                <Link
+                  key={p.id}
+                  to="/imovel/$code"
+                  params={{ code: p.code }}
+                  className="group block overflow-hidden rounded-3xl bg-card ring-1 ring-black/5 hover:shadow-2xl transition-shadow"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
+                    {p.cover_image && (
+                      <img
+                        src={p.cover_image}
+                        alt={p.title}
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
+                    )}
+                    <span className="absolute top-4 left-4 rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-foreground">
+                      Venda
+                    </span>
+                    <span className="absolute top-4 right-4 rounded-full bg-black/55 backdrop-blur px-3 py-1 text-xs text-white">
+                      Cód. {p.code}
+                    </span>
                   </div>
-                  <a
-                    href={WHATSAPP_URL}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent transition"
-                  >
-                    Detalhes <ArrowRight className="h-4 w-4" />
-                  </a>
-                </div>
-              </div>
-            </article>
-          ))}
+                  <div className="p-6">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5" />
+                      {[p.neighborhood, p.city].filter(Boolean).join(", ")}
+                    </div>
+                    <h3 className="mt-2 font-display text-2xl tracking-tight line-clamp-2">
+                      {p.title}
+                    </h3>
+                    <div className="mt-4 flex items-center gap-5 text-sm text-muted-foreground">
+                      {p.bedrooms != null && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <BedDouble className="h-4 w-4" /> {p.bedrooms}
+                        </span>
+                      )}
+                      {p.bathrooms != null && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <Bath className="h-4 w-4" /> {p.bathrooms}
+                        </span>
+                      )}
+                      {p.area_m2 != null && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <Maximize className="h-4 w-4" /> {p.area_m2} m²
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+                      <div>
+                        <div className="text-xs text-muted-foreground">A partir de</div>
+                        <div className="font-display text-xl">{brl(p.price_brl)}</div>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground group-hover:text-accent transition">
+                        Detalhes <ArrowRight className="h-4 w-4" />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            : fallbackProperties.map((p) => (
+                <article
+                  key={p.code}
+                  className="group overflow-hidden rounded-3xl bg-card ring-1 ring-black/5 hover:shadow-2xl transition-shadow"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden">
+                    <img
+                      src={p.img}
+                      alt={p.name}
+                      loading="lazy"
+                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <span className="absolute top-4 left-4 rounded-full bg-white/95 px-3 py-1 text-xs font-medium text-foreground">
+                      Venda
+                    </span>
+                    <span className="absolute top-4 right-4 rounded-full bg-black/55 backdrop-blur px-3 py-1 text-xs text-white">
+                      Cód. {p.code}
+                    </span>
+                  </div>
+                  <div className="p-6">
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5" /> {p.neighborhood}
+                    </div>
+                    <h3 className="mt-2 font-display text-2xl tracking-tight">{p.name}</h3>
+                    <div className="mt-4 flex items-center gap-5 text-sm text-muted-foreground">
+                      <span className="inline-flex items-center gap-1.5"><BedDouble className="h-4 w-4" /> {p.beds}</span>
+                      <span className="inline-flex items-center gap-1.5"><Bath className="h-4 w-4" /> {p.baths}</span>
+                      <span className="inline-flex items-center gap-1.5"><Maximize className="h-4 w-4" /> {p.area}</span>
+                    </div>
+                    <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+                      <div>
+                        <div className="text-xs text-muted-foreground">A partir de</div>
+                        <div className="font-display text-xl">{p.price}</div>
+                      </div>
+                      <a
+                        href={WHATSAPP_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-accent transition"
+                      >
+                        Detalhes <ArrowRight className="h-4 w-4" />
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
         </div>
       </section>
 
