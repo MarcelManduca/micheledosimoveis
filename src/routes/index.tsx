@@ -120,7 +120,7 @@ function Index() {
         <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px]">
           <img
             src={heroImg}
-            alt="Apartamento de alto padrão na Beira Mar Norte com vista para o mar"
+            alt="Imóvel de alto padrão em Florianópolis com vista para o mar"
             width={1920}
             height={1280}
             className="h-[88vh] min-h-[600px] w-full object-cover"
