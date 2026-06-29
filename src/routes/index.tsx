@@ -754,11 +754,8 @@ function LaunchesAndFeatured({ items }: { items: PropertyListItem[] }) {
                 lançamentos selecionados nas regiões mais valorizadas da Ilha.
               </p>
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {launchItems.map((p) => (
-                <PropertyCard key={p.id} p={p} />
-              ))}
-            </div>
+            <ChromaGridProperties items={launchItems} />
+
           </div>
         </section>
       )}
