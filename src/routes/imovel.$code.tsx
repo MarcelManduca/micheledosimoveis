@@ -275,18 +275,20 @@ function PropertyPage() {
             </div>
           )}
 
-          {mapSrc && (
+          {hasMap && (
             <div className="mt-12">
               <h2 className="font-display text-2xl tracking-tight">Localização</h2>
               <p className="mt-2 text-sm text-muted-foreground">{mapQuery}</p>
               <div className="mt-4 overflow-hidden rounded-3xl ring-1 ring-black/5">
-                <iframe
-                  title={`Mapa de ${p.title}`}
-                  src={mapSrc}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="w-full h-[360px] sm:h-[420px] border-0"
-                />
+                <Suspense
+                  fallback={
+                    <div className="w-full h-[360px] sm:h-[420px] bg-secondary grid place-items-center text-sm text-muted-foreground">
+                      Carregando mapa…
+                    </div>
+                  }
+                >
+                  <LeafletMap query={mapQuery} title={p.title} />
+                </Suspense>
               </div>
             </div>
           )}
