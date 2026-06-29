@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { searchProperties, type PropertyListItem } from "@/lib/properties.functions";
 import { PropertyFilters, PRECO_FAIXAS, type FiltersValue } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
+import { findNeighborhoodByName } from "@/lib/neighborhoods";
 
 const searchSchema = z.object({
   tipo: fallback(z.string().optional(), undefined),
