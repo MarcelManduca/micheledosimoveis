@@ -218,6 +218,8 @@ function Index() {
               alt="Imóvel de alto padrão em Florianópolis com vista para o mar"
               width={1920}
               height={1280}
+              fetchPriority="high"
+              decoding="async"
               className="absolute inset-0 h-full w-full object-cover origin-center animate-hero-fade-a will-change-transform motion-reduce:animate-none"
             />
             <img
@@ -226,6 +228,9 @@ function Index() {
               width={1920}
               height={1280}
               aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
               className="absolute inset-0 h-full w-full object-cover origin-center animate-hero-fade-b will-change-transform motion-reduce:animate-none motion-reduce:opacity-0"
             />
             <img
@@ -234,6 +239,9 @@ function Index() {
               width={1920}
               height={1280}
               aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
               className="absolute inset-0 h-full w-full object-cover origin-center animate-hero-fade-d will-change-transform motion-reduce:animate-none motion-reduce:opacity-0"
             />
             <img
@@ -242,6 +250,9 @@ function Index() {
               width={2000}
               height={1333}
               aria-hidden="true"
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
               className="absolute inset-0 h-full w-full object-cover origin-center animate-hero-fade-c will-change-transform motion-reduce:animate-none motion-reduce:opacity-0"
             />
           </div>
