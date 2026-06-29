@@ -128,9 +128,9 @@ function PropertyPage() {
       </header>
 
       {/* Gallery */}
-      <section className="mx-auto max-w-6xl px-6 sm:px-10 pt-6">
+      <section className="mx-auto max-w-6xl px-4 sm:px-10 pt-4 sm:pt-6">
         {photoList.length > 0 ? (
-          <div className="relative grid gap-2 sm:grid-cols-4 sm:grid-rows-2 sm:aspect-[16/8] rounded-3xl overflow-hidden">
+          <div className="relative grid gap-2 aspect-[4/3] sm:aspect-[16/8] sm:grid-cols-4 sm:grid-rows-2 rounded-2xl sm:rounded-3xl overflow-hidden">
             <button
               type="button"
               onClick={() => setLightboxIndex(0)}
@@ -142,7 +142,7 @@ function PropertyPage() {
                 alt={p.title}
                 fetchPriority="high"
                 decoding="async"
-                className="h-full w-full object-cover aspect-[4/3] group-hover:scale-[1.02] transition-transform duration-500"
+                className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
               />
             </button>
             {photoList.slice(1, 5).map((ph, i) => (
@@ -157,10 +157,11 @@ function PropertyPage() {
                   src={ph.url}
                   alt=""
                   loading="lazy"
-                  className="h-full w-full object-cover aspect-[4/3] group-hover:scale-[1.02] transition-transform duration-500"
+                  className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                 />
               </button>
             ))}
+
             {photoList.length > 1 && (
               <button
                 type="button"
@@ -185,12 +186,12 @@ function PropertyPage() {
       </section>
 
       {/* CTAs */}
-      <section className="mx-auto max-w-6xl px-6 sm:px-10 pt-6">
-        <div className="flex flex-wrap gap-3">
+      <section className="mx-auto max-w-6xl px-4 sm:px-10 pt-6">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3">
           <button
             type="button"
             onClick={() => setScheduleOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition w-full sm:w-auto"
           >
             <CalendarCheck className="h-4 w-4" />
             Agendar visita
@@ -199,7 +200,7 @@ function PropertyPage() {
             href={whatsapp}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition"
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition w-full sm:w-auto"
           >
             Tirar dúvidas no WhatsApp
           </a>
@@ -207,14 +208,16 @@ function PropertyPage() {
       </section>
 
 
+
       {/* Body */}
-      <section className="mx-auto max-w-6xl px-6 sm:px-10 py-10 grid gap-12 lg:grid-cols-[1.7fr,1fr]">
-        <div>
+      <section className="mx-auto max-w-6xl px-4 sm:px-10 py-8 sm:py-10 grid gap-10 lg:gap-12 lg:grid-cols-[1.7fr,1fr]">
+        <div className="min-w-0">
           <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Cód. {p.code}
             {p.property_type ? ` · ${p.property_type}` : ""}
           </div>
-          <h1 className="mt-3 font-display font-light text-4xl sm:text-5xl tracking-tight leading-[1.05]">
+          <h1 className="mt-3 font-display font-light text-[clamp(1.8rem,6vw,3rem)] tracking-tight leading-[1.05]">
+
             {p.title}
           </h1>
           <div className="mt-4 flex items-center gap-2 text-muted-foreground">
