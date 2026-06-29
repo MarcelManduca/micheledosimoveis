@@ -209,13 +209,14 @@ function PropertyPage() {
 
 
       {/* Body */}
-      <section className="mx-auto max-w-6xl px-6 sm:px-10 py-10 grid gap-12 lg:grid-cols-[1.7fr,1fr]">
-        <div>
+      <section className="mx-auto max-w-6xl px-4 sm:px-10 py-8 sm:py-10 grid gap-10 lg:gap-12 lg:grid-cols-[1.7fr,1fr]">
+        <div className="min-w-0">
           <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Cód. {p.code}
             {p.property_type ? ` · ${p.property_type}` : ""}
           </div>
-          <h1 className="mt-3 font-display font-light text-4xl sm:text-5xl tracking-tight leading-[1.05]">
+          <h1 className="mt-3 font-display font-light text-[clamp(1.8rem,6vw,3rem)] tracking-tight leading-[1.05]">
+
             {p.title}
           </h1>
           <div className="mt-4 flex items-center gap-2 text-muted-foreground">
