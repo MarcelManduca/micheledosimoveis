@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ArrowRight, MapPin, Star, Phone, Instagram, Mail, ShieldCheck, Rocket, Sparkles } from "lucide-react";
 import heroImg from "@/assets/hero-beiramar.jpg";
+import heroImg2 from "@/assets/hero-beiramar-2.jpg";
 import portrait from "@/assets/michele-portrait.jpg";
 import portraitHover from "@/assets/michele-portrait-2.jpg";
 import prop1 from "@/assets/property-1.jpg";
