@@ -105,9 +105,7 @@ function PropertyPage() {
   const mapQuery = [p.address, p.neighborhood, p.city, p.state]
     .filter(Boolean)
     .join(", ");
-  const mapSrc = mapQuery
-    ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`
-    : null;
+  const hasMap = mapQuery.length > 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
