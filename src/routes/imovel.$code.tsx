@@ -186,12 +186,12 @@ function PropertyPage() {
       </section>
 
       {/* CTAs */}
-      <section className="mx-auto max-w-6xl px-6 sm:px-10 pt-6">
-        <div className="flex flex-wrap gap-3">
+      <section className="mx-auto max-w-6xl px-4 sm:px-10 pt-6">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3">
           <button
             type="button"
             onClick={() => setScheduleOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition w-full sm:w-auto"
           >
             <CalendarCheck className="h-4 w-4" />
             Agendar visita
@@ -200,12 +200,13 @@ function PropertyPage() {
             href={whatsapp}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition"
+            className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition w-full sm:w-auto"
           >
             Tirar dúvidas no WhatsApp
           </a>
         </div>
       </section>
+
 
 
       {/* Body */}
