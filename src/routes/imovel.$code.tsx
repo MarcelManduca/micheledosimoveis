@@ -180,6 +180,32 @@ function PropertyPage() {
         )}
       </section>
 
+      {/* CTAs */}
+      <section className="mx-auto max-w-6xl px-6 sm:px-10 pt-6">
+        <div className="flex flex-wrap gap-3">
+          <a
+            href={`https://api.whatsapp.com/send?phone=5548991828828&text=${encodeURIComponent(
+              `Olá Michele! Gostaria de agendar uma visita ao imóvel cód. ${p.code} — ${p.title}.`,
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition"
+          >
+            <CalendarCheck className="h-4 w-4" />
+            Agendar visita
+          </a>
+          <a
+            href={whatsapp}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition"
+          >
+            Tirar dúvidas no WhatsApp
+          </a>
+        </div>
+      </section>
+
+
       {/* Body */}
       <section className="mx-auto max-w-6xl px-6 sm:px-10 py-10 grid gap-12 lg:grid-cols-[1.7fr,1fr]">
         <div>
