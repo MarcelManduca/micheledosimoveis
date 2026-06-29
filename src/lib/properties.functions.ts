@@ -80,13 +80,24 @@ export const listLaunches = createServerFn({ method: "GET" }).handler(
   },
 );
 
-const searchSchema = z.object({
-  tipo: z.string().trim().max(60).optional().nullable(),
-  bairro: z.string().trim().max(120).optional().nullable(),
-  dorms: z.number().int().min(0).max(10).optional().nullable(),
-  precoMin: z.number().int().min(0).optional().nullable(),
-  precoMax: z.number().int().min(0).optional().nullable(),
-});
+const searchSchema = z
+  .object({
+    tipo: z.string().trim().max(60).optional().nullable(),
+    bairro: z.string().trim().max(120).optional().nullable(),
+    dorms: z.number().int().min(0).max(10).optional().nullable(),
+    precoMin: z.number().int().min(0).max(1_000_000_000).optional().nullable(),
+    precoMax: z.number().int().min(0).max(1_000_000_000).optional().nullable(),
+  })
+  .refine(
+    (d) => d.precoMin == null || d.precoMax == null || d.precoMin <= d.precoMax,
+    { message: "Faixa de preço inválida." },
+  );
+
+// Escape LIKE/ILIKE wildcards so user input can't broaden the match
+// (e.g. "%" matching everything, "_" matching any single char).
+function escapeLike(s: string): string {
+  return s.replace(/[\\%_]/g, "\\$&");
+}
 
 export const searchProperties = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => searchSchema.parse(d))
@@ -96,8 +107,8 @@ export const searchProperties = createServerFn({ method: "GET" })
       .from("properties")
       .select(LIST_COLS)
       .eq("published", true);
-    if (data.tipo) q = q.ilike("property_type", `%${data.tipo}%`);
-    if (data.bairro) q = q.ilike("neighborhood", `%${data.bairro}%`);
+    if (data.tipo) q = q.ilike("property_type", `%${escapeLike(data.tipo)}%`);
+    if (data.bairro) q = q.ilike("neighborhood", `%${escapeLike(data.bairro)}%`);
     if (data.dorms != null) {
       if (data.dorms >= 4) q = q.gte("bedrooms", 4);
       else q = q.eq("bedrooms", data.dorms);
@@ -142,32 +153,16 @@ export const getPropertyByCode = createServerFn({ method: "GET" })
 export const getMyAdminStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const userId = context.userId;
-
-    const { data: mine, error: mineErr } = await supabaseAdmin
-      .from("user_roles")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("role", "admin")
-      .maybeSingle();
-    if (mineErr) safeError("Não foi possível verificar seu acesso.", mineErr);
-    if (mine) return { isAdmin: true, bootstrapped: false };
-
-    const { count, error: countErr } = await supabaseAdmin
-      .from("user_roles")
-      .select("id", { count: "exact", head: true })
-      .eq("role", "admin");
-    if (countErr) safeError("Não foi possível verificar o estado do sistema.", countErr);
-
-    if ((count ?? 0) === 0) {
-      const { error: insErr } = await supabaseAdmin
-        .from("user_roles")
-        .upsert({ user_id: userId, role: "admin" }, { onConflict: "user_id,role" });
-      if (insErr) safeError("Não foi possível concluir o cadastro de admin.", insErr);
-      return { isAdmin: true, bootstrapped: true };
-    }
-    return { isAdmin: false, bootstrapped: false };
+    // Read-only check. Admin promotion is NOT performed here — it must be
+    // done explicitly via a SQL migration / backend tool. Doing it from a
+    // user-facing server fn would silently elevate any signed-in user if the
+    // user_roles table were ever emptied.
+    const { data, error } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (error) safeError("Não foi possível verificar seu acesso.", error);
+    return { isAdmin: Boolean(data), bootstrapped: false };
   });
 
 // ───────── Admin actions ─────────
@@ -209,7 +204,10 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
     try {
       scraped = await scrapeGralhaProperty(data.url);
     } catch (err) {
-      throw new Error((err as Error).message || "Falha ao importar o imóvel.");
+      console.error("scrapeGralhaProperty failed", err);
+      // Surface a stable, user-safe message; don't echo upstream errors that
+      // might include internal hostnames, stack frames, or HTML snippets.
+      throw new Error("Falha ao importar o imóvel. Verifique o link e tente novamente.");
     }
 
     const { data: upserted, error: upErr } = await supabaseAdmin
