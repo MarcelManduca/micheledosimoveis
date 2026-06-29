@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { getPropertyByCode } from "@/lib/properties.functions";
+import { findNeighborhoodByName } from "@/lib/neighborhoods";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CalendarCheck } from "lucide-react";
 
