@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { BedDouble, Bath, Maximize, MapPin, ArrowRight } from "lucide-react";
 import type { PropertyListItem } from "@/lib/properties.functions";
+import { findNeighborhoodByName } from "@/lib/neighborhoods";
 
 function brl(n: number | null) {
   if (n == null) return "Sob consulta";
