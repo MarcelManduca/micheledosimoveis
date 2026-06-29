@@ -3,5 +3,9 @@ Allow: /
 Disallow: /admin
 Disallow: /auth
 Disallow: /api/
+Disallow: /buscar?
+Disallow: /*?utm_*
+Disallow: /*?fbclid=
+Disallow: /*?gclid=
 
 Sitemap: https://micheledosimoveis.lovable.app/sitemap.xml

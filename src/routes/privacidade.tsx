@@ -10,7 +10,11 @@ export const Route = createFileRoute("/privacidade")({
           "Política de Privacidade e tratamento de dados pessoais em conformidade com a LGPD (Lei nº 13.709/2018) — Michele Prietsch (Michele dos Imóveis).",
       },
       { name: "robots", content: "index,follow" },
+      { property: "og:title", content: "Política de Privacidade — Michele dos Imóveis" },
+      { property: "og:url", content: "https://micheledosimoveis.lovable.app/privacidade" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://micheledosimoveis.lovable.app/privacidade" }],
   }),
   component: PrivacyPage,
 });

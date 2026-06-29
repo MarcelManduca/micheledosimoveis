@@ -8,6 +8,16 @@ interface SitemapEntry {
   lastmod?: string;
   changefreq?: "always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never";
   priority?: string;
+  image?: string | null;
+}
+
+function escapeXml(s: string) {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 export const Route = createFileRoute("/sitemap.xml")({
@@ -18,6 +28,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/buscar", changefreq: "daily", priority: "0.9" },
           { path: "/anuncie", changefreq: "monthly", priority: "0.8" },
+          { path: "/privacidade", changefreq: "yearly", priority: "0.3" },
         ];
 
         try {
@@ -29,7 +40,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           );
           const { data } = await supabase
             .from("properties")
-            .select("code, updated_at")
+            .select("code, updated_at, cover_image")
             .eq("published", true);
 
           for (const row of data ?? []) {
@@ -40,10 +51,11 @@ export const Route = createFileRoute("/sitemap.xml")({
                 : undefined,
               changefreq: "weekly",
               priority: "0.8",
+              image: row.cover_image,
             });
           }
         } catch {
-          // fall through with just the home entry
+          // fall through
         }
 
         const urls = entries.map((e) =>
@@ -53,6 +65,9 @@ export const Route = createFileRoute("/sitemap.xml")({
             e.lastmod ? `    <lastmod>${e.lastmod}</lastmod>` : null,
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,
+            e.image
+              ? `    <image:image><image:loc>${escapeXml(e.image)}</image:loc></image:image>`
+              : null,
             `  </url>`,
           ]
             .filter(Boolean)
@@ -61,7 +76,7 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         const xml = [
           `<?xml version="1.0" encoding="UTF-8"?>`,
-          `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,
+          `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">`,
           ...urls,
           `</urlset>`,
         ].join("\n");
