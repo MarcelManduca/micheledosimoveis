@@ -371,3 +371,32 @@ export const NEIGHBORHOODS: Neighborhood[] = [
 export function getNeighborhood(slug: string): Neighborhood | undefined {
   return NEIGHBORHOODS.find((n) => n.slug === slug);
 }
+
+// Normaliza string para matching tolerante a acentos/caixa.
+function norm(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+// Resolve um nome de bairro vindo do Gralha para o slug canônico
+// do bairro programático. Usado para linkar imóveis ao bairro e
+// para unificar canonicals (ex.: /buscar?bairro=X → /imoveis/$slug).
+export function findNeighborhoodByName(
+  name: string | null | undefined,
+): Neighborhood | undefined {
+  if (!name) return undefined;
+  const target = norm(name);
+  let hit = NEIGHBORHOODS.find((n) => norm(n.name) === target);
+  if (hit) return hit;
+  hit = NEIGHBORHOODS.find(
+    (n) => target.includes(norm(n.query)) || norm(n.query).includes(target),
+  );
+  if (hit) return hit;
+  return NEIGHBORHOODS.find(
+    (n) => target.includes(norm(n.name)) || norm(n.name).includes(target),
+  );
+}
+
