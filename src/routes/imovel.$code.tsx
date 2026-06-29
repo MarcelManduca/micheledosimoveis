@@ -311,8 +311,27 @@ function PropertyPage() {
           <div className="mt-4 flex items-center gap-2 text-muted-foreground">
             <MapPin className="h-4 w-4" />
             <span>
-              {[p.neighborhood, p.city, p.state].filter(Boolean).join(", ")}
-              {p.condo_name ? ` · ${p.condo_name}` : ""}
+              {(() => {
+                const nb = findNeighborhoodByName(p.neighborhood);
+                return (
+                  <>
+                    {nb ? (
+                      <Link
+                        to="/imoveis/$slug"
+                        params={{ slug: nb.slug }}
+                        className="underline-offset-2 hover:underline hover:text-foreground transition"
+                      >
+                        {p.neighborhood}
+                      </Link>
+                    ) : (
+                      p.neighborhood
+                    )}
+                    {p.neighborhood && (p.city || p.state) ? ", " : ""}
+                    {[p.city, p.state].filter(Boolean).join(", ")}
+                    {p.condo_name ? ` · ${p.condo_name}` : ""}
+                  </>
+                );
+              })()}
             </span>
           </div>
 
