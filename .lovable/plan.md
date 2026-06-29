@@ -1,76 +1,90 @@
-# Plano de Implementação
+# Plano de SEO Técnico — Michele dos Imóveis
 
-## 1. Filtros de pesquisa na Home (acima de Imóveis em destaque)
+Objetivo: maximizar indexação no Google e CTR nas SERPs, cobrindo meta tags, hierarquia de headers, dados estruturados, sitemap/robots, performance e estratégia programática por bairro.
 
-Barra de filtros com:
-- **Tipo**: Apartamento, Cobertura, Casa, Terreno, Comercial
-- **Bairro**: select com a lista das 18 regiões já cadastradas
-- **Dormitórios**: 1, 2, 3, 4+
-- **Faixa de preço**: até 1M, 1–3M, 3–5M, 5–10M, 10M+
-- Botão **Buscar**
+## 1. Auditoria — o que já está bom
 
-Ao submeter → navega para `/buscar?tipo=...&bairro=...&dorms=...&preco=...`
+- `__root.tsx` com title, description, OG, Twitter, geo tags, viewport e og:image.
+- `/` , `/anuncie`, `/buscar`, `/privacidade` têm `head()` próprios com title/description.
+- `sitemap.xml` dinâmico inclui imóveis publicados via Supabase.
+- `robots.txt` bloqueia `/admin`, `/auth`, `/api/` e referencia o sitemap.
+- JSON-LD `RealEstateAgent` já presente na home (verificado em turnos anteriores).
 
-## 2. Nova rota `/buscar` (página de pesquisa)
+## 2. Lacunas a corrigir
 
-- Lê filtros via `validateSearch` (zod + fallback)
-- Loader consulta `properties` (publicado=true) com filtros aplicados via server fn pública
-- Grid de cards de imóveis com mesma estética dos destaques (sem ChromaGrid)
-- Reaplica a barra de filtros no topo para refinar
-- `errorComponent` e `notFoundComponent`
-- SEO: title/description dinâmicos por filtro
+1. **Canonical ausente** em `/` (existe), `/buscar`, `/imovel/:code`, `/privacidade` — só `/anuncie` e `/` têm. Sem canonical leaf, Google pode escolher URL errada quando há parâmetros (`/buscar?bairro=…`).
+2. **`og:url` por rota** ausente em vários leaves.
+3. **`/imovel/:code` sem JSON-LD** `Product` + `RealEstateListing` (preço, imagens, localização, agent). Hoje é o tipo de página com maior potencial de rich result.
+4. **`/buscar` indexa variações com query string** — risco de conteúdo duplicado. Precisa canonical fixo + `noindex` quando há filtros.
+5. **Sitemap não inclui `/privacidade`** e não emite `<image:image>` por imóvel (perde Google Images).
+6. **Sem BreadcrumbList JSON-LD** nos imóveis (`Início > Buscar > Bairro > Título`).
+7. **Sem `FAQPage` em `/anuncie`** (queries informacionais "como vender imóvel alto padrão Florianópolis").
+8. **Hierarquia H1/H2 ok**, mas o cartão CTA da home usa `h1` duplicado em alguns componentes ChromaGrid; padronizar 1 H1 por página.
+9. **Sem páginas programáticas por bairro** — perde long-tail ("apartamento Jurerê Internacional", "cobertura Beira Mar Norte").
+10. **Sem `hreflang pt-BR`** explícito e sem `<link rel="alternate">` para o domínio canônico.
+11. **`robots.txt` permite crawl de `/buscar?…`** — adicionar `Disallow: /buscar?` e `Disallow: /*?utm_*`.
+12. **Imagens sem `alt` descritivo** em alguns componentes; LCP do hero pode usar `fetchpriority="high"`.
 
-## 3. Destaques gerenciáveis no Admin
+## 3. Entregáveis (implementação)
 
-A coluna `featured boolean` já existe em `properties`. Vou:
-- Adicionar toggle "Destacar na home" em cada card da lista de imóveis em `/admin`
-- Server fn `toggleFeatured` protegida (`requireSupabaseAuth` + `has_role admin`)
-- Home passa a buscar apenas `featured=true` para a seção "Imóveis em destaque"
+### 3.1 Meta tags por rota
+- Adicionar `<link rel="canonical">` + `og:url` self-referencing em `/buscar`, `/imovel/:code`, `/privacidade`.
+- Em `/buscar`, quando houver search params, emitir `<meta name="robots" content="noindex,follow">` e canonical apontando para `/buscar` limpo.
+- Em `/imovel/:code`: `og:type=product`, `product:price:amount`, `product:price:currency=BRL`, `og:image` = `cover_image`.
+- Padronizar título com fórmula: `{Título} — {Bairro}, Florianópolis | Michele dos Imóveis`.
+- Description automática: `{quartos} quartos · {area}m² · R$ {price} — {bairro}, Florianópolis. Atendimento Michele Prietsch.`
 
-## 4. Seção "Lançamentos" na Home
+### 3.2 Estrutura de headers
+- Garantir 1 `<h1>` por página (hero).
+- Cards e seções como `<h2>`/`<h3>`. Auditar `ChromaGridProperties` para usar `<h3>` (não `<h1>`).
+- Adicionar `<nav aria-label="Breadcrumb">` visível nos imóveis e em `/buscar`.
 
-Mesmo fluxo de importação por link da Gralha, com uma flag separada:
-- Migration: adicionar coluna `is_launch boolean default false` em `properties`
-- Admin: campo "Marcar como lançamento" no formulário de importação + toggle na listagem
-- Home: nova seção "Lançamentos imobiliários" abaixo de destaques, listando `is_launch=true`
-- Usa o mesmo componente visual de card (grid simples, sem ChromaGrid no mobile)
+### 3.3 Dados estruturados (JSON-LD)
+- **Sitewide** (`__root.tsx`): `RealEstateAgent` + `WebSite` com `SearchAction` (sitelinks searchbox).
+- **`/imovel/:code`**: combinar `Product` + `Residence`/`Apartment` com `offers`, `geo`, `image[]`, `numberOfRooms`, `floorSize`.
+- **`/imovel/:code`**: `BreadcrumbList`.
+- **`/anuncie`**: `FAQPage` (4–6 perguntas reais sobre venda de alto padrão).
+- **`/buscar`**: `CollectionPage` + `ItemList` dos resultados.
 
-## 5. Mover "Anuncie seu imóvel" para página dedicada
+### 3.4 Sitemap & robots
+- Incluir `/privacidade` (priority 0.3, changefreq yearly).
+- Adicionar namespace `xmlns:image` no sitemap e `<image:image><image:loc>` para `cover_image` de cada imóvel.
+- Dividir em índice quando passar de 200 URLs (`sitemap-index.xml` → `sitemap-pages.xml`, `sitemap-imoveis.xml`).
+- `robots.txt`:
+  ```
+  Disallow: /buscar?
+  Disallow: /*?utm_*
+  Disallow: /*?fbclid=
+  ```
 
-- Criar rota `/anuncie` com todo o conteúdo atual da seção (copy, benefícios, Off Market, CTAs WhatsApp)
-- Remover a seção da home
-- Substituir por **dois CTAs compactos** na home:
-  - Banner "Quer vender seu imóvel? Conheça nossa curadoria de alto padrão" → `/anuncie`
-  - Link no menu superior "Anuncie" passa a apontar para `/anuncie` (já existe, só ajustar destino)
-- SEO próprio em `/anuncie` (head com title, description, OG)
+### 3.5 Performance para Core Web Vitals (sinal de ranking)
+- Hero `<img fetchpriority="high" decoding="async">` (já existe preload — confirmar).
+- `loading="lazy"` em todas imagens abaixo da fold (já aplicado nos cards; revisar Dome/About).
+- `width`/`height` explícitos em toda `<img>` para evitar CLS.
+- Preconnect a `fonts.googleapis.com`, `fonts.gstatic.com`, R2 do Supabase de imagens.
 
-## Detalhes técnicos
+### 3.6 SEO programático por bairro (long-tail)
+- Criar rota dinâmica `/imoveis/$bairro` com slug (jurere-internacional, beira-mar-norte, lagoa-da-conceicao, campeche, praia-brava, cacupe, centro, …) listando imóveis filtrados.
+- Cada página: H1 "Imóveis de alto padrão em {Bairro} — Florianópolis", copy específica (300+ palavras), lista de imóveis, FAQ por bairro, JSON-LD `Place` + `ItemList`.
+- Linkar internamente a partir da grade "Regiões de atuação" e do footer.
+- Incluir todas no sitemap.
 
-**Arquivos novos:**
-- `src/routes/buscar.tsx` — página de busca com `validateSearch`
-- `src/routes/anuncie.tsx` — página dedicada
-- `src/components/PropertyFilters.tsx` — barra de filtros reutilizável (home + busca)
-- `src/components/PropertyCard.tsx` — card extraído para reuso
-- `src/lib/properties.functions.ts` — server fns `searchProperties`, `getFeatured`, `getLaunches`, `toggleFeatured`, `toggleLaunch`
+### 3.7 Indexação e monitoramento
+- Validar `https://micheledosimoveis.lovable.app` no Google Search Console via meta-tag (fluxo do conector).
+- Submeter `sitemap.xml`.
+- Solicitar inspeção URL das páginas-chave após deploy.
 
-**Migration:**
-- `ALTER TABLE properties ADD COLUMN is_launch boolean NOT NULL DEFAULT false;`
-- Index parcial em `featured` e `is_launch` para listagens rápidas
+## 4. Ordem de execução sugerida
 
-**Arquivos alterados:**
-- `src/routes/index.tsx` — adicionar filtros no topo dos destaques, nova seção Lançamentos, remover seção Anuncie e colocar CTA banner, ajustar link "Anuncie" do menu para `/anuncie`
-- `src/routes/admin.tsx` — toggles Destaque/Lançamento na listagem + campo "Lançamento" no import
-- `src/lib/gralha-scraper.server.ts` — aceitar flag `isLaunch` no import (sem mudança de scraping)
-- Atualizar `sitemap[.]xml.ts` para incluir `/anuncie` e `/buscar`
+1. Correções de canonical/og:url/headers em todas rotas existentes (rápido, alto impacto).
+2. JSON-LD `Product`+`BreadcrumbList` em `/imovel/:code` + sitemap com `image:image`.
+3. `noindex` condicional em `/buscar` com filtros, robots.txt atualizado.
+4. `FAQPage` em `/anuncie` e `WebSite/SearchAction` no root.
+5. Rotas programáticas por bairro (`/imoveis/$slug`) + sitemap atualizado.
+6. Verificação no Search Console e pedido de indexação.
 
-**Comportamento da Home após mudanças:**
-1. Hero
-2. Filtros de pesquisa
-3. Imóveis em destaque (featured=true)
-4. Lançamentos (is_launch=true)
-5. Regiões
-6. CTA banner "Anuncie seu imóvel" → /anuncie
-7. Sobre
-8. Footer
+## 5. Detalhes técnicos
 
-Confirma para eu seguir?
+Stack: TanStack Start, `head()` por rota em `createFileRoute`, server route `sitemap[.]xml.ts`. JSON-LD vai em `head().scripts` com `type: "application/ld+json"`. Canonical via `links` apenas em leaves (root concatena). `noindex` condicional usa `loaderDeps` com search params + `head({ search })`.
+
+Quer que eu execute as etapas 1–4 agora (alto impacto, sem mudança visual) e deixe a etapa 5 (páginas por bairro) para um próximo turno?
