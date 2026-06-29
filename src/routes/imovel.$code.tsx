@@ -476,51 +476,62 @@ function ScheduleVisitDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl w-[95vw] p-0 overflow-hidden">
-        <div className="p-6 sm:p-8">
-          <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+      <DialogContent className="max-w-2xl w-[95vw] p-0 overflow-hidden gap-0 block">
+        <div className="px-6 pt-7 pb-5 sm:px-8 sm:pt-8 border-b border-border/70">
+          <div className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
             Agendar visita · Cód. {propertyCode}
           </div>
-          <h2 className="mt-2 font-display text-2xl sm:text-3xl tracking-tight">
+          <h2 className="mt-2 font-display text-2xl sm:text-[28px] leading-tight tracking-tight">
             Escolha o melhor dia e turno
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             A confirmação é feita diretamente com Michele pelo WhatsApp.
           </p>
+        </div>
 
-          <div className="mt-6">
-            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
-              Dia
+        <div className="px-6 sm:px-8 py-6 space-y-7">
+          <section className="min-w-0">
+            <div className="flex items-baseline justify-between mb-3">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                Dia
+              </div>
+              <div className="text-[11px] text-muted-foreground">Próximos 14 dias</div>
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-              {days.map((d) => {
-                const selected = d.key === dayKey;
-                return (
-                  <button
-                    key={d.key}
-                    type="button"
-                    onClick={() => setDayKey(d.key)}
-                    className={`flex-shrink-0 w-16 rounded-2xl border px-2 py-3 text-center transition ${
-                      selected
-                        ? "border-foreground bg-foreground text-background"
-                        : "border-border hover:bg-secondary"
-                    }`}
-                  >
-                    <div className={`text-[10px] uppercase tracking-wider ${selected ? "opacity-80" : "text-muted-foreground"}`}>
-                      {d.weekday}
-                    </div>
-                    <div className="mt-1 font-display text-xl leading-none">{d.day}</div>
-                    <div className={`mt-1 text-[10px] uppercase ${selected ? "opacity-80" : "text-muted-foreground"}`}>
-                      {d.month}
-                    </div>
-                  </button>
-                );
-              })}
+            <div className="-mx-1 px-1 overflow-x-auto">
+              <div className="flex gap-2 w-max">
+                {days.map((d) => {
+                  const selected = d.key === dayKey;
+                  return (
+                    <button
+                      key={d.key}
+                      type="button"
+                      onClick={() => setDayKey(d.key)}
+                      className={`flex-shrink-0 w-[60px] rounded-2xl border px-2 py-3 text-center transition ${
+                        selected
+                          ? "border-foreground bg-foreground text-background shadow-sm"
+                          : "border-border hover:border-foreground/40 hover:bg-secondary"
+                      }`}
+                    >
+                      <div
+                        className={`text-[10px] uppercase tracking-wider ${selected ? "opacity-80" : "text-muted-foreground"}`}
+                      >
+                        {d.weekday}
+                      </div>
+                      <div className="mt-1 font-display text-xl leading-none">{d.day}</div>
+                      <div
+                        className={`mt-1 text-[10px] uppercase ${selected ? "opacity-80" : "text-muted-foreground"}`}
+                      >
+                        {d.month}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          </section>
 
-          <div className="mt-6">
-            <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-3">
+          <section className="min-w-0">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground mb-3">
               Turno
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -533,8 +544,8 @@ function ScheduleVisitDialog({
                     onClick={() => setPeriodId(pr.id)}
                     className={`rounded-2xl border px-3 py-3 text-center transition ${
                       selected
-                        ? "border-foreground bg-foreground text-background"
-                        : "border-border hover:bg-secondary"
+                        ? "border-foreground bg-foreground text-background shadow-sm"
+                        : "border-border hover:border-foreground/40 hover:bg-secondary"
                     }`}
                   >
                     <div className="text-sm font-medium">{pr.label}</div>
@@ -545,36 +556,37 @@ function ScheduleVisitDialog({
                 );
               })}
             </div>
-          </div>
+          </section>
+        </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div className="text-sm text-muted-foreground">
-              {canSend
-                ? `${selectedDay!.weekday}, ${selectedDay!.day} de ${selectedDay!.month} · ${selectedPeriod!.label}`
-                : "Selecione dia e turno para continuar."}
-            </div>
-            <a
-              href={sendHref}
-              target={canSend ? "_blank" : undefined}
-              rel="noreferrer"
-              aria-disabled={!canSend}
-              onClick={(e) => {
-                if (!canSend) e.preventDefault();
-                else onOpenChange(false);
-              }}
-              className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition ${
-                canSend
-                  ? "bg-[#25D366] text-white hover:bg-[#1ebe57]"
-                  : "bg-secondary text-muted-foreground cursor-not-allowed"
-              }`}
-            >
-              <Send className="h-4 w-4" />
-              Enviar pelo WhatsApp
-            </a>
+        <div className="px-6 sm:px-8 py-4 border-t border-border/70 bg-secondary/40 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="text-sm text-muted-foreground min-w-0 truncate">
+            {canSend
+              ? `${selectedDay!.weekday}, ${selectedDay!.day} de ${selectedDay!.month} · ${selectedPeriod!.label} (${selectedPeriod!.range})`
+              : "Selecione dia e turno para continuar."}
           </div>
+          <a
+            href={sendHref}
+            target={canSend ? "_blank" : undefined}
+            rel="noreferrer"
+            aria-disabled={!canSend}
+            onClick={(e) => {
+              if (!canSend) e.preventDefault();
+              else onOpenChange(false);
+            }}
+            className={`inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition shrink-0 ${
+              canSend
+                ? "bg-[#25D366] text-white hover:bg-[#1ebe57] shadow-md"
+                : "bg-secondary text-muted-foreground/70 cursor-not-allowed"
+            }`}
+          >
+            <Send className="h-4 w-4" />
+            Enviar pelo WhatsApp
+          </a>
         </div>
       </DialogContent>
     </Dialog>
+
   );
 }
 
