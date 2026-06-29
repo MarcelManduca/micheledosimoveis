@@ -567,7 +567,8 @@ function ScheduleVisitDialog({
                   : "bg-secondary text-muted-foreground cursor-not-allowed"
               }`}
             >
-              Confirmar no WhatsApp
+              <Send className="h-4 w-4" />
+              Enviar pelo WhatsApp
             </a>
           </div>
         </div>
