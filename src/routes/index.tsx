@@ -763,9 +763,12 @@ function ChromaGridProperties({ items }: { items: PropertyListItem[] }) {
   const cols = Math.max(1, Math.min(chromaItems.length, 3));
   return (
     <div className="relative">
-      <ChromaGrid items={chromaItems} columns={cols} radius={320} damping={0.45} fadeOut={0.6} ease="power3.out" />
+      <Suspense fallback={<div className="h-[420px] w-full" aria-hidden />}>
+        <ChromaGrid items={chromaItems} columns={cols} radius={320} damping={0.45} fadeOut={0.6} ease="power3.out" />
+      </Suspense>
     </div>
   );
+
 
 }
 
