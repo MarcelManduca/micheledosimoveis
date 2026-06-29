@@ -228,16 +228,134 @@ o GitHub já dispara o deploy** — nenhum comando manual é necessário.
 
 ## Cenário B.1 — Hospedagem específica na Hostinger
 
-A Hostinger oferece três famílias de planos. Só **uma delas** roda este
-projeto sem adaptações, porque o site é **SSR (Node.js)**, não HTML estático:
+A Hostinger oferece **dois caminhos** que rodam este projeto. Escolha
+conforme o plano contratado:
+
+| Caminho | Plano Hostinger | Esforço | Quando usar |
+|---|---|---|---|
+| **A — Web App Node.js** (hPanel → Sites → Adicionar Site) | Business / Cloud Startup+ / qualquer plano com suporte a Node.js apps | Baixo (sem SSH) | Padrão recomendado. Hostinger gerencia processo, SSL e domínio. |
+| **B — VPS KVM** (acesso root + Nginx + PM2) | VPS KVM 1/2/4/8 | Médio (configuração manual) | Quando precisar de controle total, cron próprio, múltiplos serviços. |
+
+> Hospedagem **Compartilhada / Premium** *sem* a opção "Web App Node.js" no
+> menu **não roda** este projeto (é só PHP + estático). Se não enxergar a
+> opção, faça upgrade para Business / Cloud ou siga o caminho VPS.
+
+---
+
+## Caminho A — Web App Node.js no hPanel da Hostinger
+
+Este é o fluxo que aparece em **hPanel → Sites → Adicionar Site → Web App
+Node.js**. A Hostinger usa Phusion Passenger por trás e roda o `npm start`
+do projeto (já configurado para `node .output/server/index.mjs`).
+
+### 1. Criar o app no hPanel
+1. **hPanel → Sites → Adicionar Site**.
+2. Escolha **Web App Node.js**.
+3. Preencha:
+   - **Domínio**: `micheledosimoveis.com.br` (ou subdomínio de teste).
+   - **Versão do Node.js**: **20.x** (mínimo exigido pelo projeto).
+   - **Diretório do app**: deixe o padrão (ex.: `/home/<usuario>/htdocs/<dominio>`).
+   - **Arquivo de inicialização / Startup file**: `.output/server/index.mjs`.
+   - **Comando de start (se solicitado)**: `npm start`.
+4. Conclua a criação — o painel cria a estrutura e um app vazio.
+
+### 2. Conectar ao GitHub (Git Deploy)
+No card do site recém-criado: **Gerenciar → Git** (ou "Auto Deploy").
+
+- **Repositório**: `https://github.com/<seu-usuario>/<seu-repo>.git`
+- **Branch**: `main`
+- **Diretório de destino**: o mesmo do app.
+- **Auto-deploy**: ative para puxar a cada push.
+
+> Como o Lovable faz push automático no GitHub a cada edição, **toda
+> publicação no Lovable dispara um redeploy na Hostinger**.
+
+### 3. Variáveis de ambiente
+No painel do app: **Gerenciar → Variáveis de ambiente** (ou "Environment
+Variables"). Adicione, no mínimo:
+
+```
+NODE_ENV=production
+PORT=3000
+VITE_SUPABASE_URL=https://<seu-projeto>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=<sua-publishable-key>
+VITE_SUPABASE_PROJECT_ID=<seu-project-id>
+SUPABASE_URL=https://<seu-projeto>.supabase.co
+SUPABASE_PUBLISHABLE_KEY=<sua-publishable-key>
+SUPABASE_PROJECT_ID=<seu-project-id>
+SYNC_WEBHOOK_SECRET=<openssl rand -hex 32>
+```
+
+> A Hostinger ignora qualquer `.env` versionado por segurança — sempre
+> configure as chaves **no painel**, não no repositório.
+
+### 4. Comandos de build
+No painel do app: **Gerenciar → Build / Hooks** (ou "Post-deploy commands").
+Configure nesta ordem (executam após cada `git pull`):
+
+```bash
+npm install
+npm run build
+```
+
+Se o painel permitir Bun, prefira `bun install && bun run build`
+(2–3x mais rápido). O `npm start` (já no `package.json`) é o que a
+Hostinger executa para subir o processo.
+
+### 5. Domínio e SSL
+1. **hPanel → Domínios** → aponte `A @` e `A www` para o IP indicado pela
+   Hostinger no card do site (ou use os nameservers `ns1/ns2.dns-parking.com`
+   se o domínio for gerenciado pela própria Hostinger).
+2. No card do site: **SSL** → **Ativar SSL gratuito (Let's Encrypt)** →
+   forçar HTTPS.
+
+### 6. Verificar
+- Logs do app: **Gerenciar → Logs** (stdout do `node`).
+- Reiniciar manualmente: **Gerenciar → Reiniciar app**.
+- Testar URL: `https://micheledosimoveis.com.br` deve responder com o site.
+
+### 7. Cron diário de sincronização (opcional)
+**hPanel → Avançado → Tarefas Cron** → adicionar:
+
+```
+0 6 * * * curl -fsS -X POST -H "x-sync-secret: SEU_SEGREDO" \
+  https://micheledosimoveis.com.br/api/public/hooks/sync-properties \
+  > /dev/null 2>&1
+```
+
+### Fluxo completo (caminho A)
+
+```text
+Lovable (edita) ─► GitHub (push automático) ─► Hostinger Web App Node.js
+                                                  │
+                                                  ├─ git pull
+                                                  ├─ npm install
+                                                  ├─ npm run build
+                                                  └─ restart app (npm start)
+                                                  
+                                              Site no ar em
+                                              https://micheledosimoveis.com.br
+```
+
+Sem SSH, sem PM2, sem Nginx — tudo gerenciado pela Hostinger.
+
+---
+
+## Caminho B — VPS KVM (controle total)
+
+Use quando o plano contratado **não** oferece "Web App Node.js" ou quando
+você quer customizar Nginx, processos múltiplos, cron próprio, etc.
+
+### Tabela rápida de planos
 
 | Plano Hostinger | Roda este projeto? | Por quê |
 |---|---|---|
-| **VPS (KVM 1/2/4/8)** | ✅ **Recomendado** | Acesso root, Node 20, PM2, Nginx, Certbot. |
-| **Cloud Hosting** | ⚠️ Parcial | Suporta Node em alguns planos; confirme com o suporte antes. |
-| **Hospedagem Compartilhada / Premium / Business** | ❌ Não | Só PHP + estático. Não roda servidor Node persistente. |
+| **VPS (KVM 1/2/4/8)** | ✅ Sim | Acesso root, Node 20, PM2, Nginx, Certbot. |
+| **Cloud Hosting** | ✅ Sim (via Web App Node.js — caminho A) | Painel gerencia o processo Node. |
+| **Business / Premium** com "Web App Node.js" | ✅ Sim (caminho A) | Sem SSH, painel cuida do deploy. |
+| **Compartilhada antiga** (só PHP) | ❌ Não | Não roda servidor Node persistente. |
 
-> Se o plano contratado for compartilhado, faça **upgrade para um VPS KVM**
+> Se contratou apenas compartilhada antiga, faça **upgrade para Business**
 > (a partir do KVM 1 com 1 vCPU / 4 GB já roda confortavelmente).
 
 ### Passo a passo na VPS Hostinger (KVM, Ubuntu 22.04+)
