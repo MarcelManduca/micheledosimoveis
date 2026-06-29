@@ -147,3 +147,18 @@
     color: var(--color-foreground);
   }
 }
+
+/* Cinematic hero zoom (Ken Burns) */
+@keyframes hero-zoom {
+  0%   { transform: scale(1) translate3d(0, 0, 0); }
+  50%  { transform: scale(1.12) translate3d(-1%, -1.5%, 0); }
+  100% { transform: scale(1) translate3d(0, 0, 0); }
+}
+
+.animate-hero-zoom {
+  animation: hero-zoom 22s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-hero-zoom { animation: none; }
+}
