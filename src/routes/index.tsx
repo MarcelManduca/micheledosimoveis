@@ -805,7 +805,7 @@ function LaunchesAndFeatured({ items }: { items: PropertyListItem[] }) {
                 lançamentos selecionados nas regiões mais valorizadas da Ilha.
               </p>
             </div>
-            <ChromaGridProperties items={launchItems} />
+            <ExpandableProperties items={launchItems} viewAllHref="/buscar" />
 
           </div>
         </section>
