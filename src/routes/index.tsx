@@ -518,28 +518,29 @@ function Index() {
           <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-6">
             Bastidores · Michele em cena
           </div>
-          <div
+          <LazyVisible
             className="relative w-full overflow-hidden rounded-[24px] ring-1 ring-black/5 bg-secondary/60"
             style={{ aspectRatio: "21 / 9" }}
-            aria-label="Galeria de fotos de Michele Prietsch"
+            rootMargin="400px"
           >
-            <DomeGallery
-              images={DOME_IMAGES}
-              grayscale={true}
-              fit={0.5}
-              fitBasis="width"
-              minRadius={320}
-              maxRadius={900}
-              padFactor={0.14}
-              overlayBlurColor="#ece8df"
-              openedImageWidth="360px"
-              openedImageHeight="360px"
-              imageBorderRadius="12px"
-              openedImageBorderRadius="20px"
-              segments={30}
-            />
-
-          </div>
+            <Suspense fallback={<div aria-hidden className="h-full w-full bg-secondary/60" />}>
+              <DomeGallery
+                images={DOME_IMAGES}
+                grayscale={true}
+                fit={0.5}
+                fitBasis="width"
+                minRadius={320}
+                maxRadius={900}
+                padFactor={0.14}
+                overlayBlurColor="#ece8df"
+                openedImageWidth="360px"
+                openedImageHeight="360px"
+                imageBorderRadius="12px"
+                openedImageBorderRadius="20px"
+                segments={30}
+              />
+            </Suspense>
+          </LazyVisible>
         </div>
       </section>
 
