@@ -18,6 +18,7 @@ import {
   MapPin,
   Maximize,
   Car,
+  Send,
 } from "lucide-react";
 
 export const Route = createFileRoute("/imovel/$code")({
