@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -7,6 +7,7 @@ import { searchProperties, type PropertyListItem } from "@/lib/properties.functi
 import { PropertyFilters, PRECO_FAIXAS, type FiltersValue } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
 import { findNeighborhoodByName } from "@/lib/neighborhoods";
+import { buildWhatsAppUrl } from "@/lib/site-config";
 
 const searchSchema = z.object({
   tipo: fallback(z.string().optional(), undefined),
@@ -18,6 +19,18 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/buscar")({
   validateSearch: zodValidator(searchSchema),
   loaderDeps: ({ search }) => search,
+  // Redireciona busca-por-bairro (único filtro) para a rota canônica
+  // do bairro programático — consolida link equity e evita duplicate content.
+  beforeLoad: ({ search }) => {
+    const onlyBairro =
+      Boolean(search.bairro) && !search.tipo && search.dorms == null && search.faixa == null;
+    if (onlyBairro) {
+      const nb = findNeighborhoodByName(search.bairro);
+      if (nb) {
+        throw redirect({ to: "/imoveis/$slug", params: { slug: nb.slug }, replace: true });
+      }
+    }
+  },
   loader: ({ deps }) => {
     const faixa = deps.faixa != null ? PRECO_FAIXAS[deps.faixa] : undefined;
     return searchProperties({
@@ -162,7 +175,11 @@ function BuscarPage() {
             <p className="mt-2 text-sm text-muted-foreground">
               Ajuste os filtros acima ou{" "}
               <a
-                href="https://api.whatsapp.com/send?phone=5548991828828"
+                href={buildWhatsAppUrl(
+                  `Olá Michele! Não encontrei resultados na busca${
+                    search.bairro ? ` para ${search.bairro}` : ""
+                  }. Pode me ajudar com uma curadoria personalizada?`,
+                )}
                 target="_blank"
                 rel="noreferrer"
                 className="underline"
