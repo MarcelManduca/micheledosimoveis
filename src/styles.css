@@ -159,22 +159,35 @@
   animation: hero-zoom 22s ease-in-out infinite;
 }
 
-/* Cross-fade between two hero images (synced with 22s zoom loop) */
+/* Cross-fade between three hero images (33s loop) */
 @keyframes hero-fade-a {
-  0%, 45%   { opacity: 1; }
-  55%, 95%  { opacity: 0; }
+  0%, 30%   { opacity: 1; }
+  37%, 97%  { opacity: 0; }
   100%      { opacity: 1; }
 }
 @keyframes hero-fade-b {
-  0%, 45%   { opacity: 0; }
-  55%, 95%  { opacity: 1; }
+  0%, 30%   { opacity: 0; }
+  37%, 63%  { opacity: 1; }
+  70%, 100% { opacity: 0; }
+}
+@keyframes hero-fade-c {
+  0%, 63%   { opacity: 0; }
+  70%, 97%  { opacity: 1; }
   100%      { opacity: 0; }
 }
-.animate-hero-fade-a { animation: hero-zoom 22s ease-in-out infinite, hero-fade-a 22s ease-in-out infinite; }
-.animate-hero-fade-b { animation: hero-zoom 22s ease-in-out infinite, hero-fade-b 22s ease-in-out infinite; }
+/* Horizontal pan for the middle image */
+@keyframes hero-pan-x {
+  0%   { transform: scale(1.12) translate3d(-3%, 0, 0); }
+  100% { transform: scale(1.12) translate3d(3%, 0, 0); }
+}
+.animate-hero-fade-a { animation: hero-zoom 33s ease-in-out infinite, hero-fade-a 33s ease-in-out infinite; }
+.animate-hero-fade-b { animation: hero-pan-x 33s ease-in-out infinite, hero-fade-b 33s ease-in-out infinite; }
+.animate-hero-fade-c { animation: hero-zoom 33s ease-in-out infinite, hero-fade-c 33s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-hero-zoom { animation: none; }
   .animate-hero-fade-a,
-  .animate-hero-fade-b { animation: none; }
+  .animate-hero-fade-b,
+  .animate-hero-fade-c { animation: none; }
 }
+
