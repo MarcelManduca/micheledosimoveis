@@ -140,6 +140,8 @@ function PropertyPage() {
               <img
                 src={photoList[0]?.url ?? p.cover_image ?? ""}
                 alt={p.title}
+                fetchPriority="high"
+                decoding="async"
                 className="h-full w-full object-cover aspect-[4/3] group-hover:scale-[1.02] transition-transform duration-500"
               />
             </button>
