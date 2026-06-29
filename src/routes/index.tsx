@@ -286,7 +286,7 @@ function Index() {
       {/* Hero */}
       <section id="top" className="relative px-3 sm:px-5 pt-3">
         <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px]">
-          <div className="relative h-[88vh] min-h-[600px] w-full overflow-hidden">
+          <div className="relative h-[78vh] min-h-[520px] sm:h-[88vh] sm:min-h-[600px] w-full overflow-hidden">
             <img
               src={heroImg}
               alt="Imóvel de alto padrão em Florianópolis com vista para o mar"
