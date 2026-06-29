@@ -324,11 +324,12 @@ export const deleteProperty = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// ───────── Availability sync ─────────
+// ───────── Availability + full refresh sync ─────────
 
 export type SyncSummary = {
   checked: number;
   available: number;
+  refreshed: number;
   unpublished: number;
   errors: number;
   details: Array<{ code: string; status: string; detail: string }>;
@@ -337,6 +338,7 @@ export type SyncSummary = {
 async function runAvailabilitySync(): Promise<SyncSummary> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { checkGralhaAvailability } = await import("./gralha-availability.server");
+  const { scrapeGralhaProperty } = await import("./gralha-scraper.server");
 
   const { data: rows, error } = await supabaseAdmin
     .from("properties")
@@ -347,6 +349,7 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
   const summary: SyncSummary = {
     checked: 0,
     available: 0,
+    refreshed: 0,
     unpublished: 0,
     errors: 0,
     details: [],
@@ -356,22 +359,11 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
     if (!row.source_url) continue;
     summary.checked += 1;
     const result = await checkGralhaAvailability(row.source_url);
-    summary.details.push({ code: row.code, status: result.status, detail: result.detail });
-
     const now = new Date().toISOString();
-    if (result.status === "available") {
-      summary.available += 1;
-      await supabaseAdmin
-        .from("properties")
-        .update({
-          last_checked_at: now,
-          last_check_status: "available",
-          unavailable_since: null,
-          published: row.published,
-        })
-        .eq("id", row.id);
-    } else if (result.status === "not_found") {
+
+    if (result.status === "not_found") {
       summary.unpublished += 1;
+      summary.details.push({ code: row.code, status: "removido", detail: result.detail });
       await supabaseAdmin
         .from("properties")
         .update({
@@ -381,13 +373,81 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
           published: false,
         })
         .eq("id", row.id);
-    } else {
+      continue;
+    }
+
+    if (result.status === "error") {
       summary.errors += 1;
+      summary.details.push({ code: row.code, status: "erro", detail: result.detail });
       await supabaseAdmin
         .from("properties")
         .update({
           last_checked_at: now,
           last_check_status: `error: ${result.detail}`,
+        })
+        .eq("id", row.id);
+      continue;
+    }
+
+    // Available — re-scrape to refresh price, photos, description, etc.
+    summary.available += 1;
+    try {
+      const scraped = await scrapeGralhaProperty(row.source_url);
+      const { error: upErr } = await supabaseAdmin
+        .from("properties")
+        .update({
+          // Refresh content fields; preserve featured/is_launch/published
+          title: scraped.title,
+          property_type: scraped.property_type,
+          neighborhood: scraped.neighborhood,
+          city: scraped.city,
+          state: scraped.state,
+          address: scraped.address,
+          condo_name: scraped.condo_name,
+          price_brl: scraped.price_brl,
+          condo_fee_brl: scraped.condo_fee_brl,
+          iptu_brl: scraped.iptu_brl,
+          area_m2: scraped.area_m2,
+          bedrooms: scraped.bedrooms,
+          suites: scraped.suites,
+          bathrooms: scraped.bathrooms,
+          parking_spots: scraped.parking_spots,
+          description: scraped.description,
+          features: scraped.features,
+          condo_features: scraped.condo_features,
+          cover_image: scraped.cover_image,
+          last_checked_at: now,
+          last_check_status: "available",
+          unavailable_since: null,
+        })
+        .eq("id", row.id);
+      if (upErr) throw upErr;
+
+      // Replace photo set
+      await supabaseAdmin.from("property_photos").delete().eq("property_id", row.id);
+      if (scraped.photos.length > 0) {
+        const rowsToInsert = scraped.photos.slice(0, 80).map((url, i) => ({
+          property_id: row.id,
+          url,
+          position: i,
+        }));
+        await supabaseAdmin.from("property_photos").insert(rowsToInsert);
+      }
+      summary.refreshed += 1;
+      summary.details.push({ code: row.code, status: "atualizado", detail: "Dados e fotos sincronizados" });
+    } catch (err) {
+      // Listing is available but refresh failed — keep it published, log the issue.
+      summary.errors += 1;
+      summary.details.push({
+        code: row.code,
+        status: "erro_refresh",
+        detail: (err as Error).message || "Falha ao atualizar dados",
+      });
+      await supabaseAdmin
+        .from("properties")
+        .update({
+          last_checked_at: now,
+          last_check_status: `refresh_error: ${(err as Error).message || "desconhecido"}`,
         })
         .eq("id", row.id);
     }
@@ -405,3 +465,4 @@ export const syncPropertiesAvailability = createServerFn({ method: "POST" })
 export async function _runAvailabilitySyncInternal() {
   return runAvailabilitySync();
 }
+
