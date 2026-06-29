@@ -86,14 +86,59 @@ export const Route = createFileRoute("/imoveis/$slug")({
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Início", item: SITE },
-        { "@type": "ListItem", position: 2, name: "Imóveis em Florianópolis", item: `${SITE}/buscar` },
+        { "@type": "ListItem", position: 2, name: "Imóveis por bairro", item: `${SITE}/imoveis` },
         { "@type": "ListItem", position: 3, name: n.name, item: url },
       ],
     };
+    const faq = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: `Quais tipos de imóveis a Michele oferece em ${n.name}?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: `Em ${n.name}, a Michele atua com ${n.metaDesc}, incluindo apartamentos, coberturas, casas e lançamentos selecionados. Cada imóvel passa por curadoria antes de ser apresentado.`,
+          },
+        },
+        {
+          "@type": "Question",
+          name: `Há imóveis disponíveis em ${n.name} agora?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: count > 0
+              ? `Sim. Hoje há ${count} ${count === 1 ? "imóvel publicado" : "imóveis publicados"} em ${n.name}. Também trabalhamos com opções off market que não aparecem em listagens públicas — consulte a Michele para receber a seleção completa.`
+              : `No momento o portfólio público de ${n.name} está vazio, mas atuamos com operações off market nesta região. Fale com a Michele para receber opções sob medida que não são divulgadas publicamente.`,
+          },
+        },
+        {
+          "@type": "Question",
+          name: `Por que escolher ${n.name} em Florianópolis?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: `${n.intro}`,
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Como funciona o atendimento personalizado?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Michele Prietsch (CRECI 69502) é corretora associada à Gralha Imóveis e conduz pessoalmente cada negociação — desde a leitura de perfil até a entrega das chaves, com discrição, curadoria e segurança jurídica.",
+          },
+        },
+      ],
+    };
+    // Bairros sem portfólio público viram conteúdo "thin" para o Google.
+    // Marcamos noindex,follow: a página continua acessível e passa link
+    // equity para os imóveis e bairros vizinhos, mas não polui o índice.
+    const robots = count === 0 ? "noindex, follow" : "index, follow";
     return {
       meta: [
         { title },
         { name: "description", content: description },
+        { name: "robots", content: robots },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "website" },
@@ -104,6 +149,7 @@ export const Route = createFileRoute("/imoveis/$slug")({
         { type: "application/ld+json", children: JSON.stringify(localBusiness) },
         { type: "application/ld+json", children: JSON.stringify(itemList) },
         { type: "application/ld+json", children: JSON.stringify(breadcrumbs) },
+        { type: "application/ld+json", children: JSON.stringify(faq) },
       ],
     };
   },
