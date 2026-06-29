@@ -9,3 +9,4 @@ Disallow: /*?fbclid=
 Disallow: /*?gclid=
 
 Sitemap: https://micheledosimoveis.lovable.app/sitemap.xml
+Sitemap: https://micheledosimoveis.lovable.app/sitemap-bairros.xml
