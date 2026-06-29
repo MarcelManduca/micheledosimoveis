@@ -575,8 +575,9 @@ function Index() {
           <div>
             <div className="text-xs uppercase tracking-[0.2em] text-foreground/70">Endereço</div>
             <p className="mt-2 leading-relaxed">
-              Rua Alvares de Brito, 285<br />
+              R. Alves de Brito, 285<br />
               Centro · Florianópolis/SC
+
             </p>
           </div>
         </div>
