@@ -29,17 +29,28 @@ export const Route = createFileRoute("/buscar")({
       },
     });
   },
-  head: () => ({
-    meta: [
-      { title: "Buscar imóveis em Florianópolis | Michele dos Imóveis" },
-      {
-        name: "description",
-        content:
-          "Pesquise imóveis de alto padrão em Florianópolis por bairro, tipo, dormitórios e faixa de preço com curadoria de Michele Prietsch.",
-      },
-      { property: "og:title", content: "Buscar imóveis em Florianópolis | Michele dos Imóveis" },
-    ],
-  }),
+  head: ({ match }) => {
+    const search = (match.search ?? {}) as z.infer<typeof searchSchema>;
+    const hasFilters = Boolean(search.tipo || search.bairro || search.dorms != null || search.faixa != null);
+    const baseTitle = "Buscar imóveis em Florianópolis | Michele dos Imóveis";
+    const baseDesc =
+      "Pesquise imóveis de alto padrão em Florianópolis por bairro, tipo, dormitórios e faixa de preço com curadoria de Michele Prietsch.";
+    return {
+      meta: [
+        { title: baseTitle },
+        { name: "description", content: baseDesc },
+        { property: "og:title", content: baseTitle },
+        { property: "og:description", content: baseDesc },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: "https://micheledosimoveis.lovable.app/buscar" },
+        // Filtered variants are duplicates of /buscar — noindex but allow follow
+        ...(hasFilters
+          ? [{ name: "robots" as const, content: "noindex,follow" }]
+          : []),
+      ],
+      links: [{ rel: "canonical", href: "https://micheledosimoveis.lovable.app/buscar" }],
+    };
+  },
   errorComponent: ({ error, reset }) => (
     <div className="min-h-screen grid place-items-center px-6 text-center">
       <div>
