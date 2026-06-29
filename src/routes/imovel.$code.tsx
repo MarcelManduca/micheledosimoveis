@@ -176,6 +176,8 @@ function PropertyPage() {
             <img
               src={p.cover_image}
               alt={p.title}
+              fetchPriority="high"
+              decoding="async"
               className="w-full aspect-[16/9] object-cover rounded-3xl"
             />
           )
