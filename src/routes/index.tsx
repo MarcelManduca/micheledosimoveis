@@ -56,7 +56,10 @@ export const Route = createFileRoute("/")({
       { property: "og:image", content: heroImg },
       { property: "og:url", content: "https://micheledosimoveis.lovable.app/" },
     ],
-    links: [{ rel: "canonical", href: "https://micheledosimoveis.lovable.app/" }],
+    links: [
+      { rel: "canonical", href: "https://micheledosimoveis.lovable.app/" },
+      { rel: "preload", as: "image", href: heroImg, fetchpriority: "high" } as any,
+    ],
   }),
 
   loader: () => listProperties(),
