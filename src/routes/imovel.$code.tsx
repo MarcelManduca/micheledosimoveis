@@ -128,9 +128,9 @@ function PropertyPage() {
       </header>
 
       {/* Gallery */}
-      <section className="mx-auto max-w-6xl px-6 sm:px-10 pt-6">
+      <section className="mx-auto max-w-6xl px-4 sm:px-10 pt-4 sm:pt-6">
         {photoList.length > 0 ? (
-          <div className="relative grid gap-2 sm:grid-cols-4 sm:grid-rows-2 sm:aspect-[16/8] rounded-3xl overflow-hidden">
+          <div className="relative grid gap-2 aspect-[4/3] sm:aspect-[16/8] sm:grid-cols-4 sm:grid-rows-2 rounded-2xl sm:rounded-3xl overflow-hidden">
             <button
               type="button"
               onClick={() => setLightboxIndex(0)}
@@ -142,7 +142,7 @@ function PropertyPage() {
                 alt={p.title}
                 fetchPriority="high"
                 decoding="async"
-                className="h-full w-full object-cover aspect-[4/3] group-hover:scale-[1.02] transition-transform duration-500"
+                className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
               />
             </button>
             {photoList.slice(1, 5).map((ph, i) => (
@@ -157,10 +157,11 @@ function PropertyPage() {
                   src={ph.url}
                   alt=""
                   loading="lazy"
-                  className="h-full w-full object-cover aspect-[4/3] group-hover:scale-[1.02] transition-transform duration-500"
+                  className="h-full w-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                 />
               </button>
             ))}
+
             {photoList.length > 1 && (
               <button
                 type="button"
