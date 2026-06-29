@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { ArrowRight, MapPin, Star, Phone, Instagram, Mail, ShieldCheck, Rocket, Sparkles } from "lucide-react";
 import heroImg from "@/assets/hero-beiramar.jpg";
 import heroImg2 from "@/assets/hero-beiramar-2.jpg";
@@ -12,11 +12,11 @@ import prop1 from "@/assets/property-1.jpg";
 import prop2 from "@/assets/property-2.jpg";
 import prop3 from "@/assets/property-3.jpg";
 import { listLaunches, listProperties, type PropertyListItem } from "@/lib/properties.functions";
-import { ChromaGrid, type ChromaItem } from "@/components/ChromaGrid";
+import type { ChromaItem } from "@/components/ChromaGrid";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { PropertyFilters } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
-import DomeGallery from "@/components/DomeGallery.jsx";
+import { LazyVisible } from "@/components/LazyVisible";
 import dome01 from "@/assets/dome/michele-01.jpg.asset.json";
 import dome02 from "@/assets/dome/michele-02.jpg.asset.json";
 import dome03 from "@/assets/dome/michele-03.jpg.asset.json";
@@ -32,6 +32,13 @@ import dome12 from "@/assets/dome/michele-12.jpg.asset.json";
 import dome13 from "@/assets/dome/michele-13.jpg.asset.json";
 import dome14 from "@/assets/dome/michele-14.jpg.asset.json";
 import dome15 from "@/assets/dome/michele-15.jpg.asset.json";
+
+// Lazy-loaded heavy components (GSAP / 3D). Mounted only when scrolled into view.
+const ChromaGrid = lazy(() =>
+  import("@/components/ChromaGrid").then((m) => ({ default: m.ChromaGrid })),
+);
+const DomeGallery = lazy(() => import("@/components/DomeGallery.jsx"));
+
 
 const DOME_IMAGES = [
   dome01, dome02, dome03, dome04, dome05, dome06, dome07, dome08,
