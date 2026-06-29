@@ -44,6 +44,17 @@ export function RegioesSection() {
           ))}
         </ul>
 
+        <div className="mt-8 flex justify-center">
+          <Link
+            to="/imoveis"
+            className="inline-flex items-center gap-2 rounded-full ring-1 ring-foreground/15 px-5 py-2.5 text-sm hover:bg-secondary transition"
+          >
+            Ver todos os bairros
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+
         <p className="mt-10 text-sm text-muted-foreground text-center max-w-3xl mx-auto">
           Imóveis de alto padrão em Florianópolis: apartamentos frente mar,
           coberturas duplex, casas em condomínio fechado e lançamentos
