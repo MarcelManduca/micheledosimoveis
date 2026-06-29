@@ -223,7 +223,7 @@ function AdminPage() {
           <div>
             <h2 className="font-display text-2xl tracking-tight">Imóveis cadastrados</h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              A verificação automática roda diariamente e despublica imóveis removidos do site da Gralha.
+              A verificação roda diariamente: atualiza preços, fotos e descrições dos imóveis ativos e despublica os que foram removidos do site da Gralha.
             </p>
           </div>
           <button
@@ -232,14 +232,15 @@ function AdminPage() {
             className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium hover:bg-secondary transition disabled:opacity-60"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${syncMut.isPending ? "animate-spin" : ""}`} />
-            {syncMut.isPending ? "Verificando..." : "Verificar disponibilidade agora"}
+            {syncMut.isPending ? "Sincronizando..." : "Verificar e atualizar agora"}
           </button>
         </div>
         {syncMut.data && (
           <div className="mt-3 rounded-xl bg-secondary/60 px-4 py-3 text-xs text-foreground">
-            Verificados {syncMut.data.checked} · disponíveis {syncMut.data.available} · despublicados {syncMut.data.unpublished} · erros {syncMut.data.errors}
+            Verificados {syncMut.data.checked} · atualizados {syncMut.data.refreshed ?? 0} · disponíveis {syncMut.data.available} · despublicados {syncMut.data.unpublished} · erros {syncMut.data.errors}
           </div>
         )}
+
         {syncMut.error && (
           <div className="mt-3 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
             {(syncMut.error as Error).message}
