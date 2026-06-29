@@ -431,7 +431,7 @@ function buildVisitDays(count = 14) {
   const days: Array<{ key: string; date: Date; weekday: string; day: number; month: string; isWeekend: boolean }> = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  for (let i = 0; i < count; i++) {
+  for (let i = 1; i <= count; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     const wd = d.getDay();
