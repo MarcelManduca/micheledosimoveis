@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SitemapBairrosDotxmlRouteImport } from './routes/sitemap-bairros[.]xml'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -24,6 +25,11 @@ import { Route as ApiPublicHooksSyncPropertiesRouteImport } from './routes/api/p
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapBairrosDotxmlRoute = SitemapBairrosDotxmlRouteImport.update({
+  id: '/sitemap-bairros.xml',
+  path: '/sitemap-bairros.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
@@ -127,6 +136,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/buscar'
     | '/privacidade'
+    | '/sitemap-bairros.xml'
     | '/sitemap.xml'
     | '/imoveis/$slug'
     | '/imovel/$code'
@@ -140,6 +150,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/buscar'
     | '/privacidade'
+    | '/sitemap-bairros.xml'
     | '/sitemap.xml'
     | '/imoveis/$slug'
     | '/imovel/$code'
@@ -153,6 +164,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/buscar'
     | '/privacidade'
+    | '/sitemap-bairros.xml'
     | '/sitemap.xml'
     | '/imoveis/$slug'
     | '/imovel/$code'
@@ -167,6 +179,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   BuscarRoute: typeof BuscarRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  SitemapBairrosDotxmlRoute: typeof SitemapBairrosDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ImoveisSlugRoute: typeof ImoveisSlugRoute
   ImovelCodeRoute: typeof ImovelCodeRoute
@@ -181,6 +194,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-bairros.xml': {
+      id: '/sitemap-bairros.xml'
+      path: '/sitemap-bairros.xml'
+      fullPath: '/sitemap-bairros.xml'
+      preLoaderRoute: typeof SitemapBairrosDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacidade': {
@@ -263,6 +283,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   BuscarRoute: BuscarRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  SitemapBairrosDotxmlRoute: SitemapBairrosDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ImoveisSlugRoute: ImoveisSlugRoute,
   ImovelCodeRoute: ImovelCodeRoute,

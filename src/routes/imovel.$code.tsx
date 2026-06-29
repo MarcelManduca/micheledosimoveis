@@ -51,20 +51,42 @@ export const Route = createFileRoute("/imovel/$code")({
     const images = photos.map((x) => x.url).filter(Boolean);
     if (p.cover_image && !images.includes(p.cover_image)) images.unshift(p.cover_image);
 
+    const nbForBread = findNeighborhoodByName(p.neighborhood);
+    const amenityProps = [
+      ...(p.features ?? []).map((f: string) => ({
+        "@type": "LocationFeatureSpecification",
+        name: f,
+        value: true,
+      })),
+      ...(p.condo_features ?? []).map((f: string) => ({
+        "@type": "LocationFeatureSpecification",
+        name: f,
+        value: true,
+      })),
+    ];
+
     const productLd: Record<string, unknown> = {
       "@context": "https://schema.org",
-      "@type": ["Product", "Accommodation"],
+      "@type": ["Product", "RealEstateListing", "Accommodation"],
       name: p.title,
       sku: String(p.code ?? params.code),
+      productID: String(p.code ?? params.code),
       url,
       image: images.length ? images.slice(0, 8) : undefined,
       description,
       brand: { "@type": "Brand", name: "Michele dos Imóveis" },
       category: p.property_type ?? "Imóvel de alto padrão",
       numberOfRooms: p.bedrooms ?? undefined,
+      numberOfBathroomsTotal: p.bathrooms ?? undefined,
+      numberOfBedrooms: p.bedrooms ?? undefined,
+      numberOfFullBathrooms: p.bathrooms ?? undefined,
+      ...(p.suites
+        ? { numberOfRoomsTotal: (p.bedrooms ?? 0) + (p.suites ?? 0) }
+        : {}),
       floorSize: p.area_m2
         ? { "@type": "QuantitativeValue", value: p.area_m2, unitCode: "MTK" }
         : undefined,
+      amenityFeature: amenityProps.length ? amenityProps : undefined,
       address: {
         "@type": "PostalAddress",
         streetAddress: p.address ?? undefined,
@@ -72,6 +94,15 @@ export const Route = createFileRoute("/imovel/$code")({
         addressRegion: "SC",
         addressCountry: "BR",
       },
+      ...(nbForBread?.geo
+        ? {
+            geo: {
+              "@type": "GeoCoordinates",
+              latitude: nbForBread.geo.lat,
+              longitude: nbForBread.geo.lng,
+            },
+          }
+        : {}),
       offers: p.price_brl
         ? {
             "@type": "Offer",
@@ -79,12 +110,23 @@ export const Route = createFileRoute("/imovel/$code")({
             priceCurrency: "BRL",
             availability: "https://schema.org/InStock",
             url,
-            seller: { "@type": "RealEstateAgent", name: "Michele dos Imóveis" },
+            seller: {
+              "@type": "RealEstateAgent",
+              name: "Michele dos Imóveis",
+              telephone: "+5548991828828",
+              url: "https://micheledosimoveis.lovable.app/",
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "R. Alves de Brito, 285",
+                addressLocality: "Florianópolis",
+                addressRegion: "SC",
+                addressCountry: "BR",
+              },
+            },
           }
         : undefined,
     };
 
-    const nbForBread = findNeighborhoodByName(p.neighborhood);
     const breadcrumbLd = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
