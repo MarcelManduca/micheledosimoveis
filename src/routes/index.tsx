@@ -80,24 +80,24 @@ const WHATSAPP_URL =
   encodeURIComponent("Olá Michele! Vi sua página e gostaria de saber mais sobre imóveis de alto padrão em Florianópolis.");
 
 const REGIOES = [
-  { nome: "Centro / Beira Mar Norte", desc: "Vista mar e localização central" },
-  { nome: "Agronômica", desc: "Próximo ao centro, vista privilegiada" },
-  { nome: "Jurerê Internacional", desc: "Endereço mais exclusivo da Ilha" },
-  { nome: "Jurerê Tradicional", desc: "Praia familiar e tranquila" },
-  { nome: "Praia Brava", desc: "Mar aberto e arquitetura contemporânea" },
-  { nome: "João Paulo", desc: "Vista para a baía, alto padrão residencial" },
-  { nome: "Cacupé", desc: "Mar calmo, pôr do sol e exclusividade" },
-  { nome: "Santo Antônio de Lisboa", desc: "Charme açoriano à beira-mar" },
-  { nome: "Itacorubi", desc: "Bairro nobre, próximo a tudo" },
-  { nome: "Trindade", desc: "Centralidade e valorização constante" },
-  { nome: "Santa Mônica", desc: "Residencial, arborizado, alto padrão" },
-  { nome: "Córrego Grande", desc: "Tranquilidade a minutos do centro" },
-  { nome: "Lagoa da Conceição", desc: "Estilo de vida único na Ilha" },
-  { nome: "Canto da Lagoa", desc: "Reserva, natureza e exclusividade" },
-  { nome: "Campeche", desc: "Praia, lifestyle e novos lançamentos" },
-  { nome: "Novo Campeche", desc: "Empreendimentos contemporâneos pé na areia" },
-  { nome: "Rio Tavares", desc: "Casas em condomínio com amplo terreno" },
-  { nome: "Morro das Pedras", desc: "Vista mar aberta e privacidade" },
+  { slug: "beira-mar-norte", nome: "Centro / Beira Mar Norte", desc: "Vista mar e localização central" },
+  { slug: "agronomica", nome: "Agronômica", desc: "Próximo ao centro, vista privilegiada" },
+  { slug: "jurere-internacional", nome: "Jurerê Internacional", desc: "Endereço mais exclusivo da Ilha" },
+  { slug: "jurere-tradicional", nome: "Jurerê Tradicional", desc: "Praia familiar e tranquila" },
+  { slug: "praia-brava", nome: "Praia Brava", desc: "Mar aberto e arquitetura contemporânea" },
+  { slug: "joao-paulo", nome: "João Paulo", desc: "Vista para a baía, alto padrão residencial" },
+  { slug: "cacupe", nome: "Cacupé", desc: "Mar calmo, pôr do sol e exclusividade" },
+  { slug: "santo-antonio-de-lisboa", nome: "Santo Antônio de Lisboa", desc: "Charme açoriano à beira-mar" },
+  { slug: "itacorubi", nome: "Itacorubi", desc: "Bairro nobre, próximo a tudo" },
+  { slug: "trindade", nome: "Trindade", desc: "Centralidade e valorização constante" },
+  { slug: "santa-monica", nome: "Santa Mônica", desc: "Residencial, arborizado, alto padrão" },
+  { slug: "corrego-grande", nome: "Córrego Grande", desc: "Tranquilidade a minutos do centro" },
+  { slug: "lagoa-da-conceicao", nome: "Lagoa da Conceição", desc: "Estilo de vida único na Ilha" },
+  { slug: "canto-da-lagoa", nome: "Canto da Lagoa", desc: "Reserva, natureza e exclusividade" },
+  { slug: "campeche", nome: "Campeche", desc: "Praia, lifestyle e novos lançamentos" },
+  { slug: "novo-campeche", nome: "Novo Campeche", desc: "Empreendimentos contemporâneos pé na areia" },
+  { slug: "rio-tavares", nome: "Rio Tavares", desc: "Casas em condomínio com amplo terreno" },
+  { slug: "morro-das-pedras", nome: "Morro das Pedras", desc: "Vista mar aberta e privacidade" },
 ];
 
 
@@ -458,11 +458,10 @@ function Index() {
 
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {REGIOES.map((r) => (
-              <li key={r.nome}>
-                <a
-                  href={`${WHATSAPP_URL.split("&text=")[0]}&text=${encodeURIComponent(`Olá Michele! Tenho interesse em imóveis de alto padrão em ${r.nome}, Florianópolis.`)}`}
-                  target="_blank"
-                  rel="noreferrer"
+              <li key={r.slug}>
+                <Link
+                  to="/imoveis/$slug"
+                  params={{ slug: r.slug }}
                   className="group flex items-start gap-4 rounded-2xl bg-card ring-1 ring-black/5 px-5 py-4 hover:shadow-lg hover:ring-black/10 transition"
                 >
                   <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
@@ -473,7 +472,7 @@ function Index() {
                     <span className="block text-xs text-muted-foreground mt-0.5">{r.desc}</span>
                   </span>
                   <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
