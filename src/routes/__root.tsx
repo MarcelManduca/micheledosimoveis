@@ -120,7 +120,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           priceRange: "$$$$",
           address: {
             "@type": "PostalAddress",
-            streetAddress: "Rua Álvares de Brito, 285",
+            streetAddress: "R. Alves de Brito, 285",
             addressLocality: "Florianópolis",
             addressRegion: "SC",
             postalCode: "88015-440",
