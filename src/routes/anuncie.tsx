@@ -11,6 +11,29 @@ import {
   EyeOff,
 } from "lucide-react";
 
+const ANUNCIE_FAQ = [
+  {
+    q: "Como funciona o processo de venda de imóveis de alto padrão com a Michele?",
+    a: "Começamos com uma visita técnica e análise comparativa de mercado para precificação estratégica. Em seguida produzimos fotos e vídeos profissionais, definimos o plano de divulgação (público ou Off Market) e ativamos a carteira de clientes qualificados em Florianópolis e fora do estado.",
+  },
+  {
+    q: "O que é venda Off Market?",
+    a: "É a venda discreta, sem anúncio público. O imóvel é oferecido apenas para uma carteira selecionada de compradores e parceiros, preservando privacidade, exclusividade e poder de negociação.",
+  },
+  {
+    q: "Em quais bairros de Florianópolis você atua?",
+    a: "Centro/Beira Mar Norte, Agronômica, Jurerê (Tradicional e Internacional), Praia Brava, João Paulo, Cacupé, Santo Antônio de Lisboa, Itacorubi, Trindade, Santa Mônica, Córrego Grande, Lagoa da Conceição, Canto da Lagoa, Campeche, Novo Campeche, Rio Tavares e Morro das Pedras.",
+  },
+  {
+    q: "Quanto tempo leva para vender um imóvel de alto padrão?",
+    a: "Depende da precificação, do estágio do mercado e da qualidade do produto. Imóveis bem precificados e bem apresentados normalmente recebem propostas em 30 a 120 dias.",
+  },
+  {
+    q: "Quais documentos preciso ter para anunciar?",
+    a: "Matrícula atualizada, IPTU do ano vigente, regularização junto ao condomínio (se aplicável) e documentação dos proprietários. A Michele orienta toda a checagem antes de ativar a divulgação.",
+  },
+];
+
 export const Route = createFileRoute("/anuncie")({
   head: () => ({
     meta: [
@@ -29,9 +52,24 @@ export const Route = createFileRoute("/anuncie")({
         content:
           "Curadoria imobiliária personalizada para proprietários — venda com discrição, estratégia e acesso aos compradores certos.",
       },
+      { property: "og:type", content: "website" },
       { property: "og:url", content: "https://micheledosimoveis.lovable.app/anuncie" },
     ],
     links: [{ rel: "canonical", href: "https://micheledosimoveis.lovable.app/anuncie" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: ANUNCIE_FAQ.map((f) => ({
+            "@type": "Question",
+            name: f.q,
+            acceptedAnswer: { "@type": "Answer", text: f.a },
+          })),
+        }),
+      },
+    ],
   }),
   component: AnunciePage,
 });
