@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ArrowRight, MapPin, Star, Phone, Instagram, Mail, ShieldCheck, Rocket, Sparkles } from "lucide-react";
 import heroImg from "@/assets/hero-beiramar.jpg";
 import portrait from "@/assets/michele-portrait.jpg";
+import portraitHover from "@/assets/michele-portrait-2.jpg";
 import prop1 from "@/assets/property-1.jpg";
 import prop2 from "@/assets/property-2.jpg";
 import prop3 from "@/assets/property-3.jpg";
@@ -412,14 +413,25 @@ function Index() {
       <section id="sobre" className="bg-secondary/60 border-y border-border">
         <div className="mx-auto max-w-7xl px-6 sm:px-10 py-24 sm:py-32 grid gap-14 lg:grid-cols-2 lg:items-center">
           <div className="relative">
-            <img
-              src={portrait}
-              alt="Michele Prietsch, corretora de imóveis de alto padrão em Florianópolis"
-              loading="lazy"
-              width={800}
-              height={800}
-              className="w-full max-w-md rounded-[28px] object-cover aspect-square shadow-xl"
-            />
+            <div className="group relative w-full max-w-md aspect-square rounded-[28px] overflow-hidden shadow-xl">
+              <img
+                src={portrait}
+                alt="Michele Prietsch, corretora de imóveis de alto padrão em Florianópolis"
+                loading="lazy"
+                width={800}
+                height={800}
+                className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out group-hover:opacity-0"
+              />
+              <img
+                src={portraitHover}
+                alt=""
+                aria-hidden="true"
+                loading="lazy"
+                width={800}
+                height={800}
+                className="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-700 ease-in-out group-hover:opacity-100"
+              />
+            </div>
             <div className="absolute -bottom-6 -right-2 sm:right-10 rounded-2xl bg-background px-5 py-4 shadow-xl ring-1 ring-black/5">
               <div className="font-display text-3xl">+16 anos</div>
               <div className="text-xs text-muted-foreground mt-1">no mercado imobiliário</div>
