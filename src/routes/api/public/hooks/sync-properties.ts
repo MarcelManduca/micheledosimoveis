@@ -1,16 +1,43 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { timingSafeEqual } from "node:crypto";
 
 // Public cron endpoint that triggers the availability sync.
-// Authenticated by Supabase anon key in the `apikey` header (sent by pg_cron),
-// matching the project's publishable key.
+// Authenticated by a dedicated SYNC_WEBHOOK_SECRET (NOT the Supabase
+// publishable key, which is a public client-side value and unsafe as a shared
+// secret). Configure pg_cron / external schedulers with header
+// `x-sync-secret: <SYNC_WEBHOOK_SECRET>`.
+
+function safeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  try {
+    return timingSafeEqual(ab, bb);
+  } catch {
+    return false;
+  }
+}
 
 export const Route = createFileRoute("/api/public/hooks/sync-properties")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apikey = request.headers.get("apikey");
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY;
-        if (!expected || apikey !== expected) {
+        const expected = process.env.SYNC_WEBHOOK_SECRET;
+        if (!expected) {
+          // Misconfiguration — refuse rather than fall back to a public key.
+          return new Response(JSON.stringify({ error: "Webhook not configured" }), {
+            status: 503,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+        // Accept either a dedicated header or Bearer token.
+        const headerSecret = request.headers.get("x-sync-secret") ?? "";
+        const authHeader = request.headers.get("authorization") ?? "";
+        const bearer = authHeader.toLowerCase().startsWith("bearer ")
+          ? authHeader.slice(7).trim()
+          : "";
+        const provided = headerSecret || bearer;
+        if (!provided || !safeEqual(provided, expected)) {
           return new Response(JSON.stringify({ error: "Unauthorized" }), {
             status: 401,
             headers: { "Content-Type": "application/json" },
@@ -24,8 +51,9 @@ export const Route = createFileRoute("/api/public/hooks/sync-properties")({
           return Response.json({ ok: true, ...summary });
         } catch (err) {
           console.error("sync-properties failed", err);
+          // Don't leak internal error messages.
           return new Response(
-            JSON.stringify({ ok: false, error: (err as Error).message }),
+            JSON.stringify({ ok: false, error: "Sync failed" }),
             { status: 500, headers: { "Content-Type": "application/json" } },
           );
         }
