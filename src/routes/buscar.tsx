@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -7,6 +7,7 @@ import { searchProperties, type PropertyListItem } from "@/lib/properties.functi
 import { PropertyFilters, PRECO_FAIXAS, type FiltersValue } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
 import { findNeighborhoodByName } from "@/lib/neighborhoods";
+import { buildWhatsAppUrl } from "@/lib/site-config";
 
 const searchSchema = z.object({
   tipo: fallback(z.string().optional(), undefined),
