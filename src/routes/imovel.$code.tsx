@@ -18,6 +18,7 @@ import {
   MapPin,
   Maximize,
   Car,
+  Send,
 } from "lucide-react";
 
 export const Route = createFileRoute("/imovel/$code")({
@@ -431,7 +432,7 @@ function buildVisitDays(count = 14) {
   const days: Array<{ key: string; date: Date; weekday: string; day: number; month: string; isWeekend: boolean }> = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  for (let i = 0; i < count; i++) {
+  for (let i = 1; i <= count; i++) {
     const d = new Date(today);
     d.setDate(today.getDate() + i);
     const wd = d.getDay();
@@ -567,7 +568,8 @@ function ScheduleVisitDialog({
                   : "bg-secondary text-muted-foreground cursor-not-allowed"
               }`}
             >
-              Confirmar no WhatsApp
+              <Send className="h-4 w-4" />
+              Enviar pelo WhatsApp
             </a>
           </div>
         </div>
