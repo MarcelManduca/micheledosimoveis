@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense, useState } from "react";
-import { ArrowRight, MapPin, Star, Phone, Instagram, Mail, ShieldCheck, Rocket, Sparkles } from "lucide-react";
+import { ArrowRight, MapPin, Star, Phone, Instagram, Mail, ShieldCheck, Rocket, Sparkles, Menu, X } from "lucide-react";
 import heroImg from "@/assets/hero-beiramar.jpg";
 import heroImg2 from "@/assets/hero-beiramar-2.jpg";
 import heroImg3 from "@/assets/hero-beiramar-3.jpg";
