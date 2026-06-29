@@ -10,6 +10,7 @@ function brl(n: number | null) {
 
 export function PropertyCard({ p }: { p: PropertyListItem }) {
   const nb = findNeighborhoodByName(p.neighborhood);
+  return (
     <Link
       to="/imovel/$code"
       params={{ code: p.code }}
