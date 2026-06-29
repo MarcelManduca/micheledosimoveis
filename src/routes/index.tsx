@@ -198,13 +198,15 @@ function Index() {
       {/* Hero */}
       <section id="top" className="relative px-3 sm:px-5 pt-3">
         <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px]">
-          <img
-            src={heroImg}
-            alt="Imóvel de alto padrão em Florianópolis com vista para o mar"
-            width={1920}
-            height={1280}
-            className="h-[88vh] min-h-[600px] w-full object-cover"
-          />
+          <div className="h-[88vh] min-h-[600px] w-full overflow-hidden">
+            <img
+              src={heroImg}
+              alt="Imóvel de alto padrão em Florianópolis com vista para o mar"
+              width={1920}
+              height={1280}
+              className="h-full w-full object-cover origin-center animate-hero-zoom will-change-transform motion-reduce:animate-none"
+            />
+          </div>
           <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/25 to-black/70" />
 
           <div className="absolute inset-0 flex items-center">
