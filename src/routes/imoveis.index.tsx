@@ -56,6 +56,19 @@ export const Route = createFileRoute("/imoveis/")({
         url: `${SITE}/imoveis/${n.slug}`,
       })),
     };
+    const itemList = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      name: "Bairros de atuação em Florianópolis",
+      numberOfItems: NEIGHBORHOODS.length,
+      itemListOrder: "https://schema.org/ItemListOrderAscending",
+      itemListElement: NEIGHBORHOODS.map((n, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        url: `${SITE}/imoveis/${n.slug}`,
+        name: `Imóveis em ${n.name}, Florianópolis`,
+      })),
+    };
     return {
       meta: [
         { title },
@@ -69,6 +82,7 @@ export const Route = createFileRoute("/imoveis/")({
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(breadcrumbs) },
         { type: "application/ld+json", children: JSON.stringify(collection) },
+        { type: "application/ld+json", children: JSON.stringify(itemList) },
       ],
     };
   },

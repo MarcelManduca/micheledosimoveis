@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { getPropertyByCode } from "@/lib/properties.functions";
+import { findNeighborhoodByName } from "@/lib/neighborhoods";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CalendarCheck } from "lucide-react";
 
@@ -83,14 +84,22 @@ export const Route = createFileRoute("/imovel/$code")({
         : undefined,
     };
 
+    const nbForBread = findNeighborhoodByName(p.neighborhood);
     const breadcrumbLd = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Início", item: "https://micheledosimoveis.lovable.app/" },
-        { "@type": "ListItem", position: 2, name: "Buscar imóveis", item: "https://micheledosimoveis.lovable.app/buscar" },
+        { "@type": "ListItem", position: 2, name: "Imóveis por bairro", item: "https://micheledosimoveis.lovable.app/imoveis" },
         ...(p.neighborhood
-          ? [{ "@type": "ListItem", position: 3, name: p.neighborhood, item: `https://micheledosimoveis.lovable.app/buscar?bairro=${encodeURIComponent(p.neighborhood)}` }]
+          ? [{
+              "@type": "ListItem",
+              position: 3,
+              name: nbForBread?.name ?? p.neighborhood,
+              item: nbForBread
+                ? `https://micheledosimoveis.lovable.app/imoveis/${nbForBread.slug}`
+                : `https://micheledosimoveis.lovable.app/buscar?bairro=${encodeURIComponent(p.neighborhood)}`,
+            }]
           : []),
         { "@type": "ListItem", position: p.neighborhood ? 4 : 3, name: p.title, item: url },
       ],
@@ -302,8 +311,27 @@ function PropertyPage() {
           <div className="mt-4 flex items-center gap-2 text-muted-foreground">
             <MapPin className="h-4 w-4" />
             <span>
-              {[p.neighborhood, p.city, p.state].filter(Boolean).join(", ")}
-              {p.condo_name ? ` · ${p.condo_name}` : ""}
+              {(() => {
+                const nb = findNeighborhoodByName(p.neighborhood);
+                return (
+                  <>
+                    {nb ? (
+                      <Link
+                        to="/imoveis/$slug"
+                        params={{ slug: nb.slug }}
+                        className="underline-offset-2 hover:underline hover:text-foreground transition"
+                      >
+                        {p.neighborhood}
+                      </Link>
+                    ) : (
+                      p.neighborhood
+                    )}
+                    {p.neighborhood && (p.city || p.state) ? ", " : ""}
+                    {[p.city, p.state].filter(Boolean).join(", ")}
+                    {p.condo_name ? ` · ${p.condo_name}` : ""}
+                  </>
+                );
+              })()}
             </span>
           </div>
 

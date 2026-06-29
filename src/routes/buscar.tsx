@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { searchProperties, type PropertyListItem } from "@/lib/properties.functions";
 import { PropertyFilters, PRECO_FAIXAS, type FiltersValue } from "@/components/PropertyFilters";
 import { PropertyCard } from "@/components/PropertyCard";
+import { findNeighborhoodByName } from "@/lib/neighborhoods";
 
 const searchSchema = z.object({
   tipo: fallback(z.string().optional(), undefined),
@@ -32,9 +33,18 @@ export const Route = createFileRoute("/buscar")({
   head: ({ match }) => {
     const search = (match.search ?? {}) as z.infer<typeof searchSchema>;
     const hasFilters = Boolean(search.tipo || search.bairro || search.dorms != null || search.faixa != null);
+    const onlyBairro =
+      Boolean(search.bairro) && !search.tipo && search.dorms == null && search.faixa == null;
+    const nb = onlyBairro ? findNeighborhoodByName(search.bairro) : undefined;
     const baseTitle = "Buscar imóveis em Florianópolis | Michele dos Imóveis";
     const baseDesc =
       "Pesquise imóveis de alto padrão em Florianópolis por bairro, tipo, dormitórios e faixa de preço com curadoria de Michele Prietsch.";
+    // Canonical consistente do bairro: quando o filtro é apenas o bairro
+    // e ele corresponde a uma região programática, apontamos canonical e
+    // og:url para /imoveis/$slug (a versão canônica do bairro).
+    const canonical = nb
+      ? `https://micheledosimoveis.lovable.app/imoveis/${nb.slug}`
+      : "https://micheledosimoveis.lovable.app/buscar";
     return {
       meta: [
         { title: baseTitle },
@@ -42,13 +52,14 @@ export const Route = createFileRoute("/buscar")({
         { property: "og:title", content: baseTitle },
         { property: "og:description", content: baseDesc },
         { property: "og:type", content: "website" },
-        { property: "og:url", content: "https://micheledosimoveis.lovable.app/buscar" },
-        // Filtered variants are duplicates of /buscar — noindex but allow follow
+        { property: "og:url", content: canonical },
+        // Variantes com filtros (incluindo o caso bairro canonicalizado)
+        // são duplicatas — noindex,follow.
         ...(hasFilters
           ? [{ name: "robots" as const, content: "noindex,follow" }]
           : []),
       ],
-      links: [{ rel: "canonical", href: "https://micheledosimoveis.lovable.app/buscar" }],
+      links: [{ rel: "canonical", href: canonical }],
     };
   },
   errorComponent: ({ error, reset }) => (
