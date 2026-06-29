@@ -458,11 +458,10 @@ function Index() {
 
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {REGIOES.map((r) => (
-              <li key={r.nome}>
-                <a
-                  href={`${WHATSAPP_URL.split("&text=")[0]}&text=${encodeURIComponent(`Olá Michele! Tenho interesse em imóveis de alto padrão em ${r.nome}, Florianópolis.`)}`}
-                  target="_blank"
-                  rel="noreferrer"
+              <li key={r.slug}>
+                <Link
+                  to="/imoveis/$slug"
+                  params={{ slug: r.slug }}
                   className="group flex items-start gap-4 rounded-2xl bg-card ring-1 ring-black/5 px-5 py-4 hover:shadow-lg hover:ring-black/10 transition"
                 >
                   <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
@@ -473,7 +472,7 @@ function Index() {
                     <span className="block text-xs text-muted-foreground mt-0.5">{r.desc}</span>
                   </span>
                   <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
