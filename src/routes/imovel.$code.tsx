@@ -27,16 +27,95 @@ export const Route = createFileRoute("/imovel/$code")({
     if (!result) throw notFound();
     return result;
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.property.title} · Michele Prietsch` },
-          { name: "description", content: loaderData.property.description?.slice(0, 160) ?? "" },
-          { property: "og:title", content: loaderData.property.title },
-          { property: "og:image", content: loaderData.property.cover_image ?? "" },
-        ]
-      : [{ title: "Imóvel · Michele Prietsch" }],
-  }),
+  head: ({ params, loaderData }) => {
+    if (!loaderData) return { meta: [{ title: "Imóvel · Michele Prietsch" }] };
+    const p = loaderData.property as any;
+    const url = `https://micheledosimoveis.lovable.app/imovel/${params.code}`;
+    const localizacao = [p.neighborhood, p.city].filter(Boolean).join(", ");
+    const titleSeo = `${p.title}${p.neighborhood ? ` — ${p.neighborhood}` : ""}, Florianópolis | Michele dos Imóveis`;
+    const descAuto = [
+      p.bedrooms ? `${p.bedrooms} dormitórios` : null,
+      p.bathrooms ? `${p.bathrooms} banheiros` : null,
+      p.area_m2 ? `${p.area_m2}m²` : null,
+      p.price_brl
+        ? `R$ ${Number(p.price_brl).toLocaleString("pt-BR")}`
+        : null,
+      localizacao || null,
+      "Atendimento Michele Prietsch.",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    const description = (p.description?.slice(0, 160) || descAuto).trim();
+    const photos = (loaderData.photos as Array<{ url: string }> | undefined) ?? [];
+    const images = photos.map((x) => x.url).filter(Boolean);
+    if (p.cover_image && !images.includes(p.cover_image)) images.unshift(p.cover_image);
+
+    const productLd: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": ["Product", "Accommodation"],
+      name: p.title,
+      sku: String(p.code ?? params.code),
+      url,
+      image: images.length ? images.slice(0, 8) : undefined,
+      description,
+      brand: { "@type": "Brand", name: "Michele dos Imóveis" },
+      category: p.property_type ?? "Imóvel de alto padrão",
+      numberOfRooms: p.bedrooms ?? undefined,
+      floorSize: p.area_m2
+        ? { "@type": "QuantitativeValue", value: p.area_m2, unitCode: "MTK" }
+        : undefined,
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: p.address ?? undefined,
+        addressLocality: p.city ?? "Florianópolis",
+        addressRegion: "SC",
+        addressCountry: "BR",
+      },
+      offers: p.price_brl
+        ? {
+            "@type": "Offer",
+            price: p.price_brl,
+            priceCurrency: "BRL",
+            availability: "https://schema.org/InStock",
+            url,
+            seller: { "@type": "RealEstateAgent", name: "Michele dos Imóveis" },
+          }
+        : undefined,
+    };
+
+    const breadcrumbLd = {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Início", item: "https://micheledosimoveis.lovable.app/" },
+        { "@type": "ListItem", position: 2, name: "Buscar imóveis", item: "https://micheledosimoveis.lovable.app/buscar" },
+        ...(p.neighborhood
+          ? [{ "@type": "ListItem", position: 3, name: p.neighborhood, item: `https://micheledosimoveis.lovable.app/buscar?bairro=${encodeURIComponent(p.neighborhood)}` }]
+          : []),
+        { "@type": "ListItem", position: p.neighborhood ? 4 : 3, name: p.title, item: url },
+      ],
+    };
+
+    return {
+      meta: [
+        { title: titleSeo },
+        { name: "description", content: description },
+        { property: "og:title", content: titleSeo },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "product" },
+        { property: "og:url", content: url },
+        ...(p.cover_image ? [{ property: "og:image" as const, content: p.cover_image }] : []),
+        ...(p.cover_image ? [{ name: "twitter:image" as const, content: p.cover_image }] : []),
+        ...(p.price_brl ? [{ property: "product:price:amount" as const, content: String(p.price_brl) }] : []),
+        ...(p.price_brl ? [{ property: "product:price:currency" as const, content: "BRL" }] : []),
+      ],
+      links: [{ rel: "canonical", href: url }],
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(productLd) },
+        { type: "application/ld+json", children: JSON.stringify(breadcrumbLd) },
+      ],
+    };
+  },
   component: PropertyPage,
   notFoundComponent: () => (
     <div className="min-h-screen grid place-items-center px-6 text-center">
