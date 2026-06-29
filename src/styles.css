@@ -67,26 +67,38 @@
 }
 
 :root {
-  --radius: 1rem;
-  --background: oklch(0.985 0.005 90);
-  --foreground: oklch(0.18 0.015 60);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.18 0.015 60);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.18 0.015 60);
-  --primary: oklch(0.32 0.04 50);
-  --primary-foreground: oklch(0.985 0.005 90);
-  --secondary: oklch(0.94 0.015 75);
-  --secondary-foreground: oklch(0.25 0.025 60);
-  --muted: oklch(0.95 0.012 80);
-  --muted-foreground: oklch(0.45 0.02 60);
-  --accent: oklch(0.72 0.12 60);
-  --accent-foreground: oklch(0.15 0.02 60);
+  --radius: 1.1rem;
+
+  /* Warm, paper-like background with soft cream surfaces */
+  --background: oklch(0.982 0.008 85);
+  --foreground: oklch(0.18 0.018 55);
+
+  --card: oklch(0.995 0.004 85);
+  --card-foreground: oklch(0.18 0.018 55);
+  --popover: oklch(0.995 0.004 85);
+  --popover-foreground: oklch(0.18 0.018 55);
+
+  /* Espresso primary — sophisticated, less flat than pure black */
+  --primary: oklch(0.255 0.028 50);
+  --primary-foreground: oklch(0.985 0.008 85);
+
+  --secondary: oklch(0.945 0.018 78);
+  --secondary-foreground: oklch(0.25 0.025 55);
+
+  --muted: oklch(0.955 0.014 80);
+  --muted-foreground: oklch(0.48 0.022 60);
+
+  /* Refined champagne / brass accent */
+  --accent: oklch(0.74 0.105 75);
+  --accent-foreground: oklch(0.16 0.022 55);
+
   --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --destructive-foreground: oklch(0.985 0.008 85);
+
+  --border: oklch(0.9 0.012 75);
+  --input: oklch(0.92 0.012 75);
+  --ring: oklch(0.74 0.105 75);
+
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -100,28 +112,42 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+
+  /* Premium gradients & shadows (semantic tokens) */
+  --gradient-warm: linear-gradient(180deg, oklch(0.985 0.008 85) 0%, oklch(0.955 0.018 78) 100%);
+  --gradient-accent: linear-gradient(135deg, oklch(0.78 0.11 78) 0%, oklch(0.66 0.12 60) 100%);
+  --gradient-primary: linear-gradient(135deg, oklch(0.28 0.03 55) 0%, oklch(0.18 0.02 50) 100%);
+
+  --shadow-xs: 0 1px 2px 0 oklch(0.18 0.018 55 / 0.04);
+  --shadow-sm: 0 2px 6px -2px oklch(0.18 0.018 55 / 0.06), 0 1px 2px -1px oklch(0.18 0.018 55 / 0.04);
+  --shadow-md: 0 10px 30px -12px oklch(0.18 0.018 55 / 0.12), 0 2px 6px -2px oklch(0.18 0.018 55 / 0.06);
+  --shadow-lg: 0 24px 60px -20px oklch(0.18 0.018 55 / 0.18), 0 8px 20px -10px oklch(0.18 0.018 55 / 0.10);
+  --shadow-elegant: 0 30px 80px -30px oklch(0.32 0.04 50 / 0.28);
+  --shadow-glow: 0 0 0 1px oklch(0.74 0.105 75 / 0.18), 0 20px 50px -20px oklch(0.74 0.105 75 / 0.35);
+
+  --transition-smooth: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
+  --background: oklch(0.16 0.012 55);
+  --foreground: oklch(0.97 0.008 85);
+  --card: oklch(0.2 0.014 55);
+  --card-foreground: oklch(0.97 0.008 85);
+  --popover: oklch(0.2 0.014 55);
+  --popover-foreground: oklch(0.97 0.008 85);
+  --primary: oklch(0.97 0.008 85);
+  --primary-foreground: oklch(0.2 0.014 55);
+  --secondary: oklch(0.26 0.018 55);
+  --secondary-foreground: oklch(0.97 0.008 85);
+  --muted: oklch(0.26 0.018 55);
+  --muted-foreground: oklch(0.72 0.018 75);
+  --accent: oklch(0.74 0.105 75);
+  --accent-foreground: oklch(0.16 0.022 55);
   --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
+  --destructive-foreground: oklch(0.985 0.008 85);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
+  --ring: oklch(0.74 0.105 75);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -142,11 +168,67 @@
     border-color: var(--color-border);
   }
 
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-feature-settings: "ss01", "cv11", "kern";
+    letter-spacing: -0.005em;
+  }
+
+  /* Display typography — refined Fraunces with optical sizing */
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-feature-settings: "ss01", "ss02", "kern", "liga";
+    font-optical-sizing: auto;
+    letter-spacing: -0.022em;
+    line-height: 1.08;
+  }
+
+  h1 { font-weight: 500; letter-spacing: -0.03em; }
+  h2 { font-weight: 500; }
+  h3 { font-weight: 500; letter-spacing: -0.018em; }
+
+  /* Smooth focus rings using the accent ring token */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Refined selection */
+  ::selection {
+    background-color: oklch(0.74 0.105 75 / 0.35);
+    color: var(--foreground);
   }
 }
+
+/* Premium utility helpers (semantic, opt-in) */
+@utility shadow-elegant {
+  box-shadow: var(--shadow-elegant);
+}
+@utility shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+@utility bg-gradient-warm {
+  background-image: var(--gradient-warm);
+}
+@utility bg-gradient-accent {
+  background-image: var(--gradient-accent);
+}
+@utility bg-gradient-primary {
+  background-image: var(--gradient-primary);
+}
+@utility transition-smooth {
+  transition-timing-function: var(--transition-smooth);
+  transition-duration: 400ms;
+}
+
 
 /* Cinematic hero zoom (Ken Burns) */
 @keyframes hero-zoom {
