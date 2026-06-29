@@ -226,6 +226,126 @@ o GitHub já dispara o deploy** — nenhum comando manual é necessário.
 
 ---
 
+## Cenário B.1 — Hospedagem específica na Hostinger
+
+A Hostinger oferece três famílias de planos. Só **uma delas** roda este
+projeto sem adaptações, porque o site é **SSR (Node.js)**, não HTML estático:
+
+| Plano Hostinger | Roda este projeto? | Por quê |
+|---|---|---|
+| **VPS (KVM 1/2/4/8)** | ✅ **Recomendado** | Acesso root, Node 20, PM2, Nginx, Certbot. |
+| **Cloud Hosting** | ⚠️ Parcial | Suporta Node em alguns planos; confirme com o suporte antes. |
+| **Hospedagem Compartilhada / Premium / Business** | ❌ Não | Só PHP + estático. Não roda servidor Node persistente. |
+
+> Se o plano contratado for compartilhado, faça **upgrade para um VPS KVM**
+> (a partir do KVM 1 com 1 vCPU / 4 GB já roda confortavelmente).
+
+### Passo a passo na VPS Hostinger (KVM, Ubuntu 22.04+)
+
+#### 1. Provisionar a VPS no hPanel
+1. hPanel → **VPS** → escolha um plano KVM.
+2. Sistema operacional: **Ubuntu 22.04 (ou 24.04) limpo** — *não* use template
+   "Node.js" da Hostinger, que vem com versões antigas.
+3. Defina senha root e anote o **IP público** da VPS.
+
+#### 2. Apontar o domínio para a VPS
+No hPanel → **Domínios** → DNS Zone Editor do seu domínio:
+
+| Tipo | Nome | Valor | TTL |
+|------|------|-------|-----|
+| A | `@` | IP da VPS | 3600 |
+| A | `www` | IP da VPS | 3600 |
+
+Se o domínio está em outro registrador, faça o mesmo lá. Aguarde a
+propagação (alguns minutos a poucas horas).
+
+#### 3. Conectar via SSH
+```bash
+ssh root@<IP-da-VPS>
+```
+
+#### 4. Rodar o setup automatizado
+Já incluímos um script idempotente que instala Node 20, Bun, PM2, Nginx,
+clona o repositório, gera o build e sobe o processo:
+
+```bash
+# Na VPS, como root:
+apt-get update && apt-get install -y git
+git clone https://github.com/<seu-usuario>/<seu-repo>.git /var/www/michele-imoveis
+cd /var/www/michele-imoveis
+
+# Edita o .env antes de subir
+cp .env.example .env
+nano .env   # cole as chaves reais do backend (VITE_SUPABASE_*, SUPABASE_*, SYNC_WEBHOOK_SECRET)
+
+# Roda o setup
+REPO_URL="https://github.com/<seu-usuario>/<seu-repo>.git" \
+APP_DIR="/var/www/michele-imoveis" \
+DOMAIN="micheledosimoveis.com.br" \
+bash deploy/hostinger-setup.sh
+```
+
+O script faz:
+- Instala Node 20 LTS, Bun, PM2, Nginx, UFW.
+- `bun install && bun run build`.
+- `pm2 start ecosystem.config.cjs` + `pm2 save` + arranque automático no boot.
+- Configura Nginx como reverse proxy (`deploy/nginx-hostinger.conf`).
+- Libera firewall para SSH + HTTP/HTTPS.
+
+#### 5. Ativar SSL/HTTPS (Let's Encrypt)
+```bash
+apt-get install -y certbot python3-certbot-nginx
+certbot --nginx -d micheledosimoveis.com.br -d www.micheledosimoveis.com.br
+```
+Renovação automática já vem agendada via `systemctl list-timers | grep certbot`.
+
+#### 6. Atualizar após novo commit no GitHub
+```bash
+cd /var/www/michele-imoveis
+bash deploy/update.sh
+```
+
+O script faz `git pull → bun install → bun run build → pm2 reload`. Você
+também pode automatizar isso com um **webhook do GitHub** + endpoint próprio,
+ou simplesmente rodar manualmente quando o Lovable publicar novas versões.
+
+#### 7. Cron de sincronização diária (opcional)
+Para manter o status dos imóveis em dia (verifica se a Gralha ainda
+publica cada anúncio), agende um POST para o endpoint público:
+
+```bash
+# /etc/cron.d/michele-sync
+0 6 * * * root curl -fsS -X POST \
+  -H "x-sync-secret: $SYNC_WEBHOOK_SECRET" \
+  https://micheledosimoveis.com.br/api/public/hooks/sync-properties \
+  >/var/log/michele-sync.log 2>&1
+```
+
+(Defina `SYNC_WEBHOOK_SECRET` em `/etc/environment` ou inline no cron.)
+
+### Arquivos de deploy versionados neste repo
+
+| Arquivo | Função |
+|---|---|
+| `.env.example` | Modelo de variáveis de ambiente para a VPS. |
+| `ecosystem.config.cjs` | Configuração PM2 (processo Node SSR). |
+| `deploy/hostinger-setup.sh` | Setup completo da VPS (idempotente). |
+| `deploy/nginx-hostinger.conf` | Reverse proxy + cache de assets. |
+| `deploy/update.sh` | Pull + build + reload após cada novo commit. |
+
+### Checklist final Hostinger
+
+- [ ] Plano **VPS KVM** contratado (não compartilhado).
+- [ ] DNS A `@` e `www` apontando para o IP da VPS (propagado).
+- [ ] `.env` preenchido na VPS com chaves reais do backend.
+- [ ] `pm2 status` mostra `michele-imoveis` como **online**.
+- [ ] `nginx -t` retorna `syntax is ok`.
+- [ ] Certbot emitiu certificado e HTTPS responde 200.
+- [ ] Site abre em `https://micheledosimoveis.com.br` e `https://www.…`.
+- [ ] `bash deploy/update.sh` roda sem erro após um `git pull`.
+
+---
+
 ## Rotina recomendada de atualização
 
 1. **Editar** o projeto no Lovable.
@@ -263,14 +383,14 @@ o GitHub já dispara o deploy** — nenhum comando manual é necessário.
 
 ### Diferenças entre publicar pelo Lovable e pela hospedagem própria
 
-|  | **Lovable** | **Hospedagem própria** |
+|  | **Lovable** | **Hospedagem própria (Hostinger VPS)** |
 |--|--|--|
-| Configuração inicial | Zero | Servidor + DNS + SSL |
-| Domínio próprio | Suportado (DNS apontando para Lovable) | Total controle do DNS |
-| Custo | Plano Lovable | Custo do servidor escolhido |
-| Atualização | 1 clique em "Update" | `git pull` + build + restart |
-| Runtime | Cloudflare Workers (gerenciado) | À sua escolha (Node, Workers, etc.) |
-| Backup do código | GitHub (se conectado) | GitHub + sua própria infra |
+| Configuração inicial | Zero | VPS + DNS + SSL (script `deploy/hostinger-setup.sh`) |
+| Domínio próprio | Suportado (DNS apontando para Lovable) | Total controle do DNS no hPanel |
+| Custo | Plano Lovable | Plano VPS KVM Hostinger |
+| Atualização | 1 clique em "Update" | `bash deploy/update.sh` (pull + build + reload) |
+| Runtime | Cloudflare Workers (gerenciado) | Node 20 + PM2 + Nginx |
+| Backup do código | GitHub (se conectado) | GitHub + snapshot da VPS |
 | Dependência operacional | Depende do Lovable estar no ar | Independente |
 | Ideal para | Iteração rápida, MVP, validação | Produção definitiva, escala, controle |
 
