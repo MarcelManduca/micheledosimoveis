@@ -159,35 +159,47 @@
   animation: hero-zoom 22s ease-in-out infinite;
 }
 
-/* Cross-fade between three hero images (33s loop) */
+/* Cross-fade between four hero images (44s loop, 25% per image) */
 @keyframes hero-fade-a {
-  0%, 30%   { opacity: 1; }
-  37%, 97%  { opacity: 0; }
+  0%, 22%   { opacity: 1; }
+  29%, 93%  { opacity: 0; }
   100%      { opacity: 1; }
 }
 @keyframes hero-fade-b {
-  0%, 30%   { opacity: 0; }
-  37%, 63%  { opacity: 1; }
-  70%, 100% { opacity: 0; }
+  0%, 22%   { opacity: 0; }
+  29%, 47%  { opacity: 1; }
+  54%, 100% { opacity: 0; }
+}
+@keyframes hero-fade-d {
+  0%, 47%   { opacity: 0; }
+  54%, 72%  { opacity: 1; }
+  79%, 100% { opacity: 0; }
 }
 @keyframes hero-fade-c {
-  0%, 63%   { opacity: 0; }
-  70%, 97%  { opacity: 1; }
+  0%, 72%   { opacity: 0; }
+  79%, 97%  { opacity: 1; }
   100%      { opacity: 0; }
 }
-/* Horizontal pan for the middle image */
+/* Horizontal pan (left → right) for image B */
 @keyframes hero-pan-x {
   0%   { transform: scale(1.12) translate3d(-3%, 0, 0); }
   100% { transform: scale(1.12) translate3d(3%, 0, 0); }
 }
-.animate-hero-fade-a { animation: hero-zoom 33s ease-in-out infinite, hero-fade-a 33s ease-in-out infinite; }
-.animate-hero-fade-b { animation: hero-pan-x 33s ease-in-out infinite, hero-fade-b 33s ease-in-out infinite; }
-.animate-hero-fade-c { animation: hero-zoom 33s ease-in-out infinite, hero-fade-c 33s ease-in-out infinite; }
+/* Horizontal pan (right → left) for image D — opposite direction */
+@keyframes hero-pan-x-reverse {
+  0%   { transform: scale(1.12) translate3d(3%, 0, 0); }
+  100% { transform: scale(1.12) translate3d(-3%, 0, 0); }
+}
+.animate-hero-fade-a { animation: hero-zoom 44s ease-in-out infinite, hero-fade-a 44s ease-in-out infinite; }
+.animate-hero-fade-b { animation: hero-pan-x 44s ease-in-out infinite, hero-fade-b 44s ease-in-out infinite; }
+.animate-hero-fade-d { animation: hero-pan-x-reverse 44s ease-in-out infinite, hero-fade-d 44s ease-in-out infinite; }
+.animate-hero-fade-c { animation: hero-zoom 44s ease-in-out infinite, hero-fade-c 44s ease-in-out infinite; }
 
 @media (prefers-reduced-motion: reduce) {
   .animate-hero-zoom { animation: none; }
   .animate-hero-fade-a,
   .animate-hero-fade-b,
-  .animate-hero-fade-c { animation: none; }
+  .animate-hero-fade-c,
+  .animate-hero-fade-d { animation: none; }
 }
 

@@ -5,6 +5,7 @@ import { ArrowRight, MapPin, Star, Phone, Instagram, Mail, ShieldCheck, Rocket, 
 import heroImg from "@/assets/hero-beiramar.jpg";
 import heroImg2 from "@/assets/hero-beiramar-2.jpg";
 import heroImg3 from "@/assets/hero-beiramar-3.jpg";
+import heroImg4 from "@/assets/hero-beiramar-4.jpg";
 import portrait from "@/assets/michele-portrait.jpg";
 import portraitHover from "@/assets/michele-portrait-2.jpg";
 import prop1 from "@/assets/property-1.jpg";
@@ -216,6 +217,14 @@ function Index() {
               height={1280}
               aria-hidden="true"
               className="absolute inset-0 h-full w-full object-cover origin-center animate-hero-fade-b will-change-transform motion-reduce:animate-none motion-reduce:opacity-0"
+            />
+            <img
+              src={heroImg4}
+              alt="Orla da Beira-Mar Norte com edifícios à beira da baía"
+              width={1920}
+              height={1280}
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full object-cover origin-center animate-hero-fade-d will-change-transform motion-reduce:animate-none motion-reduce:opacity-0"
             />
             <img
               src={heroImg2}
