@@ -701,6 +701,55 @@ function ChromaGridProperties({ items }: { items: PropertyListItem[] }) {
 
 }
 
+function ExpandableProperties({
+  items,
+  viewAllHref,
+  viewAllSearch,
+}: {
+  items: PropertyListItem[];
+  viewAllHref: string;
+  viewAllSearch?: Record<string, string>;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const INITIAL = 6;
+  const EXPANDED = 12;
+  const visibleCount = expanded ? Math.min(items.length, EXPANDED) : Math.min(items.length, INITIAL);
+  const visible = items.slice(0, visibleCount);
+  const canExpand = !expanded && items.length > INITIAL;
+  const showViewAll = items.length > EXPANDED && (expanded || items.length <= INITIAL ? true : false);
+
+  return (
+    <div className="space-y-10">
+      <ChromaGridProperties items={visible} />
+      {(canExpand || showViewAll) && (
+        <div className="flex justify-center">
+          {canExpand ? (
+            <button
+              type="button"
+              onClick={() => setExpanded(true)}
+              className="inline-flex items-center gap-2 rounded-full border border-foreground/20 px-6 py-3 text-sm font-medium tracking-wide hover:bg-foreground hover:text-background transition-colors"
+            >
+              Ver mais imóveis
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          ) : (
+            <Link
+              to={viewAllHref as any}
+              search={viewAllSearch as any}
+              className="inline-flex items-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium tracking-wide text-background hover:bg-foreground/90 transition-colors"
+            >
+              Ver todos
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
+
 
 function LaunchesAndFeatured({ items }: { items: PropertyListItem[] }) {
   const launches = useQuery({
