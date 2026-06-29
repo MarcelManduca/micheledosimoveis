@@ -447,6 +447,47 @@ function PropertyPage() {
               </div>
             </div>
           )}
+
+          {(() => {
+            const nb = findNeighborhoodByName(p.neighborhood);
+            if (!nb) return null;
+            const waBairro = `https://api.whatsapp.com/send?phone=5548991828828&text=${encodeURIComponent(
+              `Olá Michele! Quero ver mais opções de alto padrão em ${nb.name}, Florianópolis.`,
+            )}`;
+            return (
+              <div className="mt-12 rounded-3xl bg-secondary/60 ring-1 ring-black/5 p-6 sm:p-8">
+                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                  Explorar o bairro
+                </div>
+                <h2 className="mt-2 font-display text-2xl sm:text-3xl tracking-tight">
+                  Mais imóveis em {nb.name}
+                </h2>
+                <p className="mt-3 text-sm text-muted-foreground max-w-2xl leading-relaxed">
+                  {nb.tag}. Veja o portfólio completo selecionado por Michele
+                  Prietsch na região ou peça uma curadoria sob medida —
+                  incluindo opções <strong className="text-foreground">off market</strong>{" "}
+                  que não aparecem em listagens públicas.
+                </p>
+                <div className="mt-5 flex flex-wrap gap-3">
+                  <Link
+                    to="/imoveis/$slug"
+                    params={{ slug: nb.slug }}
+                    className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-5 py-2.5 text-sm font-medium hover:opacity-90 transition"
+                  >
+                    Ver imóveis em {nb.name}
+                  </Link>
+                  <a
+                    href={waBairro}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-full ring-1 ring-black/10 px-5 py-2.5 text-sm hover:bg-background transition"
+                  >
+                    Pedir curadoria de {nb.name}
+                  </a>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* Sidebar */}
