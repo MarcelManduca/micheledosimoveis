@@ -383,14 +383,14 @@ publica cada anúncio), agende um POST para o endpoint público:
 
 ### Diferenças entre publicar pelo Lovable e pela hospedagem própria
 
-|  | **Lovable** | **Hospedagem própria** |
+|  | **Lovable** | **Hospedagem própria (Hostinger VPS)** |
 |--|--|--|
-| Configuração inicial | Zero | Servidor + DNS + SSL |
-| Domínio próprio | Suportado (DNS apontando para Lovable) | Total controle do DNS |
-| Custo | Plano Lovable | Custo do servidor escolhido |
-| Atualização | 1 clique em "Update" | `git pull` + build + restart |
-| Runtime | Cloudflare Workers (gerenciado) | À sua escolha (Node, Workers, etc.) |
-| Backup do código | GitHub (se conectado) | GitHub + sua própria infra |
+| Configuração inicial | Zero | VPS + DNS + SSL (script `deploy/hostinger-setup.sh`) |
+| Domínio próprio | Suportado (DNS apontando para Lovable) | Total controle do DNS no hPanel |
+| Custo | Plano Lovable | Plano VPS KVM Hostinger |
+| Atualização | 1 clique em "Update" | `bash deploy/update.sh` (pull + build + reload) |
+| Runtime | Cloudflare Workers (gerenciado) | Node 20 + PM2 + Nginx |
+| Backup do código | GitHub (se conectado) | GitHub + snapshot da VPS |
 | Dependência operacional | Depende do Lovable estar no ar | Independente |
 | Ideal para | Iteração rápida, MVP, validação | Produção definitiva, escala, controle |
 
