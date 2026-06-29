@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnuncieRouteImport } from './routes/anuncie'
@@ -21,6 +22,11 @@ import { Route as ApiPublicHooksSyncPropertiesRouteImport } from './routes/api/p
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacidadeRoute = PrivacidadeRouteImport.update({
+  id: '/privacidade',
+  path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BuscarRoute = BuscarRouteImport.update({
@@ -66,6 +72,7 @@ export interface FileRoutesByFullPath {
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
+  '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
@@ -99,6 +108,7 @@ export interface FileRouteTypes {
     | '/anuncie'
     | '/auth'
     | '/buscar'
+    | '/privacidade'
     | '/sitemap.xml'
     | '/imovel/$code'
     | '/api/public/hooks/sync-properties'
@@ -109,6 +119,7 @@ export interface FileRouteTypes {
     | '/anuncie'
     | '/auth'
     | '/buscar'
+    | '/privacidade'
     | '/sitemap.xml'
     | '/imovel/$code'
     | '/api/public/hooks/sync-properties'
@@ -119,6 +130,7 @@ export interface FileRouteTypes {
     | '/anuncie'
     | '/auth'
     | '/buscar'
+    | '/privacidade'
     | '/sitemap.xml'
     | '/imovel/$code'
     | '/api/public/hooks/sync-properties'
@@ -130,6 +142,7 @@ export interface RootRouteChildren {
   AnuncieRoute: typeof AnuncieRoute
   AuthRoute: typeof AuthRoute
   BuscarRoute: typeof BuscarRoute
+  PrivacidadeRoute: typeof PrivacidadeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ImovelCodeRoute: typeof ImovelCodeRoute
   ApiPublicHooksSyncPropertiesRoute: typeof ApiPublicHooksSyncPropertiesRoute
@@ -142,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacidade': {
+      id: '/privacidade'
+      path: '/privacidade'
+      fullPath: '/privacidade'
+      preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/buscar': {
@@ -202,6 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnuncieRoute: AnuncieRoute,
   AuthRoute: AuthRoute,
   BuscarRoute: BuscarRoute,
+  PrivacidadeRoute: PrivacidadeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ImovelCodeRoute: ImovelCodeRoute,
   ApiPublicHooksSyncPropertiesRoute: ApiPublicHooksSyncPropertiesRoute,
