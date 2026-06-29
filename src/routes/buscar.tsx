@@ -19,6 +19,18 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/buscar")({
   validateSearch: zodValidator(searchSchema),
   loaderDeps: ({ search }) => search,
+  // Redireciona busca-por-bairro (único filtro) para a rota canônica
+  // do bairro programático — consolida link equity e evita duplicate content.
+  beforeLoad: ({ search }) => {
+    const onlyBairro =
+      Boolean(search.bairro) && !search.tipo && search.dorms == null && search.faixa == null;
+    if (onlyBairro) {
+      const nb = findNeighborhoodByName(search.bairro);
+      if (nb) {
+        throw redirect({ to: "/imoveis/$slug", params: { slug: nb.slug }, replace: true });
+      }
+    }
+  },
   loader: ({ deps }) => {
     const faixa = deps.faixa != null ? PRECO_FAIXAS[deps.faixa] : undefined;
     return searchProperties({
