@@ -82,6 +82,7 @@ export const Route = createFileRoute("/imoveis/")({
       scripts: [
         { type: "application/ld+json", children: JSON.stringify(breadcrumbs) },
         { type: "application/ld+json", children: JSON.stringify(collection) },
+        { type: "application/ld+json", children: JSON.stringify(itemList) },
       ],
     };
   },
