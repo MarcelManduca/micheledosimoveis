@@ -111,6 +111,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         type: "application/ld+json",
         children: JSON.stringify({
           "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Michele dos Imóveis",
+          url: "https://micheledosimoveis.lovable.app",
+          inLanguage: "pt-BR",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: "https://micheledosimoveis.lovable.app/buscar?bairro={search_term_string}",
+            },
+            "query-input": "required name=search_term_string",
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
           "@type": "RealEstateAgent",
           name: "Michele dos Imóveis — Michele Prietsch",
           description:
