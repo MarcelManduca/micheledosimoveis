@@ -173,6 +173,8 @@ function Index() {
     initialData: dbProperties,
   });
   const items = live.data ?? dbProperties;
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased">
       {/* Nav */}
