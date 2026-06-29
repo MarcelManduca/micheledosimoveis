@@ -86,14 +86,59 @@ export const Route = createFileRoute("/imoveis/$slug")({
       "@type": "BreadcrumbList",
       itemListElement: [
         { "@type": "ListItem", position: 1, name: "Início", item: SITE },
-        { "@type": "ListItem", position: 2, name: "Imóveis em Florianópolis", item: `${SITE}/buscar` },
+        { "@type": "ListItem", position: 2, name: "Imóveis por bairro", item: `${SITE}/imoveis` },
         { "@type": "ListItem", position: 3, name: n.name, item: url },
       ],
     };
+    const faq = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: `Quais tipos de imóveis a Michele oferece em ${n.name}?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: `Em ${n.name}, a Michele atua com ${n.metaDesc}, incluindo apartamentos, coberturas, casas e lançamentos selecionados. Cada imóvel passa por curadoria antes de ser apresentado.`,
+          },
+        },
+        {
+          "@type": "Question",
+          name: `Há imóveis disponíveis em ${n.name} agora?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: count > 0
+              ? `Sim. Hoje há ${count} ${count === 1 ? "imóvel publicado" : "imóveis publicados"} em ${n.name}. Também trabalhamos com opções off market que não aparecem em listagens públicas — consulte a Michele para receber a seleção completa.`
+              : `No momento o portfólio público de ${n.name} está vazio, mas atuamos com operações off market nesta região. Fale com a Michele para receber opções sob medida que não são divulgadas publicamente.`,
+          },
+        },
+        {
+          "@type": "Question",
+          name: `Por que escolher ${n.name} em Florianópolis?`,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: `${n.intro}`,
+          },
+        },
+        {
+          "@type": "Question",
+          name: "Como funciona o atendimento personalizado?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Michele Prietsch (CRECI 69502) é corretora associada à Gralha Imóveis e conduz pessoalmente cada negociação — desde a leitura de perfil até a entrega das chaves, com discrição, curadoria e segurança jurídica.",
+          },
+        },
+      ],
+    };
+    // Bairros sem portfólio público viram conteúdo "thin" para o Google.
+    // Marcamos noindex,follow: a página continua acessível e passa link
+    // equity para os imóveis e bairros vizinhos, mas não polui o índice.
+    const robots = count === 0 ? "noindex, follow" : "index, follow";
     return {
       meta: [
         { title },
         { name: "description", content: description },
+        { name: "robots", content: robots },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "website" },
@@ -104,6 +149,7 @@ export const Route = createFileRoute("/imoveis/$slug")({
         { type: "application/ld+json", children: JSON.stringify(localBusiness) },
         { type: "application/ld+json", children: JSON.stringify(itemList) },
         { type: "application/ld+json", children: JSON.stringify(breadcrumbs) },
+        { type: "application/ld+json", children: JSON.stringify(faq) },
       ],
     };
   },
@@ -167,7 +213,7 @@ function NeighborhoodPage() {
           <nav aria-label="breadcrumb" className="text-xs text-muted-foreground">
             <Link to="/" className="hover:underline">Início</Link>
             <span className="mx-2">/</span>
-            <Link to="/buscar" className="hover:underline">Imóveis</Link>
+            <Link to="/imoveis" className="hover:underline">Imóveis por bairro</Link>
             <span className="mx-2">/</span>
             <span className="text-foreground">{n.name}</span>
           </nav>
@@ -306,9 +352,17 @@ function NeighborhoodPage() {
       {/* All regions footer-style for internal linking */}
       <section className="border-t border-black/5">
         <div className="mx-auto max-w-6xl px-5 sm:px-8 py-12">
-          <h2 className="font-display text-2xl tracking-tight">
-            Todas as regiões de atuação
-          </h2>
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <h2 className="font-display text-2xl tracking-tight">
+              Todas as regiões de atuação
+            </h2>
+            <Link
+              to="/imoveis"
+              className="text-sm underline text-muted-foreground hover:text-foreground"
+            >
+              Ver índice completo de bairros
+            </Link>
+          </div>
           <ul className="mt-5 flex flex-wrap gap-2">
             {NEIGHBORHOODS.map((r) => (
               <li key={r.slug}>
@@ -327,15 +381,63 @@ function NeighborhoodPage() {
               </li>
             ))}
           </ul>
-          <div className="mt-8">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-            >
+          <div className="mt-8 flex flex-wrap items-center gap-5 text-sm text-muted-foreground">
+            <Link to="/" className="inline-flex items-center gap-2 hover:text-foreground">
               <ArrowLeft className="h-4 w-4" />
               Voltar ao início
             </Link>
+            <Link to="/buscar" className="hover:text-foreground hover:underline">
+              Pesquisa com filtros
+            </Link>
+            <Link to="/anuncie" className="hover:text-foreground hover:underline">
+              Anunciar meu imóvel
+            </Link>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ visível — espelha o JSON-LD FAQPage emitido no head */}
+      <section className="border-t border-black/5 bg-secondary/30">
+        <div className="mx-auto max-w-4xl px-5 sm:px-8 py-12">
+          <h2 className="font-display text-2xl sm:text-3xl tracking-tight">
+            Perguntas frequentes sobre {n.name}
+          </h2>
+          <dl className="mt-6 space-y-4">
+            {[
+              {
+                q: `Quais tipos de imóveis a Michele oferece em ${n.name}?`,
+                a: `Em ${n.name}, a Michele atua com ${n.metaDesc}, incluindo apartamentos, coberturas, casas e lançamentos selecionados. Cada imóvel passa por curadoria antes de ser apresentado.`,
+              },
+              {
+                q: `Há imóveis disponíveis em ${n.name} agora?`,
+                a:
+                  properties.length > 0
+                    ? `Sim. Hoje há ${properties.length} ${properties.length === 1 ? "imóvel publicado" : "imóveis publicados"} em ${n.name}. Também trabalhamos com opções off market que não aparecem em listagens públicas — consulte a Michele para receber a seleção completa.`
+                    : `No momento o portfólio público de ${n.name} está vazio, mas atuamos com operações off market nesta região. Fale com a Michele para receber opções sob medida que não são divulgadas publicamente.`,
+              },
+              {
+                q: `Por que escolher ${n.name} em Florianópolis?`,
+                a: n.intro,
+              },
+              {
+                q: "Como funciona o atendimento personalizado?",
+                a: "Michele Prietsch (CRECI 69502) é corretora associada à Gralha Imóveis e conduz pessoalmente cada negociação — desde a leitura de perfil até a entrega das chaves, com discrição, curadoria e segurança jurídica.",
+              },
+            ].map((item) => (
+              <details
+                key={item.q}
+                className="group rounded-2xl bg-card ring-1 ring-black/5 px-5 py-4 open:shadow-sm"
+              >
+                <summary className="cursor-pointer list-none flex items-start justify-between gap-4 text-sm font-medium text-foreground">
+                  <span>{item.q}</span>
+                  <ArrowRight className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground transition group-open:rotate-90" />
+                </summary>
+                <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                  {item.a}
+                </p>
+              </details>
+            ))}
+          </dl>
         </div>
       </section>
     </div>
