@@ -175,7 +175,11 @@ function BuscarPage() {
             <p className="mt-2 text-sm text-muted-foreground">
               Ajuste os filtros acima ou{" "}
               <a
-                href="https://api.whatsapp.com/send?phone=5548991828828"
+                href={buildWhatsAppUrl(
+                  `Olá Michele! Não encontrei resultados na busca${
+                    search.bairro ? ` para ${search.bairro}` : ""
+                  }. Pode me ajudar com uma curadoria personalizada?`,
+                )}
                 target="_blank"
                 rel="noreferrer"
                 className="underline"
