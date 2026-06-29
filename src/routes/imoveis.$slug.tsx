@@ -213,7 +213,7 @@ function NeighborhoodPage() {
           <nav aria-label="breadcrumb" className="text-xs text-muted-foreground">
             <Link to="/" className="hover:underline">Início</Link>
             <span className="mx-2">/</span>
-            <Link to="/buscar" className="hover:underline">Imóveis</Link>
+            <Link to="/imoveis" className="hover:underline">Imóveis por bairro</Link>
             <span className="mx-2">/</span>
             <span className="text-foreground">{n.name}</span>
           </nav>
