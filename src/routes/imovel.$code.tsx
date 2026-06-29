@@ -315,7 +315,7 @@ function PropertyPage() {
               Falar com Michele pelo WhatsApp
             </a>
             <a
-              href="tel:+5548999999999"
+              href="tel:+5548991828828"
               className="mt-3 block w-full text-center rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition"
             >
               Ligar agora
