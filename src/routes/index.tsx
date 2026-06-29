@@ -716,7 +716,8 @@ function ExpandableProperties({
   const visibleCount = expanded ? Math.min(items.length, EXPANDED) : Math.min(items.length, INITIAL);
   const visible = items.slice(0, visibleCount);
   const canExpand = !expanded && items.length > INITIAL;
-  const showViewAll = items.length > EXPANDED && (expanded || items.length <= INITIAL ? true : false);
+  const showViewAll = expanded && items.length > EXPANDED;
+
 
   return (
     <div className="space-y-10">
