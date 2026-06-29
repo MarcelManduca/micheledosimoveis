@@ -17,6 +17,7 @@ import { Route as AnuncieRouteImport } from './routes/anuncie'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ImovelCodeRouteImport } from './routes/imovel.$code'
+import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as ApiPublicHooksSyncPropertiesRouteImport } from './routes/api/public/hooks/sync-properties'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -59,6 +60,11 @@ const ImovelCodeRoute = ImovelCodeRouteImport.update({
   path: '/imovel/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
+  id: '/imoveis/$slug',
+  path: '/imoveis/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSyncPropertiesRoute =
   ApiPublicHooksSyncPropertiesRouteImport.update({
     id: '/api/public/hooks/sync-properties',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/buscar': typeof BuscarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/buscar': typeof BuscarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/buscar': typeof BuscarRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/buscar'
     | '/privacidade'
     | '/sitemap.xml'
+    | '/imoveis/$slug'
     | '/imovel/$code'
     | '/api/public/hooks/sync-properties'
   fileRoutesByTo: FileRoutesByTo
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/buscar'
     | '/privacidade'
     | '/sitemap.xml'
+    | '/imoveis/$slug'
     | '/imovel/$code'
     | '/api/public/hooks/sync-properties'
   id:
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/buscar'
     | '/privacidade'
     | '/sitemap.xml'
+    | '/imoveis/$slug'
     | '/imovel/$code'
     | '/api/public/hooks/sync-properties'
   fileRoutesById: FileRoutesById
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   BuscarRoute: typeof BuscarRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ImoveisSlugRoute: typeof ImoveisSlugRoute
   ImovelCodeRoute: typeof ImovelCodeRoute
   ApiPublicHooksSyncPropertiesRoute: typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImovelCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/imoveis/$slug': {
+      id: '/imoveis/$slug'
+      path: '/imoveis/$slug'
+      fullPath: '/imoveis/$slug'
+      preLoaderRoute: typeof ImoveisSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/sync-properties': {
       id: '/api/public/hooks/sync-properties'
       path: '/api/public/hooks/sync-properties'
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   BuscarRoute: BuscarRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ImoveisSlugRoute: ImoveisSlugRoute,
   ImovelCodeRoute: ImovelCodeRoute,
   ApiPublicHooksSyncPropertiesRoute: ApiPublicHooksSyncPropertiesRoute,
 }

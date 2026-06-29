@@ -144,9 +144,14 @@ export const Route = createFileRoute("/imoveis/$slug")({
 });
 
 function NeighborhoodPage() {
-  const { neighborhood: n, properties } = Route.useLoaderData();
+  const data = Route.useLoaderData() as {
+    neighborhood: Neighborhood;
+    properties: import("@/lib/properties.functions").PropertyListItem[];
+  };
+  const n = data.neighborhood;
+  const properties = data.properties;
   const related = n.related
-    .map((slug) => NEIGHBORHOODS.find((x) => x.slug === slug))
+    .map((slug: string) => NEIGHBORHOODS.find((x) => x.slug === slug))
     .filter(Boolean) as Neighborhood[];
   const waUrl =
     WHATSAPP +
