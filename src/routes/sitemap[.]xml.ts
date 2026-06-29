@@ -24,11 +24,17 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
+        const { NEIGHBORHOODS } = await import("@/lib/neighborhoods");
         const entries: SitemapEntry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/buscar", changefreq: "daily", priority: "0.9" },
           { path: "/anuncie", changefreq: "monthly", priority: "0.8" },
           { path: "/privacidade", changefreq: "yearly", priority: "0.3" },
+          ...NEIGHBORHOODS.map((n) => ({
+            path: `/imoveis/${n.slug}`,
+            changefreq: "weekly" as const,
+            priority: "0.85",
+          })),
         ];
 
         try {
