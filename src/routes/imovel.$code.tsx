@@ -1,7 +1,10 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { getPropertyByCode } from "@/lib/properties.functions";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { CalendarCheck } from "lucide-react";
+
+const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
 type Photo = { url: string; position: number };
 import {
