@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { ArrowRight, MapPin, Star, Phone, Instagram, Mail, ShieldCheck, Rocket, Sparkles } from "lucide-react";
 import heroImg from "@/assets/hero-beiramar.jpg";
+import heroImg2 from "@/assets/hero-beiramar-2.jpg";
 import portrait from "@/assets/michele-portrait.jpg";
 import portraitHover from "@/assets/michele-portrait-2.jpg";
 import prop1 from "@/assets/property-1.jpg";
@@ -199,13 +200,21 @@ function Index() {
       {/* Hero */}
       <section id="top" className="relative px-3 sm:px-5 pt-3">
         <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px]">
-          <div className="h-[88vh] min-h-[600px] w-full overflow-hidden">
+          <div className="relative h-[88vh] min-h-[600px] w-full overflow-hidden">
             <img
               src={heroImg}
               alt="Imóvel de alto padrão em Florianópolis com vista para o mar"
               width={1920}
               height={1280}
-              className="h-full w-full object-cover origin-center animate-hero-zoom will-change-transform motion-reduce:animate-none"
+              className="absolute inset-0 h-full w-full object-cover origin-center animate-hero-zoom animate-hero-fade-a will-change-transform motion-reduce:animate-none"
+            />
+            <img
+              src={heroImg2}
+              alt="Vista aérea da Beira-Mar Norte em Florianópolis"
+              width={2000}
+              height={1333}
+              aria-hidden="true"
+              className="absolute inset-0 h-full w-full object-cover origin-center animate-hero-zoom animate-hero-fade-b will-change-transform motion-reduce:animate-none motion-reduce:opacity-0"
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/25 to-black/70" />
