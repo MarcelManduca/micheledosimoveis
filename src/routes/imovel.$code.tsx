@@ -1,7 +1,10 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { getPropertyByCode } from "@/lib/properties.functions";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { CalendarCheck } from "lucide-react";
+
+const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
 type Photo = { url: string; position: number };
 import {
@@ -102,9 +105,7 @@ function PropertyPage() {
   const mapQuery = [p.address, p.neighborhood, p.city, p.state]
     .filter(Boolean)
     .join(", ");
-  const mapSrc = mapQuery
-    ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`
-    : null;
+  const hasMap = mapQuery.length > 0;
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
@@ -177,6 +178,32 @@ function PropertyPage() {
         )}
       </section>
 
+      {/* CTAs */}
+      <section className="mx-auto max-w-6xl px-6 sm:px-10 pt-6">
+        <div className="flex flex-wrap gap-3">
+          <a
+            href={`https://api.whatsapp.com/send?phone=5548991828828&text=${encodeURIComponent(
+              `Olá Michele! Gostaria de agendar uma visita ao imóvel cód. ${p.code} — ${p.title}.`,
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition"
+          >
+            <CalendarCheck className="h-4 w-4" />
+            Agendar visita
+          </a>
+          <a
+            href={whatsapp}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition"
+          >
+            Tirar dúvidas no WhatsApp
+          </a>
+        </div>
+      </section>
+
+
       {/* Body */}
       <section className="mx-auto max-w-6xl px-6 sm:px-10 py-10 grid gap-12 lg:grid-cols-[1.7fr,1fr]">
         <div>
@@ -248,18 +275,20 @@ function PropertyPage() {
             </div>
           )}
 
-          {mapSrc && (
+          {hasMap && (
             <div className="mt-12">
               <h2 className="font-display text-2xl tracking-tight">Localização</h2>
               <p className="mt-2 text-sm text-muted-foreground">{mapQuery}</p>
               <div className="mt-4 overflow-hidden rounded-3xl ring-1 ring-black/5">
-                <iframe
-                  title={`Mapa de ${p.title}`}
-                  src={mapSrc}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                  className="w-full h-[360px] sm:h-[420px] border-0"
-                />
+                <Suspense
+                  fallback={
+                    <div className="w-full h-[360px] sm:h-[420px] bg-secondary grid place-items-center text-sm text-muted-foreground">
+                      Carregando mapa…
+                    </div>
+                  }
+                >
+                  <LeafletMap query={mapQuery} title={p.title} />
+                </Suspense>
               </div>
             </div>
           )}
