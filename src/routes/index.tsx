@@ -625,9 +625,14 @@ function Index() {
         <div className="border-t border-border">
           <div className="mx-auto max-w-7xl px-6 sm:px-10 py-5 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
             <span>© {new Date().getFullYear()} Michele Prietsch · Todos os direitos reservados.</span>
-            <Link to="/auth" className="text-muted-foreground/70 hover:text-foreground transition">
-              Admin
-            </Link>
+            <div className="flex items-center gap-4">
+              <Link to="/privacidade" className="text-muted-foreground/80 hover:text-foreground transition">
+                Privacidade & LGPD
+              </Link>
+              <Link to="/auth" className="text-muted-foreground/70 hover:text-foreground transition">
+                Admin
+              </Link>
+            </div>
           </div>
         </div>
       </footer>
