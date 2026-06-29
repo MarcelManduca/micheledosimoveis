@@ -100,7 +100,8 @@ function PropertyPage() {
   const whatsappText = encodeURIComponent(
     `Olá Michele! Tenho interesse no imóvel cód. ${p.code} — ${p.title}. ${typeof window !== "undefined" ? window.location.href : ""}`,
   );
-  const whatsapp = `https://api.whatsapp.com/send?phone=5548999999999&text=${whatsappText}`;
+  const whatsapp = `https://api.whatsapp.com/send?phone=5548991828828&text=${whatsappText}`;
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   const mapQuery = [p.address, p.neighborhood, p.city, p.state]
     .filter(Boolean)
