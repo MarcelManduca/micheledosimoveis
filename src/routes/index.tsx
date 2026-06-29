@@ -784,7 +784,7 @@ function LaunchesAndFeatured({ items }: { items: PropertyListItem[] }) {
             <Link to="/buscar" className="underline">pesquisa</Link>.
           </p>
         ) : (
-          <ChromaGridProperties items={items} />
+          <ExpandableProperties items={items} viewAllHref="/buscar" />
         )}
       </section>
 
