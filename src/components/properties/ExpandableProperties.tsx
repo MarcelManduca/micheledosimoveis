@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { PropertyCard } from "@/components/PropertyCard";
+import { ChromaGridShell } from "@/components/ChromaGridShell";
 import type { PropertyListItem } from "@/lib/properties.functions";
 
 const INITIAL = 6;
@@ -30,11 +31,12 @@ export function ExpandableProperties({
 
   return (
     <div className="space-y-10">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <ChromaGridShell>
         {visible.map((p) => (
           <PropertyCard key={p.id} p={p} lockAfter={3} />
         ))}
-      </div>
+      </ChromaGridShell>
+
       {(canExpand || showViewAll) && (
         <div className="flex justify-center">
           {canExpand ? (
