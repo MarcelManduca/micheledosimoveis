@@ -17,7 +17,7 @@ import { FloatingWhatsApp } from "@/components/home/FloatingWhatsApp";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Michele Prietsch | Michele dos Imóveis em Florianópolis" },
+      { title: "Corretora Michele" },
       { name: "description", content: "Michele Prietsch, conhecida como Michele dos Imóveis, é corretora especializada em imóveis de alto padrão em Florianópolis, com atendimento personalizado para compra, venda e curadoria imobiliária." },
       { property: "og:title", content: "Michele Prietsch | Michele dos Imóveis em Florianópolis" },
       { property: "og:description", content: "Corretora especializada em imóveis de alto padrão em Florianópolis — curadoria, discrição e atendimento sob medida em Jurerê Internacional, Praia Brava, Cacupé, Lagoa da Conceição, Campeche e Beira-Mar Norte." },
