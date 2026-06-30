@@ -10,7 +10,7 @@ import {
 import { PropertyCard } from "@/components/PropertyCard";
 
 
-const SITE = "https://micheledosimoveis.lovable.app";
+const SITE = "https://micheledosimoveis.com.br";
 const WHATSAPP =
   "https://api.whatsapp.com/send?phone=5548991828828&text=";
 

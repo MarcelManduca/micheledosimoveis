@@ -11,10 +11,10 @@ export const Route = createFileRoute("/privacidade")({
       },
       { name: "robots", content: "index,follow" },
       { property: "og:title", content: "Política de Privacidade — Michele dos Imóveis" },
-      { property: "og:url", content: "https://micheledosimoveis.lovable.app/privacidade" },
+      { property: "og:url", content: "https://micheledosimoveis.com.br/privacidade" },
       { property: "og:type", content: "website" },
     ],
-    links: [{ rel: "canonical", href: "https://micheledosimoveis.lovable.app/privacidade" }],
+    links: [{ rel: "canonical", href: "https://micheledosimoveis.com.br/privacidade" }],
   }),
   component: PrivacyPage,
 });

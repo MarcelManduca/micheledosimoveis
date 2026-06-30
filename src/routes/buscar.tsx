@@ -56,8 +56,8 @@ export const Route = createFileRoute("/buscar")({
     // e ele corresponde a uma região programática, apontamos canonical e
     // og:url para /imoveis/$slug (a versão canônica do bairro).
     const canonical = nb
-      ? `https://micheledosimoveis.lovable.app/imoveis/${nb.slug}`
-      : "https://micheledosimoveis.lovable.app/buscar";
+      ? `https://micheledosimoveis.com.br/imoveis/${nb.slug}`
+      : "https://micheledosimoveis.com.br/buscar";
     return {
       meta: [
         { title: baseTitle },

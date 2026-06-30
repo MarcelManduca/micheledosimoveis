@@ -8,5 +8,5 @@ Disallow: /*?utm_*
 Disallow: /*?fbclid=
 Disallow: /*?gclid=
 
-Sitemap: https://micheledosimoveis.lovable.app/sitemap.xml
-Sitemap: https://micheledosimoveis.lovable.app/sitemap-bairros.xml
+Sitemap: https://micheledosimoveis.com.br/sitemap.xml
+Sitemap: https://micheledosimoveis.com.br/sitemap-bairros.xml

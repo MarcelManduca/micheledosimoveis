@@ -5,7 +5,7 @@ import { searchProperties } from "@/lib/properties.functions";
 import BorderGlow from "@/components/BorderGlow";
 
 
-const SITE = "https://micheledosimoveis.lovable.app";
+const SITE = "https://micheledosimoveis.com.br";
 const URL = `${SITE}/imoveis`;
 
 export const Route = createFileRoute("/imoveis/")({

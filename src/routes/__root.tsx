@@ -113,13 +113,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "@context": "https://schema.org",
           "@type": "WebSite",
           name: "Michele dos Imóveis",
-          url: "https://micheledosimoveis.lovable.app",
+          url: "https://micheledosimoveis.com.br",
           inLanguage: "pt-BR",
           potentialAction: {
             "@type": "SearchAction",
             target: {
               "@type": "EntryPoint",
-              urlTemplate: "https://micheledosimoveis.lovable.app/buscar?bairro={search_term_string}",
+              urlTemplate: "https://micheledosimoveis.com.br/buscar?bairro={search_term_string}",
             },
             "query-input": "required name=search_term_string",
           },
@@ -133,10 +133,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           name: "Michele dos Imóveis — Michele Prietsch",
           description:
             "Corretora de imóveis de alto padrão em Florianópolis. Atuação nos principais bairros e praias da Ilha: Centro/Beira Mar, Agronômica, Jurerê Tradicional, Jurerê Internacional, Praia Brava, João Paulo, Cacupé, Santo Antônio de Lisboa, Itacorubi, Trindade, Santa Mônica, Córrego Grande, Lagoa da Conceição, Canto da Lagoa, Campeche, Novo Campeche, Rio Tavares e Morro das Pedras.",
-          url: "https://micheledosimoveis.lovable.app",
+          url: "https://micheledosimoveis.com.br",
           telephone: "+55-48-99182-8828",
           email: "micheledosimoveis@gmail.com",
-          image: "https://micheledosimoveis.lovable.app/og.jpg",
+          image: "https://micheledosimoveis.com.br/og.jpg",
           priceRange: "$$$$",
           address: {
             "@type": "PostalAddress",
