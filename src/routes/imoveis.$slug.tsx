@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, MapPin, Phone } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { searchProperties } from "@/lib/properties.functions";
 import {
   NEIGHBORHOODS,
