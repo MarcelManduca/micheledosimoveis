@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, MapPin, Phone } from "lucide-react";
+import { useMemo, useState } from "react";
 import { searchProperties } from "@/lib/properties.functions";
 import {
   NEIGHBORHOODS,
@@ -7,6 +8,7 @@ import {
   type Neighborhood,
 } from "@/lib/neighborhoods";
 import { PropertyCard } from "@/components/PropertyCard";
+
 
 const SITE = "https://micheledosimoveis.lovable.app";
 const WHATSAPP =
@@ -271,48 +273,8 @@ function NeighborhoodPage() {
         </ul>
       </section>
 
-      {/* Properties */}
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
-        <div className="flex items-end justify-between gap-4">
-          <h2 className="font-display text-2xl sm:text-3xl tracking-tight">
-            Imóveis disponíveis em {n.name}
-          </h2>
-          {properties.length > 0 && (
-            <Link
-              to="/buscar"
-              search={{ bairro: n.query }}
-              className="text-sm underline text-muted-foreground hover:text-foreground"
-            >
-              Ver todos
-            </Link>
-          )}
-        </div>
+      <PropertiesSection neighborhood={n} properties={properties} waUrl={waUrl} />
 
-        {properties.length === 0 ? (
-          <div className="mt-6 rounded-2xl bg-card ring-1 ring-black/5 p-8 text-center">
-            <p className="text-muted-foreground">
-              No momento não há imóveis publicados em {n.name}. Atuamos com
-              operações <strong className="text-foreground">off market</strong>{" "}
-              nesta região — fale com a Michele para receber opções sob medida.
-            </p>
-            <a
-              href={waUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-foreground text-background px-5 py-2.5 text-sm hover:opacity-90 transition"
-            >
-              <Phone className="h-4 w-4" />
-              Receber opções de {n.name}
-            </a>
-          </div>
-        ) : (
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {properties.slice(0, 12).map((p) => (
-              <PropertyCard key={p.id} p={p} />
-            ))}
-          </div>
-        )}
-      </section>
 
       {/* Related neighborhoods (internal linking) */}
       {related.length > 0 && (
@@ -443,3 +405,109 @@ function NeighborhoodPage() {
     </div>
   );
 }
+
+type SortKey = "relevance" | "price-desc" | "price-asc";
+
+function PropertiesSection({
+  neighborhood: n,
+  properties,
+  waUrl,
+}: {
+  neighborhood: Neighborhood;
+  properties: import("@/lib/properties.functions").PropertyListItem[];
+  waUrl: string;
+}) {
+  const [sort, setSort] = useState<SortKey>("relevance");
+  const VISIBLE_LIMIT = 12;
+
+  const sorted = useMemo(() => {
+    if (sort === "relevance") return properties;
+    const arr = [...properties];
+    arr.sort((a, b) => {
+      const pa = a.price_brl ?? -Infinity;
+      const pb = b.price_brl ?? -Infinity;
+      if (sort === "price-desc") return pb - pa;
+      // price-asc: tratar nulos como infinitos (vão para o fim)
+      const va = a.price_brl ?? Infinity;
+      const vb = b.price_brl ?? Infinity;
+      return va - vb;
+    });
+    return arr;
+  }, [properties, sort]);
+
+  const total = properties.length;
+  const visible = Math.min(total, VISIBLE_LIMIT);
+
+  return (
+    <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
+      <div className="flex items-end justify-between gap-4">
+        <h2 className="font-display text-2xl sm:text-3xl tracking-tight">
+          Imóveis disponíveis em {n.name}
+        </h2>
+        {total > 0 && (
+          <Link
+            to="/buscar"
+            search={{ bairro: n.query }}
+            className="text-sm underline text-muted-foreground hover:text-foreground"
+          >
+            Ver todos
+          </Link>
+        )}
+      </div>
+
+      {total === 0 ? (
+        <div className="mt-6 rounded-2xl bg-card ring-1 ring-black/5 p-8 text-center">
+          <p className="text-muted-foreground">
+            No momento não há imóveis publicados em {n.name}. Atuamos com
+            operações <strong className="text-foreground">off market</strong>{" "}
+            nesta região — fale com a Michele para receber opções sob medida.
+          </p>
+          <a
+            href={waUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-5 inline-flex items-center gap-2 rounded-full bg-foreground text-background px-5 py-2.5 text-sm hover:opacity-90 transition"
+          >
+            <Phone className="h-4 w-4" />
+            Receber opções de {n.name}
+          </a>
+        </div>
+      ) : (
+        <>
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-card ring-1 ring-black/5 px-4 py-3">
+            <p className="text-sm text-muted-foreground" aria-live="polite">
+              Exibindo <span className="font-medium text-foreground">{visible}</span>{" "}
+              {visible === 1 ? "imóvel" : "imóveis"}
+              {total > visible && (
+                <>
+                  {" "}de <span className="font-medium text-foreground">{total}</span>
+                </>
+              )}{" "}
+              em {n.name}
+            </p>
+            <label className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">Ordenar por</span>
+              <select
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SortKey)}
+                className="rounded-full ring-1 ring-black/10 bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
+                aria-label="Ordenar imóveis por preço"
+              >
+                <option value="relevance">Relevância</option>
+                <option value="price-desc">Maior preço</option>
+                <option value="price-asc">Menor preço</option>
+              </select>
+            </label>
+          </div>
+
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {sorted.slice(0, VISIBLE_LIMIT).map((p) => (
+              <PropertyCard key={p.id} p={p} />
+            ))}
+          </div>
+        </>
+      )}
+    </section>
+  );
+}
+
