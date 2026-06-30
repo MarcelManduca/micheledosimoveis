@@ -17,7 +17,11 @@
   },
   "overrides": {
     "@vercel/nft": "^1.10.2",
-    "nf3": "0.3.17"
+    "nf3": "0.3.17",
+    "esbuild": "^0.28.1",
+    "js-yaml": "^4.2.0",
+    "brace-expansion": "^5.0.6",
+    "@babel/core": "^7.29.6"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
