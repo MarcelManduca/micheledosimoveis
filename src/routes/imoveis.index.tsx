@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, MapPin } from "lucide-react";
 import { NEIGHBORHOODS } from "@/lib/neighborhoods";
 import { searchProperties } from "@/lib/properties.functions";
+import BorderGlow from "@/components/BorderGlow";
+
 
 const SITE = "https://micheledosimoveis.lovable.app";
 const URL = `${SITE}/imoveis`;
