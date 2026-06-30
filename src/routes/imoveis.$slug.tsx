@@ -8,6 +8,7 @@ import {
   type Neighborhood,
 } from "@/lib/neighborhoods";
 import { PropertyCard } from "@/components/PropertyCard";
+import { ChromaGridShell } from "@/components/ChromaGridShell";
 
 
 const SITE = "https://micheledosimoveis.com.br";
