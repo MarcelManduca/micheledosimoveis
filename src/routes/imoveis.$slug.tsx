@@ -243,12 +243,12 @@ function NeighborhoodPage() {
             </a>
             <Link
               to="/buscar"
-              search={{ bairro: n.query }}
               className="inline-flex items-center gap-2 rounded-full ring-1 ring-black/10 px-5 py-2.5 text-sm hover:bg-secondary transition"
             >
               Buscar com filtros
               <ArrowRight className="h-4 w-4" />
             </Link>
+
           </div>
         </div>
       </section>
