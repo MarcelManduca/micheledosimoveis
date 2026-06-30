@@ -31,7 +31,7 @@ export const Route = createFileRoute("/imovel/$code")({
   head: ({ params, loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Imóvel · Michele Prietsch" }] };
     const p = loaderData.property as any;
-    const url = `https://micheledosimoveis.lovable.app/imovel/${params.code}`;
+    const url = `https://micheledosimoveis.com.br/imovel/${params.code}`;
     const localizacao = [p.neighborhood, p.city].filter(Boolean).join(", ");
     const titleSeo = `${p.title}${p.neighborhood ? ` — ${p.neighborhood}` : ""}, Florianópolis | Michele dos Imóveis`;
     const descAuto = [
@@ -114,7 +114,7 @@ export const Route = createFileRoute("/imovel/$code")({
               "@type": "RealEstateAgent",
               name: "Michele dos Imóveis",
               telephone: "+5548991828828",
-              url: "https://micheledosimoveis.lovable.app/",
+              url: "https://micheledosimoveis.com.br/",
               address: {
                 "@type": "PostalAddress",
                 streetAddress: "R. Alves de Brito, 285",
@@ -131,16 +131,16 @@ export const Route = createFileRoute("/imovel/$code")({
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
       itemListElement: [
-        { "@type": "ListItem", position: 1, name: "Início", item: "https://micheledosimoveis.lovable.app/" },
-        { "@type": "ListItem", position: 2, name: "Imóveis por bairro", item: "https://micheledosimoveis.lovable.app/imoveis" },
+        { "@type": "ListItem", position: 1, name: "Início", item: "https://micheledosimoveis.com.br/" },
+        { "@type": "ListItem", position: 2, name: "Imóveis por bairro", item: "https://micheledosimoveis.com.br/imoveis" },
         ...(p.neighborhood
           ? [{
               "@type": "ListItem",
               position: 3,
               name: nbForBread?.name ?? p.neighborhood,
               item: nbForBread
-                ? `https://micheledosimoveis.lovable.app/imoveis/${nbForBread.slug}`
-                : `https://micheledosimoveis.lovable.app/buscar?bairro=${encodeURIComponent(p.neighborhood)}`,
+                ? `https://micheledosimoveis.com.br/imoveis/${nbForBread.slug}`
+                : `https://micheledosimoveis.com.br/buscar?bairro=${encodeURIComponent(p.neighborhood)}`,
             }]
           : []),
         { "@type": "ListItem", position: p.neighborhood ? 4 : 3, name: p.title, item: url },

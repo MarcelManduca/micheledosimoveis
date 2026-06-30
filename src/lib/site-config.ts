@@ -19,7 +19,7 @@ export const SITE = {
     district: "Centro",
     cityState: "Florianópolis/SC",
   },
-  publishedUrl: "https://micheledosimoveis.lovable.app/",
+  publishedUrl: "https://micheledosimoveis.com.br/",
 } as const;
 
 const DEFAULT_WHATSAPP_MSG =

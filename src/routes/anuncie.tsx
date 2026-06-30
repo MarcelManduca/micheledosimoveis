@@ -53,9 +53,9 @@ export const Route = createFileRoute("/anuncie")({
           "Curadoria imobiliária personalizada para proprietários — venda com discrição, estratégia e acesso aos compradores certos.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://micheledosimoveis.lovable.app/anuncie" },
+      { property: "og:url", content: "https://micheledosimoveis.com.br/anuncie" },
     ],
-    links: [{ rel: "canonical", href: "https://micheledosimoveis.lovable.app/anuncie" }],
+    links: [{ rel: "canonical", href: "https://micheledosimoveis.com.br/anuncie" }],
     scripts: [
       {
         type: "application/ld+json",

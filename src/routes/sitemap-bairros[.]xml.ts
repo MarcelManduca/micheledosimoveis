@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { NEIGHBORHOODS } from "@/lib/neighborhoods";
 
-const BASE_URL = "https://micheledosimoveis.lovable.app";
+const BASE_URL = "https://micheledosimoveis.com.br";
 
 function escapeXml(s: string) {
   return s
