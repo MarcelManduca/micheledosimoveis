@@ -24,25 +24,25 @@ export function RegioesSection() {
           </div>
         </div>
 
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {REGIOES.map((r) => (
             <li key={r.slug} className="h-full">
               <BorderGlow
                 className="h-full"
-                edgeSensitivity={25}
-                glowColor="38 70 65"
+                edgeSensitivity={18}
+                glowColor="38 55 60"
                 backgroundColor="hsl(var(--card))"
-                borderRadius={16}
-                glowRadius={24}
-                glowIntensity={0.9}
-                coneSpread={22}
+                borderRadius={18}
+                glowRadius={14}
+                glowIntensity={0.55}
+                coneSpread={18}
                 colors={["#c8a96a", "#e8d3a8", "#8c6b3a"]}
-                fillOpacity={0.35}
+                fillOpacity={0.22}
               >
                 <Link
                   to="/imoveis/$slug"
                   params={{ slug: r.slug }}
-                  className="group flex items-start gap-4 px-5 py-4 transition"
+                  className="group flex items-start gap-4 px-6 py-5 transition"
                 >
                   <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
                     <MapPin className="h-4 w-4" />
@@ -57,6 +57,7 @@ export function RegioesSection() {
             </li>
           ))}
         </ul>
+
 
         <div className="mt-8 flex justify-center">
           <Link
