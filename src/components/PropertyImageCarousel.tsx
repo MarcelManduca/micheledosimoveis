@@ -1,30 +1,40 @@
 import { useCallback, useRef, useState, type PointerEvent } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 
 type Props = {
   images: string[];
   alt: string;
   className?: string;
+  /** Limita o carrossel às N primeiras fotos e mostra um CTA "Ver mais fotos" ao chegar na última. */
+  lockAfter?: number;
+  /** Rótulo do CTA exibido ao atingir o limite. */
+  ctaLabel?: string;
 };
 
 /**
  * Carrossel de imagens com transição horizontal suave (translateX),
  * seta circular sobre a imagem e suporte a swipe no mobile.
  */
-export function PropertyImageCarousel({ images, alt, className }: Props) {
-  const list = images.filter(Boolean);
+export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLabel = "Ver mais fotos" }: Props) {
+  const filtered = images.filter(Boolean);
+  const list = lockAfter ? filtered.slice(0, lockAfter) : filtered;
   const [index, setIndex] = useState(0);
   const total = list.length;
   const hasMany = total > 1;
+  const atLockEnd = !!lockAfter && filtered.length > lockAfter && index === total - 1;
   const dragStartX = useRef<number | null>(null);
   const dragDelta = useRef(0);
 
   const goTo = useCallback(
     (next: number) => {
       if (total === 0) return;
+      if (lockAfter) {
+        setIndex(Math.max(0, Math.min(total - 1, next)));
+        return;
+      }
       setIndex(((next % total) + total) % total);
     },
-    [total],
+    [total, lockAfter],
   );
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
@@ -98,19 +108,30 @@ export function PropertyImageCarousel({ images, alt, className }: Props) {
           >
             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
-          <button
-            type="button"
-            aria-label="Próxima foto"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              goTo(index + 1);
-            }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-black/5 bg-white text-foreground shadow-md transition hover:shadow-lg hover:scale-105 active:scale-95 opacity-90 sm:opacity-0 sm:group-hover/carousel:opacity-100 cursor-pointer focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
-          >
-            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-          </button>
+          {!atLockEnd && (
+            <button
+              type="button"
+              aria-label="Próxima foto"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                goTo(index + 1);
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-black/5 bg-white text-foreground shadow-md transition hover:shadow-lg hover:scale-105 active:scale-95 opacity-90 sm:opacity-0 sm:group-hover/carousel:opacity-100 cursor-pointer focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
+            >
+              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+            </button>
+          )}
         </>
+      )}
+
+      {atLockEnd && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-black/30">
+          <span className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-foreground shadow-lg ring-1 ring-black/5 transition hover:shadow-xl hover:scale-[1.03]">
+            <ImageIcon className="h-4 w-4" />
+            {ctaLabel}
+          </span>
+        </div>
       )}
 
       {hasMany && (

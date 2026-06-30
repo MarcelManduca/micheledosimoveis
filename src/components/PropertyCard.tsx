@@ -8,7 +8,7 @@ function brl(n: number | null) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 }
 
-export function PropertyCard({ p }: { p: PropertyListItem }) {
+export function PropertyCard({ p, lockAfter }: { p: PropertyListItem; lockAfter?: number }) {
   const images = p.images?.length ? p.images : p.cover_image ? [p.cover_image] : [];
 
   return (
@@ -18,7 +18,7 @@ export function PropertyCard({ p }: { p: PropertyListItem }) {
       className="group block overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-black/10"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
-        <PropertyImageCarousel images={images} alt={p.title} className="h-full w-full" />
+        <PropertyImageCarousel images={images} alt={p.title} className="h-full w-full" lockAfter={lockAfter} />
       </div>
       <div className="p-5">
         <div className="flex items-center justify-between gap-3">

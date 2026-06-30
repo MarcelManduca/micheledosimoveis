@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { ChromaGridProperties } from "@/components/properties/ChromaGridProperties";
+import { PropertyCard } from "@/components/PropertyCard";
 import type { PropertyListItem } from "@/lib/properties.functions";
 
 const INITIAL = 6;
@@ -30,7 +30,11 @@ export function ExpandableProperties({
 
   return (
     <div className="space-y-10">
-      <ChromaGridProperties items={visible} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {visible.map((p) => (
+          <PropertyCard key={p.id} p={p} lockAfter={3} />
+        ))}
+      </div>
       {(canExpand || showViewAll) && (
         <div className="flex justify-center">
           {canExpand ? (
