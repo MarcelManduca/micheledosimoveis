@@ -24,8 +24,6 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
   const atLockEnd = !!lockAfter && filtered.length > lockAfter && index === total - 1;
   const dragStartX = useRef<number | null>(null);
   const dragDelta = useRef(0);
-  const dragStartX = useRef<number | null>(null);
-  const dragDelta = useRef(0);
 
   const goTo = useCallback(
     (next: number) => {
