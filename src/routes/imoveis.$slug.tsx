@@ -8,6 +8,7 @@ import {
   type Neighborhood,
 } from "@/lib/neighborhoods";
 import { PropertyCard } from "@/components/PropertyCard";
+import { ChromaGridShell } from "@/components/ChromaGridShell";
 
 
 const SITE = "https://micheledosimoveis.com.br";
@@ -534,10 +535,12 @@ function PropertiesSection({
             </label>
           </div>
 
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {sorted.slice(0, visible).map((p) => (
-              <PropertyCard key={p.id} p={p} />
-            ))}
+          <div className="mt-6">
+            <ChromaGridShell>
+              {sorted.slice(0, visible).map((p) => (
+                <PropertyCard key={p.id} p={p} />
+              ))}
+            </ChromaGridShell>
           </div>
 
           {hasMore && (
