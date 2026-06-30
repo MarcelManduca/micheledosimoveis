@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { BedDouble, Bath, Maximize, MapPin, ArrowRight } from "lucide-react";
+import { BedDouble, Bath, Maximize, MapPin, ArrowRight, BadgeCheck, Sparkles } from "lucide-react";
 import type { PropertyListItem } from "@/lib/properties.functions";
+import { PropertyImageCarousel } from "@/components/PropertyImageCarousel";
 
 function brl(n: number | null) {
   if (n == null) return "Sob consulta";
@@ -8,25 +9,28 @@ function brl(n: number | null) {
 }
 
 export function PropertyCard({ p }: { p: PropertyListItem }) {
+  const images = p.images?.length ? p.images : p.cover_image ? [p.cover_image] : [];
+
   return (
     <Link
       to="/imovel/$code"
       params={{ code: p.code }}
       className="group block overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-black/10"
     >
-      <div className="aspect-[4/3] overflow-hidden bg-secondary">
-        {p.cover_image ? (
-          <img
-            src={p.cover_image}
-            alt={p.title}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.06]"
-          />
-        ) : (
-          <div className="h-full w-full grid place-items-center text-muted-foreground text-xs">
-            Sem foto
-          </div>
+      <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
+        <PropertyImageCarousel images={images} alt={p.title} className="h-full w-full" />
+
+        {p.featured && (
+          <span className="pointer-events-none absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-foreground px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-background shadow-sm">
+            <Sparkles className="h-3 w-3" />
+            Super Destaque
+          </span>
         )}
+
+        <span className="pointer-events-none absolute bottom-3 left-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-medium text-foreground shadow-sm ring-1 ring-black/5">
+          <BadgeCheck className="h-3.5 w-3.5 text-emerald-600" />
+          Michele dos Imóveis
+        </span>
       </div>
       <div className="p-5">
         <div className="flex items-center justify-between gap-3">
