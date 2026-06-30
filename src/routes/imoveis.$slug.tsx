@@ -273,48 +273,8 @@ function NeighborhoodPage() {
         </ul>
       </section>
 
-      {/* Properties */}
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
-        <div className="flex items-end justify-between gap-4">
-          <h2 className="font-display text-2xl sm:text-3xl tracking-tight">
-            Imóveis disponíveis em {n.name}
-          </h2>
-          {properties.length > 0 && (
-            <Link
-              to="/buscar"
-              search={{ bairro: n.query }}
-              className="text-sm underline text-muted-foreground hover:text-foreground"
-            >
-              Ver todos
-            </Link>
-          )}
-        </div>
+      <PropertiesSection neighborhood={n} properties={properties} waUrl={waUrl} />
 
-        {properties.length === 0 ? (
-          <div className="mt-6 rounded-2xl bg-card ring-1 ring-black/5 p-8 text-center">
-            <p className="text-muted-foreground">
-              No momento não há imóveis publicados em {n.name}. Atuamos com
-              operações <strong className="text-foreground">off market</strong>{" "}
-              nesta região — fale com a Michele para receber opções sob medida.
-            </p>
-            <a
-              href={waUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-foreground text-background px-5 py-2.5 text-sm hover:opacity-90 transition"
-            >
-              <Phone className="h-4 w-4" />
-              Receber opções de {n.name}
-            </a>
-          </div>
-        ) : (
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {properties.slice(0, 12).map((p) => (
-              <PropertyCard key={p.id} p={p} />
-            ))}
-          </div>
-        )}
-      </section>
 
       {/* Related neighborhoods (internal linking) */}
       {related.length > 0 && (
