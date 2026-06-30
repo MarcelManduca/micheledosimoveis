@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { useState } from "react";
-import { ChromaGridProperties } from "@/components/properties/ChromaGridProperties";
+import { PropertyCard } from "@/components/PropertyCard";
 import type { PropertyListItem } from "@/lib/properties.functions";
 
 const INITIAL = 6;
