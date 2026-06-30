@@ -24,15 +24,16 @@ export function SiteHeader() {
     <>
       <header className="absolute top-0 left-0 right-0 z-30">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 py-5 flex items-center justify-between gap-3">
-          <a href="#top" className="flex items-center min-w-0">
+          <a href="#top" className="flex items-center min-w-0 shrink">
             <span className="sr-only">Michele dos Imóveis</span>
             <img
               src={logoWhite}
               alt="Michele dos Imóveis"
-              className="h-9 sm:h-10 w-auto select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
+              className="h-7 sm:h-9 md:h-10 w-auto max-w-[55vw] sm:max-w-none object-contain select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
               draggable={false}
             />
           </a>
+
 
 
           <nav className="hidden md:flex items-center gap-9 text-sm text-white/90">
