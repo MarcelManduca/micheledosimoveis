@@ -8,7 +8,7 @@ function brl(n: number | null) {
   return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 }
 
-export function PropertyCard({ p, lockAfter }: { p: PropertyListItem; lockAfter?: number }) {
+export function PropertyCard({ p, lockAfter = 3 }: { p: PropertyListItem; lockAfter?: number }) {
   const images = p.images?.length ? p.images : p.cover_image ? [p.cover_image] : [];
 
   return (
