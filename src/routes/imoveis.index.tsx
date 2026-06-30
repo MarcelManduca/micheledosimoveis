@@ -119,32 +119,46 @@ function ImoveisIndex() {
       </section>
 
       <section className="mx-auto max-w-6xl px-5 sm:px-8 py-12">
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {NEIGHBORHOODS.map((n) => {
             const count = counts[n.slug] ?? 0;
             return (
-              <li key={n.slug}>
-                <Link
-                  to="/imoveis/$slug"
-                  params={{ slug: n.slug }}
-                  className="group flex h-full items-start gap-4 rounded-2xl bg-card ring-1 ring-black/5 px-5 py-4 hover:shadow-lg hover:ring-black/10 transition"
+              <li key={n.slug} className="h-full">
+                <BorderGlow
+                  className="h-full"
+                  edgeSensitivity={18}
+                  glowColor="38 55 60"
+                  backgroundColor="hsl(var(--card))"
+                  borderRadius={18}
+                  glowRadius={14}
+                  glowIntensity={0.55}
+                  coneSpread={18}
+                  colors={["#c8a96a", "#e8d3a8", "#8c6b3a"]}
+                  fillOpacity={0.22}
                 >
-                  <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
-                    <MapPin className="h-4 w-4" />
-                  </span>
-                  <span className="flex-1">
-                    <span className="block font-display text-lg tracking-tight">{n.name}</span>
-                    <span className="block text-xs text-muted-foreground mt-0.5">{n.tag}</span>
-                    <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary/70 px-2 py-0.5 text-[11px] font-medium text-foreground/70 ring-1 ring-black/5">
-                      {count > 0 ? `${count} ${count === 1 ? "imóvel" : "imóveis"}` : "Off market · consulte"}
+                  <Link
+                    to="/imoveis/$slug"
+                    params={{ slug: n.slug }}
+                    className="group flex items-start gap-4 px-6 py-5 transition"
+                  >
+                    <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
+                      <MapPin className="h-4 w-4" />
                     </span>
-                  </span>
-                  <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
-                </Link>
+                    <span className="flex-1">
+                      <span className="block font-display text-lg tracking-tight">{n.name}</span>
+                      <span className="block text-xs text-muted-foreground mt-0.5">{n.tag}</span>
+                      <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary/70 px-2 py-0.5 text-[11px] font-medium text-foreground/70 ring-1 ring-black/5">
+                        {count > 0 ? `${count} ${count === 1 ? "imóvel" : "imóveis"}` : "Off market · consulte"}
+                      </span>
+                    </span>
+                    <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
+                  </Link>
+                </BorderGlow>
               </li>
             );
           })}
         </ul>
+
       </section>
     </div>
   );
