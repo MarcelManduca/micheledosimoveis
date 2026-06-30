@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BedDouble, Bath, Maximize, MapPin, ArrowRight, BadgeCheck, Sparkles } from "lucide-react";
+import { BedDouble, Bath, Maximize, MapPin, ArrowRight } from "lucide-react";
 import type { PropertyListItem } from "@/lib/properties.functions";
 import { PropertyImageCarousel } from "@/components/PropertyImageCarousel";
 
