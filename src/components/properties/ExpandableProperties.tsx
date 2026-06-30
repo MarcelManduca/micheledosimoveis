@@ -30,7 +30,11 @@ export function ExpandableProperties({
 
   return (
     <div className="space-y-10">
-      <ChromaGridProperties items={visible} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {visible.map((p) => (
+          <PropertyCard key={p.id} p={p} lockAfter={3} />
+        ))}
+      </div>
       {(canExpand || showViewAll) && (
         <div className="flex justify-center">
           {canExpand ? (
