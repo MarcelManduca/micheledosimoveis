@@ -108,19 +108,30 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
           >
             <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
-          <button
-            type="button"
-            aria-label="Próxima foto"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              goTo(index + 1);
-            }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-black/5 bg-white text-foreground shadow-md transition hover:shadow-lg hover:scale-105 active:scale-95 opacity-90 sm:opacity-0 sm:group-hover/carousel:opacity-100 cursor-pointer focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
-          >
-            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-          </button>
+          {!atLockEnd && (
+            <button
+              type="button"
+              aria-label="Próxima foto"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                goTo(index + 1);
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-black/5 bg-white text-foreground shadow-md transition hover:shadow-lg hover:scale-105 active:scale-95 opacity-90 sm:opacity-0 sm:group-hover/carousel:opacity-100 cursor-pointer focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
+            >
+              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+            </button>
+          )}
         </>
+      )}
+
+      {atLockEnd && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-black/30">
+          <span className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-sm font-medium text-foreground shadow-lg ring-1 ring-black/5 transition hover:shadow-xl hover:scale-[1.03]">
+            <ImageIcon className="h-4 w-4" />
+            {ctaLabel}
+          </span>
+        </div>
       )}
 
       {hasMany && (
