@@ -190,10 +190,12 @@ function BuscarPage() {
             </p>
           </div>
         ) : (
-          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {results.map((p) => (
-              <PropertyCard key={p.id} p={p} />
-            ))}
+          <div className="mt-6">
+            <ChromaGridShell>
+              {results.map((p) => (
+                <PropertyCard key={p.id} p={p} />
+              ))}
+            </ChromaGridShell>
           </div>
         )}
       </main>
