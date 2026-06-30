@@ -1,32 +1,33 @@
-import { useRef, useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
+import { useState, type CSSProperties, type PointerEvent, type ReactNode } from "react";
 import "./ChromaGridShell.css";
 
 /**
- * Wrapper que aplica o efeito ChromaGrid:
- * - Gradiente colorido (chroma) que segue o mouse sobre o grid inteiro
- * - Spotlight dourado por card + mute em escala de cinza nos vizinhos
- * Mantém o conteúdo original (PropertyCard + carrossel "Ver mais fotos") intacto.
+ * ChromaGrid shell — cada card recebe sua própria cor (paleta ciclada),
+ * exibida como halo/spotlight colorido no hover + mute em escala de cinza
+ * nos cards vizinhos. Mantém o conteúdo (PropertyCard + carrossel) intacto.
  */
+const PALETTE = [
+  "#D4AF6E", // dourado Michele
+  "#6EA8D4", // azul oceano
+  "#D46E9E", // rosa
+  "#8ED46E", // verde
+  "#B48ED4", // lilás
+  "#E0A65A", // âmbar
+];
+
 export function ChromaGridShell({
   children,
   className = "",
+  colors,
 }: {
   children: ReactNode[];
   className?: string;
+  colors?: string[];
 }) {
-  const shellRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [isHovering, setIsHovering] = useState(false);
+  const palette = colors && colors.length > 0 ? colors : PALETTE;
 
-  const handleShellMove = (e: PointerEvent<HTMLDivElement>) => {
-    const el = shellRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    el.style.setProperty("--x", `${e.clientX - rect.left}px`);
-    el.style.setProperty("--y", `${e.clientY - rect.top}px`);
-  };
-
-  const handleCellMove = (e: PointerEvent<HTMLDivElement>) => {
+  const handleMove = (e: PointerEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
     const rect = el.getBoundingClientRect();
     el.style.setProperty("--mouse-x", `${e.clientX - rect.left}px`);
@@ -37,32 +38,33 @@ export function ChromaGridShell({
 
   return (
     <div
-      ref={shellRef}
-      className={`chroma-shell ${isHovering ? "is-hovering" : ""} ${className}`}
-      onPointerMove={handleShellMove}
-      onPointerEnter={() => setIsHovering(true)}
-      onPointerLeave={() => {
-        setIsHovering(false);
-        setActiveIndex(null);
-      }}
-      style={{ "--x": "50%", "--y": "50%" } as CSSProperties}
+      className={`chroma-shell ${activeIndex !== null ? "is-hovering" : ""} ${className}`}
+      onPointerLeave={() => setActiveIndex(null)}
     >
-      <div className="chroma-shell__chroma" aria-hidden="true" />
-      <div className="chroma-shell__fade" aria-hidden="true" />
-      {items.map((child, i) => (
-        <div
-          key={i}
-          className={`chroma-cell ${activeIndex === i ? "is-active" : ""} ${
-            activeIndex !== null && activeIndex !== i ? "is-muted" : ""
-          }`}
-          onPointerEnter={() => setActiveIndex(i)}
-          onPointerMove={handleCellMove}
-          style={{ "--mouse-x": "50%", "--mouse-y": "50%" } as CSSProperties}
-        >
-          <span className="chroma-cell__spotlight" aria-hidden="true" />
-          {child}
-        </div>
-      ))}
+      {items.map((child, i) => {
+        const color = palette[i % palette.length];
+        return (
+          <div
+            key={i}
+            className={`chroma-cell ${activeIndex === i ? "is-active" : ""} ${
+              activeIndex !== null && activeIndex !== i ? "is-muted" : ""
+            }`}
+            onPointerEnter={() => setActiveIndex(i)}
+            onPointerMove={handleMove}
+            style={
+              {
+                "--cell-color": color,
+                "--mouse-x": "50%",
+                "--mouse-y": "50%",
+              } as CSSProperties
+            }
+          >
+            <span className="chroma-cell__glow" aria-hidden="true" />
+            <span className="chroma-cell__spotlight" aria-hidden="true" />
+            {child}
+          </div>
+        );
+      })}
     </div>
   );
 }
