@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, MapPin, Phone } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { searchProperties } from "@/lib/properties.functions";
 import {
   NEIGHBORHOODS,
@@ -418,16 +418,20 @@ function PropertiesSection({
   waUrl: string;
 }) {
   const [sort, setSort] = useState<SortKey>("relevance");
-  const VISIBLE_LIMIT = 12;
+  const PAGE_SIZE = 12;
+  const [limit, setLimit] = useState(PAGE_SIZE);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const sorted = useMemo(() => {
     if (sort === "relevance") return properties;
     const arr = [...properties];
     arr.sort((a, b) => {
-      const pa = a.price_brl ?? -Infinity;
-      const pb = b.price_brl ?? -Infinity;
-      if (sort === "price-desc") return pb - pa;
-      // price-asc: tratar nulos como infinitos (vão para o fim)
+      if (sort === "price-desc") {
+        const pa = a.price_brl ?? -Infinity;
+        const pb = b.price_brl ?? -Infinity;
+        return pb - pa;
+      }
+      // price-asc: nulos vão para o fim
       const va = a.price_brl ?? Infinity;
       const vb = b.price_brl ?? Infinity;
       return va - vb;
@@ -435,8 +439,31 @@ function PropertiesSection({
     return arr;
   }, [properties, sort]);
 
+  // Reset ao trocar ordenação
+  useEffect(() => {
+    setLimit(PAGE_SIZE);
+  }, [sort]);
+
   const total = properties.length;
-  const visible = Math.min(total, VISIBLE_LIMIT);
+  const visible = Math.min(total, limit);
+  const hasMore = visible < total;
+
+  // Infinite scroll via IntersectionObserver
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setLimit((l) => Math.min(l + PAGE_SIZE, total));
+        }
+      },
+      { rootMargin: "400px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [hasMore, total]);
 
   return (
     <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
@@ -476,14 +503,21 @@ function PropertiesSection({
         <>
           <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-card ring-1 ring-black/5 px-4 py-3">
             <p className="text-sm text-muted-foreground" aria-live="polite">
-              Exibindo <span className="font-medium text-foreground">{visible}</span>{" "}
-              {visible === 1 ? "imóvel" : "imóveis"}
-              {total > visible && (
+              {hasMore ? (
                 <>
-                  {" "}de <span className="font-medium text-foreground">{total}</span>
+                  Exibindo{" "}
+                  <span className="font-medium text-foreground">{visible}</span>{" "}
+                  de{" "}
+                  <span className="font-medium text-foreground">{total}</span>{" "}
+                  {total === 1 ? "imóvel" : "imóveis"} em {n.name}
                 </>
-              )}{" "}
-              em {n.name}
+              ) : (
+                <>
+                  <span className="font-medium text-foreground">{total}</span>{" "}
+                  {total === 1 ? "imóvel encontrado" : "imóveis encontrados"} em{" "}
+                  {n.name}
+                </>
+              )}
             </p>
             <label className="flex items-center gap-2 text-sm">
               <span className="text-muted-foreground">Ordenar por</span>
@@ -501,13 +535,30 @@ function PropertiesSection({
           </div>
 
           <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {sorted.slice(0, VISIBLE_LIMIT).map((p) => (
+            {sorted.slice(0, visible).map((p) => (
               <PropertyCard key={p.id} p={p} />
             ))}
           </div>
+
+          {hasMore && (
+            <div
+              ref={sentinelRef}
+              className="mt-8 flex justify-center"
+              aria-hidden="true"
+            >
+              <button
+                type="button"
+                onClick={() => setLimit((l) => Math.min(l + PAGE_SIZE, total))}
+                className="text-sm underline text-muted-foreground hover:text-foreground"
+              >
+                Carregar mais imóveis
+              </button>
+            </div>
+          )}
         </>
       )}
     </section>
+
   );
 }
 
