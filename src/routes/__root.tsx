@@ -94,8 +94,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Michele dos Imóveis — Alto padrão em Florianópolis | Jurerê, Beira Mar, Lagoa, Campeche" },
       { name: "twitter:description", content: "Corretora de imóveis de alto padrão em Florianópolis. Apartamentos, casas e coberturas em Jurerê Internacional, Beira Mar Norte, Lagoa da Conceição, Campeche, Praia Brava e principais bairros e praias da Ilha." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c8e126ab-3240-48b5-ae94-fc4e6158a89d/id-preview-073693f9--90b99939-dc3d-44f4-af7a-21286ac534d2.lovable.app-1782680801811.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/c8e126ab-3240-48b5-ae94-fc4e6158a89d/id-preview-073693f9--90b99939-dc3d-44f4-af7a-21286ac534d2.lovable.app-1782680801811.png" },
+      { property: "og:image", content: "https://micheledosimoveis.com.br/michele-dos-imoveis-og.png" },
+      { name: "twitter:image", content: "https://micheledosimoveis.com.br/michele-dos-imoveis-og.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
