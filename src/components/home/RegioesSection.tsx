@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, MapPin } from "lucide-react";
 import { REGIOES } from "@/lib/site-config";
+import BorderGlow from "@/components/BorderGlow";
 
 export function RegioesSection() {
   return (
@@ -25,21 +26,34 @@ export function RegioesSection() {
 
         <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {REGIOES.map((r) => (
-            <li key={r.slug}>
-              <Link
-                to="/imoveis/$slug"
-                params={{ slug: r.slug }}
-                className="group flex items-start gap-4 rounded-2xl bg-card ring-1 ring-black/5 px-5 py-4 hover:shadow-lg hover:ring-black/10 transition"
+            <li key={r.slug} className="h-full">
+              <BorderGlow
+                className="h-full"
+                edgeSensitivity={25}
+                glowColor="38 70 65"
+                backgroundColor="hsl(var(--card))"
+                borderRadius={16}
+                glowRadius={24}
+                glowIntensity={0.9}
+                coneSpread={22}
+                colors={["#c8a96a", "#e8d3a8", "#8c6b3a"]}
+                fillOpacity={0.35}
               >
-                <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
-                  <MapPin className="h-4 w-4" />
-                </span>
-                <span className="flex-1">
-                  <span className="block font-display text-lg tracking-tight">{r.nome}</span>
-                  <span className="block text-xs text-muted-foreground mt-0.5">{r.desc}</span>
-                </span>
-                <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
-              </Link>
+                <Link
+                  to="/imoveis/$slug"
+                  params={{ slug: r.slug }}
+                  className="group flex items-start gap-4 px-5 py-4 transition"
+                >
+                  <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
+                    <MapPin className="h-4 w-4" />
+                  </span>
+                  <span className="flex-1">
+                    <span className="block font-display text-lg tracking-tight">{r.nome}</span>
+                    <span className="block text-xs text-muted-foreground mt-0.5">{r.desc}</span>
+                  </span>
+                  <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
+                </Link>
+              </BorderGlow>
             </li>
           ))}
         </ul>
