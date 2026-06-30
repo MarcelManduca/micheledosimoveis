@@ -78,7 +78,7 @@ export const listProperties = createServerFn({ method: "GET" }).handler(
       .order("created_at", { ascending: false })
       .limit(12);
     if (error) safeError("Não foi possível carregar os imóveis.", error);
-    return (data ?? []) as PropertyListItem[];
+    return normalizeRows(data);
   },
 );
 
@@ -93,7 +93,7 @@ export const listLaunches = createServerFn({ method: "GET" }).handler(
       .order("created_at", { ascending: false })
       .limit(12);
     if (error) safeError("Não foi possível carregar os lançamentos.", error);
-    return (data ?? []) as PropertyListItem[];
+    return normalizeRows(data);
   },
 );
 
@@ -137,7 +137,7 @@ export const searchProperties = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(60);
     if (error) safeError("Não foi possível pesquisar os imóveis.", error);
-    return (rows ?? []) as PropertyListItem[];
+    return normalizeRows(rows);
   });
 
 const codeSchema = z.object({
