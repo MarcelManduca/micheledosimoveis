@@ -11,9 +11,10 @@ export function SiteFooter() {
           <img
             src={logoDark}
             alt={SITE.brandName}
-            className="h-10 w-auto"
+            className="h-8 sm:h-10 w-auto max-w-[220px] object-contain"
             draggable={false}
           />
+
           <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-200">
             <ShieldCheck className="h-3.5 w-3.5" /> Corretora associada · Gralha Imóveis
           </div>
