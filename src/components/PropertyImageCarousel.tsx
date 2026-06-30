@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, type PointerEvent } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type Props = {
   images: string[];
@@ -85,18 +85,32 @@ export function PropertyImageCarousel({ images, alt, className }: Props) {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
 
       {hasMany && (
-        <button
-          type="button"
-          aria-label="Próxima foto"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            goTo(index + 1);
-          }}
-          className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-black/5 bg-white text-foreground shadow-md transition hover:shadow-lg hover:scale-105 active:scale-95 opacity-90 sm:opacity-0 sm:group-hover/carousel:opacity-100 cursor-pointer focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
-        >
-          <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
-        </button>
+        <>
+          <button
+            type="button"
+            aria-label="Foto anterior"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              goTo(index - 1);
+            }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-black/5 bg-white text-foreground shadow-md transition hover:shadow-lg hover:scale-105 active:scale-95 opacity-90 sm:opacity-0 sm:group-hover/carousel:opacity-100 cursor-pointer focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
+          >
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+          </button>
+          <button
+            type="button"
+            aria-label="Próxima foto"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              goTo(index + 1);
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full border border-black/5 bg-white text-foreground shadow-md transition hover:shadow-lg hover:scale-105 active:scale-95 opacity-90 sm:opacity-0 sm:group-hover/carousel:opacity-100 cursor-pointer focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/30"
+          >
+            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+          </button>
+        </>
       )}
 
       {hasMany && (
