@@ -1,21 +1,29 @@
 import { useCallback, useRef, useState, type PointerEvent } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 
 type Props = {
   images: string[];
   alt: string;
   className?: string;
+  /** Limita o carrossel às N primeiras fotos e mostra um CTA "Ver mais fotos" ao chegar na última. */
+  lockAfter?: number;
+  /** Rótulo do CTA exibido ao atingir o limite. */
+  ctaLabel?: string;
 };
 
 /**
  * Carrossel de imagens com transição horizontal suave (translateX),
  * seta circular sobre a imagem e suporte a swipe no mobile.
  */
-export function PropertyImageCarousel({ images, alt, className }: Props) {
-  const list = images.filter(Boolean);
+export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLabel = "Ver mais fotos" }: Props) {
+  const filtered = images.filter(Boolean);
+  const list = lockAfter ? filtered.slice(0, lockAfter) : filtered;
   const [index, setIndex] = useState(0);
   const total = list.length;
   const hasMany = total > 1;
+  const atLockEnd = !!lockAfter && filtered.length > lockAfter && index === total - 1;
+  const dragStartX = useRef<number | null>(null);
+  const dragDelta = useRef(0);
   const dragStartX = useRef<number | null>(null);
   const dragDelta = useRef(0);
 
