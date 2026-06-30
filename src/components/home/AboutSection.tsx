@@ -5,28 +5,47 @@ import { LazyVisible } from "@/components/LazyVisible";
 import { AboutBio } from "@/components/home/AboutBio";
 import { ABOUT_STATS } from "@/lib/site-config";
 
-import dome01 from "@/assets/dome/michele-01.jpg.asset.json";
-import dome02 from "@/assets/dome/michele-02.jpg.asset.json";
-import dome03 from "@/assets/dome/michele-03.jpg.asset.json";
-import dome04 from "@/assets/dome/michele-04.jpg.asset.json";
-import dome05 from "@/assets/dome/michele-05.jpg.asset.json";
-import dome06 from "@/assets/dome/michele-06.jpg.asset.json";
-import dome07 from "@/assets/dome/michele-07.jpg.asset.json";
-import dome08 from "@/assets/dome/michele-08.jpg.asset.json";
-import dome09 from "@/assets/dome/michele-09.jpg.asset.json";
-import dome10 from "@/assets/dome/michele-10.jpg.asset.json";
-import dome11 from "@/assets/dome/michele-11.jpg.asset.json";
-import dome12 from "@/assets/dome/michele-12.jpg.asset.json";
-import dome13 from "@/assets/dome/michele-13.jpg.asset.json";
-import dome14 from "@/assets/dome/michele-14.jpg.asset.json";
-import dome15 from "@/assets/dome/michele-15.jpg.asset.json";
+import dome01 from "@/assets/dome/michele-01.jpg";
+import dome02 from "@/assets/dome/michele-02.jpg";
+import dome03 from "@/assets/dome/michele-03.jpg";
+import dome04 from "@/assets/dome/michele-04.jpg";
+import dome05 from "@/assets/dome/michele-05.jpg";
+import dome06 from "@/assets/dome/michele-06.jpg";
+import dome07 from "@/assets/dome/michele-07.jpg";
+import dome08 from "@/assets/dome/michele-08.jpg";
+import dome09 from "@/assets/dome/michele-09.jpg";
+import dome10 from "@/assets/dome/michele-10.jpg";
+import dome11 from "@/assets/dome/michele-11.jpg";
+import dome12 from "@/assets/dome/michele-12.jpg";
+import dome13 from "@/assets/dome/michele-13.jpg";
+import dome14 from "@/assets/dome/michele-14.jpg";
+import dome15 from "@/assets/dome/michele-15.jpg";
 
 const DomeGallery = lazy(() => import("@/components/DomeGallery.jsx"));
+
+const DOME_ALTS = [
+  "Michele Prietsch em bastidores de produção imobiliária em Florianópolis",
+  "Michele dos Imóveis em cena profissional de apresentação de imóvel",
+  "Bastidores de conteúdo imobiliário de alto padrão em Florianópolis",
+  "Michele Prietsch em ensaio institucional premium",
+  "Michele dos Imóveis durante visita técnica a imóvel de alto padrão",
+  "Michele Prietsch em sessão de fotos para portfólio imobiliário",
+  "Bastidores de gravação com Michele Prietsch em Florianópolis",
+  "Michele dos Imóveis em atendimento personalizado a clientes",
+  "Michele Prietsch em cena no escritório da Gralha Imóveis",
+  "Bastidores de tour por apartamento na Beira Mar Norte",
+  "Michele Prietsch em ensaio profissional para mídias sociais",
+  "Michele dos Imóveis apresentando empreendimento em Florianópolis",
+  "Bastidores de produção de conteúdo premium em Florianópolis",
+  "Michele Prietsch em cena durante visita a cobertura de alto padrão",
+  "Michele dos Imóveis em registro institucional de bastidores",
+];
 
 const DOME_IMAGES = [
   dome01, dome02, dome03, dome04, dome05, dome06, dome07, dome08,
   dome09, dome10, dome11, dome12, dome13, dome14, dome15,
-].map((a, i) => ({ src: a.url, alt: `Michele Prietsch - foto ${i + 1}` }));
+].map((src, i) => ({ src, alt: DOME_ALTS[i] }));
+
 
 export function AboutSection() {
   return (
