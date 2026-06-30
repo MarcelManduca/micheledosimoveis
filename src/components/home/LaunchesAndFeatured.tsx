@@ -25,8 +25,8 @@ export function LaunchesAndFeatured({ items }: { items: PropertyListItem[] }) {
             </h2>
           </div>
           <p className="max-w-sm text-muted-foreground">
-            Apartamentos, coberturas, casas e lançamentos nos bairros mais
-            valorizados da Ilha — todos vistoriados pessoalmente pela Michele.
+            Apartamentos, coberturas, casas e lançamentos selecionados pela
+            curadoria de Michele dos Imóveis.
           </p>
         </div>
 
