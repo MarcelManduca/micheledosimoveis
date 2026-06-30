@@ -1,14 +1,20 @@
 import { Link } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 import { SITE } from "@/lib/site-config";
+import logoDark from "@/assets/brand/logo-dark.png";
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-border">
       <div className="mx-auto max-w-7xl px-6 sm:px-10 py-12 grid gap-8 md:grid-cols-3 text-sm text-muted-foreground">
         <div>
-          <div className="font-display text-base text-foreground">{SITE.brandName}</div>
-          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-200">
+          <img
+            src={logoDark}
+            alt={SITE.brandName}
+            className="h-10 w-auto"
+            draggable={false}
+          />
+          <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-200">
             <ShieldCheck className="h-3.5 w-3.5" /> Corretora associada · Gralha Imóveis
           </div>
         </div>

@@ -2,6 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { WHATSAPP_URL } from "@/lib/site-config";
+import logoWhite from "@/assets/brand/logo-white.png";
+import logoDark from "@/assets/brand/logo-dark.png";
 
 const NAV_LINKS: Array<[string, string]> = [
   ["#top", "Início"],
@@ -22,9 +24,16 @@ export function SiteHeader() {
     <>
       <header className="absolute top-0 left-0 right-0 z-30">
         <div className="mx-auto max-w-7xl px-5 sm:px-8 py-5 flex items-center justify-between gap-3">
-          <a href="#top" className="flex items-center gap-3 min-w-0">
-            <span className="sr-only">Michele Prietsch</span>
+          <a href="#top" className="flex items-center min-w-0">
+            <span className="sr-only">Michele dos Imóveis</span>
+            <img
+              src={logoWhite}
+              alt="Michele dos Imóveis"
+              className="h-9 sm:h-10 w-auto select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
+              draggable={false}
+            />
           </a>
+
 
           <nav className="hidden md:flex items-center gap-9 text-sm text-white/90">
             <a href="#top" className="hover:text-white transition">Início</a>
@@ -69,7 +78,7 @@ export function SiteHeader() {
           />
           <div className="absolute right-0 top-0 h-full w-[82%] max-w-xs bg-background shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
-              <span className="font-display text-lg">Menu</span>
+              <img src={logoDark} alt="Michele dos Imóveis" className="h-7 w-auto" draggable={false} />
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
