@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Michele dos Imóveis — Alto padrão em Florianópolis | Jurerê, Beira Mar, Lagoa, Campeche" },
+      { title: "Corretora Michele" },
       { name: "description", content: "Corretora de imóveis de alto padrão em Florianópolis. Apartamentos, casas e coberturas em Jurerê Internacional, Beira Mar Norte, Lagoa da Conceição, Campeche, Praia Brava e principais bairros e praias da Ilha." },
       { name: "author", content: "Michele Prietsch" },
       { name: "geo.region", content: "BR-SC" },
