@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, ArrowRight, MapPin, Phone } from "lucide-react";
+import { useMemo, useState } from "react";
 import { searchProperties } from "@/lib/properties.functions";
 import {
   NEIGHBORHOODS,
@@ -7,6 +8,7 @@ import {
   type Neighborhood,
 } from "@/lib/neighborhoods";
 import { PropertyCard } from "@/components/PropertyCard";
+
 
 const SITE = "https://micheledosimoveis.lovable.app";
 const WHATSAPP =
