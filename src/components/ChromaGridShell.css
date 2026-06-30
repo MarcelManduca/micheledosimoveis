@@ -52,20 +52,42 @@
   pointer-events: none;
 }
 
-/* Moldura fina sólida integrando foto + descrição com a cor */
+/* Moldura sólida + tint colorido suave integrando foto + descrição */
 .chroma-cell > * {
   position: relative;
   z-index: 1;
   border-radius: 1.25rem;
   overflow: hidden;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--card-border) 14%, hsl(var(--card))) 0%,
+      color-mix(in srgb, var(--card-border) 6%, hsl(var(--card))) 100%
+    );
   box-shadow:
-    inset 0 0 0 1.5px color-mix(in srgb, var(--card-border) 65%, transparent),
+    inset 0 0 0 1.5px color-mix(in srgb, var(--card-border) 70%, transparent),
     0 18px 50px -28px color-mix(in srgb, var(--card-border) 70%, transparent),
     0 6px 18px -12px rgb(0 0 0 / 0.08);
   transition:
+    background 0.45s ease,
     box-shadow 0.45s ease,
     transform 0.45s ease;
 }
+
+/* Quando algum vizinho está sob hover, este perde o tint */
+.chroma-shell.is-hovering .chroma-cell:not(:hover) > * {
+  background: hsl(var(--card));
+}
+
+.chroma-cell:hover > * {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--card-border) 22%, hsl(var(--card))) 0%,
+      color-mix(in srgb, var(--card-border) 10%, hsl(var(--card))) 100%
+    );
+}
+
 
 /* Hover na grade: tudo dessatura, exceto o card sob o cursor */
 .chroma-shell.is-hovering .chroma-cell:not(:hover) {
