@@ -15,6 +15,7 @@ export type PropertyListItem = {
   bedrooms: number | null;
   bathrooms: number | null;
   cover_image: string | null;
+  images: string[];
   featured: boolean;
   is_launch?: boolean;
 };
@@ -46,7 +47,23 @@ async function assertAdmin(ctx: {
 }
 
 const LIST_COLS =
-  "id, code, title, neighborhood, city, price_brl, area_m2, bedrooms, bathrooms, cover_image, featured, is_launch";
+  "id, code, title, neighborhood, city, price_brl, area_m2, bedrooms, bathrooms, cover_image, featured, is_launch, property_photos(url, position)";
+
+type PhotoJoin = { url: string; position: number };
+
+function normalizeRow(row: Record<string, unknown>): PropertyListItem {
+  const photos = (row.property_photos as PhotoJoin[] | null | undefined) ?? [];
+  const sorted = [...photos].sort((a, b) => a.position - b.position).map((p) => p.url);
+  const cover = (row.cover_image as string | null) ?? null;
+  const images = sorted.length > 0 ? sorted : cover ? [cover] : [];
+  const { property_photos: _omit, ...rest } = row as Record<string, unknown>;
+  void _omit;
+  return { ...(rest as Omit<PropertyListItem, "images">), images } as PropertyListItem;
+}
+
+function normalizeRows(rows: unknown[] | null): PropertyListItem[] {
+  return (rows ?? []).map((r) => normalizeRow(r as Record<string, unknown>));
+}
 
 // ───────── Public reads ─────────
 
