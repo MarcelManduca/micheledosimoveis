@@ -1,8 +1,14 @@
 .chroma-shell {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.5rem;
   width: 100%;
+  isolation: isolate;
+
+  --x: 50%;
+  --y: 50%;
+  --r: 320px;
 }
 
 @media (max-width: 1024px) {
@@ -17,70 +23,67 @@
   }
 }
 
+/* Halo colorido por trás de cada card (a cor que o spotlight irá revelar) */
 .chroma-cell {
   position: relative;
-  border-radius: 1rem;
-  isolation: isolate;
-  transition: filter 0.45s ease, opacity 0.45s ease, transform 0.45s ease;
-}
-
-.chroma-cell.is-muted {
-  filter: grayscale(1) saturate(0) brightness(0.92);
-  opacity: 0.65;
-}
-
-.chroma-cell.is-active {
-  transform: translateY(-2px);
-  z-index: 2;
-}
-
-/* Halo colorido por trás do card (cor própria da célula) */
-.chroma-cell__glow {
-  position: absolute;
-  inset: -14px;
   border-radius: 1.25rem;
-  pointer-events: none;
-  z-index: -1;
-  background: radial-gradient(
-    closest-side,
-    color-mix(in srgb, var(--cell-color) 55%, transparent),
-    transparent 75%
-  );
-  opacity: 0;
-  filter: blur(28px);
-  transition: opacity 0.45s ease;
+  padding: 6px;
+  background: var(--card-gradient);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--card-border) 55%, transparent),
+    0 20px 60px -20px color-mix(in srgb, var(--card-border) 60%, transparent);
 }
 
-.chroma-cell.is-active .chroma-cell__glow {
-  opacity: 1;
+.chroma-cell > * {
+  position: relative;
+  z-index: 1;
+  border-radius: 1rem;
+  overflow: hidden;
 }
 
-/* Spotlight tonalizado seguindo o mouse */
-.chroma-cell__spotlight {
+/* Overlay grayscale com "buraco" no spotlight — revela a cor por baixo */
+.chroma-overlay {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
+  inset: -8px;
   pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.4s ease;
   z-index: 3;
-  background: radial-gradient(
-    240px circle at var(--mouse-x) var(--mouse-y),
-    color-mix(in srgb, var(--cell-color) 38%, transparent),
-    color-mix(in srgb, var(--cell-color) 12%, transparent) 45%,
-    transparent 75%
+  backdrop-filter: grayscale(1) brightness(0.86);
+  background: rgba(0, 0, 0, 0.001);
+  border-radius: 1.5rem;
+
+  mask-image: radial-gradient(
+    circle var(--r) at var(--x) var(--y),
+    transparent 0%,
+    transparent 15%,
+    rgba(0, 0, 0, 0.1) 30%,
+    rgba(0, 0, 0, 0.22) 45%,
+    rgba(0, 0, 0, 0.35) 60%,
+    rgba(0, 0, 0, 0.5) 75%,
+    rgba(0, 0, 0, 0.68) 88%,
+    #000 100%
   );
-  mix-blend-mode: screen;
 }
 
-.chroma-cell.is-active .chroma-cell__spotlight {
+/* Fade grayscale completo quando o mouse sai */
+.chroma-fade {
+  position: absolute;
+  inset: -8px;
+  pointer-events: none;
+  z-index: 4;
+  backdrop-filter: grayscale(1) brightness(0.86);
+  background: rgba(0, 0, 0, 0.001);
+  border-radius: 1.5rem;
   opacity: 1;
-}
+  transition: opacity 0.25s ease;
 
-@media (prefers-reduced-motion: reduce) {
-  .chroma-cell,
-  .chroma-cell__spotlight,
-  .chroma-cell__glow {
-    transition: none;
-  }
+  mask-image: radial-gradient(
+    circle var(--r) at var(--x) var(--y),
+    #fff 0%,
+    #fff 15%,
+    rgba(255, 255, 255, 0.9) 30%,
+    rgba(255, 255, 255, 0.78) 45%,
+    rgba(255, 255, 255, 0.65) 60%,
+    rgba(255, 255, 255, 0.5) 75%,
+    rgba(255, 255, 255, 0.32) 88%,
+    transparent 100%
+  );
 }
