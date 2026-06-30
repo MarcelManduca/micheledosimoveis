@@ -78,7 +78,7 @@ export function SiteHeader() {
           />
           <div className="absolute right-0 top-0 h-full w-[82%] max-w-xs bg-background shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
-              <span className="font-display text-lg">Menu</span>
+              <img src={logoDark} alt="Michele dos Imóveis" className="h-7 w-auto" draggable={false} />
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
