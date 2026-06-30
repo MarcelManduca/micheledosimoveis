@@ -79,7 +79,7 @@ export function SiteHeader() {
           />
           <div className="absolute right-0 top-0 h-full w-[82%] max-w-xs bg-background shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
-              <img src={logoDark} alt="Michele dos Imóveis" className="h-7 w-auto" draggable={false} />
+              <img src={logoDark} alt="Michele dos Imóveis" className="h-6 sm:h-7 w-auto max-w-[60%] object-contain" draggable={false} />
               <button
                 type="button"
                 onClick={() => setMobileOpen(false)}
