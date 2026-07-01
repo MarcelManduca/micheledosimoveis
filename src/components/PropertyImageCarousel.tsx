@@ -95,11 +95,13 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
 
   return (
     <div
+      ref={containerRef}
       className={`group/carousel relative overflow-hidden ${className ?? ""}`}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      onMouseEnter={hasMany ? revealAll : undefined}
     >
       <div
         className="flex h-full w-full touch-pan-y will-change-transform"
@@ -110,18 +112,23 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
       >
         {list.map((src, i) => (
           <div key={`${src}-${i}`} className="relative h-full w-full shrink-0 basis-full">
-            <img
-              src={src}
-              alt={`${alt} — foto ${i + 1}`}
-              loading="lazy"
-              fetchPriority="low"
-              decoding="async"
-              draggable={false}
-              className="h-full w-full select-none object-cover"
-            />
+            {i < revealed ? (
+              <img
+                src={src}
+                alt={`${alt} — foto ${i + 1}`}
+                loading="lazy"
+                fetchPriority="low"
+                decoding="async"
+                draggable={false}
+                className="h-full w-full select-none object-cover"
+              />
+            ) : (
+              <div aria-hidden="true" className="h-full w-full bg-secondary/40" />
+            )}
           </div>
         ))}
       </div>
+
 
       {/* Gradiente inferior para leitura dos textos sobrepostos */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
