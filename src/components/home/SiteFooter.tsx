@@ -6,7 +6,7 @@ import logoDark from "@/assets/brand/logo-dark.webp";
 export function SiteFooter() {
   return (
     <footer className="border-t border-border">
-      <div className="mx-auto max-w-7xl px-6 sm:px-10 py-12 grid gap-8 md:grid-cols-3 text-sm text-muted-foreground">
+      <div className="mx-auto max-w-7xl px-6 sm:px-10 py-12 grid gap-8 md:grid-cols-4 text-sm text-muted-foreground">
         <div>
           <img
             src={logoDark}
@@ -36,6 +36,19 @@ export function SiteFooter() {
             {SITE.address.street}<br />
             {SITE.address.district} · {SITE.address.cityState}
           </p>
+        </div>
+        <div>
+          <div className="text-xs uppercase tracking-[0.2em] text-foreground/70">Guias e conteúdos</div>
+          <ul className="mt-2 space-y-2 leading-relaxed">
+            <li>
+              <Link
+                to="/guia-imoveis-alto-padrao-florianopolis"
+                className="text-foreground/80 hover:text-foreground underline-offset-4 hover:underline transition"
+              >
+                Guia de imóveis de alto padrão em Florianópolis
+              </Link>
+            </li>
+          </ul>
         </div>
       </div>
       <div className="border-t border-border">
