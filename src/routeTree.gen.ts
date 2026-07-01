@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SitemapBairrosDotxmlRouteImport } from './routes/sitemap-bairros[.]xml'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnuncieRouteImport } from './routes/anuncie'
@@ -35,6 +36,11 @@ const SitemapBairrosDotxmlRoute = SitemapBairrosDotxmlRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BuscarRoute = BuscarRouteImport.update({
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -104,6 +111,7 @@ export interface FileRoutesByTo {
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -119,6 +127,7 @@ export interface FileRoutesById {
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
+  '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -135,6 +144,7 @@ export interface FileRouteTypes {
     | '/anuncie'
     | '/auth'
     | '/buscar'
+    | '/llms.txt'
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap.xml'
@@ -149,6 +159,7 @@ export interface FileRouteTypes {
     | '/anuncie'
     | '/auth'
     | '/buscar'
+    | '/llms.txt'
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap.xml'
@@ -163,6 +174,7 @@ export interface FileRouteTypes {
     | '/anuncie'
     | '/auth'
     | '/buscar'
+    | '/llms.txt'
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap.xml'
@@ -178,6 +190,7 @@ export interface RootRouteChildren {
   AnuncieRoute: typeof AnuncieRoute
   AuthRoute: typeof AuthRoute
   BuscarRoute: typeof BuscarRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SitemapBairrosDotxmlRoute: typeof SitemapBairrosDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -208,6 +221,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/buscar': {
@@ -282,6 +302,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnuncieRoute: AnuncieRoute,
   AuthRoute: AuthRoute,
   BuscarRoute: BuscarRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SitemapBairrosDotxmlRoute: SitemapBairrosDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,

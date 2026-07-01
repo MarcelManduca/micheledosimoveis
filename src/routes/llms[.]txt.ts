@@ -34,7 +34,7 @@ function loadContent(): string {
   return cached;
 }
 
-export const Route = createFileRoute("/llms[.]txt")({
+export const Route = createFileRoute("/llms.txt")({
   server: {
     handlers: {
       GET: async () => {
