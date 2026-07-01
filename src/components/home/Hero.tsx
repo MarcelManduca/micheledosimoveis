@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ArrowRight, MapPin, ShieldCheck, Star } from "lucide-react";
 import hero1_720 from "@/assets/hero-beiramar-720.webp";
 import hero1_1280 from "@/assets/hero-beiramar-1280.webp";
@@ -42,6 +43,22 @@ const HERO_IMAGES = [
 ];
 
 export function Hero() {
+  // Adia a montagem das imagens secundárias do slideshow para depois do load
+  // do LCP — libera main thread e não concorre por banda no mobile.
+  const [showSecondary, setShowSecondary] = useState(false);
+  useEffect(() => {
+    const w = window as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    };
+    const trigger = () => {
+      if (w.requestIdleCallback) w.requestIdleCallback(() => setShowSecondary(true), { timeout: 3500 });
+      else setTimeout(() => setShowSecondary(true), 2500);
+    };
+    if (document.readyState === "complete") trigger();
+    else window.addEventListener("load", trigger, { once: true });
+    return () => window.removeEventListener("load", trigger);
+  }, []);
+  const images = showSecondary ? HERO_IMAGES : HERO_IMAGES.slice(0, 1);
   return (
     <section id="top" className="relative px-3 sm:px-5 pt-3">
       <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px]">
