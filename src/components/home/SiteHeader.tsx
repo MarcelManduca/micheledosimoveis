@@ -3,6 +3,8 @@ import { ArrowRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { WHATSAPP_URL } from "@/lib/site-config";
 import logoWhite from "@/assets/brand/logo-white.webp";
+import logoWhite160 from "@/assets/brand/logo-white-160.webp";
+import logoWhite320 from "@/assets/brand/logo-white-320.webp";
 import logoDark from "@/assets/brand/logo-dark.webp";
 
 const NAV_LINKS: Array<[string, string]> = [
