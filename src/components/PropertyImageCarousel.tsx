@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 
 type Props = {
