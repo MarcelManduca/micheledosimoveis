@@ -29,6 +29,10 @@ export function SiteHeader() {
             <img
               src={logoWhite}
               alt="Michele dos Imóveis"
+              width={640}
+              height={237}
+              fetchPriority="high"
+              decoding="async"
               className="h-7 sm:h-9 md:h-10 w-auto max-w-[55vw] sm:max-w-none object-contain select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
               draggable={false}
             />
