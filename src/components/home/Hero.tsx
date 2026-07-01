@@ -12,7 +12,7 @@ import portrait from "@/assets/michele-portrait.webp";
 
 const HERO_IMAGES = [
   {
-    srcSet: `${hero1_720} 720w, ${hero1_1280} 1280w, ${hero1_1920} 1920w`,
+    srcSet: `${hero1_720} 720w, ${hero1_1280} 1280w`,
     src: hero1_fallback,
     alt: "Imóvel de alto padrão em Florianópolis com vista para o mar",
     anim: "animate-hero-fade-a",
