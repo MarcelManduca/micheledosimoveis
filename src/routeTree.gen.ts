@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SitemapBairrosDotxmlRouteImport } from './routes/sitemap-bairros[.]xml'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
+import { Route as GuiaImoveisAltoPadraoFlorianopolisRouteImport } from './routes/guia-imoveis-alto-padrao-florianopolis'
 import { Route as BuscarRouteImport } from './routes/buscar'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnuncieRouteImport } from './routes/anuncie'
@@ -43,6 +44,12 @@ const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
   path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuiaImoveisAltoPadraoFlorianopolisRoute =
+  GuiaImoveisAltoPadraoFlorianopolisRouteImport.update({
+    id: '/guia-imoveis-alto-padrao-florianopolis',
+    path: '/guia-imoveis-alto-padrao-florianopolis',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BuscarRoute = BuscarRouteImport.update({
   id: '/buscar',
   path: '/buscar',
@@ -96,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
+  '/guia-imoveis-alto-padrao-florianopolis': typeof GuiaImoveisAltoPadraoFlorianopolisRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
@@ -111,6 +119,7 @@ export interface FileRoutesByTo {
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
+  '/guia-imoveis-alto-padrao-florianopolis': typeof GuiaImoveisAltoPadraoFlorianopolisRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
@@ -127,6 +136,7 @@ export interface FileRoutesById {
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
+  '/guia-imoveis-alto-padrao-florianopolis': typeof GuiaImoveisAltoPadraoFlorianopolisRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
@@ -144,6 +154,7 @@ export interface FileRouteTypes {
     | '/anuncie'
     | '/auth'
     | '/buscar'
+    | '/guia-imoveis-alto-padrao-florianopolis'
     | '/llms.txt'
     | '/privacidade'
     | '/sitemap-bairros.xml'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/anuncie'
     | '/auth'
     | '/buscar'
+    | '/guia-imoveis-alto-padrao-florianopolis'
     | '/llms.txt'
     | '/privacidade'
     | '/sitemap-bairros.xml'
@@ -174,6 +186,7 @@ export interface FileRouteTypes {
     | '/anuncie'
     | '/auth'
     | '/buscar'
+    | '/guia-imoveis-alto-padrao-florianopolis'
     | '/llms.txt'
     | '/privacidade'
     | '/sitemap-bairros.xml'
@@ -190,6 +203,7 @@ export interface RootRouteChildren {
   AnuncieRoute: typeof AnuncieRoute
   AuthRoute: typeof AuthRoute
   BuscarRoute: typeof BuscarRoute
+  GuiaImoveisAltoPadraoFlorianopolisRoute: typeof GuiaImoveisAltoPadraoFlorianopolisRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SitemapBairrosDotxmlRoute: typeof SitemapBairrosDotxmlRoute
@@ -228,6 +242,13 @@ declare module '@tanstack/react-router' {
       path: '/llms.txt'
       fullPath: '/llms.txt'
       preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guia-imoveis-alto-padrao-florianopolis': {
+      id: '/guia-imoveis-alto-padrao-florianopolis'
+      path: '/guia-imoveis-alto-padrao-florianopolis'
+      fullPath: '/guia-imoveis-alto-padrao-florianopolis'
+      preLoaderRoute: typeof GuiaImoveisAltoPadraoFlorianopolisRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/buscar': {
@@ -302,6 +323,8 @@ const rootRouteChildren: RootRouteChildren = {
   AnuncieRoute: AnuncieRoute,
   AuthRoute: AuthRoute,
   BuscarRoute: BuscarRoute,
+  GuiaImoveisAltoPadraoFlorianopolisRoute:
+    GuiaImoveisAltoPadraoFlorianopolisRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SitemapBairrosDotxmlRoute: SitemapBairrosDotxmlRoute,

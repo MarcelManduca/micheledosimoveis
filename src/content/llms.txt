@@ -69,6 +69,7 @@ Informações principais:
 - [Página inicial](https://micheledosimoveis.com.br/): Página principal da Michele dos Imóveis, com apresentação da corretora, imóveis em destaque, regiões de atuação e atendimento via WhatsApp.
 - [Sobre Michele Prietsch](https://micheledosimoveis.com.br/#sobre): Apresentação da corretora, trajetória profissional, atuação e posicionamento no mercado imobiliário de Florianópolis.
 - [Anuncie seu imóvel](https://micheledosimoveis.com.br/anuncie): Página para proprietários interessados em vender imóveis de alto padrão com curadoria, avaliação, divulgação qualificada e opção off market.
+- [Guia de imóveis de alto padrão em Florianópolis](https://micheledosimoveis.com.br/guia-imoveis-alto-padrao-florianopolis): Conteúdo editorial sobre bairros, tipos de imóveis, critérios de compra, imóveis off market e curadoria imobiliária em Florianópolis.
 - [Contato via WhatsApp](https://micheledosimoveis.com.br/#contato): Canal principal para atendimento personalizado.
 - [Política de privacidade](https://micheledosimoveis.com.br/privacidade): Informações sobre privacidade, LGPD e tratamento de dados.
 

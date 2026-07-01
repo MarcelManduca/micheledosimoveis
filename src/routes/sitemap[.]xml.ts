@@ -30,6 +30,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/buscar", changefreq: "daily", priority: "0.9" },
           { path: "/imoveis", changefreq: "weekly", priority: "0.9" },
           { path: "/anuncie", changefreq: "monthly", priority: "0.8" },
+          { path: "/guia-imoveis-alto-padrao-florianopolis", changefreq: "monthly", priority: "0.8" },
           { path: "/privacidade", changefreq: "yearly", priority: "0.3" },
           ...NEIGHBORHOODS.map((n) => ({
             path: `/imoveis/${n.slug}`,
