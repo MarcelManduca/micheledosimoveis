@@ -135,7 +135,8 @@ export const searchProperties = createServerFn({ method: "GET" })
     const { data: rows, error } = await q
       .order("featured", { ascending: false })
       .order("created_at", { ascending: false })
-      .limit(60);
+      .limit(1000);
+
     if (error) safeError("Não foi possível pesquisar os imóveis.", error);
     return normalizeRows(rows);
   });
