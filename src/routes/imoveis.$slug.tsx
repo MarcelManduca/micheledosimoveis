@@ -112,7 +112,7 @@ export const Route = createFileRoute("/imoveis/$slug")({
             "@type": "Answer",
             text: count > 0
               ? `Sim. Hoje há ${count} ${count === 1 ? "imóvel publicado" : "imóveis publicados"} em ${n.name}. Também trabalhamos com opções off market que não aparecem em listagens públicas — consulte a Michele para receber a seleção completa.`
-              : `No momento o portfólio público de ${n.name} está vazio, mas atuamos com operações off market nesta região. Fale com a Michele para receber opções sob medida que não são divulgadas publicamente.`,
+              : `No momento, alguns imóveis de alto padrão em ${n.name} podem estar disponíveis em formato off market, sem divulgação pública. Nem todos os imóveis desta região são anunciados abertamente — fale com Michele para receber uma curadoria personalizada.`,
           },
         },
         {
@@ -133,10 +133,12 @@ export const Route = createFileRoute("/imoveis/$slug")({
         },
       ],
     };
-    // Bairros sem portfólio público viram conteúdo "thin" para o Google.
-    // Marcamos noindex,follow: a página continua acessível e passa link
-    // equity para os imóveis e bairros vizinhos, mas não polui o índice.
-    const robots = count === 0 ? "noindex, follow" : "index, follow";
+    // Bairros estratégicos (indexWhenEmpty) permanecem indexáveis mesmo
+    // sem imóveis públicos, pois representam autoridade local, atuação
+    // editorial e captação off market. Demais bairros vazios recebem
+    // noindex,follow para evitar thin content.
+    const shouldIndex = count > 0 || n.indexWhenEmpty === true;
+    const robots = shouldIndex ? "index, follow" : "noindex, follow";
     return {
       meta: [
         { title },
@@ -376,7 +378,7 @@ function NeighborhoodPage() {
                 a:
                   properties.length > 0
                     ? `Sim. Hoje há ${properties.length} ${properties.length === 1 ? "imóvel publicado" : "imóveis publicados"} em ${n.name}. Também trabalhamos com opções off market que não aparecem em listagens públicas — consulte a Michele para receber a seleção completa.`
-                    : `No momento o portfólio público de ${n.name} está vazio, mas atuamos com operações off market nesta região. Fale com a Michele para receber opções sob medida que não são divulgadas publicamente.`,
+                    : `No momento, alguns imóveis de alto padrão em ${n.name} podem estar disponíveis em formato off market, sem divulgação pública. Nem todos os imóveis desta região são anunciados abertamente — fale com Michele para receber uma curadoria personalizada.`,
               },
               {
                 q: `Por que escolher ${n.name} em Florianópolis?`,
@@ -484,11 +486,24 @@ function PropertiesSection({
       </div>
 
       {total === 0 ? (
-        <div className="mt-6 rounded-2xl bg-card ring-1 ring-black/5 p-8 text-center">
-          <p className="text-muted-foreground">
-            No momento não há imóveis publicados em {n.name}. Atuamos com
-            operações <strong className="text-foreground">off market</strong>{" "}
-            nesta região — fale com a Michele para receber opções sob medida.
+        <div className="mt-6 rounded-2xl bg-card ring-1 ring-black/5 p-8">
+          <p className="text-muted-foreground leading-relaxed">
+            {n.indexWhenEmpty ? (
+              <>
+                {n.name} é uma das regiões de atuação prioritária da Michele em
+                Florianópolis. Nem todos os imóveis de alto padrão desta região
+                são divulgados publicamente — muitos são negociados em formato{" "}
+                <strong className="text-foreground">off market</strong>, com
+                total discrição e curadoria personalizada.
+              </>
+            ) : (
+              <>
+                No momento não há imóveis publicados em {n.name}. Atuamos com
+                operações{" "}
+                <strong className="text-foreground">off market</strong> nesta
+                região — fale com a Michele para receber opções sob medida.
+              </>
+            )}
           </p>
           <a
             href={waUrl}
@@ -497,7 +512,7 @@ function PropertiesSection({
             className="mt-5 inline-flex items-center gap-2 rounded-full bg-foreground text-background px-5 py-2.5 text-sm hover:opacity-90 transition"
           >
             <Phone className="h-4 w-4" />
-            Receber opções de {n.name}
+            Receber curadoria de {n.name} no WhatsApp
           </a>
         </div>
       ) : (

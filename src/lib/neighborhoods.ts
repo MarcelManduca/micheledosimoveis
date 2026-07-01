@@ -21,7 +21,23 @@ export type Neighborhood = {
   geo?: { lat: number; lng: number };
   // Slugs of nearby/related neighborhoods for internal linking.
   related: string[];
+  // Se true, a página do bairro é indexável (index,follow) mesmo quando
+  // o portfólio público estiver vazio — usado em bairros estratégicos
+  // de SEO/GEO com forte autoridade local e captação off market.
+  indexWhenEmpty?: boolean;
 };
+
+const STRATEGIC_SLUGS = new Set([
+  "jurere-internacional",
+  "beira-mar-norte",
+  "cacupe",
+  "joao-paulo",
+  "campeche",
+  "lagoa-da-conceicao",
+  "praia-brava",
+  "santo-antonio-de-lisboa",
+  "novo-campeche",
+]);
 
 export const NEIGHBORHOODS: Neighborhood[] = [
   {
@@ -367,6 +383,11 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     related: ["campeche", "novo-campeche", "rio-tavares"],
   },
 ];
+
+// Marca bairros estratégicos como indexáveis mesmo sem imóveis públicos.
+for (const n of NEIGHBORHOODS) {
+  if (STRATEGIC_SLUGS.has(n.slug)) n.indexWhenEmpty = true;
+}
 
 export function getNeighborhood(slug: string): Neighborhood | undefined {
   return NEIGHBORHOODS.find((n) => n.slug === slug);
