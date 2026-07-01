@@ -222,7 +222,14 @@ function AdminPage() {
         <div className="mt-16 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="font-display text-2xl tracking-tight">Imóveis cadastrados</h2>
-            <p className="mt-1 text-xs text-muted-foreground">
+            {list.data && (
+              <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-secondary/60 px-3 py-1 text-xs text-foreground">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                {list.data.filter((p) => (p as any).published).length} ativos
+                <span className="text-muted-foreground">· {list.data.length} no total</span>
+              </p>
+            )}
+            <p className="mt-2 text-xs text-muted-foreground">
               A verificação roda diariamente: atualiza preços, fotos e descrições dos imóveis ativos e despublica os que foram removidos do site da Gralha.
             </p>
           </div>
