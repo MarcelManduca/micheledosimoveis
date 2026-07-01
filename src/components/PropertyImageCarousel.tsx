@@ -56,13 +56,14 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
   const goTo = useCallback(
     (next: number) => {
       if (total === 0) return;
+      revealAll();
       if (lockAfter) {
         setIndex(Math.max(0, Math.min(total - 1, next)));
         return;
       }
       setIndex(((next % total) + total) % total);
     },
-    [total, lockAfter],
+    [total, lockAfter, revealAll],
   );
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
