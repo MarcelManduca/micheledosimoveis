@@ -1,13 +1,27 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { PropertyCard } from "@/components/PropertyCard";
-import { ChromaGridShell } from "@/components/ChromaGridShell";
 import type { PropertyListItem } from "@/lib/properties.functions";
+
+// ChromaGridShell (CSS+JS) só entra no bundle quando a seção
+// se aproxima da viewport — fora do critical path do mobile.
+const ChromaGridShell = lazy(() =>
+  import("@/components/ChromaGridShell").then((m) => ({ default: m.ChromaGridShell })),
+);
+
+function PlainGrid({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
+      {children}
+    </div>
+  );
+}
 
 const INITIAL_MOBILE = 3;
 const INITIAL_DESKTOP = 6;
 const EXPANDED = 12;
+
 
 /**
  * Lista paginada por revelação: mostra 6 itens, expande para 12,
