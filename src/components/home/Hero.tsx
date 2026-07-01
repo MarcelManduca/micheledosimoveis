@@ -1,7 +1,6 @@
 import { ArrowRight, MapPin, ShieldCheck, Star } from "lucide-react";
 import hero1_720 from "@/assets/hero-beiramar-720.webp";
 import hero1_1280 from "@/assets/hero-beiramar-1280.webp";
-import hero1_1920 from "@/assets/hero-beiramar-1920.webp";
 import hero1_fallback from "@/assets/hero-beiramar.jpg";
 import hero2_720 from "@/assets/hero-beiramar-2-720.webp";
 import hero2_1280 from "@/assets/hero-beiramar-2-1280.webp";
