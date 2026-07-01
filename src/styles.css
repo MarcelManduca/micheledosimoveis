@@ -285,6 +285,28 @@
   .animate-hero-fade-d { animation: none; }
 }
 
+/* === Fallback font metrics to reduce CLS from web font swap === */
+@font-face {
+  font-family: "Fraunces Fallback";
+  src: local("Georgia");
+  size-adjust: 105%;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Inter Tight Fallback";
+  src: local("Arial");
+  size-adjust: 107%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+:root {
+  --font-display: "Fraunces", "Fraunces Fallback", ui-serif, Georgia, serif;
+  --font-sans: "Inter Tight", "Inter Tight Fallback", ui-sans-serif, system-ui, sans-serif;
+}
+
 
 /* === Proteção visual contra cópia/download de imagens === */
 img {

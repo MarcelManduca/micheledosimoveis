@@ -78,8 +78,10 @@ export function PropertyFilters({
       }`}
     >
       <div>
-        <label className={labelCls}>Tipo de imóvel</label>
+        <label htmlFor="filtro-tipo" className={labelCls}>Tipo de imóvel</label>
         <select
+          id="filtro-tipo"
+          aria-label="Tipo de imóvel"
           className={fieldCls}
           value={v.tipo ?? ""}
           onChange={(e) => setV({ ...v, tipo: e.target.value || undefined })}
@@ -94,8 +96,10 @@ export function PropertyFilters({
       </div>
 
       <div>
-        <label className={labelCls}>Bairro</label>
+        <label htmlFor="filtro-bairro" className={labelCls}>Bairro</label>
         <select
+          id="filtro-bairro"
+          aria-label="Bairro"
           className={fieldCls}
           value={v.bairro ?? ""}
           onChange={(e) => setV({ ...v, bairro: e.target.value || undefined })}
@@ -110,8 +114,10 @@ export function PropertyFilters({
       </div>
 
       <div>
-        <label className={labelCls}>Dormitórios</label>
+        <label htmlFor="filtro-dorms" className={labelCls}>Dormitórios</label>
         <select
+          id="filtro-dorms"
+          aria-label="Número de dormitórios"
           className={fieldCls}
           value={v.dorms ?? ""}
           onChange={(e) =>
@@ -127,8 +133,10 @@ export function PropertyFilters({
       </div>
 
       <div>
-        <label className={labelCls}>Faixa de preço</label>
+        <label htmlFor="filtro-faixa" className={labelCls}>Faixa de preço</label>
         <select
+          id="filtro-faixa"
+          aria-label="Faixa de preço"
           className={fieldCls}
           value={v.faixa ?? ""}
           onChange={(e) =>
@@ -143,6 +151,7 @@ export function PropertyFilters({
           ))}
         </select>
       </div>
+
 
       <button
         type="submit"

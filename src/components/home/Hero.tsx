@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ArrowRight, MapPin, ShieldCheck, Star } from "lucide-react";
 import hero1_720 from "@/assets/hero-beiramar-720.webp";
 import hero1_1280 from "@/assets/hero-beiramar-1280.webp";
@@ -42,11 +43,27 @@ const HERO_IMAGES = [
 ];
 
 export function Hero() {
+  // Adia a montagem das imagens secundárias do slideshow para depois do load
+  // do LCP — libera main thread e não concorre por banda no mobile.
+  const [showSecondary, setShowSecondary] = useState(false);
+  useEffect(() => {
+    const w = window as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    };
+    const trigger = () => {
+      if (w.requestIdleCallback) w.requestIdleCallback(() => setShowSecondary(true), { timeout: 3500 });
+      else setTimeout(() => setShowSecondary(true), 2500);
+    };
+    if (document.readyState === "complete") trigger();
+    else window.addEventListener("load", trigger, { once: true });
+    return () => window.removeEventListener("load", trigger);
+  }, []);
+  const images = showSecondary ? HERO_IMAGES : HERO_IMAGES.slice(0, 1);
   return (
     <section id="top" className="relative px-3 sm:px-5 pt-3">
       <div className="relative overflow-hidden rounded-[28px] sm:rounded-[36px]">
         <div className="relative h-[78vh] min-h-[520px] sm:h-[88vh] sm:min-h-[600px] w-full overflow-hidden">
-          {HERO_IMAGES.map((img, i) => (
+          {images.map((img, i) => (
             <img
               key={img.src}
               src={img.src}
@@ -67,15 +84,18 @@ export function Hero() {
 
         <div className="absolute inset-0 flex items-center">
           <div className="mx-auto w-full max-w-7xl px-6 sm:px-10">
-            <div className="max-w-2xl text-white">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs uppercase tracking-[0.18em] ring-1 ring-white/20">
+            <div className="max-w-2xl text-white" style={{ minHeight: "clamp(320px, 46vh, 460px)" }}>
+              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-3 py-1 text-xs uppercase tracking-[0.18em] leading-5 ring-1 ring-white/20">
                 <MapPin className="h-3.5 w-3.5" /> Florianópolis · Alto padrão
               </span>
-              <h1 className="mt-6 font-display font-light leading-[0.95] tracking-tight text-[clamp(3rem,8vw,6.5rem)]">
+              <h1
+                className="mt-6 font-display font-light tracking-tight text-[clamp(3rem,8vw,6.5rem)]"
+                style={{ lineHeight: 0.95, minHeight: "clamp(9rem, 20vw, 13rem)" }}
+              >
                 Michele<br />
                 <span className="italic">dos Imóveis.</span>
               </h1>
-              <p className="mt-6 max-w-xl text-base sm:text-lg text-white/85">
+              <p className="mt-6 max-w-xl text-base sm:text-lg leading-relaxed text-white/85 min-h-[6rem] sm:min-h-[5rem]">
                 Imóveis de alto padrão nos melhores endereços de Florianópolis —
                 de Jurerê Internacional à Lagoa da Conceição, da Beira Mar Norte
                 ao Campeche. Curadoria, discrição e atendimento sob medida.
