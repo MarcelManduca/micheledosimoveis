@@ -23,11 +23,20 @@ export function ExpandableProperties({
   viewAllSearch?: Record<string, string>;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [initial, setInitial] = useState(INITIAL_DESKTOP);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(max-width: 767px)");
+    const apply = () => setInitial(mql.matches ? INITIAL_MOBILE : INITIAL_DESKTOP);
+    apply();
+    mql.addEventListener("change", apply);
+    return () => mql.removeEventListener("change", apply);
+  }, []);
   const visibleCount = expanded
     ? Math.min(items.length, EXPANDED)
-    : Math.min(items.length, INITIAL);
+    : Math.min(items.length, initial);
   const visible = items.slice(0, visibleCount);
-  const canExpand = !expanded && items.length > INITIAL;
+  const canExpand = !expanded && items.length > initial;
   const showViewAll = expanded && items.length > EXPANDED;
 
   return (
