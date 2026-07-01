@@ -486,11 +486,24 @@ function PropertiesSection({
       </div>
 
       {total === 0 ? (
-        <div className="mt-6 rounded-2xl bg-card ring-1 ring-black/5 p-8 text-center">
-          <p className="text-muted-foreground">
-            No momento não há imóveis publicados em {n.name}. Atuamos com
-            operações <strong className="text-foreground">off market</strong>{" "}
-            nesta região — fale com a Michele para receber opções sob medida.
+        <div className="mt-6 rounded-2xl bg-card ring-1 ring-black/5 p-8">
+          <p className="text-muted-foreground leading-relaxed">
+            {n.indexWhenEmpty ? (
+              <>
+                {n.name} é uma das regiões de atuação prioritária da Michele em
+                Florianópolis. Nem todos os imóveis de alto padrão desta região
+                são divulgados publicamente — muitos são negociados em formato{" "}
+                <strong className="text-foreground">off market</strong>, com
+                total discrição e curadoria personalizada.
+              </>
+            ) : (
+              <>
+                No momento não há imóveis publicados em {n.name}. Atuamos com
+                operações{" "}
+                <strong className="text-foreground">off market</strong> nesta
+                região — fale com a Michele para receber opções sob medida.
+              </>
+            )}
           </p>
           <a
             href={waUrl}
@@ -499,7 +512,7 @@ function PropertiesSection({
             className="mt-5 inline-flex items-center gap-2 rounded-full bg-foreground text-background px-5 py-2.5 text-sm hover:opacity-90 transition"
           >
             <Phone className="h-4 w-4" />
-            Receber opções de {n.name}
+            Receber curadoria de {n.name} no WhatsApp
           </a>
         </div>
       ) : (
