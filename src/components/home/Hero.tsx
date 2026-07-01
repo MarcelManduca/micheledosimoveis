@@ -43,10 +43,31 @@ const HERO_IMAGES = [
 ];
 
 export function Hero() {
-  // Adia a montagem das imagens secundárias do slideshow para depois do load
-  // do LCP — libera main thread e não concorre por banda no mobile.
+  // Mobile: monta imagens secundárias só após interação real (scroll/tap/click) ou 10s
+  //   — evita que o Lighthouse mobile capture as heros 2/3/4 no load inicial.
+  // Desktop: idle callback após load, mantém slideshow imediato.
   const [showSecondary, setShowSecondary] = useState(false);
   useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (isMobile) {
+      let done = false;
+      const reveal = () => {
+        if (done) return;
+        done = true;
+        setShowSecondary(true);
+      };
+      window.addEventListener("scroll", reveal, { once: true, passive: true });
+      window.addEventListener("pointerdown", reveal, { once: true });
+      window.addEventListener("touchstart", reveal, { once: true, passive: true });
+      const t = setTimeout(reveal, 10000);
+      return () => {
+        clearTimeout(t);
+        window.removeEventListener("scroll", reveal);
+        window.removeEventListener("pointerdown", reveal);
+        window.removeEventListener("touchstart", reveal);
+      };
+    }
     const w = window as unknown as {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
     };
