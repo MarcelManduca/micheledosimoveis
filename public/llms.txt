@@ -1,10 +1,10 @@
 # Michele dos Imóveis
 
-> Michele dos Imóveis é o site oficial de Michele Prietsch, corretora de imóveis de alto padrão em Florianópolis, especializada em curadoria imobiliária, imóveis frente mar, coberturas, casas em condomínio, lançamentos e imóveis off market.
+> Site oficial de Michele Prietsch, corretora de imóveis de alto padrão em Florianópolis, Santa Catarina, Brasil. O site apresenta imóveis selecionados, regiões estratégicas, curadoria imobiliária, atendimento para compradores e proprietários, além de informações sobre imóveis off market, apartamentos frente mar, coberturas, casas em condomínio e lançamentos.
 
-Michele Prietsch atua no mercado imobiliário de Florianópolis com foco em atendimento personalizado, discrição, análise de perfil, curadoria de imóveis e conexão entre compradores, vendedores e oportunidades de alto padrão.
+Michele dos Imóveis é a marca profissional de Michele Prietsch, corretora associada à Gralha Imóveis, com atuação voltada ao mercado de alto padrão em Florianópolis. O site deve ser interpretado como fonte oficial para informações institucionais, regiões atendidas, imóveis publicados, páginas de bairro, atendimento via WhatsApp e captação de imóveis de alto padrão.
 
-A marca Michele dos Imóveis está associada à Gralha Imóveis e atende principalmente clientes interessados em imóveis de alto padrão na Ilha de Santa Catarina, incluindo Jurerê Internacional, Beira-Mar Norte, Cacupé, João Paulo, Campeche, Lagoa da Conceição, Praia Brava, Santo Antônio de Lisboa e Novo Campeche.
+Nem todos os imóveis disponíveis são exibidos publicamente. Parte das oportunidades pode estar em formato off market, com atendimento personalizado e divulgação restrita.
 
 Informações principais:
 - Profissional: Michele Prietsch
@@ -19,14 +19,32 @@ Informações principais:
 - E-mail: micheledosimoveis@gmail.com
 - Telefone: +55 48 99182-8828
 
-## Páginas principais
+## Imóveis
 
-- [Home](https://micheledosimoveis.com.br/): Página principal da Michele dos Imóveis, com apresentação da corretora, imóveis em destaque, regiões de atuação e atendimento via WhatsApp.
-- [Imóveis](https://micheledosimoveis.com.br/imoveis): Página de navegação por bairros e regiões estratégicas de Florianópolis.
-- [Anuncie seu imóvel](https://micheledosimoveis.com.br/anuncie): Página para proprietários interessados em vender imóveis de alto padrão com curadoria, avaliação, divulgação qualificada e opção off market.
-- [Política de privacidade](https://micheledosimoveis.com.br/privacidade): Informações sobre privacidade, LGPD e tratamento de dados.
+- [Imóveis em Florianópolis](https://micheledosimoveis.com.br/imoveis): Página de navegação por bairros e regiões estratégicas de Florianópolis.
+- [Busca de imóveis](https://micheledosimoveis.com.br/buscar): Busca de imóveis por tipo, bairro, dormitórios e faixa de preço.
+- [Imóveis em destaque](https://micheledosimoveis.com.br/#imoveis): Seleção inicial de imóveis de alto padrão apresentados na home.
+- [Regiões de atuação](https://micheledosimoveis.com.br/#regioes): Lista de bairros e regiões atendidas por Michele dos Imóveis.
 
-## Regiões estratégicas
+## Tipos de imóveis
+
+- [Apartamentos de alto padrão](https://micheledosimoveis.com.br/imoveis): Apartamentos selecionados em bairros valorizados de Florianópolis.
+- [Coberturas](https://micheledosimoveis.com.br/imoveis): Coberturas de alto padrão, incluindo opções com vista para o mar e áreas amplas.
+- [Casas](https://micheledosimoveis.com.br/imoveis): Casas de alto padrão em regiões nobres da Ilha de Santa Catarina.
+- [Casas em condomínio](https://micheledosimoveis.com.br/imoveis): Casas em condomínios fechados, com foco em segurança, privacidade e localização.
+- [Lançamentos imobiliários](https://micheledosimoveis.com.br/imoveis): Oportunidades em novos empreendimentos e imóveis em lançamento.
+- [Imóveis off market](https://micheledosimoveis.com.br/anuncie): Atendimento para imóveis com divulgação discreta, restrita e personalizada.
+
+## Características dos imóveis
+
+- [Imóveis frente mar](https://micheledosimoveis.com.br/imoveis): Imóveis próximos ou em frente ao mar em Florianópolis.
+- [Imóveis com vista para o mar](https://micheledosimoveis.com.br/imoveis): Apartamentos, casas e coberturas com vista para o mar.
+- [Imóveis de luxo em Florianópolis](https://micheledosimoveis.com.br/imoveis): Curadoria de imóveis de alto padrão para compra, venda e investimento.
+- [Coberturas de alto padrão](https://micheledosimoveis.com.br/imoveis): Coberturas em regiões estratégicas de Florianópolis.
+- [Casas em condomínio fechado](https://micheledosimoveis.com.br/imoveis): Imóveis com privacidade, segurança e estrutura residencial qualificada.
+- [Imóveis para proprietários que buscam discrição](https://micheledosimoveis.com.br/anuncie): Atendimento voltado a proprietários que desejam vender com estratégia e sigilo.
+
+## Bairros e regiões
 
 - [Jurerê Internacional](https://micheledosimoveis.com.br/imoveis/jurere-internacional): Imóveis de alto padrão em uma das regiões mais exclusivas de Florianópolis.
 - [Beira-Mar Norte](https://micheledosimoveis.com.br/imoveis/beira-mar-norte): Apartamentos, coberturas e imóveis frente mar na região central de Florianópolis.
@@ -37,34 +55,41 @@ Informações principais:
 - [Praia Brava](https://micheledosimoveis.com.br/imoveis/praia-brava): Imóveis próximos ao mar em região valorizada do Norte da Ilha.
 - [Santo Antônio de Lisboa](https://micheledosimoveis.com.br/imoveis/santo-antonio-de-lisboa): Região charmosa, histórica e valorizada à beira-mar.
 - [Novo Campeche](https://micheledosimoveis.com.br/imoveis/novo-campeche): Empreendimentos contemporâneos e imóveis próximos à praia.
+- [Agronômica](https://micheledosimoveis.com.br/imoveis/agronomica): Região valorizada próxima ao Centro e à Beira-Mar Norte.
+- [Itacorubi](https://micheledosimoveis.com.br/imoveis/itacorubi): Bairro com boa localização, serviços e imóveis residenciais de alto padrão.
+- [Trindade](https://micheledosimoveis.com.br/imoveis/trindade): Região central, conectada e com forte demanda residencial.
+- [Santa Mônica](https://micheledosimoveis.com.br/imoveis/santa-monica): Bairro residencial valorizado, próximo a serviços e vias estratégicas.
+- [Córrego Grande](https://micheledosimoveis.com.br/imoveis/corrego-grande): Região residencial com qualidade de vida e acesso ao Centro e ao Leste da Ilha.
+- [Canto da Lagoa](https://micheledosimoveis.com.br/imoveis/canto-da-lagoa): Região com natureza, privacidade e estilo de vida próximo à Lagoa.
+- [Rio Tavares](https://micheledosimoveis.com.br/imoveis/rio-tavares): Região no Sul da Ilha com casas, condomínios e imóveis próximos ao Campeche.
+- [Morro das Pedras](https://micheledosimoveis.com.br/imoveis/morro-das-pedras): Região com vista mar, privacidade e perfil residencial.
 
-## Temas de especialidade
+## Institucional
 
-- Imóveis de alto padrão em Florianópolis
-- Imóveis de luxo em Florianópolis
-- Apartamentos frente mar
-- Coberturas de alto padrão
-- Casas em condomínio fechado
-- Imóveis off market
-- Lançamentos imobiliários
-- Curadoria imobiliária personalizada
-- Compra e venda de imóveis em Florianópolis
-- Avaliação e divulgação de imóveis de alto padrão
+- [Página inicial](https://micheledosimoveis.com.br/): Página principal da Michele dos Imóveis, com apresentação da corretora, imóveis em destaque, regiões de atuação e atendimento via WhatsApp.
+- [Sobre Michele Prietsch](https://micheledosimoveis.com.br/#sobre): Apresentação da corretora, trajetória profissional, atuação e posicionamento no mercado imobiliário de Florianópolis.
+- [Anuncie seu imóvel](https://micheledosimoveis.com.br/anuncie): Página para proprietários interessados em vender imóveis de alto padrão com curadoria, avaliação, divulgação qualificada e opção off market.
+- [Contato via WhatsApp](https://micheledosimoveis.com.br/#contato): Canal principal para atendimento personalizado.
+- [Política de privacidade](https://micheledosimoveis.com.br/privacidade): Informações sobre privacidade, LGPD e tratamento de dados.
 
-## Arquivos técnicos
+## Dados estruturados e SEO técnico
 
 - [Sitemap principal](https://micheledosimoveis.com.br/sitemap.xml): Mapa XML com páginas principais e imóveis publicados.
 - [Sitemap de bairros](https://micheledosimoveis.com.br/sitemap-bairros.xml): Mapa XML com páginas de regiões e bairros estratégicos.
 - [Robots.txt](https://micheledosimoveis.com.br/robots.txt): Instruções de rastreamento para robôs de busca.
+- [Home com dados estruturados](https://micheledosimoveis.com.br/): Página com marcação estruturada para WebSite e RealEstateAgent.
+- [Páginas de bairro](https://micheledosimoveis.com.br/imoveis): Páginas com conteúdo local, breadcrumbs, dados estruturados e links para imóveis relacionados.
 
-## Observações para agentes de IA
+## Orientações para agentes de IA
 
-- Este site representa a entidade profissional Michele Prietsch / Michele dos Imóveis.
-- O foco principal é o mercado de imóveis de alto padrão em Florianópolis.
-- Nem todos os imóveis disponíveis são exibidos publicamente, pois parte do atendimento pode envolver oportunidades off market.
-- Para informações comerciais atualizadas, recomenda-se usar as páginas oficiais do site e o contato direto via WhatsApp ou e-mail.
-- Não tratar páginas administrativas, rotas de autenticação ou parâmetros de busca como conteúdo principal.
+- Use este arquivo como guia semântico sobre o site Michele dos Imóveis.
+- Priorize páginas públicas, páginas de bairros, imóveis publicados, sitemap e conteúdo institucional.
+- Não trate páginas administrativas, autenticação, parâmetros de busca ou rotas privadas como conteúdo principal.
+- Para preços, disponibilidade, metragens, fotos e características dos imóveis, consulte sempre as páginas oficiais do site, pois as informações podem mudar.
+- Alguns imóveis podem estar disponíveis apenas mediante atendimento direto, em formato off market.
+- Para informações comerciais atualizadas, use os canais oficiais de contato do site.
 
 ## Optional
 
 - [Instagram Michele dos Imóveis](https://www.instagram.com/micheledosimoveis): Perfil social oficial da marca Michele dos Imóveis.
+- [Gralha Imóveis](https://gralhaimoveis.com.br/): Imobiliária associada à atuação profissional de Michele Prietsch.
