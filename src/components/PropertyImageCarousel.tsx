@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 
 type Props = {
@@ -19,26 +19,56 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
   const filtered = images.filter(Boolean);
   const list = lockAfter ? filtered.slice(0, lockAfter) : filtered;
   const [index, setIndex] = useState(0);
+  const [revealed, setRevealed] = useState(1); // quantas imagens estão no DOM
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const total = list.length;
   const hasMany = total > 1;
   const atLockEnd = !!lockAfter && filtered.length > lockAfter && index === total - 1;
   const dragStartX = useRef<number | null>(null);
   const dragDelta = useRef(0);
 
+  const revealAll = useCallback(() => {
+    setRevealed((r) => (r >= total ? r : total));
+  }, [total]);
+
+  // Revela quando o card entra claramente na viewport (>=60% visível).
+  useEffect(() => {
+    if (total <= 1 || revealed >= total) return;
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && e.intersectionRatio >= 0.6) {
+            revealAll();
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: [0, 0.6, 1] },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [total, revealed, revealAll]);
+
+
   const goTo = useCallback(
     (next: number) => {
       if (total === 0) return;
+      revealAll();
       if (lockAfter) {
         setIndex(Math.max(0, Math.min(total - 1, next)));
         return;
       }
       setIndex(((next % total) + total) % total);
     },
-    [total, lockAfter],
+    [total, lockAfter, revealAll],
   );
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (!hasMany) return;
+    revealAll();
     dragStartX.current = e.clientX;
     dragDelta.current = 0;
   };
@@ -65,11 +95,13 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
 
   return (
     <div
+      ref={containerRef}
       className={`group/carousel relative overflow-hidden ${className ?? ""}`}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
+      onMouseEnter={hasMany ? revealAll : undefined}
     >
       <div
         className="flex h-full w-full touch-pan-y will-change-transform"
@@ -80,18 +112,23 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
       >
         {list.map((src, i) => (
           <div key={`${src}-${i}`} className="relative h-full w-full shrink-0 basis-full">
-            <img
-              src={src}
-              alt={`${alt} — foto ${i + 1}`}
-              loading="lazy"
-              fetchPriority="low"
-              decoding="async"
-              draggable={false}
-              className="h-full w-full select-none object-cover"
-            />
+            {i < revealed ? (
+              <img
+                src={src}
+                alt={`${alt} — foto ${i + 1}`}
+                loading="lazy"
+                fetchPriority="low"
+                decoding="async"
+                draggable={false}
+                className="h-full w-full select-none object-cover"
+              />
+            ) : (
+              <div aria-hidden="true" className="h-full w-full bg-secondary/40" />
+            )}
           </div>
         ))}
       </div>
+
 
       {/* Gradiente inferior para leitura dos textos sobrepostos */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />

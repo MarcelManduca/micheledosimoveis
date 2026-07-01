@@ -39,21 +39,25 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 
 function withCacheHeaders(request: Request, response: Response): Response {
   const { pathname } = new URL(request.url);
-  const isImmutable =
+  const isVersioned =
     pathname.startsWith("/assets/") ||
     pathname.startsWith("/_build/") ||
-    /\.(?:js|css|woff2?|webp|avif|png|jpg|jpeg|svg|ico)$/.test(pathname);
-  if (isImmutable && response.status < 400 && !response.headers.get("cache-control")) {
+    pathname.startsWith("/_server/");
+  const isStaticAsset =
+    isVersioned ||
+    /\.(?:js|mjs|css|woff2?|ttf|otf|webp|avif|png|jpg|jpeg|gif|svg|ico|map)$/.test(pathname);
+  if (isStaticAsset && response.status < 400) {
     const headers = new Headers(response.headers);
-    if (pathname.startsWith("/assets/") || pathname.startsWith("/_build/")) {
+    if (isVersioned) {
       headers.set("cache-control", "public, max-age=31536000, immutable");
-    } else {
+    } else if (!headers.get("cache-control")) {
       headers.set("cache-control", "public, max-age=604800");
     }
     return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
   }
   return response;
 }
+
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
