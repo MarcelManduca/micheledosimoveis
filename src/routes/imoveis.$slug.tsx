@@ -133,10 +133,12 @@ export const Route = createFileRoute("/imoveis/$slug")({
         },
       ],
     };
-    // Bairros sem portfólio público viram conteúdo "thin" para o Google.
-    // Marcamos noindex,follow: a página continua acessível e passa link
-    // equity para os imóveis e bairros vizinhos, mas não polui o índice.
-    const robots = count === 0 ? "noindex, follow" : "index, follow";
+    // Bairros estratégicos (indexWhenEmpty) permanecem indexáveis mesmo
+    // sem imóveis públicos, pois representam autoridade local, atuação
+    // editorial e captação off market. Demais bairros vazios recebem
+    // noindex,follow para evitar thin content.
+    const shouldIndex = count > 0 || n.indexWhenEmpty === true;
+    const robots = shouldIndex ? "index, follow" : "noindex, follow";
     return {
       meta: [
         { title },
