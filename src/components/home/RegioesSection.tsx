@@ -1,11 +1,55 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, MapPin } from "lucide-react";
+import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { REGIOES } from "@/lib/site-config";
-import BorderGlow from "@/components/BorderGlow";
+
+// BorderGlow (CSS+JS) só é carregado quando a seção fica próxima da viewport,
+// mantendo o path crítico do mobile leve. Fallback = mesmo container sem efeito.
+const BorderGlow = lazy(() => import("@/components/BorderGlow"));
+
+function PlainCard({ children }: { children: ReactNode }) {
+  return (
+    <div
+      className="h-full rounded-[18px] bg-card ring-1 ring-black/5"
+      style={{ borderRadius: 18 }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function useNearViewport(rootMargin = "400px") {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [near, setNear] = useState(false);
+  useEffect(() => {
+    if (near) return;
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setNear(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setNear(true);
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [near, rootMargin]);
+  return { ref, near };
+}
 
 export function RegioesSection() {
+  const { ref, near } = useNearViewport("400px");
   return (
-    <section id="regioes" className="border-t border-border bg-background">
+    <section id="regioes" ref={ref} className="border-t border-border bg-background">
       <div className="mx-auto max-w-7xl px-6 sm:px-10 py-24 sm:py-28">
         <div className="flex flex-wrap items-end justify-between gap-6 mb-12">
           <div className="max-w-2xl">
@@ -25,37 +69,48 @@ export function RegioesSection() {
         </div>
 
         <ul className="grid gap-5 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {REGIOES.map((r) => (
-            <li key={r.slug} className="h-full">
-              <BorderGlow
-                className="h-full"
-                edgeSensitivity={18}
-                glowColor="38 55 60"
-                backgroundColor="hsl(var(--card))"
-                borderRadius={18}
-                glowRadius={14}
-                glowIntensity={0.55}
-                coneSpread={18}
-                colors={["#c8a96a", "#e8d3a8", "#8c6b3a"]}
-                fillOpacity={0.22}
+          {REGIOES.map((r) => {
+            const linkContent = (
+              <Link
+                to="/imoveis/$slug"
+                params={{ slug: r.slug }}
+                className="group flex items-start gap-4 px-6 py-5 transition"
               >
-                <Link
-                  to="/imoveis/$slug"
-                  params={{ slug: r.slug }}
-                  className="group flex items-start gap-4 px-6 py-5 transition"
-                >
-                  <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
-                    <MapPin className="h-4 w-4" />
-                  </span>
-                  <span className="flex-1">
-                    <span className="block font-display text-lg tracking-tight">{r.nome}</span>
-                    <span className="block text-xs text-muted-foreground mt-0.5">{r.desc}</span>
-                  </span>
-                  <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
-                </Link>
-              </BorderGlow>
-            </li>
-          ))}
+                <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
+                  <MapPin className="h-4 w-4" />
+                </span>
+                <span className="flex-1">
+                  <span className="block font-display text-lg tracking-tight">{r.nome}</span>
+                  <span className="block text-xs text-muted-foreground mt-0.5">{r.desc}</span>
+                </span>
+                <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
+              </Link>
+            );
+            return (
+              <li key={r.slug} className="h-full">
+                {near ? (
+                  <Suspense fallback={<PlainCard>{linkContent}</PlainCard>}>
+                    <BorderGlow
+                      className="h-full"
+                      edgeSensitivity={18}
+                      glowColor="38 55 60"
+                      backgroundColor="hsl(var(--card))"
+                      borderRadius={18}
+                      glowRadius={14}
+                      glowIntensity={0.55}
+                      coneSpread={18}
+                      colors={["#c8a96a", "#e8d3a8", "#8c6b3a"]}
+                      fillOpacity={0.22}
+                    >
+                      {linkContent}
+                    </BorderGlow>
+                  </Suspense>
+                ) : (
+                  <PlainCard>{linkContent}</PlainCard>
+                )}
+              </li>
+            );
+          })}
         </ul>
 
 

@@ -7,7 +7,7 @@ export function FloatingWhatsApp() {
       target="_blank"
       rel="noreferrer"
       aria-label="Falar com Michele no WhatsApp"
-      className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-50 inline-flex items-center gap-2 rounded-full bg-[#128C4B] text-white pl-4 pr-5 py-3 text-sm font-semibold shadow-2xl ring-1 ring-black/10 hover:bg-[#0f7540] transition"
+      className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-50 inline-flex items-center gap-2 rounded-full bg-[#075E33] text-white pl-4 pr-5 py-3 text-sm font-semibold shadow-2xl ring-1 ring-black/10 hover:bg-[#054d29] transition"
     >
       <span className="relative grid h-6 w-6 place-items-center">
         <span className="absolute inset-0 rounded-full bg-white/40 animate-ping" />

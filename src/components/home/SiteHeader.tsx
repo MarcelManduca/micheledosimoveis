@@ -3,6 +3,8 @@ import { ArrowRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { WHATSAPP_URL } from "@/lib/site-config";
 import logoWhite from "@/assets/brand/logo-white.webp";
+import logoWhite160 from "@/assets/brand/logo-white-160.webp";
+import logoWhite320 from "@/assets/brand/logo-white-320.webp";
 import logoDark from "@/assets/brand/logo-dark.webp";
 
 const NAV_LINKS: Array<[string, string]> = [
@@ -27,7 +29,9 @@ export function SiteHeader() {
           <a href="#top" className="flex items-center min-w-0 shrink">
             <span className="sr-only">Michele dos Imóveis</span>
             <img
-              src={logoWhite}
+              src={logoWhite160}
+              srcSet={`${logoWhite160} 160w, ${logoWhite320} 320w, ${logoWhite} 640w`}
+              sizes="(max-width: 640px) 160px, (max-width: 768px) 200px, 240px"
               alt="Michele dos Imóveis"
               width={640}
               height={237}
@@ -37,6 +41,7 @@ export function SiteHeader() {
               draggable={false}
             />
           </a>
+
 
 
 
