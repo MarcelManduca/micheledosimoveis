@@ -56,7 +56,7 @@ export const Route = createFileRoute("/imoveis/$slug")({
       "@context": "https://schema.org",
       "@type": "RealEstateAgent",
       name: "Michele dos Imóveis",
-      image: `${SITE}/og-michele.jpg`,
+      image: "https://micheledosimoveis.com.br/michele-dos-imoveis-og.png",
       url,
       telephone: "+5548991828828",
       priceRange: "$$$$",

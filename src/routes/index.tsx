@@ -17,15 +17,21 @@ import { FloatingWhatsApp } from "@/components/home/FloatingWhatsApp";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Corretora Michele" },
-      { name: "description", content: "Michele Prietsch, conhecida como Michele dos Imóveis, é corretora especializada em imóveis de alto padrão em Florianópolis, com atendimento personalizado para compra, venda e curadoria imobiliária." },
-      { property: "og:title", content: "Michele Prietsch | Michele dos Imóveis em Florianópolis" },
-      { property: "og:description", content: "Corretora especializada em imóveis de alto padrão em Florianópolis — curadoria, discrição e atendimento sob medida em Jurerê Internacional, Praia Brava, Cacupé, Lagoa da Conceição, Campeche e Beira-Mar Norte." },
-      { property: "og:image", content: heroImg },
-      { property: "og:url", content: SITE.publishedUrl },
+      { title: "Corretora de Imóveis de Alto Padrão em Florianópolis | Michele dos Imóveis" },
+      { name: "description", content: "Michele Prietsch, a Michele dos Imóveis, atua com curadoria de imóveis de alto padrão em Florianópolis: apartamentos frente mar, coberturas, casas em condomínio, lançamentos e imóveis off market." },
+      { property: "og:title", content: "Corretora de Imóveis de Alto Padrão em Florianópolis | Michele dos Imóveis" },
+      { property: "og:description", content: "Curadoria de imóveis de alto padrão em Florianópolis com Michele Prietsch: Jurerê Internacional, Beira-Mar Norte, Cacupé, João Paulo, Campeche, Lagoa da Conceição e imóveis off market." },
+      { property: "og:image", content: "https://micheledosimoveis.com.br/michele-dos-imoveis-og.png" },
+      { property: "og:image:secure_url", content: "https://micheledosimoveis.com.br/michele-dos-imoveis-og.png" },
+      { property: "og:image:type", content: "image/png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
+      { property: "og:image:alt", content: "Michele dos Imóveis — corretora de alto padrão em Florianópolis" },
+      { name: "twitter:image", content: "https://micheledosimoveis.com.br/michele-dos-imoveis-og.png" },
+      { property: "og:url", content: "https://micheledosimoveis.com.br/" },
     ],
     links: [
-      { rel: "canonical", href: SITE.publishedUrl },
+      { rel: "canonical", href: "https://micheledosimoveis.com.br/" },
       { rel: "preload", as: "image", href: heroImg, fetchpriority: "high" } as any,
     ],
   }),
