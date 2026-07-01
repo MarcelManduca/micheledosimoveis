@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import heroImg from "@/assets/hero-beiramar.jpg";
+import heroLcp from "@/assets/hero-beiramar-720.webp";
+import heroLcp1280 from "@/assets/hero-beiramar-1280.webp";
 import { listProperties, type PropertyListItem } from "@/lib/properties.functions";
 import { SITE } from "@/lib/site-config";
 import { SiteHeader } from "@/components/home/SiteHeader";
