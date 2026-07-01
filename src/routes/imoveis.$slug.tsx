@@ -378,7 +378,7 @@ function NeighborhoodPage() {
                 a:
                   properties.length > 0
                     ? `Sim. Hoje há ${properties.length} ${properties.length === 1 ? "imóvel publicado" : "imóveis publicados"} em ${n.name}. Também trabalhamos com opções off market que não aparecem em listagens públicas — consulte a Michele para receber a seleção completa.`
-                    : `No momento o portfólio público de ${n.name} está vazio, mas atuamos com operações off market nesta região. Fale com a Michele para receber opções sob medida que não são divulgadas publicamente.`,
+                    : `No momento, alguns imóveis de alto padrão em ${n.name} podem estar disponíveis em formato off market, sem divulgação pública. Nem todos os imóveis desta região são anunciados abertamente — fale com Michele para receber uma curadoria personalizada.`,
               },
               {
                 q: `Por que escolher ${n.name} em Florianópolis?`,
