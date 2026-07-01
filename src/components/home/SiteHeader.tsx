@@ -2,8 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { WHATSAPP_URL } from "@/lib/site-config";
-import logoWhite from "@/assets/brand/logo-white.png";
-import logoDark from "@/assets/brand/logo-dark.png";
+import logoWhite from "@/assets/brand/logo-white.webp";
+import logoDark from "@/assets/brand/logo-dark.webp";
 
 const NAV_LINKS: Array<[string, string]> = [
   ["#top", "Início"],
