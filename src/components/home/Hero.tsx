@@ -1,16 +1,44 @@
 import { ArrowRight, MapPin, ShieldCheck, Star } from "lucide-react";
-import heroImg from "@/assets/hero-beiramar.jpg";
-import heroImg2 from "@/assets/hero-beiramar-2.jpg";
-import heroImg3 from "@/assets/hero-beiramar-3.jpg";
-import heroImg4 from "@/assets/hero-beiramar-4.jpg";
-import portrait from "@/assets/michele-portrait.jpg";
+import hero1_720 from "@/assets/hero-beiramar-720.webp";
+import hero1_1280 from "@/assets/hero-beiramar-1280.webp";
+import hero1_fallback from "@/assets/hero-beiramar.jpg";
+import hero2_720 from "@/assets/hero-beiramar-2-720.webp";
+import hero2_1280 from "@/assets/hero-beiramar-2-1280.webp";
+import hero3_720 from "@/assets/hero-beiramar-3-720.webp";
+import hero3_1280 from "@/assets/hero-beiramar-3-1280.webp";
+import hero4_720 from "@/assets/hero-beiramar-4-720.webp";
+import hero4_1280 from "@/assets/hero-beiramar-4-1280.webp";
+import portrait from "@/assets/michele-portrait.webp";
 
-/** Conjunto de imagens animadas (Ken Burns + cross-fade) do hero. */
 const HERO_IMAGES = [
-  { src: heroImg, alt: "Imóvel de alto padrão em Florianópolis com vista para o mar", anim: "animate-hero-fade-a", priority: true as const },
-  { src: heroImg3, alt: "Skyline da Beira-Mar Norte ao entardecer", anim: "animate-hero-fade-b", priority: false as const },
-  { src: heroImg4, alt: "Orla da Beira-Mar Norte com edifícios à beira da baía", anim: "animate-hero-fade-d", priority: false as const },
-  { src: heroImg2, alt: "Vista aérea da Beira-Mar Norte em Florianópolis", anim: "animate-hero-fade-c", priority: false as const },
+  {
+    srcSet: `${hero1_720} 720w, ${hero1_1280} 1280w`,
+    src: hero1_fallback,
+    alt: "Imóvel de alto padrão em Florianópolis com vista para o mar",
+    anim: "animate-hero-fade-a",
+    priority: true as const,
+  },
+  {
+    srcSet: `${hero3_720} 720w, ${hero3_1280} 1280w`,
+    src: hero3_1280,
+    alt: "Skyline da Beira-Mar Norte ao entardecer",
+    anim: "animate-hero-fade-b",
+    priority: false as const,
+  },
+  {
+    srcSet: `${hero4_720} 720w, ${hero4_1280} 1280w`,
+    src: hero4_1280,
+    alt: "Orla da Beira-Mar Norte com edifícios à beira da baía",
+    anim: "animate-hero-fade-d",
+    priority: false as const,
+  },
+  {
+    srcSet: `${hero2_720} 720w, ${hero2_1280} 1280w`,
+    src: hero2_1280,
+    alt: "Vista aérea da Beira-Mar Norte em Florianópolis",
+    anim: "animate-hero-fade-c",
+    priority: false as const,
+  },
 ];
 
 export function Hero() {
@@ -22,11 +50,13 @@ export function Hero() {
             <img
               key={img.src}
               src={img.src}
+              srcSet={img.srcSet}
+              sizes="100vw"
               alt={i === 0 ? img.alt : ""}
               aria-hidden={i === 0 ? undefined : "true"}
               width={1920}
               height={1280}
-              loading={img.priority ? undefined : "lazy"}
+              loading={img.priority ? "eager" : "lazy"}
               fetchPriority={img.priority ? "high" : "low"}
               decoding="async"
               className={`absolute inset-0 h-full w-full object-cover origin-center ${img.anim} will-change-transform motion-reduce:animate-none ${i === 0 ? "" : "motion-reduce:opacity-0"}`}
@@ -74,7 +104,7 @@ export function Hero() {
 
         {/* Card flutuante da corretora */}
         <div className="absolute bottom-5 right-5 sm:bottom-8 sm:right-8 hidden sm:flex items-center gap-3 rounded-2xl bg-white/95 backdrop-blur px-4 py-3 shadow-2xl ring-1 ring-black/5">
-          <img src={portrait} alt="Michele Prietsch" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
+          <img src={portrait} alt="Michele Prietsch" width={56} height={56} loading="lazy" decoding="async" className="h-14 w-14 rounded-full object-cover" />
           <div>
             <div className="text-sm font-medium text-foreground">Michele Prietsch</div>
             <div className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">

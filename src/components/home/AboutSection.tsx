@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react";
-import portrait from "@/assets/michele-portrait.jpg";
-import portraitHover from "@/assets/michele-portrait-2.jpg";
+import portrait from "@/assets/michele-portrait-800.webp";
+import portraitHover from "@/assets/michele-portrait-2-800.webp";
 import { LazyVisible } from "@/components/LazyVisible";
 import { AboutBio } from "@/components/home/AboutBio";
 import { ABOUT_STATS } from "@/lib/site-config";

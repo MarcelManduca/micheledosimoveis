@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import heroImg from "@/assets/hero-beiramar.jpg";
+import heroLcp from "@/assets/hero-beiramar-720.webp";
+import heroLcp1280 from "@/assets/hero-beiramar-1280.webp";
 import { listProperties, type PropertyListItem } from "@/lib/properties.functions";
 import { SITE } from "@/lib/site-config";
 import { SiteHeader } from "@/components/home/SiteHeader";
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: "https://micheledosimoveis.com.br/" },
-      { rel: "preload", as: "image", href: heroImg, fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: heroLcp, imagesrcset: `${heroLcp} 720w, ${heroLcp1280} 1280w`, imagesizes: "100vw", fetchpriority: "high" } as any,
     ],
   }),
 

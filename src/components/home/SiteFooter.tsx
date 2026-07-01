@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ShieldCheck } from "lucide-react";
 import { SITE } from "@/lib/site-config";
-import logoDark from "@/assets/brand/logo-dark.png";
+import logoDark from "@/assets/brand/logo-dark.webp";
 
 export function SiteFooter() {
   return (
@@ -11,6 +11,10 @@ export function SiteFooter() {
           <img
             src={logoDark}
             alt={SITE.brandName}
+            width={640}
+            height={237}
+            loading="lazy"
+            decoding="async"
             className="h-8 sm:h-10 w-auto max-w-[220px] object-contain"
             draggable={false}
           />
