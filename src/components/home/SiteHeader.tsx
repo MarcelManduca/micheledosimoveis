@@ -29,7 +29,9 @@ export function SiteHeader() {
           <a href="#top" className="flex items-center min-w-0 shrink">
             <span className="sr-only">Michele dos Imóveis</span>
             <img
-              src={logoWhite}
+              src={logoWhite160}
+              srcSet={`${logoWhite160} 160w, ${logoWhite320} 320w, ${logoWhite} 640w`}
+              sizes="(max-width: 640px) 160px, (max-width: 768px) 200px, 240px"
               alt="Michele dos Imóveis"
               width={640}
               height={237}
@@ -39,6 +41,7 @@ export function SiteHeader() {
               draggable={false}
             />
           </a>
+
 
 
 
