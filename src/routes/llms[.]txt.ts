@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import llmsTxt from "../content/llms.txt?raw";
 
 // Servido com charset=utf-8 explícito para evitar mojibake em acentos.
-export const Route = createFileRoute("/llms[.]txt")({
+export const Route = createFileRoute("/llms.txt")({
   server: {
     handlers: {
       GET: async () => {
