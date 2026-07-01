@@ -27,6 +27,8 @@ export const Route = createFileRoute("/")({
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },
       { property: "og:image:alt", content: "Michele dos Imóveis — corretora de alto padrão em Florianópolis" },
+      { name: "twitter:title", content: "Corretora de Imóveis de Alto Padrão em Florianópolis | Michele dos Imóveis" },
+      { name: "twitter:description", content: "Curadoria de imóveis de alto padrão em Florianópolis com Michele Prietsch: Jurerê Internacional, Beira-Mar Norte, Cacupé, João Paulo, Campeche, Lagoa da Conceição e imóveis off market." },
       { name: "twitter:image", content: "https://micheledosimoveis.com.br/michele-dos-imoveis-og.png" },
       { property: "og:url", content: "https://micheledosimoveis.com.br/" },
     ],
