@@ -384,6 +384,11 @@ export const NEIGHBORHOODS: Neighborhood[] = [
   },
 ];
 
+// Marca bairros estratégicos como indexáveis mesmo sem imóveis públicos.
+for (const n of NEIGHBORHOODS) {
+  if (STRATEGIC_SLUGS.has(n.slug)) n.indexWhenEmpty = true;
+}
+
 export function getNeighborhood(slug: string): Neighborhood | undefined {
   return NEIGHBORHOODS.find((n) => n.slug === slug);
 }
