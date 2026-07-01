@@ -19,11 +19,39 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
   const filtered = images.filter(Boolean);
   const list = lockAfter ? filtered.slice(0, lockAfter) : filtered;
   const [index, setIndex] = useState(0);
+  const [revealed, setRevealed] = useState(1); // quantas imagens estão no DOM
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const total = list.length;
   const hasMany = total > 1;
   const atLockEnd = !!lockAfter && filtered.length > lockAfter && index === total - 1;
   const dragStartX = useRef<number | null>(null);
   const dragDelta = useRef(0);
+
+  const revealAll = useCallback(() => {
+    setRevealed((r) => (r >= total ? r : total));
+  }, [total]);
+
+  // Revela quando o card entra claramente na viewport (>=60% visível).
+  useEffect(() => {
+    if (total <= 1 || revealed >= total) return;
+    const el = containerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && e.intersectionRatio >= 0.6) {
+            revealAll();
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { threshold: [0, 0.6, 1] },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [total, revealed, revealAll]);
+
 
   const goTo = useCallback(
     (next: number) => {
