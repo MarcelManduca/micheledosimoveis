@@ -1,11 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PropertyCard } from "@/components/PropertyCard";
 import { ChromaGridShell } from "@/components/ChromaGridShell";
 import type { PropertyListItem } from "@/lib/properties.functions";
 
-const INITIAL = 6;
+const INITIAL_MOBILE = 3;
+const INITIAL_DESKTOP = 6;
 const EXPANDED = 12;
 
 /**
