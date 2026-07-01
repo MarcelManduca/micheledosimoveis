@@ -37,12 +37,30 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   });
 }
 
+function withCacheHeaders(request: Request, response: Response): Response {
+  const { pathname } = new URL(request.url);
+  const isImmutable =
+    pathname.startsWith("/assets/") ||
+    pathname.startsWith("/_build/") ||
+    /\.(?:js|css|woff2?|webp|avif|png|jpg|jpeg|svg|ico)$/.test(pathname);
+  if (isImmutable && response.status < 400 && !response.headers.get("cache-control")) {
+    const headers = new Headers(response.headers);
+    if (pathname.startsWith("/assets/") || pathname.startsWith("/_build/")) {
+      headers.set("cache-control", "public, max-age=31536000, immutable");
+    } else {
+      headers.set("cache-control", "public, max-age=604800");
+    }
+    return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+  }
+  return response;
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      return withCacheHeaders(request, await normalizeCatastrophicSsrResponse(response));
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {

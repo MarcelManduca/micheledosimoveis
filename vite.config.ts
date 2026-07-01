@@ -12,23 +12,5 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  nitro: {
-    routeRules: {
-      "/assets/**": {
-        headers: {
-          "cache-control": "public, max-age=31536000, immutable",
-        },
-      },
-      "/_build/**": {
-        headers: {
-          "cache-control": "public, max-age=31536000, immutable",
-        },
-      },
-      "/favicon.ico": { headers: { "cache-control": "public, max-age=604800" } },
-      "/favicon-16.png": { headers: { "cache-control": "public, max-age=604800" } },
-      "/favicon-32.png": { headers: { "cache-control": "public, max-age=604800" } },
-      "/apple-touch-icon.png": { headers: { "cache-control": "public, max-age=604800" } },
-      "/michele-dos-imoveis-og.png": { headers: { "cache-control": "public, max-age=604800" } },
-    },
-  },
 });
+
