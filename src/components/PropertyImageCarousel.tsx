@@ -31,9 +31,14 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
     setRevealed((r) => (r >= total ? r : total));
   }, [total]);
 
-  // Revela quando o card entra claramente na viewport (>=60% visível).
+  // No mobile: revela SOMENTE após interação (evita puxar fotos externas
+  // Inforce/Gralha no carregamento inicial). Desktop mantém preview ao
+  // entrar em ≥60% do viewport para o hover feel.
   useEffect(() => {
     if (total <= 1 || revealed >= total) return;
+    if (typeof window === "undefined") return;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (isMobile) return;
     const el = containerRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
     const io = new IntersectionObserver(
@@ -51,6 +56,7 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
     io.observe(el);
     return () => io.disconnect();
   }, [total, revealed, revealAll]);
+
 
 
   const goTo = useCallback(
