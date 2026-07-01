@@ -38,6 +38,8 @@ export function ExpandableProperties({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [initial, setInitial] = useState(INITIAL_DESKTOP);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const [nearViewport, setNearViewport] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mql = window.matchMedia("(max-width: 767px)");
@@ -46,6 +48,28 @@ export function ExpandableProperties({
     mql.addEventListener("change", apply);
     return () => mql.removeEventListener("change", apply);
   }, []);
+  useEffect(() => {
+    if (nearViewport) return;
+    const el = wrapRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setNearViewport(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setNearViewport(true);
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin: "300px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [nearViewport]);
   const visibleCount = expanded
     ? Math.min(items.length, EXPANDED)
     : Math.min(items.length, initial);
@@ -53,13 +77,18 @@ export function ExpandableProperties({
   const canExpand = !expanded && items.length > initial;
   const showViewAll = expanded && items.length > EXPANDED;
 
+  const cards = visible.map((p) => <PropertyCard key={p.id} p={p} lockAfter={3} />);
+
   return (
-    <div className="space-y-10">
-      <ChromaGridShell>
-        {visible.map((p) => (
-          <PropertyCard key={p.id} p={p} lockAfter={3} />
-        ))}
-      </ChromaGridShell>
+    <div ref={wrapRef} className="space-y-10">
+      {nearViewport ? (
+        <Suspense fallback={<PlainGrid>{cards}</PlainGrid>}>
+          <ChromaGridShell>{cards}</ChromaGridShell>
+        </Suspense>
+      ) : (
+        <PlainGrid>{cards}</PlainGrid>
+      )}
+
 
       {(canExpand || showViewAll) && (
         <div className="flex justify-center">
