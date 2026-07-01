@@ -68,6 +68,7 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (!hasMany) return;
+    revealAll();
     dragStartX.current = e.clientX;
     dragDelta.current = 0;
   };
