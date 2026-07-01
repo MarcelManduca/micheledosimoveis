@@ -42,10 +42,10 @@ export function SiteFooter() {
         <div className="mx-auto max-w-7xl px-6 sm:px-10 py-5 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
           <span>© {new Date().getFullYear()} {SITE.brokerName} · Todos os direitos reservados.</span>
           <div className="flex items-center gap-4">
-            <Link to="/privacidade" className="text-muted-foreground/80 hover:text-foreground transition">
+            <Link to="/privacidade" className="text-foreground/80 hover:text-foreground underline-offset-4 hover:underline transition">
               Privacidade & LGPD
             </Link>
-            <Link to="/auth" className="text-muted-foreground/70 hover:text-foreground transition">
+            <Link to="/auth" className="text-foreground/70 hover:text-foreground underline-offset-4 hover:underline transition">
               Admin
             </Link>
           </div>

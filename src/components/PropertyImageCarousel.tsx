@@ -83,7 +83,9 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
             <img
               src={src}
               alt={`${alt} — foto ${i + 1}`}
-              loading={i === 0 ? "eager" : "lazy"}
+              loading="lazy"
+              fetchPriority="low"
+              decoding="async"
               draggable={false}
               className="h-full w-full select-none object-cover"
             />
