@@ -335,7 +335,71 @@ function AdminPage() {
             {(syncMut.error as Error).message}
           </div>
         )}
-        <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card">
+        {/* Barra de busca e filtros */}
+        <div className="mt-6 rounded-2xl border border-border bg-card p-3 sm:p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="relative flex-1 lg:max-w-md">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Buscar por título, código, bairro ou cidade"
+                className="w-full rounded-full border border-border bg-background pl-9 pr-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-secondary"
+                  aria-label="Limpar busca"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+                className="rounded-full border border-border bg-background px-3 py-2 text-xs"
+              >
+                <option value="ativos">Somente ativos</option>
+                <option value="inativos">Somente inativos</option>
+                <option value="todos">Todos os status</option>
+              </select>
+              <select
+                value={tagFilter}
+                onChange={(e) => setTagFilter(e.target.value as typeof tagFilter)}
+                className="rounded-full border border-border bg-background px-3 py-2 text-xs"
+              >
+                <option value="todos">Todas as marcações</option>
+                <option value="destaques">Somente destaques</option>
+                <option value="lancamentos">Somente lançamentos</option>
+              </select>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value) as 25 | 50 | 100)}
+                className="rounded-full border border-border bg-background px-3 py-2 text-xs"
+              >
+                <option value={25}>25 por página</option>
+                <option value={50}>50 por página</option>
+                <option value={100}>100 por página</option>
+              </select>
+            </div>
+          </div>
+          {list.data && (
+            <div className="mt-3 text-xs text-muted-foreground">
+              Mostrando <span className="font-medium text-foreground">{pagedRows.length}</span> de{" "}
+              <span className="font-medium text-foreground">{filteredRows.length}</span> resultados
+              {filteredRows.length !== list.data.length && (
+                <span> · {list.data.length} imóveis no total</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 overflow-hidden rounded-2xl border border-border bg-card">
           <table className="w-full text-sm">
             <thead className="bg-secondary/60 text-left text-xs uppercase tracking-wider text-muted-foreground">
               <tr>
@@ -348,7 +412,7 @@ function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {(list.data ?? []).map((p) => (
+              {pagedRows.map((p) => (
                 <tr key={p.id} className="border-t border-border align-middle">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -430,17 +494,46 @@ function AdminPage() {
                   </td>
                 </tr>
               ))}
-              {list.data && list.data.length === 0 && (
+              {list.data && filteredRows.length === 0 && (
                 <tr>
                   <td className="px-4 py-10 text-center text-muted-foreground" colSpan={6}>
-                    Nenhum imóvel ainda. Cole um link da Gralha acima para começar.
+                    {list.data.length === 0
+                      ? "Nenhum imóvel ainda. Cole um link da Gralha acima para começar."
+                      : "Nenhum imóvel corresponde aos filtros selecionados."}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Paginação */}
+        {filteredRows.length > pageSize && (
+          <div className="mt-4 flex flex-col items-center justify-between gap-3 sm:flex-row">
+            <div className="text-xs text-muted-foreground">
+              Página <span className="font-medium text-foreground">{currentPage}</span> de{" "}
+              <span className="font-medium text-foreground">{totalPages}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs hover:bg-secondary disabled:opacity-40"
+              >
+                <ChevronLeft className="h-3.5 w-3.5" /> Anterior
+              </button>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs hover:bg-secondary disabled:opacity-40"
+              >
+                Próxima <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );
+
 }
