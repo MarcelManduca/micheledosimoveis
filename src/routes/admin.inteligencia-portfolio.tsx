@@ -414,14 +414,18 @@ function PortfolioIntelligencePage() {
   const [filterMacro, setFilterMacro] = useState("");
   const [filterDorm, setFilterDorm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [onlyStrategic, setOnlyStrategic] = useState(true);
+  type Scope = "estrategicos" | "todos" | "fora";
+  const [scope, setScope] = useState<Scope>("estrategicos");
+  const [onlyResidential, setOnlyResidential] = useState(true);
   const [showHealthy, setShowHealthy] = useState(false);
   const [pageSize, setPageSize] = useState(20);
   const [page, setPage] = useState(1);
 
   const filteredTable = useMemo(() => {
     return table.filter((r) => {
-      if (onlyStrategic && !r.isStrategic) return false;
+      if (scope === "estrategicos" && !r.isStrategic) return false;
+      if (scope === "fora" && r.isStrategic) return false;
+      if (onlyResidential && !isResidentialMacro(r.macro)) return false;
       if (!showHealthy && (r.status === "Saudável" || r.status === "Monitorar")) return false;
       if (filterBairro && r.bairro !== filterBairro) return false;
       if (filterMacro && r.macro !== filterMacro) return false;
@@ -429,7 +433,7 @@ function PortfolioIntelligencePage() {
       if (filterStatus && r.status !== filterStatus) return false;
       return true;
     });
-  }, [table, onlyStrategic, showHealthy, filterBairro, filterMacro, filterDorm, filterStatus]);
+  }, [table, scope, onlyResidential, showHealthy, filterBairro, filterMacro, filterDorm, filterStatus]);
 
   const pagedTable = filteredTable.slice((page - 1) * pageSize, page * pageSize);
   const totalPages = Math.max(1, Math.ceil(filteredTable.length / pageSize));
