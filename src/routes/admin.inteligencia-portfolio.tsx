@@ -1271,6 +1271,23 @@ function PortfolioIntelligencePage() {
                 <KpiCard label="Indisponíveis" value={indisponiveis} />
                 <KpiCard label="Preço médio" value={brl(precoMed)} />
                 <KpiCard label="Preço mediano" value={brl(precoMediano)} />
+                <KpiCard label="Bairros totais na base" value={bairrosTotaisBase} />
+                <KpiCard
+                  label="Bairros fora da curadoria"
+                  value={bairrosForaCuradoria}
+                  hint="Não pertencem à lista estratégica"
+                />
+                <KpiCard
+                  label="Faixa de preço dominante"
+                  value={priceDom?.name ?? "—"}
+                  hint={`${priceDom?.value ?? 0} imóveis`}
+                />
+                <KpiCard
+                  label="Residenciais sem dorm. informado"
+                  value={residSemDorm}
+                  hint="Apart./casas/coberturas com bedrooms 0 ou nulo"
+                  tone={residSemDorm > 0 ? "warn" : "default"}
+                />
               </div>
               <div className="rounded-2xl border border-border bg-card p-5 text-xs text-muted-foreground space-y-2">
                 <div>
@@ -1279,15 +1296,27 @@ function PortfolioIntelligencePage() {
                   há dependência de arquivo XML estático.
                 </div>
                 <div>
+                  <strong className="text-foreground">Curadoria comercial:</strong> a base pode
+                  conter bairros fora da curadoria comercial da página pública. A visão executiva
+                  considera apenas os {bairrosEstrategicosMonitorados} bairros estratégicos
+                  monitorados no filtro do site.
+                </div>
+                <div>
                   <strong className="text-foreground">Critério de ativo:</strong> publicado
                   (published=true), sem data em unavailable_since e sem status not_found/unavailable
                   em last_check_status.
                 </div>
                 <div>
                   <strong className="text-foreground">Normalização:</strong> bairros e tipologias
-                  são normalizados para agrupamentos padrão (Apartamento, Casa, Cobertura, Terreno,
-                  Comercial/Especial). Bairros estratégicos são um conjunto pré-definido de regiões
-                  prioritárias de captação.
+                  são normalizados <em>apenas para análise interna</em> (Apartamento, Casa,
+                  Cobertura, Terreno, Comercial/Especial). Centro e Beira-Mar Norte são agrupados
+                  em "Centro / Beira-Mar Norte" somente no painel — os filtros públicos, URLs e a
+                  base bruta permanecem inalterados.
+                </div>
+                <div>
+                  <strong className="text-foreground">Dormitórios:</strong> a visão executiva
+                  considera apenas imóveis residenciais (apartamento, casa, cobertura). Terrenos e
+                  comerciais não aparecem como "0 dormitórios".
                 </div>
                 <div>
                   <strong className="text-foreground">Última sincronização:</strong>{" "}
