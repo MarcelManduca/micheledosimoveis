@@ -936,16 +936,29 @@ function PortfolioIntelligencePage() {
                     <option key={s}>{s}</option>
                   ))}
                 </select>
+                <select
+                  className="rounded-full border border-border bg-background px-3 py-1.5 text-xs"
+                  value={scope}
+                  onChange={(e) => {
+                    setScope(e.target.value as Scope);
+                    setPage(1);
+                  }}
+                  title="Escopo de bairros"
+                >
+                  <option value="estrategicos">Bairros: Estratégicos</option>
+                  <option value="todos">Bairros: Todos</option>
+                  <option value="fora">Bairros: Fora da curadoria</option>
+                </select>
                 <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={onlyStrategic}
+                    checked={onlyResidential}
                     onChange={(e) => {
-                      setOnlyStrategic(e.target.checked);
+                      setOnlyResidential(e.target.checked);
                       setPage(1);
                     }}
                   />
-                  Somente bairros estratégicos
+                  Somente residenciais
                 </label>
                 <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer">
                   <input
