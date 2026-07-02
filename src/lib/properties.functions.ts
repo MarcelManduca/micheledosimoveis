@@ -334,13 +334,12 @@ export const adminPortfolioProperties = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<PortfolioProperty[]> => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const cols =
       "id, code, title, property_type, neighborhood, city, state, price_brl, area_m2, bedrooms, suites, bathrooms, parking_spots, published, last_check_status, unavailable_since, source_url, cover_image, updated_at, last_checked_at";
     const PAGE = 1000;
     const all: PortfolioProperty[] = [];
     for (let from = 0; ; from += PAGE) {
-      const { data, error } = await supabaseAdmin
+      const { data, error } = await context.supabase
         .from("properties")
         .select(cols)
         .order("created_at", { ascending: false })
