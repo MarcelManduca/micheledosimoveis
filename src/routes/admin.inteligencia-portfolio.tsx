@@ -498,7 +498,7 @@ function PortfolioIntelligencePage() {
     return Array.from(byBairro.entries()).slice(0, 8);
   }, [insights]);
 
-  const resumoExecutivo = `Hoje o site possui ${ativos} imóveis ativos distribuídos em ${byNeighborhoodMap.size} bairros. O estoque está concentrado em ${tipDom?.name?.toLowerCase() ?? "—"}, com predominância de imóveis com ${dormDom?.name ?? "—"} e faixa de preço dominante ${priceDom?.name ?? "—"}. Os principais pontos de atenção estão em ${strategicCounts.filter((n) => n.value > 0 && n.value <= 10).slice(0, 5).map((n) => `${n.name} (${n.value})`).join(", ") || "nenhum bairro estratégico"}, onde há baixa quantidade de imóveis ativos ou combinações críticas. A recomendação é priorizar captação de apartamentos e coberturas em bairros estratégicos, especialmente perfis com apenas 1 ou 2 unidades disponíveis.`;
+  const resumoExecutivo = `Hoje o site possui ${ativos} imóveis ativos, com ${bairrosEstrategicosAtivos} de ${bairrosEstrategicosMonitorados} bairros estratégicos monitorados cobertos. O estoque está concentrado em ${tipDom?.name?.toLowerCase() ?? "—"}, com predominância de imóveis residenciais com ${dormDom?.name ?? "—"} e faixa de preço dominante ${priceDom?.name ?? "—"}. Os principais pontos de atenção estão em ${strategicCounts.filter((n) => n.value <= 5).slice(0, 5).map((n) => `${n.name} (${n.value})`).join(", ") || "nenhum bairro estratégico"}, onde há baixa oferta ativa ou combinações críticas. A recomendação é priorizar captação de apartamentos e coberturas em bairros estratégicos, especialmente perfis com apenas 1 ou 2 unidades disponíveis.`;
 
   async function copyText(text: string) {
     try {
