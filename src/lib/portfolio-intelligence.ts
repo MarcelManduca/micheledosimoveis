@@ -181,7 +181,7 @@ export type EnrichedProperty = PortfolioProperty & {
 
 export function enrich(list: PortfolioProperty[]): EnrichedProperty[] {
   return list.map((p) => {
-    const n = normalizeNeighborhood(p.neighborhood);
+    const n = normalizeNeighborhoodForAnalytics(p.neighborhood);
     const macro = normalizeMacroType(p.property_type);
     const bg = bedroomGroup(p.bedrooms);
     const band = priceBand(p.price_brl);
