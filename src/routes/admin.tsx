@@ -152,6 +152,9 @@ function AdminPage() {
             Michele Prietsch
           </Link>
           <div className="flex items-center gap-4 text-sm">
+            <Link to="/admin/inteligencia-portfolio" className="hidden sm:inline text-muted-foreground hover:text-foreground">
+              Inteligência de portfólio
+            </Link>
             <span className="hidden sm:inline text-muted-foreground">{userEmail}</span>
             <button
               onClick={signOut}

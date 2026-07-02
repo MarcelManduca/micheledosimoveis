@@ -22,6 +22,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ImoveisIndexRouteImport } from './routes/imoveis.index'
 import { Route as ImovelCodeRouteImport } from './routes/imovel.$code'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
+import { Route as AdminInteligenciaPortfolioRouteImport } from './routes/admin.inteligencia-portfolio'
 import { Route as ApiPublicHooksSyncPropertiesRouteImport } from './routes/api/public/hooks/sync-properties'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -90,6 +91,12 @@ const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
   path: '/imoveis/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminInteligenciaPortfolioRoute =
+  AdminInteligenciaPortfolioRouteImport.update({
+    id: '/inteligencia-portfolio',
+    path: '/inteligencia-portfolio',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const ApiPublicHooksSyncPropertiesRoute =
   ApiPublicHooksSyncPropertiesRouteImport.update({
     id: '/api/public/hooks/sync-properties',
@@ -99,7 +106,7 @@ const ApiPublicHooksSyncPropertiesRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/imoveis/': typeof ImoveisIndexRoute
@@ -115,7 +123,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
@@ -124,6 +132,7 @@ export interface FileRoutesByTo {
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/imoveis': typeof ImoveisIndexRoute
@@ -132,7 +141,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/anuncie': typeof AnuncieRoute
   '/auth': typeof AuthRoute
   '/buscar': typeof BuscarRoute
@@ -141,6 +150,7 @@ export interface FileRoutesById {
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/imoveis/': typeof ImoveisIndexRoute
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap.xml'
+    | '/admin/inteligencia-portfolio'
     | '/imoveis/$slug'
     | '/imovel/$code'
     | '/imoveis/'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap.xml'
+    | '/admin/inteligencia-portfolio'
     | '/imoveis/$slug'
     | '/imovel/$code'
     | '/imoveis'
@@ -191,6 +203,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap.xml'
+    | '/admin/inteligencia-portfolio'
     | '/imoveis/$slug'
     | '/imovel/$code'
     | '/imoveis/'
@@ -199,7 +212,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AnuncieRoute: typeof AnuncieRoute
   AuthRoute: typeof AuthRoute
   BuscarRoute: typeof BuscarRoute
@@ -307,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImoveisSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/inteligencia-portfolio': {
+      id: '/admin/inteligencia-portfolio'
+      path: '/inteligencia-portfolio'
+      fullPath: '/admin/inteligencia-portfolio'
+      preLoaderRoute: typeof AdminInteligenciaPortfolioRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/api/public/hooks/sync-properties': {
       id: '/api/public/hooks/sync-properties'
       path: '/api/public/hooks/sync-properties'
@@ -317,9 +337,19 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminInteligenciaPortfolioRoute: typeof AdminInteligenciaPortfolioRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminInteligenciaPortfolioRoute: AdminInteligenciaPortfolioRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AnuncieRoute: AnuncieRoute,
   AuthRoute: AuthRoute,
   BuscarRoute: BuscarRoute,
