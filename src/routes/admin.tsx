@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,8 @@ function brl(n: number | null) {
 function AdminPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isChildRoute = pathname !== "/admin" && pathname !== "/admin/";
   const [sessionReady, setSessionReady] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
@@ -127,6 +129,12 @@ function AdminPage() {
       </div>
     );
   }
+
+  if (status.data?.isAdmin && isChildRoute) {
+    return <Outlet />;
+  }
+
+
 
   if (status.data && !status.data.isAdmin) {
     return (
