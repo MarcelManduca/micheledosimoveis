@@ -5,13 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   adminListProperties,
   deleteProperty,
+  exportPropertiesXml,
   getMyAdminStatus,
   importGralhaProperty,
   setPropertyFeatured,
   setPropertyLaunch,
   syncPropertiesAvailability,
 } from "@/lib/properties.functions";
-import { ArrowRight, ExternalLink, LogOut, RefreshCw, Rocket, Star, Trash2 } from "lucide-react";
+import { ArrowRight, Download, ExternalLink, LogOut, RefreshCw, Rocket, Star, Trash2 } from "lucide-react";
 
 
 export const Route = createFileRoute("/admin")({
@@ -95,6 +96,22 @@ function AdminPage() {
   const syncMut = useMutation({
     mutationFn: () => syncPropertiesAvailability(),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
+  });
+
+  const exportMut = useMutation({
+    mutationFn: () => exportPropertiesXml(),
+    onSuccess: (res) => {
+      const blob = new Blob([res.xml], { type: "application/xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `imoveis-${stamp}.xml`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
   });
 
 
@@ -233,15 +250,35 @@ function AdminPage() {
               A verificação roda diariamente: atualiza preços, fotos e descrições dos imóveis ativos e despublica os que foram removidos do site da Gralha.
             </p>
           </div>
-          <button
-            onClick={() => syncMut.mutate()}
-            disabled={syncMut.isPending}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium hover:bg-secondary transition disabled:opacity-60"
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${syncMut.isPending ? "animate-spin" : ""}`} />
-            {syncMut.isPending ? "Sincronizando..." : "Verificar e atualizar agora"}
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => exportMut.mutate()}
+              disabled={exportMut.isPending}
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium hover:bg-secondary transition disabled:opacity-60"
+            >
+              <Download className={`h-3.5 w-3.5 ${exportMut.isPending ? "animate-pulse" : ""}`} />
+              {exportMut.isPending ? "Gerando XML..." : "Exportar XML"}
+            </button>
+            <button
+              onClick={() => syncMut.mutate()}
+              disabled={syncMut.isPending}
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium hover:bg-secondary transition disabled:opacity-60"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${syncMut.isPending ? "animate-spin" : ""}`} />
+              {syncMut.isPending ? "Sincronizando..." : "Verificar e atualizar agora"}
+            </button>
+          </div>
         </div>
+        {exportMut.data && (
+          <div className="mt-3 rounded-xl bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
+            XML gerado com {exportMut.data.count} imóveis. Download iniciado automaticamente.
+          </div>
+        )}
+        {exportMut.error && (
+          <div className="mt-3 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {(exportMut.error as Error).message}
+          </div>
+        )}
         {syncMut.data && (
           <div className="mt-3 rounded-xl bg-secondary/60 px-4 py-3 text-xs text-foreground">
             Verificados {syncMut.data.checked} · atualizados {syncMut.data.refreshed ?? 0} · disponíveis {syncMut.data.available} · despublicados {syncMut.data.unpublished} · erros {syncMut.data.errors}
