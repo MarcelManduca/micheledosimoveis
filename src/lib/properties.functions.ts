@@ -307,6 +307,66 @@ export const adminListProperties = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+function xmlEscape(s: unknown): string {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+export const exportPropertiesXml = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ xml: string; count: number; generatedAt: string }> => {
+    await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data, error } = await supabaseAdmin
+      .from("properties")
+      .select("*, property_photos(url, position)")
+      .order("created_at", { ascending: false });
+    if (error) safeError("Não foi possível exportar os imóveis.", error);
+
+    const rows = (data ?? []) as Array<Record<string, unknown>>;
+    const generatedAt = new Date().toISOString();
+    const scalarKeys = [
+      "id", "code", "title", "property_type", "neighborhood", "city", "state",
+      "address", "condo_name", "price_brl", "condo_fee_brl", "iptu_brl",
+      "area_m2", "bedrooms", "suites", "bathrooms", "parking_spots",
+      "description", "featured", "is_launch", "published", "cover_image",
+      "source_url", "created_at", "updated_at", "last_checked_at",
+      "last_check_status", "unavailable_since",
+    ];
+
+    const parts: string[] = [];
+    parts.push('<?xml version="1.0" encoding="UTF-8"?>');
+    parts.push(`<properties generatedAt="${xmlEscape(generatedAt)}" count="${rows.length}">`);
+    for (const row of rows) {
+      parts.push("  <property>");
+      for (const k of scalarKeys) {
+        parts.push(`    <${k}>${xmlEscape(row[k])}</${k}>`);
+      }
+      const features = (row.features as string[] | null) ?? [];
+      parts.push("    <features>");
+      for (const f of features) parts.push(`      <feature>${xmlEscape(f)}</feature>`);
+      parts.push("    </features>");
+      const condoFeatures = (row.condo_features as string[] | null) ?? [];
+      parts.push("    <condo_features>");
+      for (const f of condoFeatures) parts.push(`      <feature>${xmlEscape(f)}</feature>`);
+      parts.push("    </condo_features>");
+      const photos = ((row.property_photos as Array<{ url: string; position: number }> | null) ?? [])
+        .slice()
+        .sort((a, b) => a.position - b.position);
+      parts.push("    <photos>");
+      for (const p of photos) parts.push(`      <photo position="${p.position}">${xmlEscape(p.url)}</photo>`);
+      parts.push("    </photos>");
+      parts.push("  </property>");
+    }
+    parts.push("</properties>");
+    return { xml: parts.join("\n"), count: rows.length, generatedAt };
+  });
+
 const idSchema = z.object({ id: z.string().uuid() });
 const featuredSchema = idSchema.extend({ featured: z.boolean() });
 const launchSchema = idSchema.extend({ is_launch: z.boolean() });
