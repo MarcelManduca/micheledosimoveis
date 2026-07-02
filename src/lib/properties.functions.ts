@@ -132,13 +132,21 @@ export const searchProperties = createServerFn({ method: "GET" })
     }
     if (data.precoMin != null) q = q.gte("price_brl", data.precoMin);
     if (data.precoMax != null) q = q.lte("price_brl", data.precoMax);
-    const { data: rows, error } = await q
+    // Paginate to bypass PostgREST's default 1000-row cap and return every
+    // matching property, no matter how many are cadastrados.
+    const ordered = q
       .order("featured", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(1000);
-
-    if (error) safeError("Não foi possível pesquisar os imóveis.", error);
-    return normalizeRows(rows);
+      .order("created_at", { ascending: false });
+    const PAGE = 1000;
+    const all: unknown[] = [];
+    for (let from = 0; ; from += PAGE) {
+      const { data: rows, error } = await ordered.range(from, from + PAGE - 1);
+      if (error) safeError("Não foi possível pesquisar os imóveis.", error);
+      const batch = rows ?? [];
+      all.push(...batch);
+      if (batch.length < PAGE) break;
+    }
+    return normalizeRows(all);
   });
 
 const codeSchema = z.object({
