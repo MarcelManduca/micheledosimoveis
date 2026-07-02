@@ -116,6 +116,40 @@ function AdminPage() {
     },
   });
 
+  // ── Busca, filtros e paginação da tabela ─────────────────────────────
+  const [query, setQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"todos" | "ativos" | "inativos">("ativos");
+  const [tagFilter, setTagFilter] = useState<"todos" | "destaques" | "lancamentos">("todos");
+  const [pageSize, setPageSize] = useState<25 | 50 | 100>(25);
+  const [page, setPage] = useState(1);
+
+  const rows = list.data ?? [];
+  const filteredRows = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return rows.filter((p) => {
+      const anyP = p as any;
+      if (statusFilter === "ativos" && !anyP.published) return false;
+      if (statusFilter === "inativos" && anyP.published) return false;
+      if (tagFilter === "destaques" && !p.featured) return false;
+      if (tagFilter === "lancamentos" && !p.is_launch) return false;
+      if (!q) return true;
+      const hay = `${p.title ?? ""} ${p.code ?? ""} ${p.neighborhood ?? ""} ${p.city ?? ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [rows, query, statusFilter, tagFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const pagedRows = useMemo(
+    () => filteredRows.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredRows, currentPage, pageSize],
+  );
+  useEffect(() => {
+    setPage(1);
+  }, [query, statusFilter, tagFilter, pageSize]);
+
+
+
 
   async function signOut() {
     await supabase.auth.signOut();
