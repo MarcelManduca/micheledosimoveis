@@ -2,24 +2,25 @@ import type { PortfolioProperty } from "@/lib/properties.functions";
 
 // ─────────── Normalization ───────────
 
+// Lista de regiões estratégicas usadas SOMENTE no painel interno de
+// inteligência de portfólio. Não afeta a busca pública nem os filtros da home.
 export const STRATEGIC_NEIGHBORHOODS = [
+  "Centro / Beira-Mar Norte",
+  "Agronômica",
   "Jurerê Internacional",
   "Jurerê Tradicional",
-  "Beira-Mar Norte",
-  "Centro",
-  "Agronômica",
+  "Praia Brava",
   "João Paulo",
   "Cacupé",
-  "Campeche",
-  "Novo Campeche",
-  "Lagoa da Conceição",
-  "Praia Brava",
   "Santo Antônio de Lisboa",
   "Itacorubi",
   "Trindade",
   "Santa Mônica",
   "Córrego Grande",
+  "Lagoa da Conceição",
   "Canto da Lagoa",
+  "Campeche",
+  "Novo Campeche",
   "Rio Tavares",
   "Morro das Pedras",
 ];
@@ -34,8 +35,23 @@ export const MACRO_TYPES = [
 ] as const;
 export type MacroType = (typeof MACRO_TYPES)[number] | "Outros";
 
+// Tipologias residenciais consideradas na análise executiva de dormitórios.
+export const RESIDENTIAL_MACROS: readonly MacroType[] = [
+  "Apartamento",
+  "Casa",
+  "Cobertura",
+] as const;
+export function isResidentialMacro(m: MacroType): boolean {
+  return (RESIDENTIAL_MACROS as readonly MacroType[]).includes(m);
+}
+
 export const BEDROOM_GROUPS = ["0", "1", "2", "3", "4+"] as const;
 export type BedroomGroup = (typeof BEDROOM_GROUPS)[number];
+
+// Grupos de dormitórios usados na visão executiva — apenas residenciais,
+// sem "0" (evita contabilizar terrenos/comerciais como 0 dormitórios).
+export const RESIDENTIAL_BEDROOM_GROUPS = ["1", "2", "3", "4+"] as const;
+export type ResidentialBedroomGroup = (typeof RESIDENTIAL_BEDROOM_GROUPS)[number];
 
 export const PRICE_BANDS = [
   "Até R$ 1M",
@@ -56,13 +72,17 @@ function slugKey(s: string | null | undefined): string {
     .trim();
 }
 
+// Aliases exclusivos do painel analítico. Não modifica dados brutos da base
+// nem o filtro público — apenas padroniza a exibição/agrupamento no painel.
 const NEIGHBORHOOD_ALIAS: Record<string, string> = {};
 for (const n of STRATEGIC_NEIGHBORHOODS) NEIGHBORHOOD_ALIAS[slugKey(n)] = n;
-// extra aliases
 Object.assign(NEIGHBORHOOD_ALIAS, {
+  [slugKey("centro")]: "Centro / Beira-Mar Norte",
+  [slugKey("beira mar")]: "Centro / Beira-Mar Norte",
+  [slugKey("beira mar norte")]: "Centro / Beira-Mar Norte",
+  [slugKey("beira-mar norte")]: "Centro / Beira-Mar Norte",
+  [slugKey("centro beira mar norte")]: "Centro / Beira-Mar Norte",
   [slugKey("jurere")]: "Jurerê Tradicional",
-  [slugKey("beira mar")]: "Beira-Mar Norte",
-  [slugKey("beira mar norte")]: "Beira-Mar Norte",
   [slugKey("joao paulo")]: "João Paulo",
   [slugKey("lagoa da conceicao")]: "Lagoa da Conceição",
   [slugKey("corrego grande")]: "Córrego Grande",
@@ -70,13 +90,20 @@ Object.assign(NEIGHBORHOOD_ALIAS, {
   [slugKey("morro das pedras")]: "Morro das Pedras",
   [slugKey("cachoeira do bom jesus")]: "Cachoeira do Bom Jesus",
   [slugKey("santo antonio de lisboa")]: "Santo Antônio de Lisboa",
+  [slugKey("barra da lagoa")]: "Barra da Lagoa",
+  [slugKey("ponta das canas")]: "Ponta das Canas",
+  [slugKey("pantano do sul")]: "Pântano do Sul",
+  [slugKey("saco dos limoes")]: "Saco dos Limões",
+  [slugKey("monte verde")]: "Monte Verde",
+  [slugKey("vargem do bom jesus")]: "Vargem do Bom Jesus",
 });
 
-export function normalizeNeighborhood(raw: string | null | undefined): string {
+// Somente para uso analítico dentro deste módulo/painel interno.
+// NÃO usar em filtros públicos, buscas ou páginas de imóveis.
+export function normalizeNeighborhoodForAnalytics(raw: string | null | undefined): string {
   if (!raw) return "—";
   const key = slugKey(raw);
   if (NEIGHBORHOOD_ALIAS[key]) return NEIGHBORHOOD_ALIAS[key];
-  // Title-case with keep of prepositions
   return raw
     .toLowerCase()
     .split(/\s+/)
@@ -154,7 +181,7 @@ export type EnrichedProperty = PortfolioProperty & {
 
 export function enrich(list: PortfolioProperty[]): EnrichedProperty[] {
   return list.map((p) => {
-    const n = normalizeNeighborhood(p.neighborhood);
+    const n = normalizeNeighborhoodForAnalytics(p.neighborhood);
     const macro = normalizeMacroType(p.property_type);
     const bg = bedroomGroup(p.bedrooms);
     const band = priceBand(p.price_brl);

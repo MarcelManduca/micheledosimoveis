@@ -25,11 +25,13 @@ import {
   BEDROOM_GROUPS,
   MACRO_TYPES,
   PRICE_BANDS,
+  RESIDENTIAL_BEDROOM_GROUPS,
   STRATEGIC_NEIGHBORHOODS,
   brl,
   enrich,
   generatePortfolioInsights,
   heatmapCellColor,
+  isResidentialMacro,
   mean,
   median,
   neighborhoodStockStatus,
@@ -246,10 +248,20 @@ function PortfolioIntelligencePage() {
   // Datasets
   const ativos = active.length;
   const byMacro = MACRO_TYPES.map((m) => ({ name: m, value: active.filter((p) => p.macro === m).length }));
-  const byBedrooms = BEDROOM_GROUPS.map((b) => ({
+
+  // Dormitórios: apenas residenciais (Apartamento/Casa/Cobertura), sem "0".
+  const activeResidential = useMemo(
+    () => active.filter((p) => isResidentialMacro(p.macro)),
+    [active],
+  );
+  const byBedrooms = RESIDENTIAL_BEDROOM_GROUPS.map((b) => ({
     name: `${b} dorm.`,
-    value: active.filter((p) => p.bedGroup === b).length,
+    value: activeResidential.filter((p) => p.bedGroup === b).length,
   }));
+  const residSemDorm = activeResidential.filter(
+    (p) => p.bedrooms == null || p.bedrooms <= 0,
+  ).length;
+
   const byPrice = PRICE_BANDS.map((b) => ({ name: b, value: active.filter((p) => p.band === b).length }));
 
   const byNeighborhoodMap = new Map<string, number>();
@@ -266,6 +278,15 @@ function PortfolioIntelligencePage() {
 
   const strategicLow = strategicCounts.filter((n) => n.value <= 5).slice(0, 10);
 
+  // KPIs baseados na curadoria estratégica.
+  const bairrosEstrategicosMonitorados = STRATEGIC_NEIGHBORHOODS.length;
+  const bairrosEstrategicosAtivos = strategicCounts.filter((n) => n.value > 0).length;
+  const bairrosEstrategicosBaixaOferta = strategicCounts.filter((n) => n.value <= 5).length;
+  const bairrosForaCuradoria = [...byNeighborhoodMap.keys()].filter(
+    (n) => !STRATEGIC_NEIGHBORHOODS.includes(n),
+  ).length;
+  const bairrosTotaisBase = byNeighborhoodMap.size;
+
   const insights = useMemo(() => generatePortfolioInsights(enriched), [enriched]);
 
   const tipDom = [...byMacro].sort((a, b) => b.value - a.value)[0];
@@ -274,7 +295,6 @@ function PortfolioIntelligencePage() {
   const prices = active.map((p) => p.price_brl ?? 0).filter((v) => v > 0);
   const precoMed = mean(prices);
   const precoMediano = median(prices);
-  const bairrosBaixa = strategicCounts.filter((n) => n.value > 0 && n.value <= 10).length;
   const combosCriticas = insights.filter((i) => i.quantidade <= 2).length;
 
   // Technical details
@@ -394,14 +414,18 @@ function PortfolioIntelligencePage() {
   const [filterMacro, setFilterMacro] = useState("");
   const [filterDorm, setFilterDorm] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
-  const [onlyStrategic, setOnlyStrategic] = useState(true);
+  type Scope = "estrategicos" | "todos" | "fora";
+  const [scope, setScope] = useState<Scope>("estrategicos");
+  const [onlyResidential, setOnlyResidential] = useState(true);
   const [showHealthy, setShowHealthy] = useState(false);
   const [pageSize, setPageSize] = useState(20);
   const [page, setPage] = useState(1);
 
   const filteredTable = useMemo(() => {
     return table.filter((r) => {
-      if (onlyStrategic && !r.isStrategic) return false;
+      if (scope === "estrategicos" && !r.isStrategic) return false;
+      if (scope === "fora" && r.isStrategic) return false;
+      if (onlyResidential && !isResidentialMacro(r.macro)) return false;
       if (!showHealthy && (r.status === "Saudável" || r.status === "Monitorar")) return false;
       if (filterBairro && r.bairro !== filterBairro) return false;
       if (filterMacro && r.macro !== filterMacro) return false;
@@ -409,7 +433,7 @@ function PortfolioIntelligencePage() {
       if (filterStatus && r.status !== filterStatus) return false;
       return true;
     });
-  }, [table, onlyStrategic, showHealthy, filterBairro, filterMacro, filterDorm, filterStatus]);
+  }, [table, scope, onlyResidential, showHealthy, filterBairro, filterMacro, filterDorm, filterStatus]);
 
   const pagedTable = filteredTable.slice((page - 1) * pageSize, page * pageSize);
   const totalPages = Math.max(1, Math.ceil(filteredTable.length / pageSize));
@@ -474,7 +498,7 @@ function PortfolioIntelligencePage() {
     return Array.from(byBairro.entries()).slice(0, 8);
   }, [insights]);
 
-  const resumoExecutivo = `Hoje o site possui ${ativos} imóveis ativos distribuídos em ${byNeighborhoodMap.size} bairros. O estoque está concentrado em ${tipDom?.name?.toLowerCase() ?? "—"}, com predominância de imóveis com ${dormDom?.name ?? "—"} e faixa de preço dominante ${priceDom?.name ?? "—"}. Os principais pontos de atenção estão em ${strategicCounts.filter((n) => n.value > 0 && n.value <= 10).slice(0, 5).map((n) => `${n.name} (${n.value})`).join(", ") || "nenhum bairro estratégico"}, onde há baixa quantidade de imóveis ativos ou combinações críticas. A recomendação é priorizar captação de apartamentos e coberturas em bairros estratégicos, especialmente perfis com apenas 1 ou 2 unidades disponíveis.`;
+  const resumoExecutivo = `Hoje o site possui ${ativos} imóveis ativos, com ${bairrosEstrategicosAtivos} de ${bairrosEstrategicosMonitorados} bairros estratégicos monitorados cobertos. O estoque está concentrado em ${tipDom?.name?.toLowerCase() ?? "—"}, com predominância de imóveis residenciais com ${dormDom?.name ?? "—"} e faixa de preço dominante ${priceDom?.name ?? "—"}. Os principais pontos de atenção estão em ${strategicCounts.filter((n) => n.value <= 5).slice(0, 5).map((n) => `${n.name} (${n.value})`).join(", ") || "nenhum bairro estratégico"}, onde há baixa oferta ativa ou combinações críticas. A recomendação é priorizar captação de apartamentos e coberturas em bairros estratégicos, especialmente perfis com apenas 1 ou 2 unidades disponíveis.`;
 
   async function copyText(text: string) {
     try {
@@ -637,15 +661,27 @@ function PortfolioIntelligencePage() {
 
             {/* ─────────── VISÃO EXECUTIVA ─────────── */}
             <TabsContent value="visao" className="mt-6 space-y-2">
-              {/* KPIs essenciais */}
+              {/* KPIs essenciais — focados na curadoria estratégica */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 <KpiCard label="Imóveis ativos" value={ativos} hint="Publicados e disponíveis" tone="ok" />
-                <KpiCard label="Bairros com imóveis" value={byNeighborhoodMap.size} />
                 <KpiCard
-                  label="Bairros estratégicos c/ baixa oferta"
-                  value={bairrosBaixa}
-                  hint="Até 10 imóveis ativos"
-                  tone={bairrosBaixa > 0 ? "warn" : "default"}
+                  label="Bairros estratégicos monitorados"
+                  value={bairrosEstrategicosMonitorados}
+                  hint="Lista curada do site"
+                />
+                <KpiCard
+                  label="Estratégicos com imóveis ativos"
+                  value={`${bairrosEstrategicosAtivos}/${bairrosEstrategicosMonitorados}`}
+                  hint="Cobertura atual da curadoria"
+                  tone={
+                    bairrosEstrategicosAtivos < bairrosEstrategicosMonitorados ? "warn" : "ok"
+                  }
+                />
+                <KpiCard
+                  label="Estratégicos com baixa oferta"
+                  value={bairrosEstrategicosBaixaOferta}
+                  hint="Até 5 imóveis ativos"
+                  tone={bairrosEstrategicosBaixaOferta > 0 ? "warn" : "default"}
                 />
                 <KpiCard
                   label="Combinações críticas"
@@ -657,11 +693,6 @@ function PortfolioIntelligencePage() {
                   label="Tipologia dominante"
                   value={tipDom?.name ?? "—"}
                   hint={`${tipDom?.value ?? 0} imóveis`}
-                />
-                <KpiCard
-                  label="Faixa de preço dominante"
-                  value={priceDom?.name ?? "—"}
-                  hint={`${priceDom?.value ?? 0} imóveis`}
                 />
               </div>
 
@@ -712,7 +743,12 @@ function PortfolioIntelligencePage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="rounded-2xl border border-border bg-card p-4">
-                  <div className="text-xs text-muted-foreground mb-2">Por dormitórios</div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Residenciais por dormitórios
+                    <span className="ml-1 text-[10px] opacity-70">
+                      (apartamentos, casas e coberturas)
+                    </span>
+                  </div>
                   <ResponsiveContainer width="100%" height={230}>
                     <BarChart data={byBedrooms}>
                       <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
@@ -900,16 +936,29 @@ function PortfolioIntelligencePage() {
                     <option key={s}>{s}</option>
                   ))}
                 </select>
+                <select
+                  className="rounded-full border border-border bg-background px-3 py-1.5 text-xs"
+                  value={scope}
+                  onChange={(e) => {
+                    setScope(e.target.value as Scope);
+                    setPage(1);
+                  }}
+                  title="Escopo de bairros"
+                >
+                  <option value="estrategicos">Bairros: Estratégicos</option>
+                  <option value="todos">Bairros: Todos</option>
+                  <option value="fora">Bairros: Fora da curadoria</option>
+                </select>
                 <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer">
                   <input
                     type="checkbox"
-                    checked={onlyStrategic}
+                    checked={onlyResidential}
                     onChange={(e) => {
-                      setOnlyStrategic(e.target.checked);
+                      setOnlyResidential(e.target.checked);
                       setPage(1);
                     }}
                   />
-                  Somente bairros estratégicos
+                  Somente residenciais
                 </label>
                 <label className="inline-flex items-center gap-1.5 text-xs cursor-pointer">
                   <input
@@ -1222,6 +1271,23 @@ function PortfolioIntelligencePage() {
                 <KpiCard label="Indisponíveis" value={indisponiveis} />
                 <KpiCard label="Preço médio" value={brl(precoMed)} />
                 <KpiCard label="Preço mediano" value={brl(precoMediano)} />
+                <KpiCard label="Bairros totais na base" value={bairrosTotaisBase} />
+                <KpiCard
+                  label="Bairros fora da curadoria"
+                  value={bairrosForaCuradoria}
+                  hint="Não pertencem à lista estratégica"
+                />
+                <KpiCard
+                  label="Faixa de preço dominante"
+                  value={priceDom?.name ?? "—"}
+                  hint={`${priceDom?.value ?? 0} imóveis`}
+                />
+                <KpiCard
+                  label="Residenciais sem dorm. informado"
+                  value={residSemDorm}
+                  hint="Apart./casas/coberturas com bedrooms 0 ou nulo"
+                  tone={residSemDorm > 0 ? "warn" : "default"}
+                />
               </div>
               <div className="rounded-2xl border border-border bg-card p-5 text-xs text-muted-foreground space-y-2">
                 <div>
@@ -1230,15 +1296,27 @@ function PortfolioIntelligencePage() {
                   há dependência de arquivo XML estático.
                 </div>
                 <div>
+                  <strong className="text-foreground">Curadoria comercial:</strong> a base pode
+                  conter bairros fora da curadoria comercial da página pública. A visão executiva
+                  considera apenas os {bairrosEstrategicosMonitorados} bairros estratégicos
+                  monitorados no filtro do site.
+                </div>
+                <div>
                   <strong className="text-foreground">Critério de ativo:</strong> publicado
                   (published=true), sem data em unavailable_since e sem status not_found/unavailable
                   em last_check_status.
                 </div>
                 <div>
                   <strong className="text-foreground">Normalização:</strong> bairros e tipologias
-                  são normalizados para agrupamentos padrão (Apartamento, Casa, Cobertura, Terreno,
-                  Comercial/Especial). Bairros estratégicos são um conjunto pré-definido de regiões
-                  prioritárias de captação.
+                  são normalizados <em>apenas para análise interna</em> (Apartamento, Casa,
+                  Cobertura, Terreno, Comercial/Especial). Centro e Beira-Mar Norte são agrupados
+                  em "Centro / Beira-Mar Norte" somente no painel — os filtros públicos, URLs e a
+                  base bruta permanecem inalterados.
+                </div>
+                <div>
+                  <strong className="text-foreground">Dormitórios:</strong> a visão executiva
+                  considera apenas imóveis residenciais (apartamento, casa, cobertura). Terrenos e
+                  comerciais não aparecem como "0 dormitórios".
                 </div>
                 <div>
                   <strong className="text-foreground">Última sincronização:</strong>{" "}
