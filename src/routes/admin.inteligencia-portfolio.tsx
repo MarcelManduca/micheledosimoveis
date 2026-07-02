@@ -248,10 +248,20 @@ function PortfolioIntelligencePage() {
   // Datasets
   const ativos = active.length;
   const byMacro = MACRO_TYPES.map((m) => ({ name: m, value: active.filter((p) => p.macro === m).length }));
-  const byBedrooms = BEDROOM_GROUPS.map((b) => ({
+
+  // Dormitórios: apenas residenciais (Apartamento/Casa/Cobertura), sem "0".
+  const activeResidential = useMemo(
+    () => active.filter((p) => isResidentialMacro(p.macro)),
+    [active],
+  );
+  const byBedrooms = RESIDENTIAL_BEDROOM_GROUPS.map((b) => ({
     name: `${b} dorm.`,
-    value: active.filter((p) => p.bedGroup === b).length,
+    value: activeResidential.filter((p) => p.bedGroup === b).length,
   }));
+  const residSemDorm = activeResidential.filter(
+    (p) => p.bedrooms == null || p.bedrooms <= 0,
+  ).length;
+
   const byPrice = PRICE_BANDS.map((b) => ({ name: b, value: active.filter((p) => p.band === b).length }));
 
   const byNeighborhoodMap = new Map<string, number>();
@@ -268,6 +278,15 @@ function PortfolioIntelligencePage() {
 
   const strategicLow = strategicCounts.filter((n) => n.value <= 5).slice(0, 10);
 
+  // KPIs baseados na curadoria estratégica.
+  const bairrosEstrategicosMonitorados = STRATEGIC_NEIGHBORHOODS.length;
+  const bairrosEstrategicosAtivos = strategicCounts.filter((n) => n.value > 0).length;
+  const bairrosEstrategicosBaixaOferta = strategicCounts.filter((n) => n.value <= 5).length;
+  const bairrosForaCuradoria = [...byNeighborhoodMap.keys()].filter(
+    (n) => !STRATEGIC_NEIGHBORHOODS.includes(n),
+  ).length;
+  const bairrosTotaisBase = byNeighborhoodMap.size;
+
   const insights = useMemo(() => generatePortfolioInsights(enriched), [enriched]);
 
   const tipDom = [...byMacro].sort((a, b) => b.value - a.value)[0];
@@ -276,7 +295,6 @@ function PortfolioIntelligencePage() {
   const prices = active.map((p) => p.price_brl ?? 0).filter((v) => v > 0);
   const precoMed = mean(prices);
   const precoMediano = median(prices);
-  const bairrosBaixa = strategicCounts.filter((n) => n.value > 0 && n.value <= 10).length;
   const combosCriticas = insights.filter((i) => i.quantidade <= 2).length;
 
   // Technical details
