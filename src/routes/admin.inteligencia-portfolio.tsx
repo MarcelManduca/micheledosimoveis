@@ -739,7 +739,12 @@ function PortfolioIntelligencePage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="rounded-2xl border border-border bg-card p-4">
-                  <div className="text-xs text-muted-foreground mb-2">Por dormitórios</div>
+                  <div className="text-xs text-muted-foreground mb-2">
+                    Residenciais por dormitórios
+                    <span className="ml-1 text-[10px] opacity-70">
+                      (apartamentos, casas e coberturas)
+                    </span>
+                  </div>
                   <ResponsiveContainer width="100%" height={230}>
                     <BarChart data={byBedrooms}>
                       <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
