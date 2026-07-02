@@ -98,6 +98,22 @@ function AdminPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
   });
 
+  const exportMut = useMutation({
+    mutationFn: () => exportPropertiesXml(),
+    onSuccess: (res) => {
+      const blob = new Blob([res.xml], { type: "application/xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `imoveis-${stamp}.xml`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+  });
+
 
   async function signOut() {
     await supabase.auth.signOut();
