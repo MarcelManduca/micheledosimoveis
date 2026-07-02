@@ -117,25 +117,10 @@ function PortfolioIntelligencePage() {
     enabled: !!status.data?.isAdmin,
   });
 
-  if (!sessionReady || status.isLoading) {
-    return (
-      <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
-        Carregando painel...
-      </div>
-    );
-  }
-  if (status.data && !status.data.isAdmin) {
-    return (
-      <div className="min-h-screen grid place-items-center px-6 text-center">
-        <div className="max-w-sm">
-          <h1 className="font-display text-2xl">Acesso restrito</h1>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Sua conta não tem permissão de administrador.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const notReady = !sessionReady || status.isLoading;
+  const notAdmin = !!status.data && !status.data.isAdmin;
+
+
 
   const raw = portfolio.data ?? [];
   const enriched: EnrichedProperty[] = useMemo(() => enrich(raw), [raw]);
