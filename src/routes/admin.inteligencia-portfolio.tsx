@@ -311,6 +311,28 @@ function PortfolioIntelligencePage() {
     downloadCsv(`combinacoes-portfolio-${new Date().toISOString().slice(0, 10)}.csv`, rows);
   }
 
+  if (notReady) {
+    return (
+      <div className="min-h-screen grid place-items-center text-sm text-muted-foreground">
+        Carregando painel...
+      </div>
+    );
+  }
+  if (notAdmin) {
+    return (
+      <div className="min-h-screen grid place-items-center px-6 text-center">
+        <div className="max-w-sm">
+          <h1 className="font-display text-2xl">Acesso restrito</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Sua conta não tem permissão de administrador.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
       <header className="border-b border-border">
