@@ -120,27 +120,29 @@ export const searchProperties = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => searchSchema.parse(d))
   .handler(async ({ data }): Promise<PropertyListItem[]> => {
     const supabase = getPublicClient();
-    let q = supabase
-      .from("properties")
-      .select(LIST_COLS)
-      .eq("published", true);
-    if (data.tipo) q = q.ilike("property_type", `%${escapeLike(data.tipo)}%`);
-    if (data.bairro) q = q.ilike("neighborhood", `%${escapeLike(data.bairro)}%`);
-    if (data.dorms != null) {
-      if (data.dorms >= 4) q = q.gte("bedrooms", 4);
-      else q = q.eq("bedrooms", data.dorms);
-    }
-    if (data.precoMin != null) q = q.gte("price_brl", data.precoMin);
-    if (data.precoMax != null) q = q.lte("price_brl", data.precoMax);
+    const buildQuery = () => {
+      let q = supabase
+        .from("properties")
+        .select(LIST_COLS)
+        .eq("published", true);
+      if (data.tipo) q = q.ilike("property_type", `%${escapeLike(data.tipo)}%`);
+      if (data.bairro) q = q.ilike("neighborhood", `%${escapeLike(data.bairro)}%`);
+      if (data.dorms != null) {
+        if (data.dorms >= 4) q = q.gte("bedrooms", 4);
+        else q = q.eq("bedrooms", data.dorms);
+      }
+      if (data.precoMin != null) q = q.gte("price_brl", data.precoMin);
+      if (data.precoMax != null) q = q.lte("price_brl", data.precoMax);
+      return q
+        .order("featured", { ascending: false })
+        .order("created_at", { ascending: false });
+    };
     // Paginate to bypass PostgREST's default 1000-row cap and return every
-    // matching property, no matter how many are cadastrados.
-    const ordered = q
-      .order("featured", { ascending: false })
-      .order("created_at", { ascending: false });
+    // matching property, no matter how many estejam cadastrados.
     const PAGE = 1000;
     const all: unknown[] = [];
     for (let from = 0; ; from += PAGE) {
-      const { data: rows, error } = await ordered.range(from, from + PAGE - 1);
+      const { data: rows, error } = await buildQuery().range(from, from + PAGE - 1);
       if (error) safeError("Não foi possível pesquisar os imóveis.", error);
       const batch = rows ?? [];
       all.push(...batch);
