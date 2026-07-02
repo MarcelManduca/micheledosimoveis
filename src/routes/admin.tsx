@@ -130,6 +130,12 @@ function AdminPage() {
     );
   }
 
+  if (status.data?.isAdmin && isChildRoute) {
+    return <Outlet />;
+  }
+
+
+
   if (status.data && !status.data.isAdmin) {
     return (
       <div className="min-h-screen grid place-items-center px-6 text-center">
