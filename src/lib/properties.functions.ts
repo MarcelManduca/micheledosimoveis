@@ -307,6 +307,49 @@ export const adminListProperties = createServerFn({ method: "GET" })
     return data ?? [];
   });
 
+export type PortfolioProperty = {
+  id: string;
+  code: string;
+  title: string;
+  property_type: string | null;
+  neighborhood: string | null;
+  city: string | null;
+  state: string | null;
+  price_brl: number | null;
+  area_m2: number | null;
+  bedrooms: number | null;
+  suites: number | null;
+  bathrooms: number | null;
+  parking_spots: number | null;
+  published: boolean;
+  last_check_status: string | null;
+  unavailable_since: string | null;
+  source_url: string | null;
+};
+
+export const adminPortfolioProperties = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<PortfolioProperty[]> => {
+    await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const cols =
+      "id, code, title, property_type, neighborhood, city, state, price_brl, area_m2, bedrooms, suites, bathrooms, parking_spots, published, last_check_status, unavailable_since, source_url";
+    const PAGE = 1000;
+    const all: PortfolioProperty[] = [];
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await supabaseAdmin
+        .from("properties")
+        .select(cols)
+        .order("created_at", { ascending: false })
+        .range(from, from + PAGE - 1);
+      if (error) safeError("Não foi possível carregar o portfólio.", error);
+      const rows = (data ?? []) as unknown as PortfolioProperty[];
+      all.push(...rows);
+      if (rows.length < PAGE) break;
+    }
+    return all;
+  });
+
 function xmlEscape(s: unknown): string {
   if (s == null) return "";
   return String(s)
