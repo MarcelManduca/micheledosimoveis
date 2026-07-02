@@ -336,13 +336,14 @@ export const adminPortfolioProperties = createServerFn({ method: "GET" })
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
     const cols =
       "id, code, title, property_type, neighborhood, city, state, price_brl, area_m2, bedrooms, suites, bathrooms, parking_spots, published, last_check_status, unavailable_since, source_url, cover_image, updated_at, last_checked_at";
-    const PAGE = 1000;
+    const PAGE = 500;
     const all: PortfolioProperty[] = [];
     for (let from = 0; ; from += PAGE) {
       const { data, error } = await context.supabase
         .from("properties")
         .select(cols)
         .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
         .range(from, from + PAGE - 1);
       if (error) safeError("Não foi possível carregar o portfólio.", error);
       const rows = (data ?? []) as unknown as PortfolioProperty[];
@@ -351,6 +352,7 @@ export const adminPortfolioProperties = createServerFn({ method: "GET" })
     }
     return all;
   });
+
 
 
 function xmlEscape(s: unknown): string {
