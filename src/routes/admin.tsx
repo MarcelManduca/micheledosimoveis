@@ -28,6 +28,8 @@ function brl(n: number | null) {
 function AdminPage() {
   const navigate = useNavigate();
   const qc = useQueryClient();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isChildRoute = pathname !== "/admin" && pathname !== "/admin/";
   const [sessionReady, setSessionReady] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
