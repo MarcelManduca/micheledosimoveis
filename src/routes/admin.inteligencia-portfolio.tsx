@@ -657,15 +657,27 @@ function PortfolioIntelligencePage() {
 
             {/* ─────────── VISÃO EXECUTIVA ─────────── */}
             <TabsContent value="visao" className="mt-6 space-y-2">
-              {/* KPIs essenciais */}
+              {/* KPIs essenciais — focados na curadoria estratégica */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 <KpiCard label="Imóveis ativos" value={ativos} hint="Publicados e disponíveis" tone="ok" />
-                <KpiCard label="Bairros com imóveis" value={byNeighborhoodMap.size} />
                 <KpiCard
-                  label="Bairros estratégicos c/ baixa oferta"
-                  value={bairrosBaixa}
-                  hint="Até 10 imóveis ativos"
-                  tone={bairrosBaixa > 0 ? "warn" : "default"}
+                  label="Bairros estratégicos monitorados"
+                  value={bairrosEstrategicosMonitorados}
+                  hint="Lista curada do site"
+                />
+                <KpiCard
+                  label="Estratégicos com imóveis ativos"
+                  value={`${bairrosEstrategicosAtivos}/${bairrosEstrategicosMonitorados}`}
+                  hint="Cobertura atual da curadoria"
+                  tone={
+                    bairrosEstrategicosAtivos < bairrosEstrategicosMonitorados ? "warn" : "ok"
+                  }
+                />
+                <KpiCard
+                  label="Estratégicos com baixa oferta"
+                  value={bairrosEstrategicosBaixaOferta}
+                  hint="Até 5 imóveis ativos"
+                  tone={bairrosEstrategicosBaixaOferta > 0 ? "warn" : "default"}
                 />
                 <KpiCard
                   label="Combinações críticas"
@@ -677,11 +689,6 @@ function PortfolioIntelligencePage() {
                   label="Tipologia dominante"
                   value={tipDom?.name ?? "—"}
                   hint={`${tipDom?.value ?? 0} imóveis`}
-                />
-                <KpiCard
-                  label="Faixa de preço dominante"
-                  value={priceDom?.name ?? "—"}
-                  hint={`${priceDom?.value ?? 0} imóveis`}
                 />
               </div>
 
