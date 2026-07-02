@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      cron_secrets: {
+        Row: {
+          created_at: string
+          name: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          name: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          name?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       properties: {
         Row: {
           address: string | null
