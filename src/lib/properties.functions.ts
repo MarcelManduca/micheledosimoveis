@@ -325,6 +325,9 @@ export type PortfolioProperty = {
   last_check_status: string | null;
   unavailable_since: string | null;
   source_url: string | null;
+  cover_image: string | null;
+  updated_at: string | null;
+  last_checked_at: string | null;
 };
 
 export const adminPortfolioProperties = createServerFn({ method: "GET" })
@@ -333,7 +336,7 @@ export const adminPortfolioProperties = createServerFn({ method: "GET" })
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const cols =
-      "id, code, title, property_type, neighborhood, city, state, price_brl, area_m2, bedrooms, suites, bathrooms, parking_spots, published, last_check_status, unavailable_since, source_url";
+      "id, code, title, property_type, neighborhood, city, state, price_brl, area_m2, bedrooms, suites, bathrooms, parking_spots, published, last_check_status, unavailable_since, source_url, cover_image, updated_at, last_checked_at";
     const PAGE = 1000;
     const all: PortfolioProperty[] = [];
     for (let from = 0; ; from += PAGE) {
@@ -349,6 +352,7 @@ export const adminPortfolioProperties = createServerFn({ method: "GET" })
     }
     return all;
   });
+
 
 function xmlEscape(s: unknown): string {
   if (s == null) return "";
