@@ -12,7 +12,7 @@ import {
   setPropertyLaunch,
   syncPropertiesAvailability,
 } from "@/lib/properties.functions";
-import { ArrowRight, Download, ExternalLink, LogOut, RefreshCw, Rocket, Star, Trash2 } from "lucide-react";
+import { ArrowRight, ChevronLeft, ChevronRight, Download, ExternalLink, LogOut, RefreshCw, Rocket, Search, Star, Trash2, X } from "lucide-react";
 
 
 export const Route = createFileRoute("/admin")({
