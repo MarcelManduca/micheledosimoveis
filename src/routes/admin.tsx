@@ -5,13 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   adminListProperties,
   deleteProperty,
+  exportPropertiesXml,
   getMyAdminStatus,
   importGralhaProperty,
   setPropertyFeatured,
   setPropertyLaunch,
   syncPropertiesAvailability,
 } from "@/lib/properties.functions";
-import { ArrowRight, ExternalLink, LogOut, RefreshCw, Rocket, Star, Trash2 } from "lucide-react";
+import { ArrowRight, Download, ExternalLink, LogOut, RefreshCw, Rocket, Star, Trash2 } from "lucide-react";
 
 
 export const Route = createFileRoute("/admin")({
