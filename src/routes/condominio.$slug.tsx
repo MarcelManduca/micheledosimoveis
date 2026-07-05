@@ -54,28 +54,36 @@ function nearbyCondosQO(bairroSlug: string | null, excludeSlug: string) {
 
 function buildFaq(condo: CondominiumDetail, hasProperties: boolean) {
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
+  const addr = condo.address ?? bairro;
+  const topAmen = condo.amenities.slice(0, 5);
+  const amenList =
+    topAmen.length > 0 ? topAmen.join(", ") : "não estão publicamente disponíveis";
   return [
     {
       q: `Onde fica o ${condo.name}?`,
-      a: `O ${condo.name} está localizado em ${condo.address ?? bairro}, no bairro ${bairro}, em ${condo.city}, ${condo.state}.`,
+      a: `O ${condo.name} fica em ${addr}, no bairro ${bairro}, em ${condo.city}/${condo.state}.`,
     },
     {
       q: `O ${condo.name} tem imóveis disponíveis?`,
       a: hasProperties
-        ? `Sim. Consulte na página os imóveis publicados por Michele dos Imóveis neste condomínio ou fale diretamente pelo WhatsApp para saber mais.`
-        : `No momento, não há imóveis publicados neste condomínio na base de Michele dos Imóveis. Fale com Michele para consultar oportunidades off market ou imóveis semelhantes na região.`,
+        ? `Sim. Nesta página estão listados os imóveis publicados por Michele dos Imóveis neste condomínio. A disponibilidade depende dos imóveis ativos na base e pode ser confirmada diretamente com Michele.`
+        : `A disponibilidade depende dos imóveis ativos publicados na base de Michele dos Imóveis. Se não houver imóvel publicado no momento, Michele pode consultar oportunidades off market ou opções semelhantes na região.`,
+    },
+    {
+      q: `Quais comodidades existem no ${condo.name}?`,
+      a: `As comodidades conhecidas incluem ${amenList}. Essas informações devem ser confirmadas no atendimento antes de qualquer decisão de compra ou venda.`,
     },
     {
       q: `Como saber o valor de um imóvel no ${condo.name}?`,
-      a: `Michele dos Imóveis realiza avaliações personalizadas considerando localização, comodidades, condições do imóvel e comparativos de mercado no bairro ${bairro}.`,
+      a: `O valor depende de fatores como metragem, posição, conservação, vagas, vista, padrão do imóvel e momento de mercado. Michele pode ajudar com uma avaliação personalizada.`,
     },
     {
       q: `Posso vender meu imóvel nesse condomínio com discrição?`,
-      a: `Sim. Michele dos Imóveis atende proprietários com estratégias discretas, inclusive em formato off market, quando faz sentido para o imóvel e para o mercado local.`,
+      a: `Sim. A venda pode ser conduzida com estratégia discreta, incluindo abordagem off market, apresentação seletiva e qualificação de compradores.`,
     },
     {
       q: `A Michele atende compradores interessados neste condomínio?`,
-      a: `Sim. Michele dos Imóveis oferece atendimento imobiliário a compradores interessados em imóveis no ${bairro} e em condomínios da região.`,
+      a: `Sim. Michele dos Imóveis oferece atendimento imobiliário para compradores interessados em condomínios e imóveis de alto padrão em Florianópolis.`,
     },
   ];
 }
@@ -108,7 +116,8 @@ export const Route = createFileRoute("/condominio/$slug")({
     const bairro = condo.normalized_neighborhood ?? "Florianópolis";
     const url = `${SITE}/condominio/${params.slug}`;
     const title = `${condo.name} em ${bairro}, Florianópolis | Michele dos Imóveis`;
-    const description = `Conheça o ${condo.name}, localizado em ${bairro}, Florianópolis. Veja informações gerais, comodidades, imóveis próximos e fale com Michele dos Imóveis.`;
+    const description = `Conheça o ${condo.name}, em ${bairro}, Florianópolis. Veja localização, comodidades, imóveis próximos e fale com Michele dos Imóveis.`;
+    const ogImage = `${SITE}/michele-dos-imoveis-og.png`;
 
     const apartmentComplex: Record<string, unknown> = {
       "@context": "https://schema.org",
@@ -193,9 +202,11 @@ export const Route = createFileRoute("/condominio/$slug")({
         { property: "og:description", content: description },
         { property: "og:type", content: "website" },
         { property: "og:url", content: url },
+        { property: "og:image", content: ogImage },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
+        { name: "twitter:image", content: ogImage },
       ],
       links: [{ rel: "canonical", href: url }],
       scripts: [
@@ -224,7 +235,6 @@ export const Route = createFileRoute("/condominio/$slug")({
 });
 
 function CondominioPage() {
-  const { slug } = Route.useParams();
   const { condo } = Route.useLoaderData();
   const nInfo = getNeighborhood(condo.bairro_slug ?? "");
   const props = useQuery(
@@ -234,7 +244,9 @@ function CondominioPage() {
   const [showMap, setShowMap] = useState(false);
 
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
-  const hasProps = (props.data?.inCondo?.length ?? 0) > 0;
+  const inCondoCount = props.data?.inCondo.length ?? 0;
+  const nearbyPropsCount = props.data?.nearby.length ?? 0;
+  const hasProps = inCondoCount > 0;
   const faq = useMemo(() => buildFaq(condo, hasProps), [condo, hasProps]);
 
   const buyerLink =
@@ -247,6 +259,11 @@ function CondominioPage() {
     encodeURIComponent(
       `Olá, Michele. Tenho um imóvel no ${condo.name}, em ${bairro}, e gostaria de avaliar uma estratégia de venda.`,
     );
+  const alertLink =
+    WHATSAPP +
+    encodeURIComponent(
+      `Olá, Michele. Quero ser avisado quando surgir imóvel no ${condo.name}, em ${bairro}.`,
+    );
 
   const mapEmbed =
     condo.latitude != null && condo.longitude != null
@@ -256,6 +273,8 @@ function CondominioPage() {
     condo.latitude != null && condo.longitude != null
       ? `https://www.google.com/maps?q=${condo.latitude},${condo.longitude}`
       : null;
+
+  const hasCoords = condo.latitude != null && condo.longitude != null;
 
   return (
     <div className="min-h-screen bg-background">
@@ -331,14 +350,55 @@ function CondominioPage() {
             </div>
           </header>
 
-          {/* Resumo original */}
+          {/* Intro semântica */}
           <section className="prose prose-sm max-w-none">
             <p className="text-base leading-relaxed text-muted-foreground">
-              O {condo.name} está localizado em {bairro}, Florianópolis, em uma região com boa
-              conexão urbana e acesso a serviços, comércio e vias importantes. Esta página reúne
-              informações gerais sobre localização, comodidades conhecidas e atendimento imobiliário
-              para quem deseja comprar, vender ou avaliar imóveis na região.
+              O {condo.name} está localizado em {bairro}, {condo.city}/{condo.state}. Esta página
+              reúne informações gerais sobre o condomínio, endereço, comodidades conhecidas,
+              imóveis publicados na base de Michele dos Imóveis e opções próximas na região. Para
+              compradores e proprietários, Michele oferece atendimento imobiliário personalizado,
+              incluindo consulta de oportunidades off market e avaliação para venda.
             </p>
+          </section>
+
+          {/* Resumo do condomínio */}
+          <section className="mt-10">
+            <h2 className="font-display text-2xl tracking-tight">Resumo do condomínio</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <SummaryCard label="Nome" value={condo.name} />
+              <SummaryCard label="Tipo" value="Condomínio residencial" />
+              {condo.address && <SummaryCard label="Endereço" value={condo.address} />}
+              <SummaryCard label="Bairro" value={bairro} />
+              <SummaryCard label="Cidade / UF" value={`${condo.city}/${condo.state}`} />
+              <SummaryCard
+                label="Comodidades conhecidas"
+                value={
+                  condo.amenities.length > 0
+                    ? `${condo.amenities.length} cadastradas`
+                    : "Não disponíveis"
+                }
+              />
+              <SummaryCard
+                label="Imóveis publicados neste condomínio"
+                value={
+                  props.isLoading
+                    ? "—"
+                    : inCondoCount > 0
+                      ? `${inCondoCount} ${inCondoCount === 1 ? "imóvel" : "imóveis"}`
+                      : "Nenhum imóvel publicado no momento"
+                }
+              />
+              <SummaryCard
+                label={`Imóveis próximos em ${bairro}`}
+                value={
+                  props.isLoading
+                    ? "—"
+                    : nearbyPropsCount > 0
+                      ? `${nearbyPropsCount} ${nearbyPropsCount === 1 ? "imóvel" : "imóveis"}`
+                      : "Nenhum no momento"
+                }
+              />
+            </div>
           </section>
 
           {/* Informações gerais + Comodidades */}
@@ -346,33 +406,31 @@ function CondominioPage() {
             <div className="rounded-2xl bg-card p-6 ring-1 ring-black/5">
               <h2 className="font-display text-lg tracking-tight">Informações gerais</h2>
               <dl className="mt-4 grid grid-cols-1 gap-2 text-sm">
-                <div className="flex justify-between gap-4 border-b border-border pb-2">
-                  <dt className="text-muted-foreground">Nome</dt>
-                  <dd className="text-right">{condo.name}</dd>
-                </div>
-                {condo.address && (
-                  <div className="flex justify-between gap-4 border-b border-border pb-2">
-                    <dt className="text-muted-foreground">Endereço</dt>
-                    <dd className="text-right">{condo.address}</dd>
-                  </div>
-                )}
-                <div className="flex justify-between gap-4 border-b border-border pb-2">
-                  <dt className="text-muted-foreground">Bairro</dt>
-                  <dd className="text-right">{bairro}</dd>
-                </div>
-                <div className="flex justify-between gap-4 border-b border-border pb-2">
-                  <dt className="text-muted-foreground">Cidade</dt>
-                  <dd className="text-right">{condo.city}</dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-muted-foreground">Estado</dt>
-                  <dd className="text-right">{condo.state}</dd>
-                </div>
+                <InfoRow label="Nome" value={condo.name} />
+                {condo.address && <InfoRow label="Endereço" value={condo.address} />}
+                <InfoRow label="Bairro" value={bairro} />
+                <InfoRow label="Cidade" value={condo.city} />
+                <InfoRow label="Estado" value={condo.state} />
+                <InfoRow label="Tipo" value="Condomínio residencial" />
+                <InfoRow
+                  label="Comodidades principais"
+                  value={
+                    condo.amenities.length > 0
+                      ? condo.amenities.slice(0, 4).join(", ")
+                      : "Não disponíveis"
+                  }
+                />
+                <InfoRow label="Coordenadas disponíveis" value={hasCoords ? "Sim" : "Não"} last />
               </dl>
             </div>
 
             <div className="rounded-2xl bg-card p-6 ring-1 ring-black/5">
               <h2 className="font-display text-lg tracking-tight">Estrutura e comodidades</h2>
+              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+                As comodidades cadastradas para o {condo.name} ajudam a identificar o perfil da
+                estrutura disponível. As informações devem ser confirmadas no atendimento antes de
+                qualquer decisão de compra ou venda.
+              </p>
               {condo.amenities.length === 0 ? (
                 <p className="mt-3 text-sm text-muted-foreground">
                   Informações de estrutura não disponíveis publicamente.
@@ -407,28 +465,44 @@ function CondominioPage() {
               </div>
             ) : (
               <div className="mt-4 rounded-2xl border border-dashed border-border bg-card p-6">
-                <p className="text-sm text-muted-foreground">
-                  No momento, não há imóveis publicados neste condomínio. Fale com Michele para
-                  consultar oportunidades off market ou imóveis semelhantes na região.
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  No momento, não há imóveis publicados neste condomínio na base de Michele dos
+                  Imóveis. Ainda assim, podem existir oportunidades discretas, imóveis off market
+                  ou opções semelhantes na região.
                 </p>
-                <a
-                  href={buyerLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
-                >
-                  <Phone className="h-4 w-4" /> Avise-me quando surgir imóvel
-                </a>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <a
+                    href={alertLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                  >
+                    <Phone className="h-4 w-4" /> Avise-me quando surgir imóvel neste condomínio
+                  </a>
+                  {nInfo && (
+                    <Link
+                      to="/imoveis/$slug"
+                      params={{ slug: nInfo.slug }}
+                      className="inline-flex items-center gap-2 rounded-lg border border-input bg-background px-4 py-2.5 text-sm font-medium"
+                    >
+                      Ver imóveis próximos em {bairro}
+                    </Link>
+                  )}
+                </div>
               </div>
             )}
           </section>
 
           {/* Imóveis próximos no bairro */}
-          {(props.data?.nearby.length ?? 0) > 0 && (
+          {nearbyPropsCount > 0 && (
             <section className="mt-14">
               <h2 className="font-display text-2xl tracking-tight">
                 Imóveis próximos em {bairro}
               </h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Opções publicadas no mesmo bairro ou em regiões próximas, selecionadas a partir da
+                base ativa da Michele dos Imóveis.
+              </p>
               <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {props.data!.nearby.slice(0, 6).map((p) => (
                   <PropertyCard key={p.id} p={p} />
@@ -448,80 +522,39 @@ function CondominioPage() {
             </section>
           )}
 
-          {/* Sobre o bairro */}
-          {nInfo && (
-            <section className="mt-14 rounded-2xl bg-card p-6 ring-1 ring-black/5">
-              <h2 className="font-display text-2xl tracking-tight">Sobre morar em {bairro}</h2>
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{nInfo.intro}</p>
-              <div className="mt-4 flex flex-wrap gap-3">
-                <Link
-                  to="/imoveis/$slug"
-                  params={{ slug: nInfo.slug }}
-                  className="inline-flex items-center gap-2 text-sm underline"
-                >
-                  Ver imóveis em {bairro}
-                </Link>
-                {condo.bairro_slug && (
-                  <Link
-                    to="/condominios/$bairro"
-                    params={{ bairro: condo.bairro_slug }}
-                    className="inline-flex items-center gap-2 text-sm underline"
-                  >
-                    Ver todos os condomínios em {bairro}
-                  </Link>
-                )}
-              </div>
-            </section>
-          )}
-
-          {/* Condomínios próximos */}
-          {(nearby.data?.items.length ?? 0) > 0 && (
+          {/* Localização (movida para cima) */}
+          {(mapEmbed || condo.address) && (
             <section className="mt-14">
-              <h2 className="font-display text-2xl tracking-tight">Condomínios próximos</h2>
-              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {nearby.data!.items.map((c) => (
-                  <Link
-                    key={c.id}
-                    to="/condominio/$slug"
-                    params={{ slug: c.slug }}
-                    className="group rounded-2xl bg-card p-5 ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md"
-                  >
-                    <Building2 className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="mt-3 font-display text-base leading-tight tracking-tight line-clamp-2">
-                      {c.name}
-                    </h3>
-                    {c.address && (
-                      <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{c.address}</p>
-                    )}
-                  </Link>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Mapa */}
-          {mapEmbed && (
-            <section className="mt-14">
-              <h2 className="font-display text-2xl tracking-tight">Localização</h2>
-              <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-black/5">
-                {showMap ? (
-                  <iframe
-                    title={`Mapa — ${condo.name}`}
-                    src={mapEmbed}
-                    className="h-[380px] w-full border-0"
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                  />
-                ) : (
-                  <button
-                    onClick={() => setShowMap(true)}
-                    className="flex h-[220px] w-full flex-col items-center justify-center gap-2 bg-secondary text-sm text-muted-foreground hover:bg-secondary/80"
-                  >
-                    <MapPin className="h-6 w-6" />
-                    Ver mapa da localização
-                  </button>
-                )}
-              </div>
+              <h2 className="font-display text-2xl tracking-tight">
+                Localização do {condo.name}
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-3xl">
+                O {condo.name} fica em {condo.address ?? bairro}, no bairro {bairro}, em{" "}
+                {condo.city}/{condo.state}. A localização é um dos principais critérios para
+                avaliar um imóvel, junto com metragem, posição, conservação, vagas, vista e
+                liquidez da região.
+              </p>
+              {mapEmbed && (
+                <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-black/5">
+                  {showMap ? (
+                    <iframe
+                      title={`Mapa — ${condo.name}`}
+                      src={mapEmbed}
+                      className="h-[380px] w-full border-0"
+                      loading="lazy"
+                      referrerPolicy="no-referrer-when-downgrade"
+                    />
+                  ) : (
+                    <button
+                      onClick={() => setShowMap(true)}
+                      className="flex h-[220px] w-full flex-col items-center justify-center gap-2 bg-secondary text-sm text-muted-foreground hover:bg-secondary/80"
+                    >
+                      <MapPin className="h-6 w-6" />
+                      Ver mapa da localização
+                    </button>
+                  )}
+                </div>
+              )}
               {mapLink && (
                 <a
                   href={mapLink}
@@ -535,14 +568,93 @@ function CondominioPage() {
             </section>
           )}
 
+          {/* Sobre o bairro */}
+          <section className="mt-14 rounded-2xl bg-card p-6 ring-1 ring-black/5">
+            <h2 className="font-display text-2xl tracking-tight">Sobre morar em {bairro}</h2>
+            <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
+              {nInfo?.intro
+                ? nInfo.intro
+                : `${bairro} é uma região de ${condo.city} com oferta de serviços, comércio, mobilidade e diferentes perfis de imóveis. Para quem pesquisa condomínios no bairro, é importante avaliar localização, estrutura do prédio, perfil do entorno, liquidez e disponibilidade de imóveis semelhantes.`}
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              {nInfo && (
+                <Link
+                  to="/imoveis/$slug"
+                  params={{ slug: nInfo.slug }}
+                  className="inline-flex items-center gap-2 text-sm underline"
+                >
+                  Ver imóveis em {bairro}
+                </Link>
+              )}
+              {condo.bairro_slug && (
+                <Link
+                  to="/condominios/$bairro"
+                  params={{ bairro: condo.bairro_slug }}
+                  className="inline-flex items-center gap-2 text-sm underline"
+                >
+                  Ver condomínios em {bairro}
+                </Link>
+              )}
+            </div>
+          </section>
+
+          {/* Condomínios próximos */}
+          {(nearby.data?.items.length ?? 0) > 0 && (
+            <section className="mt-14">
+              <h2 className="font-display text-2xl tracking-tight">Condomínios próximos</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Outros condomínios cadastrados no mesmo bairro ou em regiões próximas.
+              </p>
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {nearby.data!.items.map((c) => (
+                  <Link
+                    key={c.id}
+                    to="/condominio/$slug"
+                    params={{ slug: c.slug }}
+                    className="group flex flex-col rounded-2xl bg-card p-5 ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md"
+                  >
+                    <Building2 className="h-5 w-5 text-muted-foreground" />
+                    <h3 className="mt-3 font-display text-base leading-tight tracking-tight line-clamp-2">
+                      {c.name}
+                    </h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {c.normalized_neighborhood ?? bairro}
+                    </p>
+                    {c.address && (
+                      <p className="mt-1 text-xs text-muted-foreground line-clamp-1">
+                        {c.address}
+                      </p>
+                    )}
+                    {c.amenities.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {c.amenities.slice(0, 3).map((a) => (
+                          <span
+                            key={a}
+                            className="rounded-full border border-border bg-background px-2 py-0.5 text-[10px] text-muted-foreground"
+                          >
+                            {a}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-foreground group-hover:underline">
+                      Ver condomínio <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* Proprietários */}
           <section className="mt-14 rounded-2xl bg-card p-8 ring-1 ring-black/5">
             <h2 className="font-display text-2xl tracking-tight">
               Você tem imóvel no {condo.name}?
             </h2>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Michele dos Imóveis pode ajudar na avaliação, posicionamento e estratégia de venda do
-              seu imóvel, inclusive em formato discreto ou off market.
+            <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-2xl">
+              Michele dos Imóveis pode ajudar na avaliação, posicionamento e estratégia de venda
+              do seu imóvel, inclusive com atendimento discreto e possibilidade de abordagem off
+              market.
             </p>
             <a
               href={ownerLink}
@@ -550,7 +662,7 @@ function CondominioPage() {
               rel="noreferrer"
               className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
             >
-              Quero avaliar meu imóvel
+              Quero avaliar meu imóvel neste condomínio
             </a>
           </section>
 
@@ -595,6 +707,26 @@ function CondominioPage() {
         </div>
       </main>
       <SiteFooter />
+    </div>
+  );
+}
+
+function SummaryCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-card p-4 ring-1 ring-black/5">
+      <div className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</div>
+      <div className="mt-1.5 text-sm font-medium leading-snug">{value}</div>
+    </div>
+  );
+}
+
+function InfoRow({ label, value, last }: { label: string; value: string; last?: boolean }) {
+  return (
+    <div
+      className={`flex justify-between gap-4 ${last ? "" : "border-b border-border pb-2"}`}
+    >
+      <dt className="text-muted-foreground">{label}</dt>
+      <dd className="text-right">{value}</dd>
     </div>
   );
 }
