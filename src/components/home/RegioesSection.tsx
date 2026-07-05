@@ -7,10 +7,14 @@ import { REGIOES } from "@/lib/site-config";
 // mantendo o path crítico do mobile leve. Fallback = mesmo container sem efeito.
 const BorderGlow = lazy(() => import("@/components/BorderGlow"));
 
-function PlainCard({ children }: { children: ReactNode }) {
+function PlainCard({ children, bare = false }: { children: ReactNode; bare?: boolean }) {
   return (
     <div
-      className="h-full rounded-[18px] bg-transparent ring-1 ring-black/5"
+      className={
+        bare
+          ? "h-full rounded-[18px] bg-transparent"
+          : "h-full rounded-[18px] bg-transparent ring-1 ring-black/5"
+      }
       style={{ borderRadius: 18 }}
     >
       {children}
