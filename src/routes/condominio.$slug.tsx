@@ -821,24 +821,26 @@ function InfoRow({ label, value, last }: { label: string; value: string; last?: 
   );
 }
 
-function ValueRefsSection({
-  refs,
+function CondoFactsSection({
+  facts,
   condoName,
 }: {
-  refs: CondoValueRefs;
+  facts: CondominiumFacts;
   condoName: string;
 }) {
   const items: { label: string; value: string }[] = [];
-  if (refs.minPrice != null) items.push({ label: "Preço mínimo", value: brl(refs.minPrice) });
-  if (refs.medianPrice != null) items.push({ label: "Preço mediano", value: brl(refs.medianPrice) });
-  if (refs.maxPrice != null) items.push({ label: "Preço máximo", value: brl(refs.maxPrice) });
-  if (refs.avgCondoFee != null) items.push({ label: "Valor de condomínio", value: brl(refs.avgCondoFee) });
-  if (refs.avgIptu != null) items.push({ label: "IPTU", value: brl(refs.avgIptu) });
-  if (refs.avgArea != null) items.push({ label: "Área das unidades", value: `${refs.avgArea} m²` });
-  if (refs.commonBedrooms != null)
-    items.push({ label: "Dormitórios", value: String(refs.commonBedrooms) });
-  if (refs.commonParking != null)
-    items.push({ label: "Vagas", value: String(refs.commonParking) });
+  if (facts.condoFeeLabel) items.push({ label: "Condomínio", value: facts.condoFeeLabel });
+  if (facts.iptuLabel) items.push({ label: "IPTU", value: facts.iptuLabel });
+  if (facts.areaLabel) items.push({ label: "Área das unidades", value: facts.areaLabel });
+  if (facts.bedroomsLabel) items.push({ label: "Dormitórios", value: facts.bedroomsLabel });
+  if (facts.bathroomsLabel) items.push({ label: "Banheiros", value: facts.bathroomsLabel });
+  if (facts.parkingSpotsLabel) items.push({ label: "Vagas", value: facts.parkingSpotsLabel });
+  if (facts.postalCode) items.push({ label: "CEP", value: facts.postalCode });
+  if (facts.unitsLabel) items.push({ label: "Unidades", value: facts.unitsLabel });
+  if (facts.towersLabel) items.push({ label: "Torres", value: facts.towersLabel });
+  if (facts.floorsLabel) items.push({ label: "Andares", value: facts.floorsLabel });
+  if (facts.constructionYearLabel)
+    items.push({ label: "Ano de construção", value: facts.constructionYearLabel });
 
   if (items.length === 0) return null;
 
@@ -846,8 +848,7 @@ function ValueRefsSection({
     <section className="mt-14">
       <h2 className="font-display text-2xl tracking-tight">Dados do condomínio</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        Calculado a partir de imóveis publicados no {condoName} com associação confirmada por
-        endereço.
+        Informações específicas do {condoName} disponíveis na nossa base.
       </p>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((i) => (
@@ -859,14 +860,17 @@ function ValueRefsSection({
           </div>
         ))}
       </div>
-      <p className="mt-4 text-xs leading-relaxed text-muted-foreground max-w-3xl">
-        As informações apresentadas são referências aproximadas e podem variar conforme unidade,
-        atualização cadastral, documentação, negociação e disponibilidade. Michele dos Imóveis
-        não se responsabiliza por divergências ou alterações nesses dados. Todas as informações
-        devem ser confirmadas no atendimento antes de qualquer decisão de compra, venda ou
-        avaliação.
-      </p>
+      {facts.hasAnyQuantitativeData && (
+        <p className="mt-4 text-xs leading-relaxed text-muted-foreground max-w-3xl">
+          As informações apresentadas são referências aproximadas e podem variar conforme unidade,
+          atualização cadastral, documentação, negociação e disponibilidade. Michele dos Imóveis
+          não se responsabiliza por divergências ou alterações nesses dados. Todas as informações
+          devem ser confirmadas no atendimento antes de qualquer decisão de compra, venda ou
+          avaliação.
+        </p>
+      )}
     </section>
   );
 }
+
 
