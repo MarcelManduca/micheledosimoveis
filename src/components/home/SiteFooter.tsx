@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Instagram, Youtube } from "lucide-react";
 import { SITE } from "@/lib/site-config";
 import logoDark from "@/assets/brand/logo-dark.webp";
 
@@ -21,6 +21,27 @@ export function SiteFooter() {
 
           <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700 ring-1 ring-emerald-200">
             <ShieldCheck className="h-3.5 w-3.5" /> Corretora associada · Gralha Imóveis
+          </div>
+
+          <div className="mt-5 flex items-center gap-3">
+            <a
+              href={SITE.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram de Michele dos Imóveis"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground/80 transition hover:text-foreground hover:border-foreground/40"
+            >
+              <Instagram className="h-4 w-4" />
+            </a>
+            <a
+              href={SITE.youtubeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Canal do YouTube de Michele dos Imóveis"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border text-foreground/80 transition hover:text-foreground hover:border-foreground/40"
+            >
+              <Youtube className="h-4 w-4" />
+            </a>
           </div>
         </div>
         <div>

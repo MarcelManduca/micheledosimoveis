@@ -13,6 +13,8 @@ export const SITE = {
   email: "micheledosimoveis@gmail.com",
   instagram: "micheledosimoveis",
   instagramUrl: "https://www.instagram.com/micheledosimoveis",
+  youtube: "micheledosimoveis",
+  youtubeUrl: "https://www.youtube.com/@micheledosimoveis",
   creci: "CRECI 69502 · CRECI 11463J",
   address: {
     street: "R. Alves de Brito, 285",
