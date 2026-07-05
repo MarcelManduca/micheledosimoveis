@@ -126,7 +126,7 @@ export const getCondominiumBySlug = createServerFn({ method: "GET" })
       return null;
     }
     if (!row) return null;
-    const r = row as Record<string, unknown>;
+    const r = row as unknown as Record<string, unknown>;
     return {
       id: r.id as string,
       slug: r.slug as string,
