@@ -549,7 +549,7 @@ function CondominioPage() {
                       params={{ slug: nInfo.slug }}
                       className="inline-flex items-center gap-2 rounded-lg border border-input bg-background px-4 py-2.5 text-sm font-medium"
                     >
-                      Ver imóveis próximos em {bairro}
+                      Ver imóveis próximos {bairroPrep}
                     </Link>
                   )}
                 </div>
