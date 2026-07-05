@@ -298,6 +298,7 @@ function CondominioPage() {
   const [showMap, setShowMap] = useState(false);
 
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
+  const bairroPrep = formatNeighborhoodWithPreposition(bairro);
   const cep = formatCep(condo.postal_code);
   const inCondoCount = props.data?.inCondo.length ?? 0;
   const nearbyPropsCount = props.data?.nearby.length ?? 0;
