@@ -278,14 +278,33 @@ export function extractStreetAndNumber(address: string | null | undefined): {
   return { street: cut.trim() || null, number: null };
 }
 
-/** Comparação de logradouro tolerante a variações leves (contém / é contido). */
+/** Remove tipo de logradouro do início e retorna o núcleo do nome da via. */
+export function extractStreetCore(street: string | null | undefined): string | null {
+  if (!street) return null;
+  let s = street.trim();
+  // Tipos já normalizados (sem acento, minúsculo) via normalizeAddressForMatch.
+  const typeRe =
+    /^(rua|r|avenida|av|servidao|serv|rodovia|rod|travessa|tv|alameda|al|estrada|est|praca|largo|viela|via|beco|ladeira|passagem|passeio|caminho|rotula|rot)\b\.?\s+/;
+  let prev = "";
+  while (s !== prev) {
+    prev = s;
+    s = s.replace(typeRe, "").trim();
+  }
+  s = s.replace(/\s+/g, " ").trim();
+  return s || null;
+}
+
+/** Comparação de logradouro tolerante: compara pelos núcleos (sem tipo). */
 function streetsEqualish(a: string, b: string): boolean {
   if (!a || !b) return false;
   if (a === b) return true;
-  // Só aceita "contém" quando a menor tem pelo menos 8 chars para evitar falso positivo
-  const shorter = a.length < b.length ? a : b;
-  const longer = a.length < b.length ? b : a;
-  if (shorter.length >= 8 && longer.includes(shorter)) return true;
+  const coreA = extractStreetCore(a) ?? a;
+  const coreB = extractStreetCore(b) ?? b;
+  if (coreA && coreB && coreA === coreB) return true;
+  // Fallback tolerante: uma contém a outra (mínimo 6 chars) para variações menores.
+  const shorter = coreA.length < coreB.length ? coreA : coreB;
+  const longer = coreA.length < coreB.length ? coreB : coreA;
+  if (shorter && shorter.length >= 6 && longer.includes(shorter)) return true;
   return false;
 }
 
