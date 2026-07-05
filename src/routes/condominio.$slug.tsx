@@ -136,16 +136,17 @@ export const Route = createFileRoute("/condominio/$slug")({
     const condo = await context.queryClient.ensureQueryData(condoQO(params.slug));
     if (!condo) throw notFound();
     const nInfo = getNeighborhood(condo.bairro_slug ?? "");
+    const nQuery = nInfo?.query ?? condo.normalized_neighborhood ?? undefined;
+    const k: CondoQueryKeys = {
+      name: condo.name,
+      address: condo.address,
+      neighborhood: condo.normalized_neighborhood,
+      nQuery,
+    };
     await Promise.all([
-      context.queryClient.ensureQueryData(
-        propsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
-      ),
-      context.queryClient.ensureQueryData(
-        nearbyCondosQO(condo.bairro_slug, condo.slug),
-      ),
-      context.queryClient.ensureQueryData(
-        refsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
-      ),
+      context.queryClient.ensureQueryData(propsQO(k)),
+      context.queryClient.ensureQueryData(nearbyCondosQO(condo.bairro_slug, condo.slug)),
+      context.queryClient.ensureQueryData(refsQO(k)),
     ]);
     return { condo };
   },
