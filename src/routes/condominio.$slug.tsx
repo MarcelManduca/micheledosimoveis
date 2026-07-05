@@ -561,7 +561,7 @@ function CondominioPage() {
           {nearbyPropsCount > 0 && (
             <section className="mt-14">
               <h2 className="font-display text-2xl tracking-tight">
-                Imóveis próximos em {bairro}
+                Imóveis próximos {bairroPrep}
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Opções publicadas no mesmo bairro ou em regiões próximas. Esses imóveis não
