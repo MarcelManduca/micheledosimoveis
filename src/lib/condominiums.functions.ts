@@ -205,7 +205,7 @@ export const getPropertiesForCondominium = createServerFn({ method: "GET" })
         .order("created_at", { ascending: false })
         .limit(24);
       const inCondo = (inCondoRes.data ?? []).map((r) =>
-        normalizeProperty(r as Record<string, unknown>),
+        normalizeProperty(r as unknown as Record<string, unknown>),
       );
 
       let nearby: PropertyListItem[] = [];
@@ -220,7 +220,7 @@ export const getPropertiesForCondominium = createServerFn({ method: "GET" })
           .limit(8);
         const inCondoIds = new Set(inCondo.map((p) => p.id));
         nearby = (nearbyRes.data ?? [])
-          .map((r) => normalizeProperty(r as Record<string, unknown>))
+          .map((r) => normalizeProperty(r as unknown as Record<string, unknown>))
           .filter((p) => !inCondoIds.has(p.id));
       }
 
