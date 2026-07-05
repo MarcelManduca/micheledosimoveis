@@ -267,16 +267,18 @@ function CondominioPage() {
       `Olá, Michele. Quero ser avisado quando surgir imóvel no ${condo.name}, em ${bairro}.`,
     );
 
-  const mapEmbed =
-    condo.latitude != null && condo.longitude != null
-      ? `https://www.google.com/maps?q=${condo.latitude},${condo.longitude}&z=16&output=embed`
-      : null;
-  const mapLink =
-    condo.latitude != null && condo.longitude != null
-      ? `https://www.google.com/maps?q=${condo.latitude},${condo.longitude}`
-      : null;
-
   const hasCoords = condo.latitude != null && condo.longitude != null;
+  const addressQuery = [condo.address, bairro, condo.city, condo.state]
+    .filter(Boolean)
+    .join(", ");
+  const mapLink = hasCoords
+    ? `https://www.google.com/maps/search/?api=1&query=${condo.latitude},${condo.longitude}`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressQuery + ", Brasil")}`;
+  const leafletQuery = hasCoords
+    ? `${condo.latitude},${condo.longitude}`
+    : addressQuery;
+
+
 
   return (
     <div className="min-h-screen bg-background">
