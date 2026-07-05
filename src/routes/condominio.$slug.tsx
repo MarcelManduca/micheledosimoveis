@@ -278,7 +278,7 @@ function CondominioPage() {
   };
   const props = useQuery(propsQO(k));
   const nearby = useQuery(nearbyCondosQO(condo.bairro_slug, condo.slug));
-  const refs = useQuery(refsQO(k));
+  const facts = useMemo(() => getCondominiumFacts(condo), [condo]);
   const [showMap, setShowMap] = useState(false);
 
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
