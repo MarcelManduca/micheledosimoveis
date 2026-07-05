@@ -882,11 +882,12 @@ function ValueRefsSection({
         ))}
       </div>
       <p className="mt-4 text-xs leading-relaxed text-muted-foreground max-w-3xl">
-        Os valores apresentados são referências aproximadas calculadas a partir dos imóveis
-        publicados na base de Michele dos Imóveis ou de informações cadastradas. Condomínio,
-        IPTU, disponibilidade, metragens e demais dados podem variar conforme unidade,
-        atualização cadastral e negociação. As informações devem ser confirmadas no atendimento
-        antes de qualquer decisão.
+        {isCondo
+          ? "Os valores apresentados são referências aproximadas calculadas a partir dos imóveis publicados na base de Michele dos Imóveis com associação de endereço."
+          : "Os valores apresentados são referências aproximadas calculadas a partir dos imóveis publicados no bairro, e não necessariamente refletem imóveis deste condomínio."}{" "}
+        Condomínio, IPTU, disponibilidade, metragens e demais dados podem variar conforme
+        unidade, atualização cadastral e negociação. As informações devem ser confirmadas no
+        atendimento antes de qualquer decisão.
       </p>
     </section>
   );
