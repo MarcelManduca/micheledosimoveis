@@ -35,6 +35,11 @@ Informações principais:
 - [Lançamentos imobiliários](https://micheledosimoveis.com.br/imoveis): Oportunidades em novos empreendimentos e imóveis em lançamento.
 - [Imóveis off market](https://micheledosimoveis.com.br/anuncie): Atendimento para imóveis com divulgação discreta, restrita e personalizada.
 
+## Condomínios
+
+- [Condomínios em Florianópolis](https://micheledosimoveis.com.br/condominios): Índice de condomínios em Florianópolis, com busca por nome e filtro por bairro.
+- [Condomínios por bairro](https://micheledosimoveis.com.br/condominios): Páginas dedicadas a condomínios em bairros estratégicos da cidade, com informações gerais, comodidades e atendimento imobiliário.
+
 ## Características dos imóveis
 
 - [Imóveis frente mar](https://micheledosimoveis.com.br/imoveis): Imóveis próximos ou em frente ao mar em Florianópolis.
