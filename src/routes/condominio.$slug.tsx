@@ -15,7 +15,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import MapPlaceholder from "@/components/MapPlaceholder";
-import { brl } from "@/lib/format";
+import { brl, formatNeighborhoodWithPreposition } from "@/lib/format";
 
 const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
