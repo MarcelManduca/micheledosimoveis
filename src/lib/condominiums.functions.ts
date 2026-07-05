@@ -507,4 +507,130 @@ export const getCondoValueRefs = createServerFn({ method: "GET" })
     return EMPTY_REFS;
   });
 
+// ---------------------------------------------------------------------------
+// Dados específicos do condomínio (não usa bairro, não inventa valores).
+// ---------------------------------------------------------------------------
+
+export type CondominiumFacts = {
+  postalCode: string | null;
+  condoFeeLabel: string | null;
+  iptuLabel: string | null;
+  areaLabel: string | null;
+  bedroomsLabel: string | null;
+  bathroomsLabel: string | null;
+  parkingSpotsLabel: string | null;
+  unitsLabel: string | null;
+  towersLabel: string | null;
+  floorsLabel: string | null;
+  constructionYearLabel: string | null;
+  hasAnyQuantitativeData: boolean;
+};
+
+function formatCepInternal(cep: string | null | undefined): string | null {
+  if (!cep) return null;
+  const d = cep.replace(/\D/g, "");
+  if (d.length !== 8) return null;
+  return `${d.slice(0, 5)}-${d.slice(5)}`;
+}
+
+function brlLabel(n: number): string {
+  return n.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  });
+}
+
+function rangeLabel(
+  min: number | null,
+  max: number | null,
+  unit: string,
+  singular?: string,
+): string | null {
+  if (min == null && max == null) return null;
+  const u = (n: number) => (singular && n === 1 ? singular : unit);
+  if (min != null && max != null) {
+    if (min === max) return `${min} ${u(min)}`;
+    return `${min} a ${max} ${u(max)}`;
+  }
+  if (min != null) return `a partir de ${min} ${u(min)}`;
+  if (max != null) return `até ${max} ${u(max)}`;
+  return null;
+}
+
+function moneyRefLabel(min: number | null, avg: number | null): string | null {
+  if (min != null && min > 0) return `a partir de ${brlLabel(min)}`;
+  if (avg != null && avg > 0) return `média de ${brlLabel(avg)}`;
+  return null;
+}
+
+export function getCondominiumFacts(condo: CondominiumDetail): CondominiumFacts {
+  const areaLabel = rangeLabel(condo.area_min_m2, condo.area_max_m2, "m²");
+  const bedroomsLabel = rangeLabel(
+    condo.bedrooms_min,
+    condo.bedrooms_max,
+    "dormitórios",
+    "dormitório",
+  );
+  const bathroomsLabel = rangeLabel(
+    condo.bathrooms_min,
+    condo.bathrooms_max,
+    "banheiros",
+    "banheiro",
+  );
+  const parkingSpotsLabel = rangeLabel(
+    condo.parking_spots_min,
+    condo.parking_spots_max,
+    "vagas",
+    "vaga",
+  );
+  const condoFeeLabel = moneyRefLabel(condo.condo_fee_min_brl, condo.condo_fee_avg_brl);
+  const iptuLabel = moneyRefLabel(condo.iptu_min_brl, condo.iptu_avg_brl);
+  const unitsLabel =
+    condo.units_count != null && condo.units_count > 0
+      ? `${condo.units_count} ${condo.units_count === 1 ? "unidade" : "unidades"}`
+      : null;
+  const towersLabel =
+    condo.towers_count != null && condo.towers_count > 0
+      ? `${condo.towers_count} ${condo.towers_count === 1 ? "torre" : "torres"}`
+      : null;
+  const floorsLabel =
+    condo.floors_count != null && condo.floors_count > 0
+      ? `${condo.floors_count} ${condo.floors_count === 1 ? "andar" : "andares"}`
+      : null;
+  const constructionYearLabel =
+    condo.construction_year != null && condo.construction_year > 0
+      ? String(condo.construction_year)
+      : null;
+
+  const hasAnyQuantitativeData = [
+    condoFeeLabel,
+    iptuLabel,
+    areaLabel,
+    bedroomsLabel,
+    bathroomsLabel,
+    parkingSpotsLabel,
+    unitsLabel,
+    towersLabel,
+    floorsLabel,
+    constructionYearLabel,
+  ].some((v) => v != null);
+
+  return {
+    postalCode: formatCepInternal(condo.postal_code),
+    condoFeeLabel,
+    iptuLabel,
+    areaLabel,
+    bedroomsLabel,
+    bathroomsLabel,
+    parkingSpotsLabel,
+    unitsLabel,
+    towersLabel,
+    floorsLabel,
+    constructionYearLabel,
+    hasAnyQuantitativeData,
+  };
+}
+
+
 
