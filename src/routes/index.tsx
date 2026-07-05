@@ -13,6 +13,7 @@ import { AnuncieCTA } from "@/components/home/AnuncieCTA";
 import { AboutSection } from "@/components/home/AboutSection";
 import { ContactSection } from "@/components/home/ContactSection";
 import { SiteFooter } from "@/components/home/SiteFooter";
+import { YouTubeShorts } from "@/components/home/YouTubeShorts";
 import { FloatingWhatsApp } from "@/components/home/FloatingWhatsApp";
 
 export const Route = createFileRoute("/")({
@@ -70,6 +71,7 @@ function Index() {
       <RegioesSection />
       <AnuncieCTA />
       <AboutSection />
+      <YouTubeShorts />
       <ContactSection />
       <SiteFooter />
       <FloatingWhatsApp />
