@@ -15,7 +15,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import MapPlaceholder from "@/components/MapPlaceholder";
-import { brl } from "@/lib/format";
+import { brl, formatNeighborhoodWithPreposition } from "@/lib/format";
 
 const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
@@ -298,6 +298,7 @@ function CondominioPage() {
   const [showMap, setShowMap] = useState(false);
 
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
+  const bairroPrep = formatNeighborhoodWithPreposition(bairro);
   const cep = formatCep(condo.postal_code);
   const inCondoCount = props.data?.inCondo.length ?? 0;
   const nearbyPropsCount = props.data?.nearby.length ?? 0;
@@ -445,7 +446,7 @@ function CondominioPage() {
                 }
               />
               <SummaryCard
-                label={`Imóveis próximos em ${bairro}`}
+                label={`Imóveis próximos ${bairroPrep}`}
                 value={
                   props.isLoading
                     ? "—"
@@ -548,7 +549,7 @@ function CondominioPage() {
                       params={{ slug: nInfo.slug }}
                       className="inline-flex items-center gap-2 rounded-lg border border-input bg-background px-4 py-2.5 text-sm font-medium"
                     >
-                      Ver imóveis próximos em {bairro}
+                      Ver imóveis próximos {bairroPrep}
                     </Link>
                   )}
                 </div>
@@ -560,7 +561,7 @@ function CondominioPage() {
           {nearbyPropsCount > 0 && (
             <section className="mt-14">
               <h2 className="font-display text-2xl tracking-tight">
-                Imóveis próximos em {bairro}
+                Imóveis próximos {bairroPrep}
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Opções publicadas no mesmo bairro ou em regiões próximas. Esses imóveis não
@@ -578,16 +579,16 @@ function CondominioPage() {
                     params={{ slug: nInfo.slug }}
                     className="inline-flex items-center gap-2 text-sm underline"
                   >
-                    Ver todos os imóveis em {bairro} <ArrowRight className="h-4 w-4" />
+                    Ver todos os imóveis {bairroPrep} <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               )}
             </section>
           )}
 
-          {/* Referências de valores */}
-          {refs.data && refs.data.source !== "none" && (
-            <ValueRefsSection refs={refs.data} bairro={bairro} condoName={condo.name} />
+          {/* Dados do condomínio — apenas quando há match de endereço confirmado */}
+          {refs.data && refs.data.source === "condo" && (
+            <ValueRefsSection refs={refs.data} condoName={condo.name} />
           )}
 
 
@@ -675,7 +676,7 @@ function CondominioPage() {
 
           {/* Sobre o bairro */}
           <section className="mt-14 rounded-2xl bg-card p-6 ring-1 ring-black/5">
-            <h2 className="font-display text-2xl tracking-tight">Sobre morar em {bairro}</h2>
+            <h2 className="font-display text-2xl tracking-tight">Sobre morar {bairroPrep}</h2>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
               {nInfo?.intro
                 ? nInfo.intro
@@ -688,7 +689,7 @@ function CondominioPage() {
                   params={{ slug: nInfo.slug }}
                   className="inline-flex items-center gap-2 text-sm underline"
                 >
-                  Ver imóveis em {bairro}
+                  Ver imóveis {bairroPrep}
                 </Link>
               )}
               {condo.bairro_slug && (
@@ -697,7 +698,7 @@ function CondominioPage() {
                   params={{ bairro: condo.bairro_slug }}
                   className="inline-flex items-center gap-2 text-sm underline"
                 >
-                  Ver condomínios em {bairro}
+                  Ver condomínios {bairroPrep}
                 </Link>
               )}
             </div>
@@ -797,7 +798,7 @@ function CondominioPage() {
                 Fale com Michele sobre imóveis no {condo.name}
               </h2>
               <p className="mt-2 text-sm opacity-80">
-                Atendimento personalizado para compradores e proprietários em {bairro}.
+                Atendimento personalizado para compradores e proprietários {bairroPrep}.
               </p>
             </div>
             <a
@@ -838,39 +839,32 @@ function InfoRow({ label, value, last }: { label: string; value: string; last?: 
 
 function ValueRefsSection({
   refs,
-  bairro,
   condoName,
 }: {
   refs: CondoValueRefs;
-  bairro: string;
   condoName: string;
 }) {
-  const isCondo = refs.source === "condo";
-  const heading = isCondo
-    ? "Referências dos imóveis publicados"
-    : "Referências de imóveis no bairro";
-  const subtitle = isCondo
-    ? `Calculado a partir de ${refs.count} ${refs.count === 1 ? "imóvel publicado" : "imóveis publicados"} no ${condoName}.`
-    : `Calculado a partir de ${refs.count} imóveis publicados em ${bairro}.`;
-
   const items: { label: string; value: string }[] = [];
   if (refs.minPrice != null) items.push({ label: "Preço mínimo", value: brl(refs.minPrice) });
   if (refs.medianPrice != null) items.push({ label: "Preço mediano", value: brl(refs.medianPrice) });
   if (refs.maxPrice != null) items.push({ label: "Preço máximo", value: brl(refs.maxPrice) });
-  if (refs.avgCondoFee != null) items.push({ label: "Condomínio médio", value: brl(refs.avgCondoFee) });
-  if (refs.avgIptu != null) items.push({ label: "IPTU médio", value: brl(refs.avgIptu) });
-  if (refs.avgArea != null) items.push({ label: "Área média", value: `${refs.avgArea} m²` });
+  if (refs.avgCondoFee != null) items.push({ label: "Valor de condomínio", value: brl(refs.avgCondoFee) });
+  if (refs.avgIptu != null) items.push({ label: "IPTU", value: brl(refs.avgIptu) });
+  if (refs.avgArea != null) items.push({ label: "Área das unidades", value: `${refs.avgArea} m²` });
   if (refs.commonBedrooms != null)
-    items.push({ label: "Dormitórios mais comuns", value: String(refs.commonBedrooms) });
+    items.push({ label: "Dormitórios", value: String(refs.commonBedrooms) });
   if (refs.commonParking != null)
-    items.push({ label: "Vagas mais comuns", value: String(refs.commonParking) });
+    items.push({ label: "Vagas", value: String(refs.commonParking) });
 
   if (items.length === 0) return null;
 
   return (
     <section className="mt-14">
-      <h2 className="font-display text-2xl tracking-tight">{heading}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
+      <h2 className="font-display text-2xl tracking-tight">Dados do condomínio</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Calculado a partir de imóveis publicados no {condoName} com associação confirmada por
+        endereço.
+      </p>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((i) => (
           <div key={i.label} className="rounded-xl bg-card p-4 ring-1 ring-black/5">
@@ -882,13 +876,13 @@ function ValueRefsSection({
         ))}
       </div>
       <p className="mt-4 text-xs leading-relaxed text-muted-foreground max-w-3xl">
-        {isCondo
-          ? "Os valores apresentados são referências aproximadas calculadas a partir dos imóveis publicados na base de Michele dos Imóveis com associação de endereço."
-          : "Os valores apresentados são referências aproximadas calculadas a partir dos imóveis publicados no bairro, e não necessariamente refletem imóveis deste condomínio."}{" "}
-        Condomínio, IPTU, disponibilidade, metragens e demais dados podem variar conforme
-        unidade, atualização cadastral e negociação. As informações devem ser confirmadas no
-        atendimento antes de qualquer decisão.
+        As informações apresentadas são referências aproximadas e podem variar conforme unidade,
+        atualização cadastral, documentação, negociação e disponibilidade. Michele dos Imóveis
+        não se responsabiliza por divergências ou alterações nesses dados. Todas as informações
+        devem ser confirmadas no atendimento antes de qualquer decisão de compra, venda ou
+        avaliação.
       </p>
     </section>
   );
 }
+
