@@ -131,7 +131,6 @@ export const Route = createFileRoute("/condominio/$slug")({
     await Promise.all([
       context.queryClient.ensureQueryData(propsQO(k)),
       context.queryClient.ensureQueryData(nearbyCondosQO(condo.bairro_slug, condo.slug)),
-      context.queryClient.ensureQueryData(refsQO(k)),
     ]);
     return { condo };
   },
