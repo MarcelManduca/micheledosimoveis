@@ -164,6 +164,22 @@ export const getCondominiumBySlug = createServerFn({ method: "GET" })
       latitude: (r.latitude as number | null) ?? null,
       longitude: (r.longitude as number | null) ?? null,
       description: (r.description as string | null) ?? null,
+      condo_fee_min_brl: (r.condo_fee_min_brl as number | null) ?? null,
+      condo_fee_avg_brl: (r.condo_fee_avg_brl as number | null) ?? null,
+      iptu_min_brl: (r.iptu_min_brl as number | null) ?? null,
+      iptu_avg_brl: (r.iptu_avg_brl as number | null) ?? null,
+      area_min_m2: (r.area_min_m2 as number | null) ?? null,
+      area_max_m2: (r.area_max_m2 as number | null) ?? null,
+      bedrooms_min: (r.bedrooms_min as number | null) ?? null,
+      bedrooms_max: (r.bedrooms_max as number | null) ?? null,
+      bathrooms_min: (r.bathrooms_min as number | null) ?? null,
+      bathrooms_max: (r.bathrooms_max as number | null) ?? null,
+      parking_spots_min: (r.parking_spots_min as number | null) ?? null,
+      parking_spots_max: (r.parking_spots_max as number | null) ?? null,
+      units_count: (r.units_count as number | null) ?? null,
+      towers_count: (r.towers_count as number | null) ?? null,
+      floors_count: (r.floors_count as number | null) ?? null,
+      construction_year: (r.construction_year as number | null) ?? null,
     };
   });
 
