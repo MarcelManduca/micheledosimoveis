@@ -18,6 +18,7 @@ export type CondominiumSummary = {
 export type CondominiumDetail = CondominiumSummary & {
   city: string;
   state: string;
+  postal_code: string | null;
   latitude: number | null;
   longitude: number | null;
   description: string | null;
