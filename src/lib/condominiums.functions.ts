@@ -54,7 +54,12 @@ function getPublicClient() {
 const SUMMARY_COLS =
   "id, slug, name, address, neighborhood, normalized_neighborhood, bairro_slug, amenities";
 const DETAIL_COLS =
-  SUMMARY_COLS + ", city, state, postal_code, latitude, longitude, description";
+  SUMMARY_COLS +
+  ", city, state, postal_code, latitude, longitude, description" +
+  ", condo_fee_min_brl, condo_fee_avg_brl, iptu_min_brl, iptu_avg_brl" +
+  ", area_min_m2, area_max_m2, bedrooms_min, bedrooms_max" +
+  ", bathrooms_min, bathrooms_max, parking_spots_min, parking_spots_max" +
+  ", units_count, towers_count, floors_count, construction_year";
 
 function escapeLike(term: string) {
   return term.replace(/[%_\\]/g, (m) => `\\${m}`);
