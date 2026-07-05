@@ -96,7 +96,7 @@ export function RegioesSection() {
           className="h-full"
           edgeSensitivity={18}
           glowColor="38 55 60"
-          backgroundColor="hsl(var(--card))"
+          backgroundColor="hsl(var(--background))"
           borderRadius={18}
           glowRadius={14}
           glowIntensity={0.55}
