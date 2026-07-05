@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Instagram, Youtube } from "lucide-react";
 import { SITE } from "@/lib/site-config";
 import logoDark from "@/assets/brand/logo-dark.webp";
 
