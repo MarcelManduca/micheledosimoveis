@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      condo_import_staging: {
+        Row: {
+          area_max_m2: number | null
+          area_min_m2: number | null
+          bathrooms_max: number | null
+          bathrooms_min: number | null
+          bedrooms_max: number | null
+          bedrooms_min: number | null
+          condo_fee_min_brl: number | null
+          construction_year: number | null
+          iptu_min_brl: number | null
+          parking_spots_max: number | null
+          parking_spots_min: number | null
+          postal_code: string | null
+          slug: string
+        }
+        Insert: {
+          area_max_m2?: number | null
+          area_min_m2?: number | null
+          bathrooms_max?: number | null
+          bathrooms_min?: number | null
+          bedrooms_max?: number | null
+          bedrooms_min?: number | null
+          condo_fee_min_brl?: number | null
+          construction_year?: number | null
+          iptu_min_brl?: number | null
+          parking_spots_max?: number | null
+          parking_spots_min?: number | null
+          postal_code?: string | null
+          slug: string
+        }
+        Update: {
+          area_max_m2?: number | null
+          area_min_m2?: number | null
+          bathrooms_max?: number | null
+          bathrooms_min?: number | null
+          bedrooms_max?: number | null
+          bedrooms_min?: number | null
+          condo_fee_min_brl?: number | null
+          construction_year?: number | null
+          iptu_min_brl?: number | null
+          parking_spots_max?: number | null
+          parking_spots_min?: number | null
+          postal_code?: string | null
+          slug?: string
+        }
+        Relationships: []
+      }
       condominiums: {
         Row: {
           address: string | null
