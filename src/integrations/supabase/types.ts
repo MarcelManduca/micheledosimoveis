@@ -401,7 +401,28 @@ export type Database = {
         }[]
       }
       normalize_condo_slug: { Args: { s: string }; Returns: string }
+      preview_condo_publication_candidates: {
+        Args: { limit_count?: number }
+        Returns: {
+          address: string
+          data_quality_status: string
+          id: string
+          latitude: number
+          longitude: number
+          name: string
+          neighborhood: string
+          postal_code: string
+          quality_score: number
+          quantitative_fields_count: number
+          slug: string
+        }[]
+      }
+      publish_curated_condominiums: {
+        Args: { limit_count?: number }
+        Returns: Json
+      }
       strip_accents_pt: { Args: { s: string }; Returns: string }
+      unpublish_low_quality_condominiums: { Args: never; Returns: Json }
     }
     Enums: {
       app_role: "admin"
