@@ -15,12 +15,16 @@ const NAV_LINKS: Array<[string, string]> = [
   ["#contato", "Contato"],
 ];
 
+type Variant = "dark" | "light";
+
 /**
  * Header transparente sobre o hero + drawer mobile.
- * Estado de abertura é encapsulado aqui — o componente é autocontido.
+ * variant="dark" (padrão): logo branca, textos claros — para páginas com hero escuro.
+ * variant="light": logo escura, textos escuros — para páginas com fundo claro.
  */
-export function SiteHeader() {
+export function SiteHeader({ variant = "dark" }: { variant?: Variant } = {}) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const isLight = variant === "light";
 
   return (
     <>
@@ -28,30 +32,44 @@ export function SiteHeader() {
         <div className="mx-auto max-w-7xl px-5 sm:px-8 py-5 flex items-center justify-between gap-3">
           <a href="#top" className="flex items-center min-w-0 shrink">
             <span className="sr-only">Michele dos Imóveis</span>
-            <img
-              src={logoWhite160}
-              srcSet={`${logoWhite160} 160w, ${logoWhite320} 320w, ${logoWhite} 640w`}
-              sizes="(max-width: 640px) 160px, (max-width: 768px) 200px, 240px"
-              alt="Michele dos Imóveis"
-              width={640}
-              height={237}
-              fetchPriority="high"
-              decoding="async"
-              className="h-7 sm:h-9 md:h-10 w-auto max-w-[55vw] sm:max-w-none object-contain select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
-              draggable={false}
-            />
+            {isLight ? (
+              <img
+                src={logoDark}
+                alt="Michele dos Imóveis"
+                width={640}
+                height={237}
+                fetchPriority="high"
+                decoding="async"
+                className="h-7 sm:h-9 md:h-10 w-auto max-w-[55vw] sm:max-w-none object-contain select-none"
+                draggable={false}
+              />
+            ) : (
+              <img
+                src={logoWhite160}
+                srcSet={`${logoWhite160} 160w, ${logoWhite320} 320w, ${logoWhite} 640w`}
+                sizes="(max-width: 640px) 160px, (max-width: 768px) 200px, 240px"
+                alt="Michele dos Imóveis"
+                width={640}
+                height={237}
+                fetchPriority="high"
+                decoding="async"
+                className="h-7 sm:h-9 md:h-10 w-auto max-w-[55vw] sm:max-w-none object-contain select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]"
+                draggable={false}
+              />
+            )}
           </a>
 
-
-
-
-          <nav className="hidden md:flex items-center gap-9 text-sm text-white/90">
-            <a href="#top" className="hover:text-white transition">Início</a>
-            <a href="#imoveis" className="hover:text-white transition">Imóveis</a>
-            <a href="#regioes" className="hover:text-white transition">Regiões</a>
-            <Link to="/anuncie" className="hover:text-white transition">Anuncie</Link>
-            <a href="#sobre" className="hover:text-white transition">Sobre</a>
-            <a href="#contato" className="hover:text-white transition">Contato</a>
+          <nav
+            className={`hidden md:flex items-center gap-9 text-sm ${
+              isLight ? "text-foreground/70" : "text-white/90"
+            }`}
+          >
+            <a href="#top" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Início</a>
+            <a href="#imoveis" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Imóveis</a>
+            <a href="#regioes" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Regiões</a>
+            <Link to="/anuncie" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Anuncie</Link>
+            <a href="#sobre" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Sobre</a>
+            <a href="#contato" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Contato</a>
           </nav>
 
           <div className="flex items-center gap-2 shrink-0">
@@ -71,7 +89,11 @@ export function SiteHeader() {
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
-              className="md:hidden grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur ring-1 ring-white/20 hover:bg-white/25 transition"
+              className={
+                isLight
+                  ? "md:hidden grid h-10 w-10 place-items-center rounded-full bg-foreground/5 text-foreground ring-1 ring-foreground/15 hover:bg-foreground/10 transition"
+                  : "md:hidden grid h-10 w-10 place-items-center rounded-full bg-white/15 text-white backdrop-blur ring-1 ring-white/20 hover:bg-white/25 transition"
+              }
               aria-label="Abrir menu"
             >
               <Menu className="h-5 w-5" />
