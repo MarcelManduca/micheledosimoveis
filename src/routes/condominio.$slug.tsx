@@ -569,9 +569,9 @@ function CondominioPage() {
             </p>
 
             <div className="mt-5 rounded-2xl bg-card p-4 ring-1 ring-black/5">
-              <dl className="grid gap-2 text-sm sm:grid-cols-2">
+              <dl className="grid gap-2 text-sm sm:grid-cols-3">
                 {condo.address && (
-                  <div>
+                  <div className="sm:col-span-3">
                     <dt className="text-[11px] uppercase tracking-widest text-muted-foreground">Endereço</dt>
                     <dd className="mt-0.5">{condo.address}</dd>
                   </div>
@@ -584,6 +584,12 @@ function CondominioPage() {
                   <dt className="text-[11px] uppercase tracking-widest text-muted-foreground">Cidade / UF</dt>
                   <dd className="mt-0.5">{condo.city}/{condo.state}</dd>
                 </div>
+                {cep && (
+                  <div>
+                    <dt className="text-[11px] uppercase tracking-widest text-muted-foreground">CEP</dt>
+                    <dd className="mt-0.5">{cep}</dd>
+                  </div>
+                )}
               </dl>
 
               <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-black/5">
@@ -598,30 +604,12 @@ function CondominioPage() {
                     <LeafletMap query={leafletQuery} title={condo.name} />
                   </Suspense>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => hasCoords && setShowMap(true)}
-                    disabled={!hasCoords}
-                    aria-label={
-                      hasCoords
-                        ? `Ver mapa da localização do ${condo.name}`
-                        : `Mapa indisponível para o ${condo.name}`
-                    }
-                    className="flex h-[220px] w-full flex-col items-center justify-center gap-2 bg-secondary text-sm text-muted-foreground hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    <MapPin className="h-6 w-6" />
-                    {hasCoords ? (
-                      <>
-                        <span className="font-medium text-foreground">Ver mapa da localização</span>
-                        {condo.address && <span className="text-xs">{condo.address}</span>}
-                      </>
-                    ) : (
-                      <>
-                        <span>Coordenadas não disponíveis.</span>
-                        <span className="text-xs">Use o endereço para abrir no Google Maps.</span>
-                      </>
-                    )}
-                  </button>
+                  <MapPlaceholder
+                    title={condo.name}
+                    address={condo.address}
+                    canOpen={hasCoords}
+                    onOpen={() => setShowMap(true)}
+                  />
                 )}
               </div>
 
