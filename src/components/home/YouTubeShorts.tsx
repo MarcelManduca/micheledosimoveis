@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Play, X, Youtube } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Maximize2, Play, X, Youtube } from "lucide-react";
 import { YOUTUBE_SHORTS, type YouTubeShort } from "@/lib/youtube-shorts";
 import { SITE } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
@@ -8,12 +8,21 @@ export function YouTubeShorts() {
   const shorts = YOUTUBE_SHORTS;
   const total = shorts.length;
   const [active, setActive] = useState(0);
+  const [playingInline, setPlayingInline] = useState(false);
   const [open, setOpen] = useState<YouTubeShort | null>(null);
 
   const go = useCallback(
-    (dir: number) => setActive((i) => (i + dir + total) % total),
+    (dir: number) => {
+      setPlayingInline(false);
+      setActive((i) => (i + dir + total) % total);
+    },
     [total],
   );
+
+  const jumpTo = useCallback((i: number) => {
+    setPlayingInline(false);
+    setActive(i);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -29,14 +38,28 @@ export function YouTubeShorts() {
     };
   }, [open]);
 
-  // swipe
-  const [touchX, setTouchX] = useState<number | null>(null);
-  const onTouchStart = (e: React.TouchEvent) => setTouchX(e.touches[0].clientX);
-  const onTouchEnd = (e: React.TouchEvent) => {
-    if (touchX == null) return;
-    const dx = e.changedTouches[0].clientX - touchX;
-    if (Math.abs(dx) > 40) go(dx < 0 ? 1 : -1);
-    setTouchX(null);
+  // Pointer drag (mouse + touch) to change videos
+  const dragRef = useRef<{ x: number; moved: boolean; id: number } | null>(null);
+  const [dragDx, setDragDx] = useState(0);
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    if (playingInline) return; // don't hijack drags while iframe is active
+    dragRef.current = { x: e.clientX, moved: false, id: e.pointerId };
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+  };
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    const dx = e.clientX - dragRef.current.x;
+    if (Math.abs(dx) > 4) dragRef.current.moved = true;
+    setDragDx(dx);
+  };
+  const endDrag = (e: React.PointerEvent) => {
+    if (!dragRef.current) return;
+    const dx = e.clientX - dragRef.current.x;
+    const moved = dragRef.current.moved;
+    dragRef.current = null;
+    setDragDx(0);
+    if (moved && Math.abs(dx) > 60) go(dx < 0 ? 1 : -1);
   };
 
   return (
@@ -72,9 +95,12 @@ export function YouTubeShorts() {
       </div>
 
       <div
-        className="relative mt-10 select-none"
-        onTouchStart={onTouchStart}
-        onTouchEnd={onTouchEnd}
+        className="relative mt-10 select-none touch-pan-y"
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={endDrag}
+        onPointerCancel={endDrag}
+        style={{ cursor: playingInline ? "default" : "grab" }}
       >
         {/* Stage */}
         <div className="relative mx-auto h-[460px] sm:h-[520px] md:h-[560px] w-full">
@@ -86,21 +112,43 @@ export function YouTubeShorts() {
             if (abs > 2) return null;
 
             const isCenter = d === 0;
-            // Absolute horizontal offset in px keeps spacing predictable
-            // regardless of card size / scale.
-            const offset = d * 240; // px
+            const offset = d * 240 + (isCenter ? 0 : dragDx * 0.15);
             const scale = isCenter ? 1 : abs === 1 ? 0.78 : 0.6;
             const opacity = isCenter ? 1 : abs === 1 ? 0.7 : 0.35;
             const z = 10 - abs;
 
+            const handleClick = (e: React.MouseEvent) => {
+              // Suppress click when drag actually moved
+              if (dragRef.current?.moved) {
+                e.preventDefault();
+                return;
+              }
+              if (!isCenter) {
+                jumpTo(i);
+                return;
+              }
+              if (!playingInline) setPlayingInline(true);
+            };
+
             return (
-              <button
+              <div
                 key={s.id}
-                type="button"
-                onClick={() => (isCenter ? setOpen(s) : setActive(i))}
+                role="button"
+                tabIndex={isCenter ? 0 : -1}
                 aria-label={
-                  isCenter ? `Abrir Short: ${s.title}` : `Ver Short: ${s.title}`
+                  isCenter
+                    ? playingInline
+                      ? `Reproduzindo: ${s.title}`
+                      : `Reproduzir Short: ${s.title}`
+                    : `Ver Short: ${s.title}`
                 }
+                onClick={handleClick}
+                onKeyDown={(e) => {
+                  if ((e.key === "Enter" || e.key === " ") && isCenter) {
+                    e.preventDefault();
+                    if (!playingInline) setPlayingInline(true);
+                  }
+                }}
                 className={cn(
                   "group absolute left-1/2 top-1/2",
                   "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
@@ -111,7 +159,6 @@ export function YouTubeShorts() {
                   opacity,
                   zIndex: z,
                 }}
-                tabIndex={isCenter ? 0 : -1}
               >
                 <div
                   className={cn(
@@ -122,14 +169,41 @@ export function YouTubeShorts() {
                       : "shadow-xl ring-1 ring-black/5",
                   )}
                 >
-                  <img
-                    src={s.thumbnail}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                  {isCenter && (
+                  {isCenter && playingInline ? (
+                    <>
+                      <iframe
+                        src={`https://www.youtube-nocookie.com/embed/${s.youtubeId}?autoplay=1&rel=0&playsinline=1&modestbranding=1`}
+                        title={s.title}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        className="absolute inset-0 h-full w-full"
+                      />
+                      {/* Expand button (over iframe) */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpen(s);
+                        }}
+                        aria-label="Abrir em tela cheia"
+                        className="absolute top-3 right-3 z-10 inline-flex items-center gap-1.5 rounded-full bg-black/70 text-white text-xs px-3 py-1.5 ring-1 ring-white/20 backdrop-blur hover:bg-black/85 transition"
+                      >
+                        <Maximize2 className="h-3.5 w-3.5" />
+                        Expandir
+                      </button>
+                    </>
+                  ) : (
+                    <img
+                      src={s.thumbnail}
+                      alt=""
+                      loading="lazy"
+                      decoding="async"
+                      draggable={false}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  )}
+
+                  {isCenter && !playingInline && (
                     <>
                       <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
                       <div className="absolute inset-0 grid place-items-center">
@@ -148,11 +222,10 @@ export function YouTubeShorts() {
                     <div className="absolute inset-0 bg-black/25" />
                   )}
                 </div>
-              </button>
+              </div>
             );
           })}
         </div>
-
 
         {/* Arrows */}
         <button
@@ -178,7 +251,7 @@ export function YouTubeShorts() {
             <button
               key={s.id}
               type="button"
-              onClick={() => setActive(i)}
+              onClick={() => jumpTo(i)}
               aria-label={`Ir para Short ${i + 1}`}
               className={cn(
                 "h-1.5 rounded-full transition-all",
