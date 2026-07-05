@@ -464,9 +464,9 @@ export const getCondoValueRefs = createServerFn({ method: "GET" })
       if (res.confidence === "high") inCondo.push(row);
     }
 
-    // Referências do condomínio só com match de endereço de alta confiança
+    // Somente dados específicos do condomínio (match de endereço de alta confiança).
+    // Não fazemos fallback para o bairro na página individual do condomínio.
     if (inCondo.length >= 2) return computeRefs(inCondo, "condo");
-    if (pool.length >= 3) return computeRefs(pool, "neighborhood");
     return EMPTY_REFS;
   });
 
