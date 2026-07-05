@@ -10,7 +10,7 @@ const BorderGlow = lazy(() => import("@/components/BorderGlow"));
 function PlainCard({ children }: { children: ReactNode }) {
   return (
     <div
-      className="h-full rounded-[18px] bg-card ring-1 ring-black/5"
+      className="h-full rounded-[18px] bg-transparent ring-1 ring-black/5"
       style={{ borderRadius: 18 }}
     >
       {children}
