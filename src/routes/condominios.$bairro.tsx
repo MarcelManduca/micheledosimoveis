@@ -95,7 +95,7 @@ function CondominiosBairro() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
+      <SiteHeader variant="light" />
       <main className="pt-28 pb-16">
         <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <nav aria-label="breadcrumb" className="mb-6 text-xs text-muted-foreground">

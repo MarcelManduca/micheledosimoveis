@@ -281,7 +281,7 @@ function CondominioPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
+      <SiteHeader variant="light" />
       <main className="pt-28 pb-20">
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
           {/* Breadcrumbs */}
