@@ -5,17 +5,17 @@ import { MapPin, Phone, ArrowRight, Building2, ExternalLink } from "lucide-react
 import {
   getCondominiumBySlug,
   getPropertiesForCondominium,
-  getCondoValueRefs,
+  getCondominiumFacts,
   listCondominiums,
   type CondominiumDetail,
-  type CondoValueRefs,
+  type CondominiumFacts,
 } from "@/lib/condominiums.functions";
 import { getNeighborhood } from "@/lib/neighborhoods";
 import { PropertyCard } from "@/components/PropertyCard";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import MapPlaceholder from "@/components/MapPlaceholder";
-import { brl, formatNeighborhoodWithPreposition } from "@/lib/format";
+import { formatNeighborhoodWithPreposition } from "@/lib/format";
 
 const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
