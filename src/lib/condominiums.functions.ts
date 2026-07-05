@@ -138,6 +138,7 @@ export const getCondominiumBySlug = createServerFn({ method: "GET" })
       bairro_slug: (r.bairro_slug as string | null) ?? null,
       amenities: (r.amenities as string[] | null) ?? [],
       city: (r.city as string) ?? "Florianópolis",
+      postal_code: (r.postal_code as string | null) ?? null,
       state: (r.state as string) ?? "SC",
       latitude: (r.latitude as number | null) ?? null,
       longitude: (r.longitude as number | null) ?? null,
