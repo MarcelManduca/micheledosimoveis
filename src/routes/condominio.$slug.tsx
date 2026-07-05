@@ -87,22 +87,22 @@ function buildFaq(condo: CondominiumDetail, hasProperties: boolean) {
       a: `O ${condo.name} fica em ${addr}, no bairro ${bairro}, em ${condo.city}/${condo.state}.`,
     },
     {
-      q: `O ${condo.name} tem imóveis disponíveis?`,
-      a: hasProperties
-        ? `Sim. Nesta página estão listados os imóveis publicados por Michele dos Imóveis neste condomínio. A disponibilidade depende dos imóveis ativos na base e pode ser confirmada diretamente com Michele.`
-        : `A disponibilidade depende dos imóveis ativos publicados na base de Michele dos Imóveis. Se não houver imóvel publicado no momento, Michele pode consultar oportunidades off market ou opções semelhantes na região.`,
-    },
-    {
       q: `Quais comodidades existem no ${condo.name}?`,
       a: `As comodidades conhecidas incluem ${amenList}. Essas informações devem ser confirmadas no atendimento antes de qualquer decisão de compra ou venda.`,
     },
     {
-      q: `Como saber o valor de um imóvel no ${condo.name}?`,
-      a: `O valor depende de fatores como metragem, posição, conservação, vagas, vista, padrão do imóvel e momento de mercado. Michele pode ajudar com uma avaliação personalizada.`,
+      q: `Há imóveis disponíveis no ${condo.name}?`,
+      a: hasProperties
+        ? `Sim. Nesta página estão listados os imóveis publicados por Michele dos Imóveis neste condomínio. A disponibilidade depende dos imóveis ativos na base e pode ser confirmada diretamente com Michele.`
+        : `A disponibilidade depende dos imóveis publicados na base de Michele dos Imóveis. Se não houver imóvel publicado no momento, Michele pode indicar opções semelhantes na região. Em alguns casos, também podem existir oportunidades não divulgadas publicamente.`,
     },
     {
-      q: `Posso vender meu imóvel nesse condomínio com discrição?`,
-      a: `Sim. A venda pode ser conduzida com estratégia discreta, incluindo abordagem off market, apresentação seletiva e qualificação de compradores.`,
+      q: `Como saber o valor de um imóvel no ${condo.name}?`,
+      a: `O valor depende de fatores como metragem, posição, conservação, vagas, vista, padrão da unidade, condomínio, IPTU e momento de mercado. Michele pode ajudar com uma avaliação personalizada.`,
+    },
+    {
+      q: `Como anunciar um imóvel no ${condo.name}?`,
+      a: `Proprietários que possuem imóvel no ${condo.name} podem falar com Michele para avaliar preço, posicionamento, documentação, apresentação comercial e estratégia de divulgação. A melhor abordagem depende do perfil do imóvel, do momento de mercado e do objetivo do proprietário.`,
     },
     {
       q: `A Michele atende compradores interessados neste condomínio?`,
