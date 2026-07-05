@@ -72,14 +72,13 @@ export function YouTubeShorts() {
       </div>
 
       <div
-        className="relative mt-12 select-none"
+        className="relative mt-10 select-none"
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
         {/* Stage */}
-        <div className="relative mx-auto h-[520px] sm:h-[560px] md:h-[600px] w-full overflow-hidden">
+        <div className="relative mx-auto h-[460px] sm:h-[520px] md:h-[560px] w-full">
           {shorts.map((s, i) => {
-            // signed distance on ring
             let d = i - active;
             if (d > total / 2) d -= total;
             if (d < -total / 2) d += total;
@@ -87,10 +86,11 @@ export function YouTubeShorts() {
             if (abs > 2) return null;
 
             const isCenter = d === 0;
-            // layout by distance
-            const translate = d * 62; // % of half-width offset
-            const scale = isCenter ? 1 : abs === 1 ? 0.72 : 0.55;
-            const opacity = isCenter ? 1 : abs === 1 ? 0.55 : 0.25;
+            // Absolute horizontal offset in px keeps spacing predictable
+            // regardless of card size / scale.
+            const offset = d * 240; // px
+            const scale = isCenter ? 1 : abs === 1 ? 0.78 : 0.6;
+            const opacity = isCenter ? 1 : abs === 1 ? 0.7 : 0.35;
             const z = 10 - abs;
 
             return (
@@ -102,12 +102,12 @@ export function YouTubeShorts() {
                   isCenter ? `Abrir Short: ${s.title}` : `Ver Short: ${s.title}`
                 }
                 className={cn(
-                  "absolute left-1/2 top-1/2",
+                  "group absolute left-1/2 top-1/2",
                   "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 rounded-[28px]",
                 )}
                 style={{
-                  transform: `translate(calc(-50% + ${translate}%), -50%) scale(${scale})`,
+                  transform: `translate(calc(-50% + ${offset}px), -50%) scale(${scale})`,
                   opacity,
                   zIndex: z,
                 }}
@@ -116,7 +116,7 @@ export function YouTubeShorts() {
                 <div
                   className={cn(
                     "relative overflow-hidden rounded-[28px] bg-secondary",
-                    "aspect-[9/16] h-[500px] sm:h-[540px] md:h-[580px]",
+                    "aspect-[9/16] h-[440px] sm:h-[500px] md:h-[540px]",
                     isCenter
                       ? "shadow-[0_30px_80px_-20px_rgba(0,0,0,0.45)] ring-1 ring-black/10"
                       : "shadow-xl ring-1 ring-black/5",
@@ -129,9 +129,9 @@ export function YouTubeShorts() {
                     decoding="async"
                     className="absolute inset-0 h-full w-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/20" />
                   {isCenter && (
                     <>
+                      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
                       <div className="absolute inset-0 grid place-items-center">
                         <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-foreground shadow-lg transition-transform group-hover:scale-110">
                           <Play className="h-6 w-6 translate-x-[2px] fill-current" />
@@ -144,11 +144,15 @@ export function YouTubeShorts() {
                       </div>
                     </>
                   )}
+                  {!isCenter && (
+                    <div className="absolute inset-0 bg-black/25" />
+                  )}
                 </div>
               </button>
             );
           })}
         </div>
+
 
         {/* Arrows */}
         <button
