@@ -676,7 +676,7 @@ function CondominioPage() {
 
           {/* Sobre o bairro */}
           <section className="mt-14 rounded-2xl bg-card p-6 ring-1 ring-black/5">
-            <h2 className="font-display text-2xl tracking-tight">Sobre morar em {bairro}</h2>
+            <h2 className="font-display text-2xl tracking-tight">Sobre morar {bairroPrep}</h2>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
               {nInfo?.intro
                 ? nInfo.intro
@@ -689,7 +689,7 @@ function CondominioPage() {
                   params={{ slug: nInfo.slug }}
                   className="inline-flex items-center gap-2 text-sm underline"
                 >
-                  Ver imóveis em {bairro}
+                  Ver imóveis {bairroPrep}
                 </Link>
               )}
               {condo.bairro_slug && (
@@ -698,7 +698,7 @@ function CondominioPage() {
                   params={{ bairro: condo.bairro_slug }}
                   className="inline-flex items-center gap-2 text-sm underline"
                 >
-                  Ver condomínios em {bairro}
+                  Ver condomínios {bairroPrep}
                 </Link>
               )}
             </div>
