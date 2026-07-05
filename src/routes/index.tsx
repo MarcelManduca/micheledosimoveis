@@ -36,7 +36,7 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: "https://micheledosimoveis.com.br/" },
-      { rel: "preload", as: "image", href: heroLcp, imagesrcset: `${heroLcp} 720w, ${heroLcp1280} 1280w`, imagesizes: "100vw", fetchpriority: "high" } as any,
+      { rel: "preload", as: "image", href: heroLcp, imageSrcSet: `${heroLcp} 720w, ${heroLcp1280} 1280w`, imageSizes: "100vw", fetchPriority: "high" } as any,
     ],
   }),
 
