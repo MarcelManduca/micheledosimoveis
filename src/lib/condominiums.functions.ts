@@ -22,6 +22,22 @@ export type CondominiumDetail = CondominiumSummary & {
   latitude: number | null;
   longitude: number | null;
   description: string | null;
+  condo_fee_min_brl: number | null;
+  condo_fee_avg_brl: number | null;
+  iptu_min_brl: number | null;
+  iptu_avg_brl: number | null;
+  area_min_m2: number | null;
+  area_max_m2: number | null;
+  bedrooms_min: number | null;
+  bedrooms_max: number | null;
+  bathrooms_min: number | null;
+  bathrooms_max: number | null;
+  parking_spots_min: number | null;
+  parking_spots_max: number | null;
+  units_count: number | null;
+  towers_count: number | null;
+  floors_count: number | null;
+  construction_year: number | null;
 };
 
 export type BairroCount = { bairro_slug: string; normalized_neighborhood: string; count: number };
