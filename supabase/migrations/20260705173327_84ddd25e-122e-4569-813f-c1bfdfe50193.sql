@@ -1,0 +1,1 @@
+ALTER TABLE public.condominiums ADD COLUMN IF NOT EXISTS postal_code TEXT NULL;
