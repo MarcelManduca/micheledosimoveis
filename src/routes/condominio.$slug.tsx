@@ -123,7 +123,7 @@ export const Route = createFileRoute("/condominio/$slug")({
         addressRegion: condo.state,
         addressCountry: "BR",
       },
-      amenityFeature: condo.amenities.map((a) => ({
+      amenityFeature: condo.amenities.map((a: string) => ({
         "@type": "LocationFeatureSpecification",
         name: a,
         value: true,
@@ -304,7 +304,7 @@ function CondominioPage() {
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="rounded-full bg-secondary px-3 py-1 text-xs">{bairro}</span>
               <span className="rounded-full bg-secondary px-3 py-1 text-xs">{condo.city}</span>
-              {condo.amenities.slice(0, 3).map((a) => (
+              {condo.amenities.slice(0, 3).map((a: string) => (
                 <span key={a} className="rounded-full bg-secondary px-3 py-1 text-xs">
                   {a}
                 </span>
@@ -379,7 +379,7 @@ function CondominioPage() {
                 </p>
               ) : (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {condo.amenities.map((a) => (
+                  {condo.amenities.map((a: string) => (
                     <span
                       key={a}
                       className="rounded-full border border-border bg-background px-3 py-1 text-xs"
