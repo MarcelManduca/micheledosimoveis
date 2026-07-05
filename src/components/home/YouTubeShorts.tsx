@@ -102,7 +102,7 @@ export function YouTubeShorts() {
                   isCenter ? `Abrir Short: ${s.title}` : `Ver Short: ${s.title}`
                 }
                 className={cn(
-                  "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2",
+                  "absolute left-1/2 top-1/2",
                   "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
                   "focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/40 rounded-[28px]",
                 )}
