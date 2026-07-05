@@ -156,6 +156,7 @@ export const Route = createFileRoute("/condominio/$slug")({
         streetAddress: condo.address ?? undefined,
         addressLocality: condo.city,
         addressRegion: condo.state,
+        postalCode: formatCep(condo.postal_code) ?? undefined,
         addressCountry: "BR",
       },
       amenityFeature: condo.amenities.map((a: string) => ({
