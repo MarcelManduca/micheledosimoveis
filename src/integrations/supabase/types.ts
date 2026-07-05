@@ -18,12 +18,25 @@ export type Database = {
         Row: {
           address: string | null
           amenities: string[]
+          area_max_m2: number | null
+          area_min_m2: number | null
           bairro_slug: string | null
+          bathrooms_max: number | null
+          bathrooms_min: number | null
+          bedrooms_max: number | null
+          bedrooms_min: number | null
           canonical_url: string | null
           city: string
+          condo_fee_avg_brl: number | null
+          condo_fee_min_brl: number | null
+          construction_year: number | null
           created_at: string
+          data_quality_status: string | null
           description: string | null
+          floors_count: number | null
           id: string
+          iptu_avg_brl: number | null
+          iptu_min_brl: number | null
           is_active: boolean
           latitude: number | null
           longitude: number | null
@@ -31,24 +44,42 @@ export type Database = {
           neighborhood: string | null
           normalized_name: string
           normalized_neighborhood: string | null
+          parking_spots_max: number | null
+          parking_spots_min: number | null
           postal_code: string | null
           publication_status: string
+          reference_updated_at: string | null
           seo_description: string | null
           seo_title: string | null
           slug: string
           source_reference_internal: string | null
           state: string
+          towers_count: number | null
+          units_count: number | null
           updated_at: string
         }
         Insert: {
           address?: string | null
           amenities?: string[]
+          area_max_m2?: number | null
+          area_min_m2?: number | null
           bairro_slug?: string | null
+          bathrooms_max?: number | null
+          bathrooms_min?: number | null
+          bedrooms_max?: number | null
+          bedrooms_min?: number | null
           canonical_url?: string | null
           city?: string
+          condo_fee_avg_brl?: number | null
+          condo_fee_min_brl?: number | null
+          construction_year?: number | null
           created_at?: string
+          data_quality_status?: string | null
           description?: string | null
+          floors_count?: number | null
           id?: string
+          iptu_avg_brl?: number | null
+          iptu_min_brl?: number | null
           is_active?: boolean
           latitude?: number | null
           longitude?: number | null
@@ -56,24 +87,42 @@ export type Database = {
           neighborhood?: string | null
           normalized_name: string
           normalized_neighborhood?: string | null
+          parking_spots_max?: number | null
+          parking_spots_min?: number | null
           postal_code?: string | null
           publication_status?: string
+          reference_updated_at?: string | null
           seo_description?: string | null
           seo_title?: string | null
           slug: string
           source_reference_internal?: string | null
           state?: string
+          towers_count?: number | null
+          units_count?: number | null
           updated_at?: string
         }
         Update: {
           address?: string | null
           amenities?: string[]
+          area_max_m2?: number | null
+          area_min_m2?: number | null
           bairro_slug?: string | null
+          bathrooms_max?: number | null
+          bathrooms_min?: number | null
+          bedrooms_max?: number | null
+          bedrooms_min?: number | null
           canonical_url?: string | null
           city?: string
+          condo_fee_avg_brl?: number | null
+          condo_fee_min_brl?: number | null
+          construction_year?: number | null
           created_at?: string
+          data_quality_status?: string | null
           description?: string | null
+          floors_count?: number | null
           id?: string
+          iptu_avg_brl?: number | null
+          iptu_min_brl?: number | null
           is_active?: boolean
           latitude?: number | null
           longitude?: number | null
@@ -81,13 +130,18 @@ export type Database = {
           neighborhood?: string | null
           normalized_name?: string
           normalized_neighborhood?: string | null
+          parking_spots_max?: number | null
+          parking_spots_min?: number | null
           postal_code?: string | null
           publication_status?: string
+          reference_updated_at?: string | null
           seo_description?: string | null
           seo_title?: string | null
           slug?: string
           source_reference_internal?: string | null
           state?: string
+          towers_count?: number | null
+          units_count?: number | null
           updated_at?: string
         }
         Relationships: []

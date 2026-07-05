@@ -22,6 +22,22 @@ export type CondominiumDetail = CondominiumSummary & {
   latitude: number | null;
   longitude: number | null;
   description: string | null;
+  condo_fee_min_brl: number | null;
+  condo_fee_avg_brl: number | null;
+  iptu_min_brl: number | null;
+  iptu_avg_brl: number | null;
+  area_min_m2: number | null;
+  area_max_m2: number | null;
+  bedrooms_min: number | null;
+  bedrooms_max: number | null;
+  bathrooms_min: number | null;
+  bathrooms_max: number | null;
+  parking_spots_min: number | null;
+  parking_spots_max: number | null;
+  units_count: number | null;
+  towers_count: number | null;
+  floors_count: number | null;
+  construction_year: number | null;
 };
 
 export type BairroCount = { bairro_slug: string; normalized_neighborhood: string; count: number };
@@ -38,7 +54,12 @@ function getPublicClient() {
 const SUMMARY_COLS =
   "id, slug, name, address, neighborhood, normalized_neighborhood, bairro_slug, amenities";
 const DETAIL_COLS =
-  SUMMARY_COLS + ", city, state, postal_code, latitude, longitude, description";
+  SUMMARY_COLS +
+  ", city, state, postal_code, latitude, longitude, description" +
+  ", condo_fee_min_brl, condo_fee_avg_brl, iptu_min_brl, iptu_avg_brl" +
+  ", area_min_m2, area_max_m2, bedrooms_min, bedrooms_max" +
+  ", bathrooms_min, bathrooms_max, parking_spots_min, parking_spots_max" +
+  ", units_count, towers_count, floors_count, construction_year";
 
 function escapeLike(term: string) {
   return term.replace(/[%_\\]/g, (m) => `\\${m}`);
@@ -143,6 +164,22 @@ export const getCondominiumBySlug = createServerFn({ method: "GET" })
       latitude: (r.latitude as number | null) ?? null,
       longitude: (r.longitude as number | null) ?? null,
       description: (r.description as string | null) ?? null,
+      condo_fee_min_brl: (r.condo_fee_min_brl as number | null) ?? null,
+      condo_fee_avg_brl: (r.condo_fee_avg_brl as number | null) ?? null,
+      iptu_min_brl: (r.iptu_min_brl as number | null) ?? null,
+      iptu_avg_brl: (r.iptu_avg_brl as number | null) ?? null,
+      area_min_m2: (r.area_min_m2 as number | null) ?? null,
+      area_max_m2: (r.area_max_m2 as number | null) ?? null,
+      bedrooms_min: (r.bedrooms_min as number | null) ?? null,
+      bedrooms_max: (r.bedrooms_max as number | null) ?? null,
+      bathrooms_min: (r.bathrooms_min as number | null) ?? null,
+      bathrooms_max: (r.bathrooms_max as number | null) ?? null,
+      parking_spots_min: (r.parking_spots_min as number | null) ?? null,
+      parking_spots_max: (r.parking_spots_max as number | null) ?? null,
+      units_count: (r.units_count as number | null) ?? null,
+      towers_count: (r.towers_count as number | null) ?? null,
+      floors_count: (r.floors_count as number | null) ?? null,
+      construction_year: (r.construction_year as number | null) ?? null,
     };
   });
 
@@ -469,5 +506,131 @@ export const getCondoValueRefs = createServerFn({ method: "GET" })
     if (inCondo.length >= 2) return computeRefs(inCondo, "condo");
     return EMPTY_REFS;
   });
+
+// ---------------------------------------------------------------------------
+// Dados específicos do condomínio (não usa bairro, não inventa valores).
+// ---------------------------------------------------------------------------
+
+export type CondominiumFacts = {
+  postalCode: string | null;
+  condoFeeLabel: string | null;
+  iptuLabel: string | null;
+  areaLabel: string | null;
+  bedroomsLabel: string | null;
+  bathroomsLabel: string | null;
+  parkingSpotsLabel: string | null;
+  unitsLabel: string | null;
+  towersLabel: string | null;
+  floorsLabel: string | null;
+  constructionYearLabel: string | null;
+  hasAnyQuantitativeData: boolean;
+};
+
+function formatCepInternal(cep: string | null | undefined): string | null {
+  if (!cep) return null;
+  const d = cep.replace(/\D/g, "");
+  if (d.length !== 8) return null;
+  return `${d.slice(0, 5)}-${d.slice(5)}`;
+}
+
+function brlLabel(n: number): string {
+  return n.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  });
+}
+
+function rangeLabel(
+  min: number | null,
+  max: number | null,
+  unit: string,
+  singular?: string,
+): string | null {
+  if (min == null && max == null) return null;
+  const u = (n: number) => (singular && n === 1 ? singular : unit);
+  if (min != null && max != null) {
+    if (min === max) return `${min} ${u(min)}`;
+    return `${min} a ${max} ${u(max)}`;
+  }
+  if (min != null) return `a partir de ${min} ${u(min)}`;
+  if (max != null) return `até ${max} ${u(max)}`;
+  return null;
+}
+
+function moneyRefLabel(min: number | null, avg: number | null): string | null {
+  if (min != null && min > 0) return `a partir de ${brlLabel(min)}`;
+  if (avg != null && avg > 0) return `média de ${brlLabel(avg)}`;
+  return null;
+}
+
+export function getCondominiumFacts(condo: CondominiumDetail): CondominiumFacts {
+  const areaLabel = rangeLabel(condo.area_min_m2, condo.area_max_m2, "m²");
+  const bedroomsLabel = rangeLabel(
+    condo.bedrooms_min,
+    condo.bedrooms_max,
+    "dormitórios",
+    "dormitório",
+  );
+  const bathroomsLabel = rangeLabel(
+    condo.bathrooms_min,
+    condo.bathrooms_max,
+    "banheiros",
+    "banheiro",
+  );
+  const parkingSpotsLabel = rangeLabel(
+    condo.parking_spots_min,
+    condo.parking_spots_max,
+    "vagas",
+    "vaga",
+  );
+  const condoFeeLabel = moneyRefLabel(condo.condo_fee_min_brl, condo.condo_fee_avg_brl);
+  const iptuLabel = moneyRefLabel(condo.iptu_min_brl, condo.iptu_avg_brl);
+  const unitsLabel =
+    condo.units_count != null && condo.units_count > 0
+      ? `${condo.units_count} ${condo.units_count === 1 ? "unidade" : "unidades"}`
+      : null;
+  const towersLabel =
+    condo.towers_count != null && condo.towers_count > 0
+      ? `${condo.towers_count} ${condo.towers_count === 1 ? "torre" : "torres"}`
+      : null;
+  const floorsLabel =
+    condo.floors_count != null && condo.floors_count > 0
+      ? `${condo.floors_count} ${condo.floors_count === 1 ? "andar" : "andares"}`
+      : null;
+  const constructionYearLabel =
+    condo.construction_year != null && condo.construction_year > 0
+      ? String(condo.construction_year)
+      : null;
+
+  const hasAnyQuantitativeData = [
+    condoFeeLabel,
+    iptuLabel,
+    areaLabel,
+    bedroomsLabel,
+    bathroomsLabel,
+    parkingSpotsLabel,
+    unitsLabel,
+    towersLabel,
+    floorsLabel,
+    constructionYearLabel,
+  ].some((v) => v != null);
+
+  return {
+    postalCode: formatCepInternal(condo.postal_code),
+    condoFeeLabel,
+    iptuLabel,
+    areaLabel,
+    bedroomsLabel,
+    bathroomsLabel,
+    parkingSpotsLabel,
+    unitsLabel,
+    towersLabel,
+    floorsLabel,
+    constructionYearLabel,
+    hasAnyQuantitativeData,
+  };
+}
+
 
 

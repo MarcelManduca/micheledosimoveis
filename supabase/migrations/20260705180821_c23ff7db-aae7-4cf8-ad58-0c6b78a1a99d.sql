@@ -1,0 +1,20 @@
+
+ALTER TABLE public.condominiums
+  ADD COLUMN IF NOT EXISTS condo_fee_min_brl numeric,
+  ADD COLUMN IF NOT EXISTS condo_fee_avg_brl numeric,
+  ADD COLUMN IF NOT EXISTS iptu_min_brl numeric,
+  ADD COLUMN IF NOT EXISTS iptu_avg_brl numeric,
+  ADD COLUMN IF NOT EXISTS area_min_m2 numeric,
+  ADD COLUMN IF NOT EXISTS area_max_m2 numeric,
+  ADD COLUMN IF NOT EXISTS bedrooms_min integer,
+  ADD COLUMN IF NOT EXISTS bedrooms_max integer,
+  ADD COLUMN IF NOT EXISTS bathrooms_min integer,
+  ADD COLUMN IF NOT EXISTS bathrooms_max integer,
+  ADD COLUMN IF NOT EXISTS parking_spots_min integer,
+  ADD COLUMN IF NOT EXISTS parking_spots_max integer,
+  ADD COLUMN IF NOT EXISTS units_count integer,
+  ADD COLUMN IF NOT EXISTS towers_count integer,
+  ADD COLUMN IF NOT EXISTS floors_count integer,
+  ADD COLUMN IF NOT EXISTS construction_year integer,
+  ADD COLUMN IF NOT EXISTS data_quality_status text,
+  ADD COLUMN IF NOT EXISTS reference_updated_at timestamptz;
