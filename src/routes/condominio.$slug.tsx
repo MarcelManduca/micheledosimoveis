@@ -274,9 +274,8 @@ function CondominioPage() {
   const mapLink = hasCoords
     ? `https://www.google.com/maps/search/?api=1&query=${condo.latitude},${condo.longitude}`
     : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addressQuery + ", Brasil")}`;
-  const leafletQuery = hasCoords
-    ? `${condo.latitude},${condo.longitude}`
-    : addressQuery;
+  const leafletQuery = addressQuery || `${bairro}, ${condo.city}, ${condo.state}, Brasil`;
+
 
 
 
