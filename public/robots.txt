@@ -10,3 +10,4 @@ Disallow: /*?gclid=
 
 Sitemap: https://micheledosimoveis.com.br/sitemap.xml
 Sitemap: https://micheledosimoveis.com.br/sitemap-bairros.xml
+Sitemap: https://micheledosimoveis.com.br/sitemap-condominios.xml
