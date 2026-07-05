@@ -579,7 +579,7 @@ function CondominioPage() {
                     params={{ slug: nInfo.slug }}
                     className="inline-flex items-center gap-2 text-sm underline"
                   >
-                    Ver todos os imóveis em {bairro} <ArrowRight className="h-4 w-4" />
+                    Ver todos os imóveis {bairroPrep} <ArrowRight className="h-4 w-4" />
                   </Link>
                 </div>
               )}
