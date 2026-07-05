@@ -806,3 +806,59 @@ function InfoRow({ label, value, last }: { label: string; value: string; last?: 
     </div>
   );
 }
+
+function ValueRefsSection({
+  refs,
+  bairro,
+  condoName,
+}: {
+  refs: CondoValueRefs;
+  bairro: string;
+  condoName: string;
+}) {
+  const isCondo = refs.source === "condo";
+  const heading = isCondo
+    ? "Referências dos imóveis publicados"
+    : "Referências de imóveis no bairro";
+  const subtitle = isCondo
+    ? `Calculado a partir de ${refs.count} ${refs.count === 1 ? "imóvel publicado" : "imóveis publicados"} no ${condoName}.`
+    : `Calculado a partir de ${refs.count} imóveis publicados em ${bairro}.`;
+
+  const items: { label: string; value: string }[] = [];
+  if (refs.minPrice != null) items.push({ label: "Preço mínimo", value: brl(refs.minPrice) });
+  if (refs.medianPrice != null) items.push({ label: "Preço mediano", value: brl(refs.medianPrice) });
+  if (refs.maxPrice != null) items.push({ label: "Preço máximo", value: brl(refs.maxPrice) });
+  if (refs.avgCondoFee != null) items.push({ label: "Condomínio médio", value: brl(refs.avgCondoFee) });
+  if (refs.avgIptu != null) items.push({ label: "IPTU médio", value: brl(refs.avgIptu) });
+  if (refs.avgArea != null) items.push({ label: "Área média", value: `${refs.avgArea} m²` });
+  if (refs.commonBedrooms != null)
+    items.push({ label: "Dormitórios mais comuns", value: String(refs.commonBedrooms) });
+  if (refs.commonParking != null)
+    items.push({ label: "Vagas mais comuns", value: String(refs.commonParking) });
+
+  if (items.length === 0) return null;
+
+  return (
+    <section className="mt-14">
+      <h2 className="font-display text-2xl tracking-tight">{heading}</h2>
+      <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map((i) => (
+          <div key={i.label} className="rounded-xl bg-card p-4 ring-1 ring-black/5">
+            <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
+              {i.label}
+            </div>
+            <div className="mt-1.5 text-sm font-medium leading-snug">{i.value}</div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-4 text-xs leading-relaxed text-muted-foreground max-w-3xl">
+        Os valores apresentados são referências aproximadas calculadas a partir dos imóveis
+        publicados na base de Michele dos Imóveis ou de informações cadastradas. Condomínio,
+        IPTU, disponibilidade, metragens e demais dados podem variar conforme unidade,
+        atualização cadastral e negociação. As informações devem ser confirmadas no atendimento
+        antes de qualquer decisão.
+      </p>
+    </section>
+  );
+}
