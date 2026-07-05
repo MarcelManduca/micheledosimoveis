@@ -285,13 +285,16 @@ export const Route = createFileRoute("/condominio/$slug")({
 function CondominioPage() {
   const { condo } = Route.useLoaderData();
   const nInfo = getNeighborhood(condo.bairro_slug ?? "");
-  const props = useQuery(
-    propsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
-  );
+  const nQuery = nInfo?.query ?? condo.normalized_neighborhood ?? undefined;
+  const k: CondoQueryKeys = {
+    name: condo.name,
+    address: condo.address,
+    neighborhood: condo.normalized_neighborhood,
+    nQuery,
+  };
+  const props = useQuery(propsQO(k));
   const nearby = useQuery(nearbyCondosQO(condo.bairro_slug, condo.slug));
-  const refs = useQuery(
-    refsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
-  );
+  const refs = useQuery(refsQO(k));
   const [showMap, setShowMap] = useState(false);
 
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
