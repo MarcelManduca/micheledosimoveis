@@ -31,12 +31,24 @@ function condoQO(slug: string) {
   });
 }
 
-function propsQO(condoName: string, nQuery: string | undefined) {
+type CondoQueryKeys = {
+  name: string;
+  address: string | null;
+  neighborhood: string | null;
+  nQuery: string | undefined;
+};
+
+function propsQO(k: CondoQueryKeys) {
   return queryOptions({
-    queryKey: ["condominium-properties", condoName, nQuery],
+    queryKey: ["condominium-properties", k.name, k.address, k.neighborhood, k.nQuery],
     queryFn: () =>
       getPropertiesForCondominium({
-        data: { condoName, neighborhoodQuery: nQuery },
+        data: {
+          condoName: k.name,
+          condoAddress: k.address,
+          condoNeighborhood: k.neighborhood,
+          neighborhoodQuery: k.nQuery,
+        },
       }),
     staleTime: 30_000,
   });
@@ -59,14 +71,22 @@ function nearbyCondosQO(bairroSlug: string | null, excludeSlug: string) {
   });
 }
 
-function refsQO(condoName: string, nQuery: string | undefined) {
+function refsQO(k: CondoQueryKeys) {
   return queryOptions({
-    queryKey: ["condo-value-refs", condoName, nQuery],
+    queryKey: ["condo-value-refs", k.name, k.address, k.neighborhood, k.nQuery],
     queryFn: () =>
-      getCondoValueRefs({ data: { condoName, neighborhoodQuery: nQuery } }),
+      getCondoValueRefs({
+        data: {
+          condoName: k.name,
+          condoAddress: k.address,
+          condoNeighborhood: k.neighborhood,
+          neighborhoodQuery: k.nQuery,
+        },
+      }),
     staleTime: 60_000,
   });
 }
+
 
 function formatCep(cep: string | null | undefined): string | null {
   if (!cep) return null;
@@ -116,16 +136,17 @@ export const Route = createFileRoute("/condominio/$slug")({
     const condo = await context.queryClient.ensureQueryData(condoQO(params.slug));
     if (!condo) throw notFound();
     const nInfo = getNeighborhood(condo.bairro_slug ?? "");
+    const nQuery = nInfo?.query ?? condo.normalized_neighborhood ?? undefined;
+    const k: CondoQueryKeys = {
+      name: condo.name,
+      address: condo.address,
+      neighborhood: condo.normalized_neighborhood,
+      nQuery,
+    };
     await Promise.all([
-      context.queryClient.ensureQueryData(
-        propsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
-      ),
-      context.queryClient.ensureQueryData(
-        nearbyCondosQO(condo.bairro_slug, condo.slug),
-      ),
-      context.queryClient.ensureQueryData(
-        refsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
-      ),
+      context.queryClient.ensureQueryData(propsQO(k)),
+      context.queryClient.ensureQueryData(nearbyCondosQO(condo.bairro_slug, condo.slug)),
+      context.queryClient.ensureQueryData(refsQO(k)),
     ]);
     return { condo };
   },
@@ -264,13 +285,16 @@ export const Route = createFileRoute("/condominio/$slug")({
 function CondominioPage() {
   const { condo } = Route.useLoaderData();
   const nInfo = getNeighborhood(condo.bairro_slug ?? "");
-  const props = useQuery(
-    propsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
-  );
+  const nQuery = nInfo?.query ?? condo.normalized_neighborhood ?? undefined;
+  const k: CondoQueryKeys = {
+    name: condo.name,
+    address: condo.address,
+    neighborhood: condo.normalized_neighborhood,
+    nQuery,
+  };
+  const props = useQuery(propsQO(k));
   const nearby = useQuery(nearbyCondosQO(condo.bairro_slug, condo.slug));
-  const refs = useQuery(
-    refsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
-  );
+  const refs = useQuery(refsQO(k));
   const [showMap, setShowMap] = useState(false);
 
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
@@ -486,8 +510,14 @@ function CondominioPage() {
           {/* Imóveis disponíveis */}
           <section className="mt-14">
             <h2 className="font-display text-2xl tracking-tight">
-              Imóveis disponíveis no {condo.name}
+              Imóveis publicados no {condo.name}
             </h2>
+            {hasProps && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                Os imóveis abaixo foram associados a este condomínio por correspondência de
+                endereço (logradouro e número).
+              </p>
+            )}
             {props.isLoading ? (
               <p className="mt-3 text-sm text-muted-foreground">Carregando…</p>
             ) : hasProps ? (
@@ -499,10 +529,9 @@ function CondominioPage() {
             ) : (
               <div className="mt-4 rounded-2xl border border-dashed border-border bg-card p-6">
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  No momento, não há imóveis publicados neste condomínio na base de Michele dos
-                  Imóveis. Michele pode indicar oportunidades publicadas, imóveis semelhantes na
-                  região ou opções consultadas diretamente no atendimento. Em alguns casos, também
-                  podem existir oportunidades não divulgadas publicamente.
+                  No momento, não há imóveis publicados neste condomínio com associação
+                  confirmada por endereço na base de Michele dos Imóveis. Você ainda pode
+                  consultar oportunidades no atendimento ou ver imóveis próximos no bairro.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <a
@@ -534,8 +563,8 @@ function CondominioPage() {
                 Imóveis próximos em {bairro}
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Opções publicadas no mesmo bairro ou em regiões próximas, selecionadas a partir da
-                base ativa da Michele dos Imóveis.
+                Opções publicadas no mesmo bairro ou em regiões próximas. Esses imóveis não
+                necessariamente pertencem ao {condo.name}.
               </p>
               <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {props.data!.nearby.slice(0, 6).map((p) => (
@@ -853,11 +882,12 @@ function ValueRefsSection({
         ))}
       </div>
       <p className="mt-4 text-xs leading-relaxed text-muted-foreground max-w-3xl">
-        Os valores apresentados são referências aproximadas calculadas a partir dos imóveis
-        publicados na base de Michele dos Imóveis ou de informações cadastradas. Condomínio,
-        IPTU, disponibilidade, metragens e demais dados podem variar conforme unidade,
-        atualização cadastral e negociação. As informações devem ser confirmadas no atendimento
-        antes de qualquer decisão.
+        {isCondo
+          ? "Os valores apresentados são referências aproximadas calculadas a partir dos imóveis publicados na base de Michele dos Imóveis com associação de endereço."
+          : "Os valores apresentados são referências aproximadas calculadas a partir dos imóveis publicados no bairro, e não necessariamente refletem imóveis deste condomínio."}{" "}
+        Condomínio, IPTU, disponibilidade, metragens e demais dados podem variar conforme
+        unidade, atualização cadastral e negociação. As informações devem ser confirmadas no
+        atendimento antes de qualquer decisão.
       </p>
     </section>
   );

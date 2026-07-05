@@ -173,7 +173,7 @@ export const listActiveSlugs = createServerFn({ method: "GET" }).handler(
 );
 
 const PROP_LIST_COLS =
-  "id, code, title, neighborhood, city, price_brl, area_m2, bedrooms, bathrooms, cover_image, featured, is_launch, property_photos(url, position)";
+  "id, code, title, address, neighborhood, city, price_brl, area_m2, bedrooms, bathrooms, cover_image, featured, is_launch, property_photos(url, position)";
 
 type PhotoJoin = { url: string; position: number };
 function normalizeProperty(row: Record<string, unknown>): PropertyListItem {
@@ -186,10 +186,117 @@ function normalizeProperty(row: Record<string, unknown>): PropertyListItem {
   return { ...(rest as Omit<PropertyListItem, "images">), images } as PropertyListItem;
 }
 
+// ---------------------------------------------------------------------------
+// Address-based matching (logradouro + número). condo_name NÃO é usado sozinho.
+// ---------------------------------------------------------------------------
+
+function stripAccents(s: string): string {
+  return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+/** Normaliza endereço para comparação: minúsculas, sem acento, abreviações expandidas. */
+export function normalizeAddressForMatch(address: string): string {
+  let s = stripAccents(address.toLowerCase());
+  s = s.replace(/[.,;:()]/g, " ");
+  s = s.replace(/\s-\s/g, " ");
+  // n° / nº / n.º / no.
+  s = s.replace(/\bn[º°o]\.?\s*/g, " ");
+  // Abreviações comuns de logradouro
+  s = s.replace(/\brua\b/g, "rua");
+  s = s.replace(/\br\b/g, "rua");
+  s = s.replace(/\bavenida\b/g, "avenida");
+  s = s.replace(/\bav\b/g, "avenida");
+  s = s.replace(/\brodovia\b/g, "rodovia");
+  s = s.replace(/\brod\b/g, "rodovia");
+  s = s.replace(/\btravessa\b/g, "travessa");
+  s = s.replace(/\btv\b/g, "travessa");
+  s = s.replace(/\bservidao\b/g, "servidao");
+  s = s.replace(/\bserv\b/g, "servidao");
+  s = s.replace(/\balameda\b/g, "alameda");
+  s = s.replace(/\bal\b/g, "alameda");
+  s = s.replace(/\s+/g, " ").trim();
+  return s;
+}
+
+/** Extrai logradouro e número principal do endereço. Ignora apto/bloco/torre. */
+export function extractStreetAndNumber(address: string | null | undefined): {
+  street: string | null;
+  number: string | null;
+} {
+  if (!address) return { street: null, number: null };
+  const normalized = normalizeAddressForMatch(address);
+  // Descarta tudo a partir de complementos
+  const cut =
+    normalized.split(
+      /\b(apto|apartamento|apart|bloco|bl|torre|sala|unidade|un|casa|cj|conjunto|fundos)\b/,
+    )[0] ?? normalized;
+
+  // "<logradouro> <número><letra opcional>" antes de vírgula/traço/fim
+  const m = cut.match(/^(.+?)\s+(\d{1,6}[a-z]?)\b/);
+  if (m) {
+    const street = m[1].replace(/\s+/g, " ").trim();
+    const number = m[2].toUpperCase();
+    return { street: street || null, number };
+  }
+  return { street: cut.trim() || null, number: null };
+}
+
+/** Comparação de logradouro tolerante a variações leves (contém / é contido). */
+function streetsEqualish(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  if (a === b) return true;
+  // Só aceita "contém" quando a menor tem pelo menos 8 chars para evitar falso positivo
+  const shorter = a.length < b.length ? a : b;
+  const longer = a.length < b.length ? b : a;
+  if (shorter.length >= 8 && longer.includes(shorter)) return true;
+  return false;
+}
+
+export type MatchResult = {
+  matched: boolean;
+  confidence: "high" | "medium" | "low" | "none";
+  method: "address_exact" | "address_neighborhood" | "name_only" | "nearby_neighborhood" | "none";
+};
+
+/**
+ * Regra pública: match SÓ é "high" quando logradouro + número batem.
+ * condo_name é apenas reforço, nunca critério único.
+ */
+export function matchPropertyToCondominiumByAddress(
+  property: { address: string | null; neighborhood?: string | null },
+  condominium: { address: string | null; normalized_neighborhood?: string | null },
+): MatchResult {
+  const c = extractStreetAndNumber(condominium.address);
+  const p = extractStreetAndNumber(property.address);
+
+  if (c.street && c.number && p.street && p.number) {
+    if (streetsEqualish(c.street, p.street) && c.number === p.number) {
+      const cNb = condominium.normalized_neighborhood
+        ? stripAccents(condominium.normalized_neighborhood.toLowerCase()).trim()
+        : "";
+      const pNb = property.neighborhood
+        ? stripAccents(property.neighborhood.toLowerCase()).trim()
+        : "";
+      const neighborhoodOk = !cNb || !pNb || cNb === pNb || cNb.includes(pNb) || pNb.includes(cNb);
+      return {
+        matched: true,
+        confidence: neighborhoodOk ? "high" : "medium",
+        method: neighborhoodOk ? "address_exact" : "address_neighborhood",
+      };
+    }
+  }
+  return { matched: false, confidence: "none", method: "none" };
+}
+
 export const getPropertiesForCondominium = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) =>
     z
-      .object({ condoName: z.string().min(1), neighborhoodQuery: z.string().optional() })
+      .object({
+        condoName: z.string().min(1),
+        condoAddress: z.string().nullable().optional(),
+        condoNeighborhood: z.string().nullable().optional(),
+        neighborhoodQuery: z.string().optional(),
+      })
       .parse(input),
   )
   .handler(
@@ -197,36 +304,44 @@ export const getPropertiesForCondominium = createServerFn({ method: "GET" })
       data,
     }): Promise<{ inCondo: PropertyListItem[]; nearby: PropertyListItem[] }> => {
       const supabase = getPublicClient();
-      // Buscar imóveis ativos onde condo_name bate com o nome
-      const like = `%${escapeLike(data.condoName)}%`;
-      const inCondoRes = await supabase
+
+      // Pool candidato: imóveis publicados no mesmo bairro. Se não há bairro,
+      // não conseguimos montar um pool seguro — retornamos vazio para "inCondo".
+      const nbQuery = (data.neighborhoodQuery ?? "").trim();
+      if (!nbQuery) return { inCondo: [], nearby: [] };
+
+      const nb = escapeLike(nbQuery);
+      const poolRes = await supabase
         .from("properties")
         .select(PROP_LIST_COLS)
         .eq("published", true)
-        .ilike("condo_name", like)
+        .ilike("neighborhood", `%${nb}%`)
         .order("created_at", { ascending: false })
-        .limit(24);
-      const inCondo = (inCondoRes.data ?? []).map((r) =>
+        .limit(60);
+
+      const pool = (poolRes.data ?? []).map((r) =>
         normalizeProperty(r as unknown as Record<string, unknown>),
       );
 
-      let nearby: PropertyListItem[] = [];
-      if (data.neighborhoodQuery && data.neighborhoodQuery.trim()) {
-        const nb = escapeLike(data.neighborhoodQuery.trim());
-        const nearbyRes = await supabase
-          .from("properties")
-          .select(PROP_LIST_COLS)
-          .eq("published", true)
-          .ilike("neighborhood", `%${nb}%`)
-          .order("created_at", { ascending: false })
-          .limit(8);
-        const inCondoIds = new Set(inCondo.map((p) => p.id));
-        nearby = (nearbyRes.data ?? [])
-          .map((r) => normalizeProperty(r as unknown as Record<string, unknown>))
-          .filter((p) => !inCondoIds.has(p.id));
+      const condo = {
+        address: data.condoAddress ?? null,
+        normalized_neighborhood: data.condoNeighborhood ?? null,
+      };
+
+      const inCondo: PropertyListItem[] = [];
+      const nearby: PropertyListItem[] = [];
+
+      for (const p of pool) {
+        const prop = p as PropertyListItem & { address?: string | null };
+        const res = matchPropertyToCondominiumByAddress(
+          { address: prop.address ?? null, neighborhood: prop.neighborhood },
+          condo,
+        );
+        if (res.confidence === "high") inCondo.push(prop);
+        else nearby.push(prop);
       }
 
-      return { inCondo, nearby };
+      return { inCondo: inCondo.slice(0, 24), nearby: nearby.slice(0, 8) };
     },
   );
 
@@ -264,6 +379,8 @@ function mode(nums: number[]): number | null {
 }
 
 type StatRow = {
+  address: string | null;
+  neighborhood: string | null;
   price_brl: number | null;
   condo_fee_brl: number | null;
   iptu_brl: number | null;
@@ -292,48 +409,65 @@ function computeRefs(rows: StatRow[], source: "condo" | "neighborhood"): CondoVa
   };
 }
 
-const STAT_COLS = "price_brl, condo_fee_brl, iptu_brl, area_m2, bedrooms, parking_spots";
+const STAT_COLS =
+  "address, neighborhood, price_brl, condo_fee_brl, iptu_brl, area_m2, bedrooms, parking_spots";
+
+const EMPTY_REFS: CondoValueRefs = {
+  source: "none",
+  count: 0,
+  minPrice: null,
+  medianPrice: null,
+  maxPrice: null,
+  avgCondoFee: null,
+  avgIptu: null,
+  avgArea: null,
+  commonBedrooms: null,
+  commonParking: null,
+};
 
 export const getCondoValueRefs = createServerFn({ method: "GET" })
   .inputValidator((input: unknown) =>
     z
-      .object({ condoName: z.string().min(1), neighborhoodQuery: z.string().optional() })
+      .object({
+        condoName: z.string().min(1),
+        condoAddress: z.string().nullable().optional(),
+        condoNeighborhood: z.string().nullable().optional(),
+        neighborhoodQuery: z.string().optional(),
+      })
       .parse(input),
   )
   .handler(async ({ data }): Promise<CondoValueRefs> => {
     const supabase = getPublicClient();
-    const like = `%${escapeLike(data.condoName)}%`;
-    const inCondoRes = await supabase
+    const nbQuery = (data.neighborhoodQuery ?? "").trim();
+    if (!nbQuery) return EMPTY_REFS;
+
+    const nb = escapeLike(nbQuery);
+    const poolRes = await supabase
       .from("properties")
       .select(STAT_COLS)
       .eq("published", true)
-      .ilike("condo_name", like)
-      .limit(200);
-    const inRows = (inCondoRes.data ?? []) as unknown as StatRow[];
-    if (inRows.length >= 2) return computeRefs(inRows, "condo");
+      .ilike("neighborhood", `%${nb}%`)
+      .limit(400);
 
-    if (data.neighborhoodQuery && data.neighborhoodQuery.trim()) {
-      const nb = escapeLike(data.neighborhoodQuery.trim());
-      const nearbyRes = await supabase
-        .from("properties")
-        .select(STAT_COLS)
-        .eq("published", true)
-        .ilike("neighborhood", `%${nb}%`)
-        .limit(200);
-      const nbRows = (nearbyRes.data ?? []) as unknown as StatRow[];
-      if (nbRows.length >= 3) return computeRefs(nbRows, "neighborhood");
-    }
-    return {
-      source: "none",
-      count: 0,
-      minPrice: null,
-      medianPrice: null,
-      maxPrice: null,
-      avgCondoFee: null,
-      avgIptu: null,
-      avgArea: null,
-      commonBedrooms: null,
-      commonParking: null,
+    const pool = (poolRes.data ?? []) as unknown as StatRow[];
+    const condo = {
+      address: data.condoAddress ?? null,
+      normalized_neighborhood: data.condoNeighborhood ?? null,
     };
+
+    const inCondo: StatRow[] = [];
+    for (const row of pool) {
+      const res = matchPropertyToCondominiumByAddress(
+        { address: row.address, neighborhood: row.neighborhood },
+        condo,
+      );
+      if (res.confidence === "high") inCondo.push(row);
+    }
+
+    // Referências do condomínio só com match de endereço de alta confiança
+    if (inCondo.length >= 2) return computeRefs(inCondo, "condo");
+    if (pool.length >= 3) return computeRefs(pool, "neighborhood");
+    return EMPTY_REFS;
   });
+
 
