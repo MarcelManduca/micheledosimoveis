@@ -123,6 +123,9 @@ export const Route = createFileRoute("/condominio/$slug")({
       context.queryClient.ensureQueryData(
         nearbyCondosQO(condo.bairro_slug, condo.slug),
       ),
+      context.queryClient.ensureQueryData(
+        refsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
+      ),
     ]);
     return { condo };
   },
