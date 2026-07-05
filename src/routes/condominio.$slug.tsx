@@ -31,12 +31,24 @@ function condoQO(slug: string) {
   });
 }
 
-function propsQO(condoName: string, nQuery: string | undefined) {
+type CondoQueryKeys = {
+  name: string;
+  address: string | null;
+  neighborhood: string | null;
+  nQuery: string | undefined;
+};
+
+function propsQO(k: CondoQueryKeys) {
   return queryOptions({
-    queryKey: ["condominium-properties", condoName, nQuery],
+    queryKey: ["condominium-properties", k.name, k.address, k.neighborhood, k.nQuery],
     queryFn: () =>
       getPropertiesForCondominium({
-        data: { condoName, neighborhoodQuery: nQuery },
+        data: {
+          condoName: k.name,
+          condoAddress: k.address,
+          condoNeighborhood: k.neighborhood,
+          neighborhoodQuery: k.nQuery,
+        },
       }),
     staleTime: 30_000,
   });
@@ -59,14 +71,22 @@ function nearbyCondosQO(bairroSlug: string | null, excludeSlug: string) {
   });
 }
 
-function refsQO(condoName: string, nQuery: string | undefined) {
+function refsQO(k: CondoQueryKeys) {
   return queryOptions({
-    queryKey: ["condo-value-refs", condoName, nQuery],
+    queryKey: ["condo-value-refs", k.name, k.address, k.neighborhood, k.nQuery],
     queryFn: () =>
-      getCondoValueRefs({ data: { condoName, neighborhoodQuery: nQuery } }),
+      getCondoValueRefs({
+        data: {
+          condoName: k.name,
+          condoAddress: k.address,
+          condoNeighborhood: k.neighborhood,
+          neighborhoodQuery: k.nQuery,
+        },
+      }),
     staleTime: 60_000,
   });
 }
+
 
 function formatCep(cep: string | null | undefined): string | null {
   if (!cep) return null;
