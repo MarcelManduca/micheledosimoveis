@@ -526,51 +526,98 @@ function CondominioPage() {
             </section>
           )}
 
-          {/* Localização (movida para cima) */}
-          {(mapEmbed || condo.address) && (
-            <section className="mt-14">
-              <h2 className="font-display text-2xl tracking-tight">
-                Localização do {condo.name}
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-3xl">
-                O {condo.name} fica em {condo.address ?? bairro}, no bairro {bairro}, em{" "}
-                {condo.city}/{condo.state}. A localização é um dos principais critérios para
-                avaliar um imóvel, junto com metragem, posição, conservação, vagas, vista e
-                liquidez da região.
-              </p>
-              {mapEmbed && (
-                <div className="mt-4 overflow-hidden rounded-2xl ring-1 ring-black/5">
-                  {showMap ? (
-                    <iframe
-                      title={`Mapa — ${condo.name}`}
-                      src={mapEmbed}
-                      className="h-[380px] w-full border-0"
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                    />
-                  ) : (
-                    <button
-                      onClick={() => setShowMap(true)}
-                      className="flex h-[220px] w-full flex-col items-center justify-center gap-2 bg-secondary text-sm text-muted-foreground hover:bg-secondary/80"
-                    >
-                      <MapPin className="h-6 w-6" />
-                      Ver mapa da localização
-                    </button>
-                  )}
+          {/* Localização */}
+          <section className="mt-14">
+            <h2 className="font-display text-2xl tracking-tight">
+              Localização do {condo.name}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground leading-relaxed max-w-3xl">
+              O {condo.name} fica em {condo.address ?? bairro}, no bairro {bairro}, em{" "}
+              {condo.city}/{condo.state}. A localização é um dos principais critérios para
+              avaliar um imóvel, junto com metragem, posição, conservação, vagas, vista e
+              liquidez da região.
+            </p>
+
+            <div className="mt-5 rounded-2xl bg-card p-4 ring-1 ring-black/5">
+              <dl className="grid gap-2 text-sm sm:grid-cols-2">
+                {condo.address && (
+                  <div>
+                    <dt className="text-[11px] uppercase tracking-widest text-muted-foreground">Endereço</dt>
+                    <dd className="mt-0.5">{condo.address}</dd>
+                  </div>
+                )}
+                <div>
+                  <dt className="text-[11px] uppercase tracking-widest text-muted-foreground">Bairro</dt>
+                  <dd className="mt-0.5">{bairro}</dd>
                 </div>
-              )}
-              {mapLink && (
+                <div>
+                  <dt className="text-[11px] uppercase tracking-widest text-muted-foreground">Cidade / UF</dt>
+                  <dd className="mt-0.5">{condo.city}/{condo.state}</dd>
+                </div>
+              </dl>
+
+              <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-black/5">
+                {showMap && hasCoords ? (
+                  <Suspense
+                    fallback={
+                      <div className="grid h-[360px] w-full place-items-center bg-secondary text-sm text-muted-foreground">
+                        Carregando mapa…
+                      </div>
+                    }
+                  >
+                    <LeafletMap query={leafletQuery} title={condo.name} />
+                  </Suspense>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => hasCoords && setShowMap(true)}
+                    disabled={!hasCoords}
+                    aria-label={
+                      hasCoords
+                        ? `Ver mapa da localização do ${condo.name}`
+                        : `Mapa indisponível para o ${condo.name}`
+                    }
+                    className="flex h-[220px] w-full flex-col items-center justify-center gap-2 bg-secondary text-sm text-muted-foreground hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <MapPin className="h-6 w-6" />
+                    {hasCoords ? (
+                      <>
+                        <span className="font-medium text-foreground">Ver mapa da localização</span>
+                        {condo.address && <span className="text-xs">{condo.address}</span>}
+                      </>
+                    ) : (
+                      <>
+                        <span>Coordenadas não disponíveis.</span>
+                        <span className="text-xs">Use o endereço para abrir no Google Maps.</span>
+                      </>
+                    )}
+                  </button>
+                )}
+              </div>
+
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                {hasCoords && !showMap && (
+                  <button
+                    type="button"
+                    onClick={() => setShowMap(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
+                  >
+                    <MapPin className="h-4 w-4" /> Ver mapa da localização
+                  </button>
+                )}
                 <a
                   href={mapLink}
                   target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+                  rel="noopener noreferrer"
+                  aria-label={`Abrir localização do ${condo.name} no Google Maps`}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-input bg-background px-4 py-2.5 text-sm font-medium hover:bg-secondary"
                 >
                   Abrir no Google Maps <ExternalLink className="h-3.5 w-3.5" />
                 </a>
-              )}
-            </section>
-          )}
+              </div>
+            </div>
+          </section>
+
 
           {/* Sobre o bairro */}
           <section className="mt-14 rounded-2xl bg-card p-6 ring-1 ring-black/5">
