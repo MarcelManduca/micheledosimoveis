@@ -556,6 +556,13 @@ function CondominioPage() {
             </section>
           )}
 
+          {/* Referências de valores */}
+          {refs.data && refs.data.source !== "none" && (
+            <ValueRefsSection refs={refs.data} bairro={bairro} condoName={condo.name} />
+          )}
+
+
+
           {/* Localização */}
           <section className="mt-14">
             <h2 className="font-display text-2xl tracking-tight">
