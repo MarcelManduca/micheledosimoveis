@@ -268,9 +268,13 @@ function CondominioPage() {
     propsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
   );
   const nearby = useQuery(nearbyCondosQO(condo.bairro_slug, condo.slug));
+  const refs = useQuery(
+    refsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
+  );
   const [showMap, setShowMap] = useState(false);
 
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
+  const cep = formatCep(condo.postal_code);
   const inCondoCount = props.data?.inCondo.length ?? 0;
   const nearbyPropsCount = props.data?.nearby.length ?? 0;
   const hasProps = inCondoCount > 0;
@@ -284,7 +288,7 @@ function CondominioPage() {
   const ownerLink =
     WHATSAPP +
     encodeURIComponent(
-      `Olá, Michele. Tenho um imóvel no ${condo.name}, em ${bairro}, e gostaria de avaliar uma estratégia de venda.`,
+      `Olá, Michele. Tenho um imóvel no ${condo.name}, em ${bairro}, e gostaria de avaliar preço e estratégia de venda.`,
     );
   const alertLink =
     WHATSAPP +
