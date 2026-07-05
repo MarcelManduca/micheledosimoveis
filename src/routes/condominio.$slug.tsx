@@ -728,9 +728,9 @@ function CondominioPage() {
               Você tem imóvel no {condo.name}?
             </h2>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-2xl">
-              Michele dos Imóveis pode ajudar na avaliação, posicionamento e estratégia de venda
-              do seu imóvel, inclusive com atendimento discreto e possibilidade de abordagem off
-              market.
+              Michele dos Imóveis pode ajudar na avaliação, posicionamento e divulgação do seu
+              imóvel, considerando preço, apresentação, documentação, público comprador e
+              estratégia comercial.
             </p>
             <a
               href={ownerLink}
@@ -738,7 +738,7 @@ function CondominioPage() {
               rel="noreferrer"
               className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
             >
-              Quero avaliar meu imóvel neste condomínio
+              Quero avaliar meu imóvel
             </a>
           </section>
 
