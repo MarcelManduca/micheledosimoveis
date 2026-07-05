@@ -446,7 +446,7 @@ function CondominioPage() {
                 }
               />
               <SummaryCard
-                label={`Imóveis próximos em ${bairro}`}
+                label={`Imóveis próximos ${bairroPrep}`}
                 value={
                   props.isLoading
                     ? "—"
