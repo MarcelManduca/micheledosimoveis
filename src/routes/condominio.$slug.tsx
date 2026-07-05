@@ -443,6 +443,7 @@ function CondominioPage() {
                 <InfoRow label="Bairro" value={bairro} />
                 <InfoRow label="Cidade" value={condo.city} />
                 <InfoRow label="Estado" value={condo.state} />
+                {cep && <InfoRow label="CEP" value={cep} />}
                 <InfoRow label="Tipo" value="Condomínio residencial" />
                 <InfoRow
                   label="Comodidades principais"
