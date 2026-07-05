@@ -570,9 +570,9 @@ function CondominioPage() {
             </section>
           )}
 
-          {/* Dados do condomínio — apenas quando há match de endereço confirmado */}
-          {refs.data && refs.data.source === "condo" && (
-            <ValueRefsSection refs={refs.data} condoName={condo.name} />
+          {/* Dados do condomínio — somente dados específicos vindos da base */}
+          {(facts.hasAnyQuantitativeData || facts.postalCode) && (
+            <CondoFactsSection facts={facts} condoName={condo.name} />
           )}
 
 
