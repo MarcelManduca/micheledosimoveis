@@ -510,8 +510,14 @@ function CondominioPage() {
           {/* Imóveis disponíveis */}
           <section className="mt-14">
             <h2 className="font-display text-2xl tracking-tight">
-              Imóveis disponíveis no {condo.name}
+              Imóveis publicados no {condo.name}
             </h2>
+            {hasProps && (
+              <p className="mt-2 text-sm text-muted-foreground">
+                Os imóveis abaixo foram associados a este condomínio por correspondência de
+                endereço (logradouro e número).
+              </p>
+            )}
             {props.isLoading ? (
               <p className="mt-3 text-sm text-muted-foreground">Carregando…</p>
             ) : hasProps ? (
@@ -523,10 +529,9 @@ function CondominioPage() {
             ) : (
               <div className="mt-4 rounded-2xl border border-dashed border-border bg-card p-6">
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  No momento, não há imóveis publicados neste condomínio na base de Michele dos
-                  Imóveis. Michele pode indicar oportunidades publicadas, imóveis semelhantes na
-                  região ou opções consultadas diretamente no atendimento. Em alguns casos, também
-                  podem existir oportunidades não divulgadas publicamente.
+                  No momento, não há imóveis publicados neste condomínio com associação
+                  confirmada por endereço na base de Michele dos Imóveis. Você ainda pode
+                  consultar oportunidades no atendimento ou ver imóveis próximos no bairro.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <a
@@ -558,8 +563,8 @@ function CondominioPage() {
                 Imóveis próximos em {bairro}
               </h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Opções publicadas no mesmo bairro ou em regiões próximas, selecionadas a partir da
-                base ativa da Michele dos Imóveis.
+                Opções publicadas no mesmo bairro ou em regiões próximas. Esses imóveis não
+                necessariamente pertencem ao {condo.name}.
               </p>
               <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {props.data!.nearby.slice(0, 6).map((p) => (
