@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQuery, queryOptions } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { MapPin, Phone, ArrowRight, Building2, ExternalLink } from "lucide-react";
 import {
   getCondominiumBySlug,
@@ -12,6 +12,8 @@ import { getNeighborhood } from "@/lib/neighborhoods";
 import { PropertyCard } from "@/components/PropertyCard";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
+
+const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
 const SITE = "https://micheledosimoveis.com.br";
 const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
