@@ -586,9 +586,9 @@ function CondominioPage() {
             </section>
           )}
 
-          {/* Referências de valores */}
-          {refs.data && refs.data.source !== "none" && (
-            <ValueRefsSection refs={refs.data} bairro={bairro} condoName={condo.name} />
+          {/* Dados do condomínio — apenas quando há match de endereço confirmado */}
+          {refs.data && refs.data.source === "condo" && (
+            <ValueRefsSection refs={refs.data} condoName={condo.name} />
           )}
 
 
