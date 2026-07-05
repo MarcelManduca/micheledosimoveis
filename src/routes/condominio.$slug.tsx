@@ -839,39 +839,32 @@ function InfoRow({ label, value, last }: { label: string; value: string; last?: 
 
 function ValueRefsSection({
   refs,
-  bairro,
   condoName,
 }: {
   refs: CondoValueRefs;
-  bairro: string;
   condoName: string;
 }) {
-  const isCondo = refs.source === "condo";
-  const heading = isCondo
-    ? "Referências dos imóveis publicados"
-    : "Referências de imóveis no bairro";
-  const subtitle = isCondo
-    ? `Calculado a partir de ${refs.count} ${refs.count === 1 ? "imóvel publicado" : "imóveis publicados"} no ${condoName}.`
-    : `Calculado a partir de ${refs.count} imóveis publicados em ${bairro}.`;
-
   const items: { label: string; value: string }[] = [];
   if (refs.minPrice != null) items.push({ label: "Preço mínimo", value: brl(refs.minPrice) });
   if (refs.medianPrice != null) items.push({ label: "Preço mediano", value: brl(refs.medianPrice) });
   if (refs.maxPrice != null) items.push({ label: "Preço máximo", value: brl(refs.maxPrice) });
-  if (refs.avgCondoFee != null) items.push({ label: "Condomínio médio", value: brl(refs.avgCondoFee) });
-  if (refs.avgIptu != null) items.push({ label: "IPTU médio", value: brl(refs.avgIptu) });
-  if (refs.avgArea != null) items.push({ label: "Área média", value: `${refs.avgArea} m²` });
+  if (refs.avgCondoFee != null) items.push({ label: "Valor de condomínio", value: brl(refs.avgCondoFee) });
+  if (refs.avgIptu != null) items.push({ label: "IPTU", value: brl(refs.avgIptu) });
+  if (refs.avgArea != null) items.push({ label: "Área das unidades", value: `${refs.avgArea} m²` });
   if (refs.commonBedrooms != null)
-    items.push({ label: "Dormitórios mais comuns", value: String(refs.commonBedrooms) });
+    items.push({ label: "Dormitórios", value: String(refs.commonBedrooms) });
   if (refs.commonParking != null)
-    items.push({ label: "Vagas mais comuns", value: String(refs.commonParking) });
+    items.push({ label: "Vagas", value: String(refs.commonParking) });
 
   if (items.length === 0) return null;
 
   return (
     <section className="mt-14">
-      <h2 className="font-display text-2xl tracking-tight">{heading}</h2>
-      <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
+      <h2 className="font-display text-2xl tracking-tight">Dados do condomínio</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Calculado a partir de imóveis publicados no {condoName} com associação confirmada por
+        endereço.
+      </p>
       <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((i) => (
           <div key={i.label} className="rounded-xl bg-card p-4 ring-1 ring-black/5">
@@ -883,13 +876,13 @@ function ValueRefsSection({
         ))}
       </div>
       <p className="mt-4 text-xs leading-relaxed text-muted-foreground max-w-3xl">
-        {isCondo
-          ? "Os valores apresentados são referências aproximadas calculadas a partir dos imóveis publicados na base de Michele dos Imóveis com associação de endereço."
-          : "Os valores apresentados são referências aproximadas calculadas a partir dos imóveis publicados no bairro, e não necessariamente refletem imóveis deste condomínio."}{" "}
-        Condomínio, IPTU, disponibilidade, metragens e demais dados podem variar conforme
-        unidade, atualização cadastral e negociação. As informações devem ser confirmadas no
-        atendimento antes de qualquer decisão.
+        As informações apresentadas são referências aproximadas e podem variar conforme unidade,
+        atualização cadastral, documentação, negociação e disponibilidade. Michele dos Imóveis
+        não se responsabiliza por divergências ou alterações nesses dados. Todas as informações
+        devem ser confirmadas no atendimento antes de qualquer decisão de compra, venda ou
+        avaliação.
       </p>
     </section>
   );
 }
+
