@@ -5,15 +5,20 @@ import { MapPin, Phone, ArrowRight, Building2, ExternalLink } from "lucide-react
 import {
   getCondominiumBySlug,
   getPropertiesForCondominium,
+  getCondoValueRefs,
   listCondominiums,
   type CondominiumDetail,
+  type CondoValueRefs,
 } from "@/lib/condominiums.functions";
 import { getNeighborhood } from "@/lib/neighborhoods";
 import { PropertyCard } from "@/components/PropertyCard";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
+import MapPlaceholder from "@/components/MapPlaceholder";
+import { brl } from "@/lib/format";
 
 const LeafletMap = lazy(() => import("@/components/LeafletMap"));
+
 
 const SITE = "https://micheledosimoveis.com.br";
 const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
