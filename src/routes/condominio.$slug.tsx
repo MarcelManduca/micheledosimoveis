@@ -71,21 +71,6 @@ function nearbyCondosQO(bairroSlug: string | null, excludeSlug: string) {
   });
 }
 
-function refsQO(k: CondoQueryKeys) {
-  return queryOptions({
-    queryKey: ["condo-value-refs", k.name, k.address, k.neighborhood, k.nQuery],
-    queryFn: () =>
-      getCondoValueRefs({
-        data: {
-          condoName: k.name,
-          condoAddress: k.address,
-          condoNeighborhood: k.neighborhood,
-          neighborhoodQuery: k.nQuery,
-        },
-      }),
-    staleTime: 60_000,
-  });
-}
 
 
 function formatCep(cep: string | null | undefined): string | null {
