@@ -14,6 +14,66 @@ export type Database = {
   }
   public: {
     Tables: {
+      condo_import_staging: {
+        Row: {
+          a1: number | null
+          a2: number | null
+          b1: number | null
+          b2: number | null
+          cf: number | null
+          er: boolean
+          h1: number | null
+          h2: number | null
+          ip: number | null
+          loaded_at: string
+          n: string
+          ns: string
+          p1: number | null
+          p2: number | null
+          pc: string | null
+          sr: string
+          y: number | null
+        }
+        Insert: {
+          a1?: number | null
+          a2?: number | null
+          b1?: number | null
+          b2?: number | null
+          cf?: number | null
+          er?: boolean
+          h1?: number | null
+          h2?: number | null
+          ip?: number | null
+          loaded_at?: string
+          n: string
+          ns: string
+          p1?: number | null
+          p2?: number | null
+          pc?: string | null
+          sr: string
+          y?: number | null
+        }
+        Update: {
+          a1?: number | null
+          a2?: number | null
+          b1?: number | null
+          b2?: number | null
+          cf?: number | null
+          er?: boolean
+          h1?: number | null
+          h2?: number | null
+          ip?: number | null
+          loaded_at?: string
+          n?: string
+          ns?: string
+          p1?: number | null
+          p2?: number | null
+          pc?: string | null
+          sr?: string
+          y?: number | null
+        }
+        Relationships: []
+      }
       condominiums: {
         Row: {
           address: string | null
@@ -331,6 +391,17 @@ export type Database = {
         }
         Returns: boolean
       }
+      merge_condos_from_staging: {
+        Args: never
+        Returns: {
+          inserted_count: number
+          skipped_count: number
+          total_staged: number
+          updated_count: number
+        }[]
+      }
+      normalize_condo_slug: { Args: { s: string }; Returns: string }
+      strip_accents_pt: { Args: { s: string }; Returns: string }
     }
     Enums: {
       app_role: "admin"
