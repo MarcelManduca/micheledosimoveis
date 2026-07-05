@@ -5,15 +5,20 @@ import { MapPin, Phone, ArrowRight, Building2, ExternalLink } from "lucide-react
 import {
   getCondominiumBySlug,
   getPropertiesForCondominium,
+  getCondoValueRefs,
   listCondominiums,
   type CondominiumDetail,
+  type CondoValueRefs,
 } from "@/lib/condominiums.functions";
 import { getNeighborhood } from "@/lib/neighborhoods";
 import { PropertyCard } from "@/components/PropertyCard";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
+import MapPlaceholder from "@/components/MapPlaceholder";
+import { brl } from "@/lib/format";
 
 const LeafletMap = lazy(() => import("@/components/LeafletMap"));
+
 
 const SITE = "https://micheledosimoveis.com.br";
 const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
@@ -54,6 +59,22 @@ function nearbyCondosQO(bairroSlug: string | null, excludeSlug: string) {
   });
 }
 
+function refsQO(condoName: string, nQuery: string | undefined) {
+  return queryOptions({
+    queryKey: ["condo-value-refs", condoName, nQuery],
+    queryFn: () =>
+      getCondoValueRefs({ data: { condoName, neighborhoodQuery: nQuery } }),
+    staleTime: 60_000,
+  });
+}
+
+function formatCep(cep: string | null | undefined): string | null {
+  if (!cep) return null;
+  const digits = cep.replace(/\D/g, "");
+  if (digits.length !== 8) return null;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
 function buildFaq(condo: CondominiumDetail, hasProperties: boolean) {
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
   const addr = condo.address ?? bairro;
@@ -66,22 +87,22 @@ function buildFaq(condo: CondominiumDetail, hasProperties: boolean) {
       a: `O ${condo.name} fica em ${addr}, no bairro ${bairro}, em ${condo.city}/${condo.state}.`,
     },
     {
-      q: `O ${condo.name} tem imóveis disponíveis?`,
-      a: hasProperties
-        ? `Sim. Nesta página estão listados os imóveis publicados por Michele dos Imóveis neste condomínio. A disponibilidade depende dos imóveis ativos na base e pode ser confirmada diretamente com Michele.`
-        : `A disponibilidade depende dos imóveis ativos publicados na base de Michele dos Imóveis. Se não houver imóvel publicado no momento, Michele pode consultar oportunidades off market ou opções semelhantes na região.`,
-    },
-    {
       q: `Quais comodidades existem no ${condo.name}?`,
       a: `As comodidades conhecidas incluem ${amenList}. Essas informações devem ser confirmadas no atendimento antes de qualquer decisão de compra ou venda.`,
     },
     {
-      q: `Como saber o valor de um imóvel no ${condo.name}?`,
-      a: `O valor depende de fatores como metragem, posição, conservação, vagas, vista, padrão do imóvel e momento de mercado. Michele pode ajudar com uma avaliação personalizada.`,
+      q: `Há imóveis disponíveis no ${condo.name}?`,
+      a: hasProperties
+        ? `Sim. Nesta página estão listados os imóveis publicados por Michele dos Imóveis neste condomínio. A disponibilidade depende dos imóveis ativos na base e pode ser confirmada diretamente com Michele.`
+        : `A disponibilidade depende dos imóveis publicados na base de Michele dos Imóveis. Se não houver imóvel publicado no momento, Michele pode indicar opções semelhantes na região. Em alguns casos, também podem existir oportunidades não divulgadas publicamente.`,
     },
     {
-      q: `Posso vender meu imóvel nesse condomínio com discrição?`,
-      a: `Sim. A venda pode ser conduzida com estratégia discreta, incluindo abordagem off market, apresentação seletiva e qualificação de compradores.`,
+      q: `Como saber o valor de um imóvel no ${condo.name}?`,
+      a: `O valor depende de fatores como metragem, posição, conservação, vagas, vista, padrão da unidade, condomínio, IPTU e momento de mercado. Michele pode ajudar com uma avaliação personalizada.`,
+    },
+    {
+      q: `Como anunciar um imóvel no ${condo.name}?`,
+      a: `Proprietários que possuem imóvel no ${condo.name} podem falar com Michele para avaliar preço, posicionamento, documentação, apresentação comercial e estratégia de divulgação. A melhor abordagem depende do perfil do imóvel, do momento de mercado e do objetivo do proprietário.`,
     },
     {
       q: `A Michele atende compradores interessados neste condomínio?`,
@@ -101,6 +122,9 @@ export const Route = createFileRoute("/condominio/$slug")({
       ),
       context.queryClient.ensureQueryData(
         nearbyCondosQO(condo.bairro_slug, condo.slug),
+      ),
+      context.queryClient.ensureQueryData(
+        refsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
       ),
     ]);
     return { condo };
@@ -132,6 +156,7 @@ export const Route = createFileRoute("/condominio/$slug")({
         streetAddress: condo.address ?? undefined,
         addressLocality: condo.city,
         addressRegion: condo.state,
+        postalCode: formatCep(condo.postal_code) ?? undefined,
         addressCountry: "BR",
       },
       amenityFeature: condo.amenities.map((a: string) => ({
@@ -243,9 +268,13 @@ function CondominioPage() {
     propsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
   );
   const nearby = useQuery(nearbyCondosQO(condo.bairro_slug, condo.slug));
+  const refs = useQuery(
+    refsQO(condo.name, nInfo?.query ?? condo.normalized_neighborhood ?? undefined),
+  );
   const [showMap, setShowMap] = useState(false);
 
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
+  const cep = formatCep(condo.postal_code);
   const inCondoCount = props.data?.inCondo.length ?? 0;
   const nearbyPropsCount = props.data?.nearby.length ?? 0;
   const hasProps = inCondoCount > 0;
@@ -259,7 +288,7 @@ function CondominioPage() {
   const ownerLink =
     WHATSAPP +
     encodeURIComponent(
-      `Olá, Michele. Tenho um imóvel no ${condo.name}, em ${bairro}, e gostaria de avaliar uma estratégia de venda.`,
+      `Olá, Michele. Tenho um imóvel no ${condo.name}, em ${bairro}, e gostaria de avaliar preço e estratégia de venda.`,
     );
   const alertLink =
     WHATSAPP +
@@ -414,6 +443,7 @@ function CondominioPage() {
                 <InfoRow label="Bairro" value={bairro} />
                 <InfoRow label="Cidade" value={condo.city} />
                 <InfoRow label="Estado" value={condo.state} />
+                {cep && <InfoRow label="CEP" value={cep} />}
                 <InfoRow label="Tipo" value="Condomínio residencial" />
                 <InfoRow
                   label="Comodidades principais"
@@ -470,8 +500,9 @@ function CondominioPage() {
               <div className="mt-4 rounded-2xl border border-dashed border-border bg-card p-6">
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   No momento, não há imóveis publicados neste condomínio na base de Michele dos
-                  Imóveis. Ainda assim, podem existir oportunidades discretas, imóveis off market
-                  ou opções semelhantes na região.
+                  Imóveis. Michele pode indicar oportunidades publicadas, imóveis semelhantes na
+                  região ou opções consultadas diretamente no atendimento. Em alguns casos, também
+                  podem existir oportunidades não divulgadas publicamente.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <a
@@ -525,6 +556,13 @@ function CondominioPage() {
             </section>
           )}
 
+          {/* Referências de valores */}
+          {refs.data && refs.data.source !== "none" && (
+            <ValueRefsSection refs={refs.data} bairro={bairro} condoName={condo.name} />
+          )}
+
+
+
           {/* Localização */}
           <section className="mt-14">
             <h2 className="font-display text-2xl tracking-tight">
@@ -538,9 +576,9 @@ function CondominioPage() {
             </p>
 
             <div className="mt-5 rounded-2xl bg-card p-4 ring-1 ring-black/5">
-              <dl className="grid gap-2 text-sm sm:grid-cols-2">
+              <dl className="grid gap-2 text-sm sm:grid-cols-3">
                 {condo.address && (
-                  <div>
+                  <div className="sm:col-span-3">
                     <dt className="text-[11px] uppercase tracking-widest text-muted-foreground">Endereço</dt>
                     <dd className="mt-0.5">{condo.address}</dd>
                   </div>
@@ -553,6 +591,12 @@ function CondominioPage() {
                   <dt className="text-[11px] uppercase tracking-widest text-muted-foreground">Cidade / UF</dt>
                   <dd className="mt-0.5">{condo.city}/{condo.state}</dd>
                 </div>
+                {cep && (
+                  <div>
+                    <dt className="text-[11px] uppercase tracking-widest text-muted-foreground">CEP</dt>
+                    <dd className="mt-0.5">{cep}</dd>
+                  </div>
+                )}
               </dl>
 
               <div className="mt-4 overflow-hidden rounded-xl ring-1 ring-black/5">
@@ -567,30 +611,12 @@ function CondominioPage() {
                     <LeafletMap query={leafletQuery} title={condo.name} />
                   </Suspense>
                 ) : (
-                  <button
-                    type="button"
-                    onClick={() => hasCoords && setShowMap(true)}
-                    disabled={!hasCoords}
-                    aria-label={
-                      hasCoords
-                        ? `Ver mapa da localização do ${condo.name}`
-                        : `Mapa indisponível para o ${condo.name}`
-                    }
-                    className="flex h-[220px] w-full flex-col items-center justify-center gap-2 bg-secondary text-sm text-muted-foreground hover:bg-secondary/80 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    <MapPin className="h-6 w-6" />
-                    {hasCoords ? (
-                      <>
-                        <span className="font-medium text-foreground">Ver mapa da localização</span>
-                        {condo.address && <span className="text-xs">{condo.address}</span>}
-                      </>
-                    ) : (
-                      <>
-                        <span>Coordenadas não disponíveis.</span>
-                        <span className="text-xs">Use o endereço para abrir no Google Maps.</span>
-                      </>
-                    )}
-                  </button>
+                  <MapPlaceholder
+                    title={condo.name}
+                    address={condo.address}
+                    canOpen={hasCoords}
+                    onOpen={() => setShowMap(true)}
+                  />
                 )}
               </div>
 
@@ -702,9 +728,9 @@ function CondominioPage() {
               Você tem imóvel no {condo.name}?
             </h2>
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed max-w-2xl">
-              Michele dos Imóveis pode ajudar na avaliação, posicionamento e estratégia de venda
-              do seu imóvel, inclusive com atendimento discreto e possibilidade de abordagem off
-              market.
+              Michele dos Imóveis pode ajudar na avaliação, posicionamento e divulgação do seu
+              imóvel, considerando preço, apresentação, documentação, público comprador e
+              estratégia comercial.
             </p>
             <a
               href={ownerLink}
@@ -712,7 +738,7 @@ function CondominioPage() {
               rel="noreferrer"
               className="mt-4 inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
             >
-              Quero avaliar meu imóvel neste condomínio
+              Quero avaliar meu imóvel
             </a>
           </section>
 
@@ -778,5 +804,61 @@ function InfoRow({ label, value, last }: { label: string; value: string; last?: 
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="text-right">{value}</dd>
     </div>
+  );
+}
+
+function ValueRefsSection({
+  refs,
+  bairro,
+  condoName,
+}: {
+  refs: CondoValueRefs;
+  bairro: string;
+  condoName: string;
+}) {
+  const isCondo = refs.source === "condo";
+  const heading = isCondo
+    ? "Referências dos imóveis publicados"
+    : "Referências de imóveis no bairro";
+  const subtitle = isCondo
+    ? `Calculado a partir de ${refs.count} ${refs.count === 1 ? "imóvel publicado" : "imóveis publicados"} no ${condoName}.`
+    : `Calculado a partir de ${refs.count} imóveis publicados em ${bairro}.`;
+
+  const items: { label: string; value: string }[] = [];
+  if (refs.minPrice != null) items.push({ label: "Preço mínimo", value: brl(refs.minPrice) });
+  if (refs.medianPrice != null) items.push({ label: "Preço mediano", value: brl(refs.medianPrice) });
+  if (refs.maxPrice != null) items.push({ label: "Preço máximo", value: brl(refs.maxPrice) });
+  if (refs.avgCondoFee != null) items.push({ label: "Condomínio médio", value: brl(refs.avgCondoFee) });
+  if (refs.avgIptu != null) items.push({ label: "IPTU médio", value: brl(refs.avgIptu) });
+  if (refs.avgArea != null) items.push({ label: "Área média", value: `${refs.avgArea} m²` });
+  if (refs.commonBedrooms != null)
+    items.push({ label: "Dormitórios mais comuns", value: String(refs.commonBedrooms) });
+  if (refs.commonParking != null)
+    items.push({ label: "Vagas mais comuns", value: String(refs.commonParking) });
+
+  if (items.length === 0) return null;
+
+  return (
+    <section className="mt-14">
+      <h2 className="font-display text-2xl tracking-tight">{heading}</h2>
+      <p className="mt-2 text-sm text-muted-foreground">{subtitle}</p>
+      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {items.map((i) => (
+          <div key={i.label} className="rounded-xl bg-card p-4 ring-1 ring-black/5">
+            <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
+              {i.label}
+            </div>
+            <div className="mt-1.5 text-sm font-medium leading-snug">{i.value}</div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-4 text-xs leading-relaxed text-muted-foreground max-w-3xl">
+        Os valores apresentados são referências aproximadas calculadas a partir dos imóveis
+        publicados na base de Michele dos Imóveis ou de informações cadastradas. Condomínio,
+        IPTU, disponibilidade, metragens e demais dados podem variar conforme unidade,
+        atualização cadastral e negociação. As informações devem ser confirmadas no atendimento
+        antes de qualquer decisão.
+      </p>
+    </section>
   );
 }

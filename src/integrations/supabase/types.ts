@@ -31,6 +31,7 @@ export type Database = {
           neighborhood: string | null
           normalized_name: string
           normalized_neighborhood: string | null
+          postal_code: string | null
           publication_status: string
           seo_description: string | null
           seo_title: string | null
@@ -55,6 +56,7 @@ export type Database = {
           neighborhood?: string | null
           normalized_name: string
           normalized_neighborhood?: string | null
+          postal_code?: string | null
           publication_status?: string
           seo_description?: string | null
           seo_title?: string | null
@@ -79,6 +81,7 @@ export type Database = {
           neighborhood?: string | null
           normalized_name?: string
           normalized_neighborhood?: string | null
+          postal_code?: string | null
           publication_status?: string
           seo_description?: string | null
           seo_title?: string | null
