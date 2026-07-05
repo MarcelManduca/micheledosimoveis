@@ -798,7 +798,7 @@ function CondominioPage() {
                 Fale com Michele sobre imóveis no {condo.name}
               </h2>
               <p className="mt-2 text-sm opacity-80">
-                Atendimento personalizado para compradores e proprietários em {bairro}.
+                Atendimento personalizado para compradores e proprietários {bairroPrep}.
               </p>
             </div>
             <a
