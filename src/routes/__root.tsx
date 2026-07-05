@@ -174,7 +174,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             { "@type": "PropertyValue", name: "CRECI-J", value: "11463J" },
           ],
           memberOf: { "@type": "Organization", name: "Gralha Imóveis" },
-          sameAs: ["https://www.instagram.com/micheledosimoveis"],
+          sameAs: ["https://www.instagram.com/micheledosimoveis", "https://www.youtube.com/@micheledosimoveis"],
         }),
       },
     ],
