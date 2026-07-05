@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SitemapCondominiosDotxmlRouteImport } from './routes/sitemap-condominios[.]xml'
 import { Route as SitemapBairrosDotxmlRouteImport } from './routes/sitemap-bairros[.]xml'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
@@ -20,8 +21,11 @@ import { Route as AnuncieRouteImport } from './routes/anuncie'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ImoveisIndexRouteImport } from './routes/imoveis.index'
+import { Route as CondominiosIndexRouteImport } from './routes/condominios.index'
 import { Route as ImovelCodeRouteImport } from './routes/imovel.$code'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
+import { Route as CondominiosBairroRouteImport } from './routes/condominios.$bairro'
+import { Route as CondominioSlugRouteImport } from './routes/condominio.$slug'
 import { Route as AdminInteligenciaPortfolioRouteImport } from './routes/admin.inteligencia-portfolio'
 import { Route as ApiPublicHooksSyncPropertiesRouteImport } from './routes/api/public/hooks/sync-properties'
 
@@ -30,6 +34,12 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapCondominiosDotxmlRoute =
+  SitemapCondominiosDotxmlRouteImport.update({
+    id: '/sitemap-condominios.xml',
+    path: '/sitemap-condominios.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const SitemapBairrosDotxmlRoute = SitemapBairrosDotxmlRouteImport.update({
   id: '/sitemap-bairros.xml',
   path: '/sitemap-bairros.xml',
@@ -81,6 +91,11 @@ const ImoveisIndexRoute = ImoveisIndexRouteImport.update({
   path: '/imoveis/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CondominiosIndexRoute = CondominiosIndexRouteImport.update({
+  id: '/condominios/',
+  path: '/condominios/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImovelCodeRoute = ImovelCodeRouteImport.update({
   id: '/imovel/$code',
   path: '/imovel/$code',
@@ -89,6 +104,16 @@ const ImovelCodeRoute = ImovelCodeRouteImport.update({
 const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
   id: '/imoveis/$slug',
   path: '/imoveis/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CondominiosBairroRoute = CondominiosBairroRouteImport.update({
+  id: '/condominios/$bairro',
+  path: '/condominios/$bairro',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CondominioSlugRoute = CondominioSlugRouteImport.update({
+  id: '/condominio/$slug',
+  path: '/condominio/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminInteligenciaPortfolioRoute =
@@ -114,10 +139,14 @@ export interface FileRoutesByFullPath {
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
+  '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
+  '/condominio/$slug': typeof CondominioSlugRoute
+  '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -131,10 +160,14 @@ export interface FileRoutesByTo {
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
+  '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
+  '/condominio/$slug': typeof CondominioSlugRoute
+  '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/condominios': typeof CondominiosIndexRoute
   '/imoveis': typeof ImoveisIndexRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -149,10 +182,14 @@ export interface FileRoutesById {
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
+  '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
+  '/condominio/$slug': typeof CondominioSlugRoute
+  '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -168,10 +205,14 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/privacidade'
     | '/sitemap-bairros.xml'
+    | '/sitemap-condominios.xml'
     | '/sitemap.xml'
     | '/admin/inteligencia-portfolio'
+    | '/condominio/$slug'
+    | '/condominios/$bairro'
     | '/imoveis/$slug'
     | '/imovel/$code'
+    | '/condominios/'
     | '/imoveis/'
     | '/api/public/hooks/sync-properties'
   fileRoutesByTo: FileRoutesByTo
@@ -185,10 +226,14 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/privacidade'
     | '/sitemap-bairros.xml'
+    | '/sitemap-condominios.xml'
     | '/sitemap.xml'
     | '/admin/inteligencia-portfolio'
+    | '/condominio/$slug'
+    | '/condominios/$bairro'
     | '/imoveis/$slug'
     | '/imovel/$code'
+    | '/condominios'
     | '/imoveis'
     | '/api/public/hooks/sync-properties'
   id:
@@ -202,10 +247,14 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/privacidade'
     | '/sitemap-bairros.xml'
+    | '/sitemap-condominios.xml'
     | '/sitemap.xml'
     | '/admin/inteligencia-portfolio'
+    | '/condominio/$slug'
+    | '/condominios/$bairro'
     | '/imoveis/$slug'
     | '/imovel/$code'
+    | '/condominios/'
     | '/imoveis/'
     | '/api/public/hooks/sync-properties'
   fileRoutesById: FileRoutesById
@@ -220,9 +269,13 @@ export interface RootRouteChildren {
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SitemapBairrosDotxmlRoute: typeof SitemapBairrosDotxmlRoute
+  SitemapCondominiosDotxmlRoute: typeof SitemapCondominiosDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  CondominioSlugRoute: typeof CondominioSlugRoute
+  CondominiosBairroRoute: typeof CondominiosBairroRoute
   ImoveisSlugRoute: typeof ImoveisSlugRoute
   ImovelCodeRoute: typeof ImovelCodeRoute
+  CondominiosIndexRoute: typeof CondominiosIndexRoute
   ImoveisIndexRoute: typeof ImoveisIndexRoute
   ApiPublicHooksSyncPropertiesRoute: typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -234,6 +287,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-condominios.xml': {
+      id: '/sitemap-condominios.xml'
+      path: '/sitemap-condominios.xml'
+      fullPath: '/sitemap-condominios.xml'
+      preLoaderRoute: typeof SitemapCondominiosDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap-bairros.xml': {
@@ -306,6 +366,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImoveisIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/condominios/': {
+      id: '/condominios/'
+      path: '/condominios'
+      fullPath: '/condominios/'
+      preLoaderRoute: typeof CondominiosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/imovel/$code': {
       id: '/imovel/$code'
       path: '/imovel/$code'
@@ -318,6 +385,20 @@ declare module '@tanstack/react-router' {
       path: '/imoveis/$slug'
       fullPath: '/imoveis/$slug'
       preLoaderRoute: typeof ImoveisSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/condominios/$bairro': {
+      id: '/condominios/$bairro'
+      path: '/condominios/$bairro'
+      fullPath: '/condominios/$bairro'
+      preLoaderRoute: typeof CondominiosBairroRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/condominio/$slug': {
+      id: '/condominio/$slug'
+      path: '/condominio/$slug'
+      fullPath: '/condominio/$slug'
+      preLoaderRoute: typeof CondominioSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/inteligencia-portfolio': {
@@ -358,9 +439,13 @@ const rootRouteChildren: RootRouteChildren = {
   LlmsDottxtRoute: LlmsDottxtRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SitemapBairrosDotxmlRoute: SitemapBairrosDotxmlRoute,
+  SitemapCondominiosDotxmlRoute: SitemapCondominiosDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  CondominioSlugRoute: CondominioSlugRoute,
+  CondominiosBairroRoute: CondominiosBairroRoute,
   ImoveisSlugRoute: ImoveisSlugRoute,
   ImovelCodeRoute: ImovelCodeRoute,
+  CondominiosIndexRoute: CondominiosIndexRoute,
   ImoveisIndexRoute: ImoveisIndexRoute,
   ApiPublicHooksSyncPropertiesRoute: ApiPublicHooksSyncPropertiesRoute,
 }

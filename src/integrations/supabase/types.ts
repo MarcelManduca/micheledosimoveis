@@ -14,6 +14,81 @@ export type Database = {
   }
   public: {
     Tables: {
+      condominiums: {
+        Row: {
+          address: string | null
+          amenities: string[]
+          bairro_slug: string | null
+          canonical_url: string | null
+          city: string
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          latitude: number | null
+          longitude: number | null
+          name: string
+          neighborhood: string | null
+          normalized_name: string
+          normalized_neighborhood: string | null
+          publication_status: string
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          source_reference_internal: string | null
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[]
+          bairro_slug?: string | null
+          canonical_url?: string | null
+          city?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          neighborhood?: string | null
+          normalized_name: string
+          normalized_neighborhood?: string | null
+          publication_status?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          source_reference_internal?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[]
+          bairro_slug?: string | null
+          canonical_url?: string | null
+          city?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          neighborhood?: string | null
+          normalized_name?: string
+          normalized_neighborhood?: string | null
+          publication_status?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          source_reference_internal?: string | null
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cron_secrets: {
         Row: {
           created_at: string
