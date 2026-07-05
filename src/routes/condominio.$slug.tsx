@@ -500,8 +500,9 @@ function CondominioPage() {
               <div className="mt-4 rounded-2xl border border-dashed border-border bg-card p-6">
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   No momento, não há imóveis publicados neste condomínio na base de Michele dos
-                  Imóveis. Ainda assim, podem existir oportunidades discretas, imóveis off market
-                  ou opções semelhantes na região.
+                  Imóveis. Michele pode indicar oportunidades publicadas, imóveis semelhantes na
+                  região ou opções consultadas diretamente no atendimento. Em alguns casos, também
+                  podem existir oportunidades não divulgadas publicamente.
                 </p>
                 <div className="mt-4 flex flex-wrap gap-3">
                   <a
