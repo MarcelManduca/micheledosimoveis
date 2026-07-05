@@ -59,6 +59,22 @@ function nearbyCondosQO(bairroSlug: string | null, excludeSlug: string) {
   });
 }
 
+function refsQO(condoName: string, nQuery: string | undefined) {
+  return queryOptions({
+    queryKey: ["condo-value-refs", condoName, nQuery],
+    queryFn: () =>
+      getCondoValueRefs({ data: { condoName, neighborhoodQuery: nQuery } }),
+    staleTime: 60_000,
+  });
+}
+
+function formatCep(cep: string | null | undefined): string | null {
+  if (!cep) return null;
+  const digits = cep.replace(/\D/g, "");
+  if (digits.length !== 8) return null;
+  return `${digits.slice(0, 5)}-${digits.slice(5)}`;
+}
+
 function buildFaq(condo: CondominiumDetail, hasProperties: boolean) {
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
   const addr = condo.address ?? bairro;
