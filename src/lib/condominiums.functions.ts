@@ -38,7 +38,7 @@ function getPublicClient() {
 const SUMMARY_COLS =
   "id, slug, name, address, neighborhood, normalized_neighborhood, bairro_slug, amenities";
 const DETAIL_COLS =
-  SUMMARY_COLS + ", city, state, latitude, longitude, description";
+  SUMMARY_COLS + ", city, state, postal_code, latitude, longitude, description";
 
 function escapeLike(term: string) {
   return term.replace(/[%_\\]/g, (m) => `\\${m}`);
