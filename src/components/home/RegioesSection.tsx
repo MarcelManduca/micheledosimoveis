@@ -7,10 +7,14 @@ import { REGIOES } from "@/lib/site-config";
 // mantendo o path crítico do mobile leve. Fallback = mesmo container sem efeito.
 const BorderGlow = lazy(() => import("@/components/BorderGlow"));
 
-function PlainCard({ children }: { children: ReactNode }) {
+function PlainCard({ children, bare = false }: { children: ReactNode; bare?: boolean }) {
   return (
     <div
-      className="h-full rounded-[18px] bg-transparent ring-1 ring-black/5"
+      className={
+        bare
+          ? "h-full rounded-[18px] bg-transparent"
+          : "h-full rounded-[18px] bg-transparent ring-1 ring-black/5"
+      }
       style={{ borderRadius: 18 }}
     >
       {children}
@@ -73,7 +77,7 @@ export function RegioesSection() {
     el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
   };
 
-  const renderCard = (r: (typeof REGIOES)[number]) => {
+  const renderCard = (r: (typeof REGIOES)[number], variant: "desktop" | "mobile" = "desktop") => {
     const linkContent = (
       <Link
         to="/imoveis/$slug"
@@ -90,6 +94,11 @@ export function RegioesSection() {
         <ArrowRight className="h-4 w-4 mt-1.5 sm:mt-2 shrink-0 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
       </Link>
     );
+    // No mobile o efeito BorderGlow é cortado pelo scroller horizontal
+    // (overflow-x cria clipping vertical), então usamos apenas o card limpo.
+    if (variant === "mobile") {
+      return <PlainCard bare>{linkContent}</PlainCard>;
+    }
     return near ? (
       <Suspense fallback={<PlainCard>{linkContent}</PlainCard>}>
         <BorderGlow
@@ -152,7 +161,7 @@ export function RegioesSection() {
                 className="grid grid-cols-1 gap-3 shrink-0 basis-full snap-start px-6"
               >
                 {group.map((r) => (
-                  <li key={r.slug} className="h-full">{renderCard(r)}</li>
+                  <li key={r.slug} className="h-full">{renderCard(r, "mobile")}</li>
                 ))}
               </ul>
             ))}
