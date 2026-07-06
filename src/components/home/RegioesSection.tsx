@@ -77,7 +77,7 @@ export function RegioesSection() {
     el.scrollTo({ left: i * el.clientWidth, behavior: "smooth" });
   };
 
-  const renderCard = (r: (typeof REGIOES)[number], variant: "desktop" | "mobile" = "desktop") => {
+  const renderCard = (r: (typeof REGIOES)[number]) => {
     const linkContent = (
       <Link
         to="/imoveis/$slug"
@@ -94,13 +94,8 @@ export function RegioesSection() {
         <ArrowRight className="h-4 w-4 mt-1.5 sm:mt-2 shrink-0 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
       </Link>
     );
-    // No mobile o efeito BorderGlow é cortado pelo scroller horizontal
-    // (overflow-x cria clipping vertical), então usamos apenas o card limpo.
-    if (variant === "mobile") {
-      return <PlainCard bare>{linkContent}</PlainCard>;
-    }
     return near ? (
-      <Suspense fallback={<PlainCard>{linkContent}</PlainCard>}>
+      <Suspense fallback={<PlainCard bare>{linkContent}</PlainCard>}>
         <BorderGlow
           className="h-full"
           edgeSensitivity={18}
@@ -117,7 +112,7 @@ export function RegioesSection() {
         </BorderGlow>
       </Suspense>
     ) : (
-      <PlainCard>{linkContent}</PlainCard>
+      <PlainCard bare>{linkContent}</PlainCard>
     );
   };
 
@@ -153,15 +148,16 @@ export function RegioesSection() {
           <div
             ref={scrollerRef}
             onScroll={onScroll}
-            className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
             {pages.map((group, i) => (
               <ul
                 key={i}
-                className="grid grid-cols-1 gap-3 shrink-0 basis-full snap-start px-6"
+                style={{ ["--glow-padding" as string]: "10px" }}
+                className="grid grid-cols-1 gap-4 shrink-0 basis-full snap-start px-6"
               >
                 {group.map((r) => (
-                  <li key={r.slug} className="h-full">{renderCard(r, "mobile")}</li>
+                  <li key={r.slug} className="h-full">{renderCard(r)}</li>
                 ))}
               </ul>
             ))}
