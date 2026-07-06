@@ -161,7 +161,7 @@ export function RegioesSection() {
                 className="grid grid-cols-1 gap-3 shrink-0 basis-full snap-start px-6"
               >
                 {group.map((r) => (
-                  <li key={r.slug} className="h-full">{renderCard(r)}</li>
+                  <li key={r.slug} className="h-full">{renderCard(r, "mobile")}</li>
                 ))}
               </ul>
             ))}
