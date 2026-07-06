@@ -38,6 +38,7 @@ export type FiltersValue = {
   bairro?: string;
   dorms?: number;
   faixa?: number; // index in PRECO_FAIXAS
+  code?: string;
 };
 
 export function PropertyFilters({
