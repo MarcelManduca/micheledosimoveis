@@ -148,15 +148,16 @@ export function RegioesSection() {
           <div
             ref={scrollerRef}
             onScroll={onScroll}
-            className="flex snap-x snap-mandatory overflow-x-auto scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+            className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
           >
             {pages.map((group, i) => (
               <ul
                 key={i}
-                className="grid grid-cols-1 gap-3 shrink-0 basis-full snap-start px-6"
+                style={{ ["--glow-padding" as string]: "10px" }}
+                className="grid grid-cols-1 gap-4 shrink-0 basis-full snap-start px-6"
               >
                 {group.map((r) => (
-                  <li key={r.slug} className="h-full">{renderCard(r, "mobile")}</li>
+                  <li key={r.slug} className="h-full">{renderCard(r)}</li>
                 ))}
               </ul>
             ))}
