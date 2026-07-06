@@ -158,6 +158,23 @@ export function PropertyFilters({
         </select>
       </div>
 
+      <div>
+        <label htmlFor="filtro-code" className={labelCls}>Código do imóvel</label>
+        <input
+          id="filtro-code"
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          aria-label="Código do imóvel"
+          placeholder="Ex.: AP1234"
+          className={fieldCls}
+          value={v.code ?? ""}
+          onChange={(e) => setV({ ...v, code: e.target.value || undefined })}
+        />
+      </div>
+
+
+
 
       <button
         type="submit"
