@@ -38,6 +38,7 @@ export type FiltersValue = {
   bairro?: string;
   dorms?: number;
   faixa?: number; // index in PRECO_FAIXAS
+  code?: string;
 };
 
 export function PropertyFilters({
@@ -64,6 +65,11 @@ export function PropertyFilters({
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        const trimmedCode = v.code?.trim();
+        if (trimmedCode) {
+          navigate({ to: "/imovel/$code", params: { code: trimmedCode } });
+          return;
+        }
         const search: Record<string, string | number> = {};
         if (v.tipo) search.tipo = v.tipo;
         if (v.bairro) search.bairro = v.bairro;
@@ -71,7 +77,7 @@ export function PropertyFilters({
         if (v.faixa != null) search.faixa = v.faixa;
         navigate({ to: "/buscar", search });
       }}
-      className={`grid gap-3 sm:grid-cols-2 lg:grid-cols-5 lg:items-end p-4 sm:p-5 rounded-2xl ${
+      className={`grid gap-3 sm:grid-cols-2 lg:grid-cols-6 lg:items-end p-4 sm:p-5 rounded-2xl ${
         isDark
           ? "bg-white/5 ring-1 ring-white/15 backdrop-blur"
           : "bg-card ring-1 ring-black/5 shadow-sm"
@@ -151,6 +157,23 @@ export function PropertyFilters({
           ))}
         </select>
       </div>
+
+      <div>
+        <label htmlFor="filtro-code" className={labelCls}>Código do imóvel</label>
+        <input
+          id="filtro-code"
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          aria-label="Código do imóvel"
+          placeholder="Ex.: AP1234"
+          className={fieldCls}
+          value={v.code ?? ""}
+          onChange={(e) => setV({ ...v, code: e.target.value || undefined })}
+        />
+      </div>
+
+
 
 
       <button
