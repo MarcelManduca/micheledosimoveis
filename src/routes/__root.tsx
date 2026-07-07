@@ -7,12 +7,18 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { ImageProtection } from "../components/ImageProtection";
-import { CookieConsent } from "../components/CookieConsent";
+
+// Deferred: not needed for first paint. Cuts initial JS.
+const ImageProtection = lazy(() =>
+  import("../components/ImageProtection").then((m) => ({ default: m.ImageProtection })),
+);
+const CookieConsent = lazy(() =>
+  import("../components/CookieConsent").then((m) => ({ default: m.CookieConsent })),
+);
 
 function NotFoundComponent() {
   return (
