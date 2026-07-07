@@ -7,12 +7,18 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { ImageProtection } from "../components/ImageProtection";
-import { CookieConsent } from "../components/CookieConsent";
+
+// Deferred: not needed for first paint. Cuts initial JS.
+const ImageProtection = lazy(() =>
+  import("../components/ImageProtection").then((m) => ({ default: m.ImageProtection })),
+);
+const CookieConsent = lazy(() =>
+  import("../components/CookieConsent").then((m) => ({ default: m.CookieConsent })),
+);
 
 function NotFoundComponent() {
   return (
@@ -112,7 +118,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter+Tight:wght@400;500;600&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter+Tight:wght@400;500;600&display=swap",
       },
     ],
     scripts: [
@@ -205,10 +211,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ImageProtection />
+      <Suspense fallback={null}>
+        <ImageProtection />
+      </Suspense>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <CookieConsent />
+      <Suspense fallback={null}>
+        <CookieConsent />
+      </Suspense>
     </QueryClientProvider>
+
   );
 }
