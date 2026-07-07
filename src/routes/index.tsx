@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { lazy, Suspense } from "react";
 import heroLcp from "@/assets/hero-beiramar-720.webp";
 import heroLcp1280 from "@/assets/hero-beiramar-1280.webp";
 import { listProperties, type PropertyListItem } from "@/lib/properties.functions";
@@ -8,13 +9,31 @@ import { SiteHeader } from "@/components/home/SiteHeader";
 import { Hero } from "@/components/home/Hero";
 import { FiltersSection } from "@/components/home/FiltersSection";
 import { LaunchesAndFeatured } from "@/components/home/LaunchesAndFeatured";
-import { RegioesSection } from "@/components/home/RegioesSection";
-import { AnuncieCTA } from "@/components/home/AnuncieCTA";
-import { AboutSection } from "@/components/home/AboutSection";
-import { ContactSection } from "@/components/home/ContactSection";
-import { SiteFooter } from "@/components/home/SiteFooter";
-import { YouTubeShorts } from "@/components/home/YouTubeShorts";
-import { FloatingWhatsApp } from "@/components/home/FloatingWhatsApp";
+
+// Below-the-fold sections: lazy-loaded to shrink the initial JS bundle
+// and cut mobile LCP/TBT. No visual/behavioral changes.
+const RegioesSection = lazy(() =>
+  import("@/components/home/RegioesSection").then((m) => ({ default: m.RegioesSection })),
+);
+const AnuncieCTA = lazy(() =>
+  import("@/components/home/AnuncieCTA").then((m) => ({ default: m.AnuncieCTA })),
+);
+const AboutSection = lazy(() =>
+  import("@/components/home/AboutSection").then((m) => ({ default: m.AboutSection })),
+);
+const ContactSection = lazy(() =>
+  import("@/components/home/ContactSection").then((m) => ({ default: m.ContactSection })),
+);
+const SiteFooter = lazy(() =>
+  import("@/components/home/SiteFooter").then((m) => ({ default: m.SiteFooter })),
+);
+const YouTubeShorts = lazy(() =>
+  import("@/components/home/YouTubeShorts").then((m) => ({ default: m.YouTubeShorts })),
+);
+const FloatingWhatsApp = lazy(() =>
+  import("@/components/home/FloatingWhatsApp").then((m) => ({ default: m.FloatingWhatsApp })),
+);
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
