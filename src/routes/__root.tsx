@@ -211,10 +211,15 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ImageProtection />
+      <Suspense fallback={null}>
+        <ImageProtection />
+      </Suspense>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
-      <CookieConsent />
+      <Suspense fallback={null}>
+        <CookieConsent />
+      </Suspense>
     </QueryClientProvider>
+
   );
 }
