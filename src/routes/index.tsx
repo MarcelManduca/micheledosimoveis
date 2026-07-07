@@ -87,13 +87,16 @@ function Index() {
       <Hero />
       <FiltersSection />
       <LaunchesAndFeatured items={items} />
-      <RegioesSection />
-      <AnuncieCTA />
-      <AboutSection />
-      <YouTubeShorts />
-      <ContactSection />
-      <SiteFooter />
-      <FloatingWhatsApp />
+      <Suspense fallback={null}>
+        <RegioesSection />
+        <AnuncieCTA />
+        <AboutSection />
+        <YouTubeShorts />
+        <ContactSection />
+        <SiteFooter />
+        <FloatingWhatsApp />
+      </Suspense>
     </div>
+
   );
 }
