@@ -10,6 +10,11 @@ import {
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+// Preload the LATIN variable-font subsets that carry the LCP typography.
+// Bundled locally as woff2 (self-hosted) — no third-party font CDN in the
+// critical request chain. Vite emits hashed URLs.
+import frauncesLatinWoff2 from "@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2?url";
+import interTightLatinWoff2 from "@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 // Deferred: not needed for first paint. Cuts initial JS.
@@ -114,12 +119,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32.png" },
       { rel: "icon", type: "image/png", sizes: "16x16", href: "/favicon-16.png" },
       { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      // Preload self-hosted latin variable-font subsets (Fraunces + Inter Tight)
+      // so the LCP typography lands in the first flight, without any third-party
+      // font stylesheet in the critical chain.
       {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter+Tight:wght@400;500;600&display=swap",
-      },
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: frauncesLatinWoff2,
+        crossOrigin: "anonymous",
+      } as any,
+      {
+        rel: "preload",
+        as: "font",
+        type: "font/woff2",
+        href: interTightLatinWoff2,
+        crossOrigin: "anonymous",
+      } as any,
     ],
     scripts: [
       {

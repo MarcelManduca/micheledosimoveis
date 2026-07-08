@@ -1,10 +1,15 @@
 @import "tailwindcss" source(none);
-@source "../src";
 @import "tw-animate-css";
+/* Self-hosted variable fonts — replaces render-blocking Google Fonts request.
+ * Each family exposes multiple @font-face blocks per unicode subset; the
+ * browser only downloads the subset(s) actually used (latin here). */
+@import "@fontsource-variable/fraunces/wght.css";
+@import "@fontsource-variable/inter-tight/wght.css";
+@source "../src";
 
 @theme {
-  --font-display: "Fraunces", ui-serif, Georgia, serif;
-  --font-sans: "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces Variable", "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Inter Tight Variable", "Inter Tight", ui-sans-serif, system-ui, sans-serif;
 }
 
 @custom-variant dark (&:is(.dark *));
@@ -303,8 +308,8 @@
   line-gap-override: 0%;
 }
 :root {
-  --font-display: "Fraunces", "Fraunces Fallback", ui-serif, Georgia, serif;
-  --font-sans: "Inter Tight", "Inter Tight Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces Variable", "Fraunces", "Fraunces Fallback", ui-serif, Georgia, serif;
+  --font-sans: "Inter Tight Variable", "Inter Tight", "Inter Tight Fallback", ui-sans-serif, system-ui, sans-serif;
 }
 
 
