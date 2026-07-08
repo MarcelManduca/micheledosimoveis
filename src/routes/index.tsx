@@ -87,13 +87,25 @@ function Index() {
       <Hero />
       <FiltersSection />
       <LaunchesAndFeatured items={items} />
-      <Suspense fallback={null}>
+      <Suspense fallback={<div aria-hidden className="min-h-[720px]" />}>
         <RegioesSection />
+      </Suspense>
+      <Suspense fallback={<div aria-hidden className="min-h-[360px]" />}>
         <AnuncieCTA />
+      </Suspense>
+      <Suspense fallback={<div aria-hidden className="min-h-[560px]" />}>
         <AboutSection />
+      </Suspense>
+      <Suspense fallback={<div aria-hidden className="min-h-[520px]" />}>
         <YouTubeShorts />
+      </Suspense>
+      <Suspense fallback={<div aria-hidden className="min-h-[520px]" />}>
         <ContactSection />
+      </Suspense>
+      <Suspense fallback={<div aria-hidden className="min-h-[320px]" />}>
         <SiteFooter />
+      </Suspense>
+      <Suspense fallback={null}>
         <FloatingWhatsApp />
       </Suspense>
     </div>
