@@ -7,9 +7,29 @@
 @import "@fontsource-variable/inter-tight/wght.css";
 @source "../src";
 
+/* Metric-adjusted fallbacks — eliminate CLS caused by font-swap between the
+ * generic fallback and the variable font. Metrics approximate the real
+ * font's ascent/descent/advance-width so the swap is visually a no-op. */
+@font-face {
+  font-family: "Fraunces Fallback";
+  src: local("Georgia");
+  ascent-override: 96.4%;
+  descent-override: 24.1%;
+  line-gap-override: 0%;
+  size-adjust: 106.1%;
+}
+@font-face {
+  font-family: "Inter Tight Fallback";
+  src: local("Arial");
+  ascent-override: 90.1%;
+  descent-override: 22.4%;
+  line-gap-override: 0%;
+  size-adjust: 107.6%;
+}
+
 @theme {
-  --font-display: "Fraunces Variable", "Fraunces", ui-serif, Georgia, serif;
-  --font-sans: "Inter Tight Variable", "Inter Tight", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces Variable", "Fraunces", "Fraunces Fallback", ui-serif, Georgia, serif;
+  --font-sans: "Inter Tight Variable", "Inter Tight", "Inter Tight Fallback", ui-sans-serif, system-ui, sans-serif;
 }
 
 @custom-variant dark (&:is(.dark *));
