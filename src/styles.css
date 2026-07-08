@@ -308,8 +308,8 @@
   line-gap-override: 0%;
 }
 :root {
-  --font-display: "Fraunces", "Fraunces Fallback", ui-serif, Georgia, serif;
-  --font-sans: "Inter Tight", "Inter Tight Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces Variable", "Fraunces", "Fraunces Fallback", ui-serif, Georgia, serif;
+  --font-sans: "Inter Tight Variable", "Inter Tight", "Inter Tight Fallback", ui-sans-serif, system-ui, sans-serif;
 }
 
 
