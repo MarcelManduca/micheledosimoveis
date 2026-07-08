@@ -10,6 +10,11 @@ import {
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+// Preload the LATIN variable-font subsets that carry the LCP typography.
+// Bundled locally as woff2 (self-hosted) — no third-party font CDN in the
+// critical request chain. Vite emits hashed URLs.
+import frauncesLatinWoff2 from "@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2?url";
+import interTightLatinWoff2 from "@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
 // Deferred: not needed for first paint. Cuts initial JS.
