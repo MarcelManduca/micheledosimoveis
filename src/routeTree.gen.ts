@@ -31,6 +31,7 @@ import { Route as AdminInteligenciaPortfolioRouteImport } from './routes/admin.i
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicHooksSyncPropertiesRouteImport } from './routes/api/public/hooks/sync-properties'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -149,6 +150,11 @@ const Char91DotmcpChar93InvokeToolToolRoute =
     path: '/.mcp/invoke-tool/$tool',
     getParentRoute: () => rootRouteImport,
   } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSyncPropertiesRoute =
   ApiPublicHooksSyncPropertiesRouteImport.update({
     id: '/api/public/hooks/sync-properties',
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/imovel/$code': typeof ImovelCodeRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/imovel/$code': typeof ImovelCodeRoute
   '/condominios': typeof CondominiosIndexRoute
   '/imoveis': typeof ImoveisIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -229,6 +237,7 @@ export interface FileRoutesById {
   '/imovel/$code': typeof ImovelCodeRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/imovel/$code'
     | '/condominios/'
     | '/imoveis/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/hooks/sync-properties'
   fileRoutesByTo: FileRoutesByTo
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/imovel/$code'
     | '/condominios'
     | '/imoveis'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/hooks/sync-properties'
   id:
@@ -306,6 +317,7 @@ export interface FileRouteTypes {
     | '/imovel/$code'
     | '/condominios/'
     | '/imoveis/'
+    | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/hooks/sync-properties'
   fileRoutesById: FileRoutesById
@@ -331,6 +343,7 @@ export interface RootRouteChildren {
   ImovelCodeRoute: typeof ImovelCodeRoute
   CondominiosIndexRoute: typeof CondominiosIndexRoute
   ImoveisIndexRoute: typeof ImoveisIndexRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicHooksSyncPropertiesRoute: typeof ApiPublicHooksSyncPropertiesRoute
 }
@@ -491,6 +504,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/sync-properties': {
       id: '/api/public/hooks/sync-properties'
       path: '/api/public/hooks/sync-properties'
@@ -534,6 +554,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImovelCodeRoute: ImovelCodeRoute,
   CondominiosIndexRoute: CondominiosIndexRoute,
   ImoveisIndexRoute: ImoveisIndexRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicHooksSyncPropertiesRoute: ApiPublicHooksSyncPropertiesRoute,
 }
