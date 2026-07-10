@@ -1,0 +1,143 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://ppndlwatmyiexpqskdxg.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "michele-dos-imoveis-mcp",
+      "version": "0.1.0",
+      "title": "Michele dos Imóveis"
+    },
+    "tools": [
+      {
+        "name": "search_properties",
+        "title": "Search properties",
+        "description": "Search published real estate listings from Michele dos Imóveis. Optional filters: neighborhood, property type, price range, and minimum bedrooms.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "neighborhood": {
+              "description": "Neighborhood name (e.g. 'Jurerê Internacional').",
+              "type": "string"
+            },
+            "property_type": {
+              "description": "Property type such as 'Apartamento', 'Casa', 'Cobertura'.",
+              "type": "string"
+            },
+            "min_price_brl": {
+              "description": "Minimum price in BRL.",
+              "type": "number"
+            },
+            "max_price_brl": {
+              "description": "Maximum price in BRL.",
+              "type": "number"
+            },
+            "min_bedrooms": {
+              "description": "Minimum number of bedrooms.",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            },
+            "limit": {
+              "description": "Max results (default 20).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_property_by_code",
+        "title": "Get property by code",
+        "description": "Return the full published property record for a given internal code.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Property internal code (e.g. 'AP1234')."
+            }
+          },
+          "required": [
+            "code"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_condominiums",
+        "title": "List condominiums",
+        "description": "List published condominiums in Florianópolis, optionally filtered by neighborhood.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "neighborhood": {
+              "description": "Neighborhood name to filter by.",
+              "type": "string"
+            },
+            "limit": {
+              "description": "Max results (default 30).",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_condominium_by_slug",
+        "title": "Get condominium by slug",
+        "description": "Return the full published condominium record for a given URL slug.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Condominium slug (e.g. 'edificio-solar-do-mar')."
+            }
+          },
+          "required": [
+            "slug"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}

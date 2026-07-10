@@ -13,6 +13,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SitemapCondominiosDotxmlRouteImport } from './routes/sitemap-condominios[.]xml'
 import { Route as SitemapBairrosDotxmlRouteImport } from './routes/sitemap-bairros[.]xml'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as GuiaImoveisAltoPadraoFlorianopolisRouteImport } from './routes/guia-imoveis-alto-padrao-florianopolis'
 import { Route as BuscarRouteImport } from './routes/buscar'
@@ -27,6 +28,9 @@ import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as CondominiosBairroRouteImport } from './routes/condominios.$bairro'
 import { Route as CondominioSlugRouteImport } from './routes/condominio.$slug'
 import { Route as AdminInteligenciaPortfolioRouteImport } from './routes/admin.inteligencia-portfolio'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as ApiPublicHooksSyncPropertiesRouteImport } from './routes/api/public/hooks/sync-properties'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -48,6 +52,11 @@ const SitemapBairrosDotxmlRoute = SitemapBairrosDotxmlRouteImport.update({
 const PrivacidadeRoute = PrivacidadeRouteImport.update({
   id: '/privacidade',
   path: '/privacidade',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
@@ -122,6 +131,24 @@ const AdminInteligenciaPortfolioRoute =
     path: '/inteligencia-portfolio',
     getParentRoute: () => AdminRoute,
   } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksSyncPropertiesRoute =
   ApiPublicHooksSyncPropertiesRouteImport.update({
     id: '/api/public/hooks/sync-properties',
@@ -137,10 +164,13 @@ export interface FileRoutesByFullPath {
   '/buscar': typeof BuscarRoute
   '/guia-imoveis-alto-padrao-florianopolis': typeof GuiaImoveisAltoPadraoFlorianopolisRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/mcp': typeof McpRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
@@ -148,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/imovel/$code': typeof ImovelCodeRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
 export interface FileRoutesByTo {
@@ -158,10 +189,13 @@ export interface FileRoutesByTo {
   '/buscar': typeof BuscarRoute
   '/guia-imoveis-alto-padrao-florianopolis': typeof GuiaImoveisAltoPadraoFlorianopolisRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/mcp': typeof McpRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
@@ -169,6 +203,7 @@ export interface FileRoutesByTo {
   '/imovel/$code': typeof ImovelCodeRoute
   '/condominios': typeof CondominiosIndexRoute
   '/imoveis': typeof ImoveisIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
 export interface FileRoutesById {
@@ -180,10 +215,13 @@ export interface FileRoutesById {
   '/buscar': typeof BuscarRoute
   '/guia-imoveis-alto-padrao-florianopolis': typeof GuiaImoveisAltoPadraoFlorianopolisRoute
   '/llms.txt': typeof LlmsDottxtRoute
+  '/mcp': typeof McpRoute
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
@@ -191,6 +229,7 @@ export interface FileRoutesById {
   '/imovel/$code': typeof ImovelCodeRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
 }
 export interface FileRouteTypes {
@@ -203,10 +242,13 @@ export interface FileRouteTypes {
     | '/buscar'
     | '/guia-imoveis-alto-padrao-florianopolis'
     | '/llms.txt'
+    | '/mcp'
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap-condominios.xml'
     | '/sitemap.xml'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin/inteligencia-portfolio'
     | '/condominio/$slug'
     | '/condominios/$bairro'
@@ -214,6 +256,7 @@ export interface FileRouteTypes {
     | '/imovel/$code'
     | '/condominios/'
     | '/imoveis/'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/hooks/sync-properties'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -224,10 +267,13 @@ export interface FileRouteTypes {
     | '/buscar'
     | '/guia-imoveis-alto-padrao-florianopolis'
     | '/llms.txt'
+    | '/mcp'
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap-condominios.xml'
     | '/sitemap.xml'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin/inteligencia-portfolio'
     | '/condominio/$slug'
     | '/condominios/$bairro'
@@ -235,6 +281,7 @@ export interface FileRouteTypes {
     | '/imovel/$code'
     | '/condominios'
     | '/imoveis'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/hooks/sync-properties'
   id:
     | '__root__'
@@ -245,10 +292,13 @@ export interface FileRouteTypes {
     | '/buscar'
     | '/guia-imoveis-alto-padrao-florianopolis'
     | '/llms.txt'
+    | '/mcp'
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap-condominios.xml'
     | '/sitemap.xml'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/admin/inteligencia-portfolio'
     | '/condominio/$slug'
     | '/condominios/$bairro'
@@ -256,6 +306,7 @@ export interface FileRouteTypes {
     | '/imovel/$code'
     | '/condominios/'
     | '/imoveis/'
+    | '/.mcp/invoke-tool/$tool'
     | '/api/public/hooks/sync-properties'
   fileRoutesById: FileRoutesById
 }
@@ -267,16 +318,20 @@ export interface RootRouteChildren {
   BuscarRoute: typeof BuscarRoute
   GuiaImoveisAltoPadraoFlorianopolisRoute: typeof GuiaImoveisAltoPadraoFlorianopolisRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
+  McpRoute: typeof McpRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   SitemapBairrosDotxmlRoute: typeof SitemapBairrosDotxmlRoute
   SitemapCondominiosDotxmlRoute: typeof SitemapCondominiosDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   CondominioSlugRoute: typeof CondominioSlugRoute
   CondominiosBairroRoute: typeof CondominiosBairroRoute
   ImoveisSlugRoute: typeof ImoveisSlugRoute
   ImovelCodeRoute: typeof ImovelCodeRoute
   CondominiosIndexRoute: typeof CondominiosIndexRoute
   ImoveisIndexRoute: typeof ImoveisIndexRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicHooksSyncPropertiesRoute: typeof ApiPublicHooksSyncPropertiesRoute
 }
 
@@ -308,6 +363,13 @@ declare module '@tanstack/react-router' {
       path: '/privacidade'
       fullPath: '/privacidade'
       preLoaderRoute: typeof PrivacidadeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/llms.txt': {
@@ -408,6 +470,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInteligenciaPortfolioRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/sync-properties': {
       id: '/api/public/hooks/sync-properties'
       path: '/api/public/hooks/sync-properties'
@@ -437,16 +520,21 @@ const rootRouteChildren: RootRouteChildren = {
   GuiaImoveisAltoPadraoFlorianopolisRoute:
     GuiaImoveisAltoPadraoFlorianopolisRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
+  McpRoute: McpRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   SitemapBairrosDotxmlRoute: SitemapBairrosDotxmlRoute,
   SitemapCondominiosDotxmlRoute: SitemapCondominiosDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   CondominioSlugRoute: CondominioSlugRoute,
   CondominiosBairroRoute: CondominiosBairroRoute,
   ImoveisSlugRoute: ImoveisSlugRoute,
   ImovelCodeRoute: ImovelCodeRoute,
   CondominiosIndexRoute: CondominiosIndexRoute,
   ImoveisIndexRoute: ImoveisIndexRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicHooksSyncPropertiesRoute: ApiPublicHooksSyncPropertiesRoute,
 }
 export const routeTree = rootRouteImport
