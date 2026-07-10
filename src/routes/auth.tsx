@@ -4,12 +4,23 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    next: typeof s.next === "string" ? s.next : undefined,
+  }),
   head: () => ({ meta: [{ title: "Acesso administrativo · Michele Prietsch" }] }),
   component: AuthPage,
 });
 
+function safeNext(next: string | undefined): string {
+  // Only allow same-origin relative paths (start with "/" but not "//").
+  if (!next || !next.startsWith("/") || next.startsWith("//")) return "/admin";
+  return next;
+}
+
 function AuthPage() {
   const navigate = useNavigate();
+  const { next } = Route.useSearch();
+  const target = safeNext(next);
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,20 +36,21 @@ function AuthPage() {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/admin` },
+          options: { emailRedirectTo: `${window.location.origin}${target}` },
         });
         if (error) throw error;
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       }
-      navigate({ to: "/admin" });
+      window.location.href = target;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro inesperado");
     } finally {
       setLoading(false);
     }
   }
+
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
