@@ -224,7 +224,7 @@ function brl(n: number | null) {
 }
 
 function PropertyPage() {
-  const { property: p, photos } = Route.useLoaderData();
+  const { property: p, photos, links } = Route.useLoaderData();
   const photoList = photos as Photo[];
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const open = lightboxIndex !== null;
