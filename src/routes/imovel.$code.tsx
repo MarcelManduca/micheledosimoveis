@@ -1,9 +1,11 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
 import { getPropertyByCode } from "@/lib/properties.functions";
+import { getPropertyInternalLinks } from "@/lib/property-links.functions";
 import { findNeighborhoodByName } from "@/lib/neighborhoods";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CalendarCheck } from "lucide-react";
+import { InternalLinkingSection } from "@/components/property/InternalLinkingSection";
 
 const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
@@ -26,7 +28,29 @@ export const Route = createFileRoute("/imovel/$code")({
   loader: async ({ params }) => {
     const result = await getPropertyByCode({ data: { code: params.code } });
     if (!result) throw notFound();
-    return result;
+    const p = result.property as {
+      neighborhood: string | null;
+      property_type: string | null;
+      price_brl: number | null;
+      bedrooms: number | null;
+    };
+    const links = await getPropertyInternalLinks({
+      data: {
+        code: params.code,
+        neighborhood: p.neighborhood ?? null,
+        propertyType: p.property_type ?? null,
+        priceBrl: p.price_brl ?? null,
+        bedrooms: p.bedrooms ?? null,
+      },
+    }).catch(() => ({
+      bairro: null,
+      bairroSlug: null,
+      typesInBairro: [],
+      nearbyNeighborhoods: [],
+      condominiums: [],
+      similar: [],
+    }));
+    return { ...result, links };
   },
   head: ({ params, loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Imóvel · Michele Prietsch" }] };
@@ -200,7 +224,7 @@ function brl(n: number | null) {
 }
 
 function PropertyPage() {
-  const { property: p, photos } = Route.useLoaderData();
+  const { property: p, photos, links } = Route.useLoaderData();
   const photoList = photos as Photo[];
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const open = lightboxIndex !== null;
@@ -526,6 +550,8 @@ function PropertyPage() {
           </div>
         </aside>
       </section>
+
+      <InternalLinkingSection links={links} originPath={`/imovel/${p.code}`} />
 
       {/* Lightbox */}
       <Dialog open={open} onOpenChange={(o) => !o && close()}>
