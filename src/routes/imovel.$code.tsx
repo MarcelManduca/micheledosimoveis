@@ -551,6 +551,8 @@ function PropertyPage() {
         </aside>
       </section>
 
+      <InternalLinkingSection links={links} originPath={`/imovel/${p.code}`} />
+
       {/* Lightbox */}
       <Dialog open={open} onOpenChange={(o) => !o && close()}>
         <DialogContent className="max-w-6xl w-[95vw] p-0 bg-black/95 border-none text-white">
