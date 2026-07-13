@@ -28,7 +28,29 @@ export const Route = createFileRoute("/imovel/$code")({
   loader: async ({ params }) => {
     const result = await getPropertyByCode({ data: { code: params.code } });
     if (!result) throw notFound();
-    return result;
+    const p = result.property as {
+      neighborhood: string | null;
+      property_type: string | null;
+      price_brl: number | null;
+      bedrooms: number | null;
+    };
+    const links = await getPropertyInternalLinks({
+      data: {
+        code: params.code,
+        neighborhood: p.neighborhood ?? null,
+        propertyType: p.property_type ?? null,
+        priceBrl: p.price_brl ?? null,
+        bedrooms: p.bedrooms ?? null,
+      },
+    }).catch(() => ({
+      bairro: null,
+      bairroSlug: null,
+      typesInBairro: [],
+      nearbyNeighborhoods: [],
+      condominiums: [],
+      similar: [],
+    }));
+    return { ...result, links };
   },
   head: ({ params, loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Imóvel · Michele Prietsch" }] };
