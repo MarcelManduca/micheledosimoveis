@@ -1,6 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Building2, MapPin, Home, Compass } from "lucide-react";
 import type { PropertyInternalLinks } from "@/lib/property-links.functions";
+import { NEIGHBORHOODS } from "@/lib/neighborhoods";
+
+const NEIGHBORHOOD_IMAGES = new Map(
+  NEIGHBORHOODS.filter((n) => n.image).map((n) => [n.slug, n.image!] as const),
+);
+
 
 function trackClick(block: string, destination: string, anchor: string, origin: string) {
   if (typeof window === "undefined") return;
@@ -33,7 +39,8 @@ export function InternalLinkingSection({
   if (!hasAny) return null;
 
   const cardBase =
-    "group flex items-start gap-3 rounded-2xl bg-card ring-1 ring-black/5 px-5 py-4 hover:shadow-md hover:ring-black/10 transition";
+    "group relative overflow-hidden flex items-start gap-3 rounded-2xl bg-card ring-1 ring-black/5 px-5 py-4 hover:shadow-md hover:ring-black/10 transition";
+
 
   return (
     <section
@@ -87,6 +94,7 @@ export function InternalLinkingSection({
             <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {nearbyNeighborhoods.map((n) => {
                 const href = `/imoveis/${n.slug}`;
+                const image = NEIGHBORHOOD_IMAGES.get(n.slug);
                 return (
                   <li key={n.slug}>
                     <Link
@@ -95,18 +103,43 @@ export function InternalLinkingSection({
                       onClick={() => trackClick("bairros_proximos", href, n.name, originPath)}
                       className={cardBase}
                     >
-                      <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
+                      {image && (
+                        <div
+                          aria-hidden="true"
+                          className="pointer-events-none absolute inset-y-0 right-0 w-[35%] sm:w-[40%]"
+                          style={{
+                            WebkitMaskImage:
+                              "linear-gradient(to left, black 70%, transparent 100%)",
+                            maskImage:
+                              "linear-gradient(to left, black 70%, transparent 100%)",
+                          }}
+                        >
+                          <img
+                            src={image.src}
+                            srcSet={image.srcset}
+                            sizes={image.sizes ?? "(max-width: 640px) 35vw, 40vw"}
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                            className="h-full w-full object-cover"
+                            style={{ filter: "saturate(0.85)" }}
+                          />
+                          <div className="absolute inset-0 bg-card/60" />
+                        </div>
+                      )}
+                      <span className="relative mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
                         <MapPin className="h-4 w-4" />
                       </span>
-                      <span className="flex-1">
+                      <span className="relative flex-1">
                         <span className="block font-display text-lg tracking-tight">{n.name}</span>
                         <span className="block text-xs text-muted-foreground mt-0.5">{n.tag}</span>
                       </span>
-                      <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
+                      <ArrowRight className="relative h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
                     </Link>
                   </li>
                 );
               })}
+
             </ul>
           </div>
         )}
