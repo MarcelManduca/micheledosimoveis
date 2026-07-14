@@ -2,6 +2,17 @@
 // One entry per region of actuation. Slugs are stable — do not rename
 // without updating sitemap and internal links.
 
+export type NeighborhoodImage = {
+  // URL padrão (fallback). Deve corresponder à variante ~640w.
+  src: string;
+  // Ex.: "img-320.webp 320w, img-640.webp 640w, img-960.webp 960w".
+  srcset?: string;
+  // Ex.: "(max-width: 640px) 25vw, 30vw".
+  sizes?: string;
+  // Texto descritivo curto (contexto do bairro).
+  alt?: string;
+};
+
 export type Neighborhood = {
   slug: string;
   name: string;
@@ -25,6 +36,9 @@ export type Neighborhood = {
   // o portfólio público estiver vazio — usado em bairros estratégicos
   // de SEO/GEO com forte autoridade local e captação off market.
   indexWhenEmpty?: boolean;
+  // Foto representativa (opcional). Quando ausente, o card usa o layout
+  // atual sem imagem. Ver `NeighborhoodImage` para o contrato.
+  image?: NeighborhoodImage;
 };
 
 const STRATEGIC_SLUGS = new Set([
