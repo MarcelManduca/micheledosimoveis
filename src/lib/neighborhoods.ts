@@ -3,6 +3,16 @@
 // without updating sitemap and internal links.
 import beiraMar720 from "@/assets/hero-beiramar-720.webp";
 import beiraMar1280 from "@/assets/hero-beiramar-1280.webp";
+import centro720 from "@/assets/bairros/bairro-centro-720.webp";
+import centro1280 from "@/assets/bairros/bairro-centro-1280.webp";
+import agronomica720 from "@/assets/bairros/bairro-agronomica-720.webp";
+import agronomica1280 from "@/assets/bairros/bairro-agronomica-1280.webp";
+import jurereInt720 from "@/assets/bairros/bairro-jurere-internacional-720.webp";
+import jurereInt1280 from "@/assets/bairros/bairro-jurere-internacional-1280.webp";
+import campeche720 from "@/assets/bairros/bairro-campeche-720.webp";
+import campeche1280 from "@/assets/bairros/bairro-campeche-1280.webp";
+import lagoa720 from "@/assets/bairros/bairro-lagoa-da-conceicao-720.webp";
+import lagoa1280 from "@/assets/bairros/bairro-lagoa-da-conceicao-1280.webp";
 
 export type NeighborhoodImage = {
   // URL padrão (fallback). Deve corresponder à variante ~640w.
