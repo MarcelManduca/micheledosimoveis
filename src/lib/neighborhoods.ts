@@ -107,6 +107,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.5969, lng: -48.5495 },
     related: ["beira-mar-norte", "agronomica", "trindade"],
+    image: {
+      src: centro720,
+      srcset: `${centro720} 720w, ${centro1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Centro de Florianópolis — atmosfera urbana editorial",
+    },
   },
   {
     slug: "agronomica",
