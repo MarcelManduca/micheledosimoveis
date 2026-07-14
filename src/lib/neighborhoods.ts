@@ -3,6 +3,16 @@
 // without updating sitemap and internal links.
 import beiraMar720 from "@/assets/hero-beiramar-720.webp";
 import beiraMar1280 from "@/assets/hero-beiramar-1280.webp";
+import centro720 from "@/assets/bairros/bairro-centro-720.webp";
+import centro1280 from "@/assets/bairros/bairro-centro-1280.webp";
+import agronomica720 from "@/assets/bairros/bairro-agronomica-720.webp";
+import agronomica1280 from "@/assets/bairros/bairro-agronomica-1280.webp";
+import jurereInt720 from "@/assets/bairros/bairro-jurere-internacional-720.webp";
+import jurereInt1280 from "@/assets/bairros/bairro-jurere-internacional-1280.webp";
+import campeche720 from "@/assets/bairros/bairro-campeche-720.webp";
+import campeche1280 from "@/assets/bairros/bairro-campeche-1280.webp";
+import lagoa720 from "@/assets/bairros/bairro-lagoa-da-conceicao-720.webp";
+import lagoa1280 from "@/assets/bairros/bairro-lagoa-da-conceicao-1280.webp";
 
 export type NeighborhoodImage = {
   // URL padrão (fallback). Deve corresponder à variante ~640w.
@@ -97,6 +107,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.5969, lng: -48.5495 },
     related: ["beira-mar-norte", "agronomica", "trindade"],
+    image: {
+      src: centro720,
+      srcset: `${centro720} 720w, ${centro1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Centro de Florianópolis — atmosfera urbana editorial",
+    },
   },
   {
     slug: "agronomica",
@@ -115,6 +131,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.5764, lng: -48.5505 },
     related: ["beira-mar-norte", "joao-paulo", "centro"],
+    image: {
+      src: agronomica720,
+      srcset: `${agronomica720} 720w, ${agronomica1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Agronômica — vista para a Baía Norte, atmosfera editorial",
+    },
   },
   {
     slug: "jurere-internacional",
@@ -133,6 +155,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.4413, lng: -48.4985 },
     related: ["jurere-tradicional", "praia-brava", "joao-paulo"],
+    image: {
+      src: jurereInt720,
+      srcset: `${jurereInt720} 720w, ${jurereInt1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Jurerê Internacional — arquitetura branca e golden hour",
+    },
   },
   {
     slug: "jurere-tradicional",
@@ -313,6 +341,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.6051, lng: -48.4671 },
     related: ["canto-da-lagoa", "campeche", "itacorubi"],
+    image: {
+      src: lagoa720,
+      srcset: `${lagoa720} 720w, ${lagoa1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Lagoa da Conceição — espelho d'água ao entardecer",
+    },
   },
   {
     slug: "canto-da-lagoa",
@@ -349,6 +383,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.6789, lng: -48.4878 },
     related: ["novo-campeche", "morro-das-pedras", "rio-tavares"],
+    image: {
+      src: campeche720,
+      srcset: `${campeche720} 720w, ${campeche1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Campeche — dunas ao golden hour, atmosfera editorial",
+    },
   },
   {
     slug: "novo-campeche",
