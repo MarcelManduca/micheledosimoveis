@@ -341,6 +341,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.6051, lng: -48.4671 },
     related: ["canto-da-lagoa", "campeche", "itacorubi"],
+    image: {
+      src: lagoa720,
+      srcset: `${lagoa720} 720w, ${lagoa1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Lagoa da Conceição — espelho d'água ao entardecer",
+    },
   },
   {
     slug: "canto-da-lagoa",
