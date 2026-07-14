@@ -1,6 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Building2, MapPin, Home, Compass } from "lucide-react";
 import type { PropertyInternalLinks } from "@/lib/property-links.functions";
+import { NEIGHBORHOODS } from "@/lib/neighborhoods";
+
+const NEIGHBORHOOD_IMAGES = new Map(
+  NEIGHBORHOODS.filter((n) => n.image).map((n) => [n.slug, n.image!] as const),
+);
+
 
 function trackClick(block: string, destination: string, anchor: string, origin: string) {
   if (typeof window === "undefined") return;
