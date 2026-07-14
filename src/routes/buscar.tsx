@@ -117,17 +117,35 @@ export const Route = createFileRoute("/buscar")({
       links: [{ rel: "canonical", href: canonical }],
     };
   },
-  errorComponent: ({ error, reset }) => (
-    <div className="min-h-screen grid place-items-center px-6 text-center">
-      <div>
-        <h1 className="font-display text-3xl">Erro na busca</h1>
-        <p className="mt-3 text-sm text-muted-foreground">{error.message}</p>
-        <button onClick={reset} className="mt-6 text-sm underline">
-          Tentar novamente
-        </button>
+  errorComponent: ({ error, reset }) => {
+    if (typeof console !== "undefined") {
+      console.error("[buscar] Erro inesperado na página de busca:", error);
+    }
+    return (
+      <div className="min-h-screen grid place-items-center px-6 text-center bg-background text-foreground">
+        <div className="max-w-md">
+          <h1 className="font-display text-3xl">Não foi possível carregar a busca</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Não conseguimos interpretar os filtros da pesquisa. Você pode limpar os filtros
+            e recomeçar.
+          </p>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <Link
+              to="/buscar"
+              search={{}}
+              onClick={() => reset()}
+              className="inline-flex items-center rounded-full bg-foreground text-background px-4 py-2 text-sm"
+            >
+              Limpar filtros
+            </Link>
+            <Link to="/" className="text-sm underline">
+              Voltar ao início
+            </Link>
+          </div>
+        </div>
       </div>
-    </div>
-  ),
+    );
+  },
   notFoundComponent: () => (
     <div className="min-h-screen grid place-items-center">
       <Link to="/" className="underline">
