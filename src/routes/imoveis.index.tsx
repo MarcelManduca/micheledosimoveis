@@ -139,19 +139,45 @@ function ImoveisIndex() {
                   <Link
                     to="/imoveis/$slug"
                     params={{ slug: n.slug }}
-                    className="group flex items-start gap-4 px-6 py-5 transition"
+                    className="group relative flex items-start gap-4 overflow-hidden px-6 py-5 transition"
                   >
-                    <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
+                    {n.image && (
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-y-0 right-0 w-[25%] sm:w-[30%]"
+                        style={{
+                          WebkitMaskImage:
+                            "linear-gradient(to left, black 55%, transparent 100%)",
+                          maskImage:
+                            "linear-gradient(to left, black 55%, transparent 100%)",
+                        }}
+                      >
+                        <img
+                          src={n.image.src}
+                          srcSet={n.image.srcset}
+                          sizes={n.image.sizes ?? "(max-width: 640px) 25vw, 30vw"}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full object-cover"
+                          style={{
+                            filter: "saturate(0.8) blur(1px)",
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-card/85" />
+                      </div>
+                    )}
+                    <span className="relative mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
                       <MapPin className="h-4 w-4" />
                     </span>
-                    <span className="flex-1">
+                    <span className="relative flex-1">
                       <span className="block font-display text-lg tracking-tight">{n.name}</span>
                       <span className="block text-xs text-muted-foreground mt-0.5">{n.tag}</span>
                       <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-secondary/70 px-2 py-0.5 text-[11px] font-medium text-foreground/70 ring-1 ring-black/5">
                         {count > 0 ? `${count} ${count === 1 ? "imóvel" : "imóveis"}` : "Off market · consulte"}
                       </span>
                     </span>
-                    <ArrowRight className="h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
+                    <ArrowRight className="relative h-4 w-4 mt-2 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
                   </Link>
                 </BorderGlow>
               </li>
