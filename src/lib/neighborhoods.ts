@@ -131,6 +131,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.5764, lng: -48.5505 },
     related: ["beira-mar-norte", "joao-paulo", "centro"],
+    image: {
+      src: agronomica720,
+      srcset: `${agronomica720} 720w, ${agronomica1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Agronômica — vista para a Baía Norte, atmosfera editorial",
+    },
   },
   {
     slug: "jurere-internacional",
