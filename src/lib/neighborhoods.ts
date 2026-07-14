@@ -155,6 +155,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.4413, lng: -48.4985 },
     related: ["jurere-tradicional", "praia-brava", "joao-paulo"],
+    image: {
+      src: jurereInt720,
+      srcset: `${jurereInt720} 720w, ${jurereInt1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Jurerê Internacional — arquitetura branca e golden hour",
+    },
   },
   {
     slug: "jurere-tradicional",
