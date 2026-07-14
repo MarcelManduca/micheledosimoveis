@@ -1,18 +1,44 @@
 // Programmatic SEO: neighborhood data for /imoveis/$slug routes.
 // One entry per region of actuation. Slugs are stable — do not rename
 // without updating sitemap and internal links.
-import beiraMar720 from "@/assets/hero-beiramar-720.webp";
-import beiraMar1280 from "@/assets/hero-beiramar-1280.webp";
+import beiraMar720 from "@/assets/bairros/bairro-beira-mar-norte-720.webp";
+import beiraMar1280 from "@/assets/bairros/bairro-beira-mar-norte-1280.webp";
 import centro720 from "@/assets/bairros/bairro-centro-720.webp";
 import centro1280 from "@/assets/bairros/bairro-centro-1280.webp";
 import agronomica720 from "@/assets/bairros/bairro-agronomica-720.webp";
 import agronomica1280 from "@/assets/bairros/bairro-agronomica-1280.webp";
 import jurereInt720 from "@/assets/bairros/bairro-jurere-internacional-720.webp";
 import jurereInt1280 from "@/assets/bairros/bairro-jurere-internacional-1280.webp";
-import campeche720 from "@/assets/bairros/bairro-campeche-720.webp";
-import campeche1280 from "@/assets/bairros/bairro-campeche-1280.webp";
+import jurereTrad720 from "@/assets/bairros/bairro-jurere-tradicional-720.webp";
+import jurereTrad1280 from "@/assets/bairros/bairro-jurere-tradicional-1280.webp";
+import praiaBrava720 from "@/assets/bairros/bairro-praia-brava-720.webp";
+import praiaBrava1280 from "@/assets/bairros/bairro-praia-brava-1280.webp";
+import joaoPaulo720 from "@/assets/bairros/bairro-joao-paulo-720.webp";
+import joaoPaulo1280 from "@/assets/bairros/bairro-joao-paulo-1280.webp";
+import cacupe720 from "@/assets/bairros/bairro-cacupe-720.webp";
+import cacupe1280 from "@/assets/bairros/bairro-cacupe-1280.webp";
+import santoAntonio720 from "@/assets/bairros/bairro-santo-antonio-de-lisboa-720.webp";
+import santoAntonio1280 from "@/assets/bairros/bairro-santo-antonio-de-lisboa-1280.webp";
+import itacorubi720 from "@/assets/bairros/bairro-itacorubi-720.webp";
+import itacorubi1280 from "@/assets/bairros/bairro-itacorubi-1280.webp";
+import trindade720 from "@/assets/bairros/bairro-trindade-720.webp";
+import trindade1280 from "@/assets/bairros/bairro-trindade-1280.webp";
+import santaMonica720 from "@/assets/bairros/bairro-santa-monica-720.webp";
+import santaMonica1280 from "@/assets/bairros/bairro-santa-monica-1280.webp";
+import corregoGrande720 from "@/assets/bairros/bairro-corrego-grande-720.webp";
+import corregoGrande1280 from "@/assets/bairros/bairro-corrego-grande-1280.webp";
 import lagoa720 from "@/assets/bairros/bairro-lagoa-da-conceicao-720.webp";
 import lagoa1280 from "@/assets/bairros/bairro-lagoa-da-conceicao-1280.webp";
+import cantoLagoa720 from "@/assets/bairros/bairro-canto-da-lagoa-720.webp";
+import cantoLagoa1280 from "@/assets/bairros/bairro-canto-da-lagoa-1280.webp";
+import campeche720 from "@/assets/bairros/bairro-campeche-720.webp";
+import campeche1280 from "@/assets/bairros/bairro-campeche-1280.webp";
+import novoCampeche720 from "@/assets/bairros/bairro-novo-campeche-720.webp";
+import novoCampeche1280 from "@/assets/bairros/bairro-novo-campeche-1280.webp";
+import rioTavares720 from "@/assets/bairros/bairro-rio-tavares-720.webp";
+import rioTavares1280 from "@/assets/bairros/bairro-rio-tavares-1280.webp";
+import morroPedras720 from "@/assets/bairros/bairro-morro-das-pedras-720.webp";
+import morroPedras1280 from "@/assets/bairros/bairro-morro-das-pedras-1280.webp";
 
 export type NeighborhoodImage = {
   // URL padrão (fallback). Deve corresponder à variante ~640w.
@@ -86,8 +112,8 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     image: {
       src: beiraMar720,
       srcset: `${beiraMar720} 720w, ${beiraMar1280} 1280w`,
-      sizes: "(max-width: 640px) 25vw, 30vw",
-      alt: "Avenida Beira Mar Norte, Florianópolis",
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Beira Mar Norte — arquitetura branca frente à Baía Norte",
     },
   },
   {
@@ -179,6 +205,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.4429, lng: -48.5125 },
     related: ["jurere-internacional", "praia-brava", "cacupe"],
+    image: {
+      src: jurereTrad720,
+      srcset: `${jurereTrad720} 720w, ${jurereTrad1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Jurerê Tradicional — dunas e areia clara ao golden hour",
+    },
   },
   {
     slug: "praia-brava",
@@ -197,6 +229,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.4083, lng: -48.4327 },
     related: ["jurere-internacional", "jurere-tradicional", "cacupe"],
+    image: {
+      src: praiaBrava720,
+      srcset: `${praiaBrava720} 720w, ${praiaBrava1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Praia Brava — mar aberto azul intenso ao entardecer",
+    },
   },
   {
     slug: "joao-paulo",
@@ -215,6 +253,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.5462, lng: -48.5096 },
     related: ["cacupe", "santo-antonio-de-lisboa", "agronomica"],
+    image: {
+      src: joaoPaulo720,
+      srcset: `${joaoPaulo720} 720w, ${joaoPaulo1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "João Paulo — verde profundo em meia encosta",
+    },
   },
   {
     slug: "cacupe",
@@ -233,6 +277,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.5253, lng: -48.5096 },
     related: ["santo-antonio-de-lisboa", "joao-paulo", "jurere-tradicional"],
+    image: {
+      src: cacupe720,
+      srcset: `${cacupe720} 720w, ${cacupe1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Cacupé — pôr do sol sobre a Baía Norte",
+    },
   },
   {
     slug: "santo-antonio-de-lisboa",
@@ -251,6 +301,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.5083, lng: -48.5142 },
     related: ["cacupe", "joao-paulo", "jurere-tradicional"],
+    image: {
+      src: santoAntonio720,
+      srcset: `${santoAntonio720} 720w, ${santoAntonio1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Santo Antônio de Lisboa — muros terracota ao golden hour",
+    },
   },
   {
     slug: "itacorubi",
@@ -269,6 +325,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.5786, lng: -48.5093 },
     related: ["trindade", "santa-monica", "corrego-grande"],
+    image: {
+      src: itacorubi720,
+      srcset: `${itacorubi720} 720w, ${itacorubi1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Itacorubi — arquitetura contemporânea em concreto claro",
+    },
   },
   {
     slug: "trindade",
@@ -287,6 +349,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.6021, lng: -48.5181 },
     related: ["itacorubi", "santa-monica", "corrego-grande"],
+    image: {
+      src: trindade720,
+      srcset: `${trindade720} 720w, ${trindade1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Trindade — árvores maduras e caminho residencial ao entardecer",
+    },
   },
   {
     slug: "santa-monica",
@@ -305,6 +373,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.5862, lng: -48.5012 },
     related: ["corrego-grande", "trindade", "itacorubi"],
+    image: {
+      src: santaMonica720,
+      srcset: `${santaMonica720} 720w, ${santaMonica1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Santa Mônica — copas de oliveiras e jardim escultural",
+    },
   },
   {
     slug: "corrego-grande",
@@ -323,6 +397,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.5961, lng: -48.4974 },
     related: ["santa-monica", "itacorubi", "trindade"],
+    image: {
+      src: corregoGrande720,
+      srcset: `${corregoGrande720} 720w, ${corregoGrande1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Córrego Grande — mata atlântica em camadas com neblina",
+    },
   },
   {
     slug: "lagoa-da-conceicao",
@@ -365,6 +445,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.6202, lng: -48.4823 },
     related: ["lagoa-da-conceicao", "campeche", "morro-das-pedras"],
+    image: {
+      src: cantoLagoa720,
+      srcset: `${cantoLagoa720} 720w, ${cantoLagoa1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Canto da Lagoa — deque de madeira sobre lago ao pôr do sol",
+    },
   },
   {
     slug: "campeche",
@@ -407,6 +493,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.6912, lng: -48.4845 },
     related: ["campeche", "morro-das-pedras", "rio-tavares"],
+    image: {
+      src: novoCampeche720,
+      srcset: `${novoCampeche720} 720w, ${novoCampeche1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Novo Campeche — arquitetura branca contemporânea frente ao mar",
+    },
   },
   {
     slug: "rio-tavares",
@@ -425,6 +517,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.6727, lng: -48.5012 },
     related: ["campeche", "novo-campeche", "canto-da-lagoa"],
+    image: {
+      src: rioTavares720,
+      srcset: `${rioTavares720} 720w, ${rioTavares1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Rio Tavares — vegetação densa e arquitetura em madeira",
+    },
   },
   {
     slug: "morro-das-pedras",
@@ -443,6 +541,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.7204, lng: -48.5119 },
     related: ["campeche", "novo-campeche", "rio-tavares"],
+    image: {
+      src: morroPedras720,
+      srcset: `${morroPedras720} 720w, ${morroPedras1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Morro das Pedras — costão de pedra natural ao golden hour",
+    },
   },
 ];
 
