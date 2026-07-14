@@ -39,7 +39,8 @@ export function InternalLinkingSection({
   if (!hasAny) return null;
 
   const cardBase =
-    "group flex items-start gap-3 rounded-2xl bg-card ring-1 ring-black/5 px-5 py-4 hover:shadow-md hover:ring-black/10 transition";
+    "group relative overflow-hidden flex items-start gap-3 rounded-2xl bg-card ring-1 ring-black/5 px-5 py-4 hover:shadow-md hover:ring-black/10 transition";
+
 
   return (
     <section
