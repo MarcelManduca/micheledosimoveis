@@ -84,22 +84,48 @@ export function RegioesSection() {
   };
 
   const renderCard = (r: (typeof REGIOES)[number]) => {
+    const image = NEIGHBORHOOD_IMAGES.get(r.slug);
     const linkContent = (
       <Link
         to="/imoveis/$slug"
         params={{ slug: r.slug }}
-        className="group flex items-start gap-3 sm:gap-4 px-4 sm:px-6 py-4 sm:py-5 transition"
+        className="group relative flex items-start gap-3 sm:gap-4 overflow-hidden px-4 sm:px-6 py-4 sm:py-5 transition"
       >
-        <span className="mt-0.5 grid h-8 w-8 sm:h-9 sm:w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
+        {image && (
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-y-0 right-0 w-[35%] sm:w-[40%]"
+            style={{
+              WebkitMaskImage:
+                "linear-gradient(to left, black 70%, transparent 100%)",
+              maskImage:
+                "linear-gradient(to left, black 70%, transparent 100%)",
+            }}
+          >
+            <img
+              src={image.src}
+              srcSet={image.srcset}
+              sizes={image.sizes ?? "(max-width: 640px) 35vw, 40vw"}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-cover"
+              style={{ filter: "saturate(0.85)" }}
+            />
+            <div className="absolute inset-0 bg-background/60" />
+          </div>
+        )}
+        <span className="relative mt-0.5 grid h-8 w-8 sm:h-9 sm:w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
           <MapPin className="h-4 w-4" />
         </span>
-        <span className="flex-1 min-w-0">
+        <span className="relative flex-1 min-w-0">
           <span className="block font-display text-base sm:text-lg tracking-tight">{r.nome}</span>
           <span className="hidden sm:block text-xs text-muted-foreground mt-0.5">{r.desc}</span>
         </span>
-        <ArrowRight className="h-4 w-4 mt-1.5 sm:mt-2 shrink-0 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
+        <ArrowRight className="relative h-4 w-4 mt-1.5 sm:mt-2 shrink-0 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition" />
       </Link>
     );
+
     return near ? (
       <Suspense fallback={<PlainCard bare>{linkContent}</PlainCard>}>
         <BorderGlow
