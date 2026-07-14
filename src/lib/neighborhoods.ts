@@ -383,6 +383,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.6789, lng: -48.4878 },
     related: ["novo-campeche", "morro-das-pedras", "rio-tavares"],
+    image: {
+      src: campeche720,
+      srcset: `${campeche720} 720w, ${campeche1280} 1280w`,
+      sizes: "(max-width: 640px) 35vw, 40vw",
+      alt: "Campeche — dunas ao golden hour, atmosfera editorial",
+    },
   },
   {
     slug: "novo-campeche",
