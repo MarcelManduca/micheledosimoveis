@@ -1,11 +1,17 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, MapPin } from "lucide-react";
-import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { REGIOES } from "@/lib/site-config";
+import { NEIGHBORHOODS } from "@/lib/neighborhoods";
 
 // BorderGlow (CSS+JS) só é carregado quando a seção fica próxima da viewport,
 // mantendo o path crítico do mobile leve. Fallback = mesmo container sem efeito.
 const BorderGlow = lazy(() => import("@/components/BorderGlow"));
+
+const NEIGHBORHOOD_IMAGES = new Map(
+  NEIGHBORHOODS.filter((n) => n.image).map((n) => [n.slug, n.image!] as const),
+);
+
 
 function PlainCard({ children, bare = false }: { children: ReactNode; bare?: boolean }) {
   return (
