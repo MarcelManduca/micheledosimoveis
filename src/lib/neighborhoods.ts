@@ -1,6 +1,8 @@
 // Programmatic SEO: neighborhood data for /imoveis/$slug routes.
 // One entry per region of actuation. Slugs are stable — do not rename
 // without updating sitemap and internal links.
+import beiraMar720 from "@/assets/hero-beiramar-720.webp";
+import beiraMar1280 from "@/assets/hero-beiramar-1280.webp";
 
 export type NeighborhoodImage = {
   // URL padrão (fallback). Deve corresponder à variante ~640w.
