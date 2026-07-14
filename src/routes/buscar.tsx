@@ -1,6 +1,5 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { ArrowLeft } from "lucide-react";
 import { searchProperties, type PropertyListItem } from "@/lib/properties.functions";
@@ -10,15 +9,57 @@ import { ChromaGridShell } from "@/components/ChromaGridShell";
 import { findNeighborhoodByName } from "@/lib/neighborhoods";
 import { buildWhatsAppUrl } from "@/lib/site-config";
 
+// Parser resiliente — nunca lança erro para o usuário final.
+// Motivo: `@tanstack/zod-adapter`'s `fallback()` usa `z.custom().pipe(...)` e
+// no Zod v4 `z.custom()` rejeita `undefined` antes do `.catch()` ser aplicado,
+// resultando em "expected: nonoptional" quando o parâmetro está ausente na URL
+// (ex.: link compartilhado no Instagram sem filtros, ou apenas com `fbclid`).
+// Aqui fazemos preprocess + `.catch(undefined)` para tolerar qualquer entrada.
+const toOptionalInt = z
+  .preprocess((v) => {
+    if (v == null || v === "") return undefined;
+    const n = typeof v === "number" ? v : Number(v);
+    return Number.isFinite(n) ? Math.trunc(n) : undefined;
+  }, z.number().int().optional())
+  .catch(undefined);
+
+const toOptionalString = z
+  .preprocess(
+    (v) => (v == null || v === "" ? undefined : String(v)),
+    z.string().optional(),
+  )
+  .catch(undefined);
+
 const searchSchema = z.object({
-  tipo: fallback(z.string().optional(), undefined),
-  bairro: fallback(z.string().optional(), undefined),
-  dorms: fallback(z.number().int().min(1).max(10).optional(), undefined),
-  faixa: fallback(z.number().int().min(0).max(20).optional(), undefined),
+  tipo: toOptionalString,
+  bairro: toOptionalString,
+  dorms: toOptionalInt,
+  faixa: toOptionalInt,
 });
 
+type SearchShape = z.infer<typeof searchSchema>;
+
+function safeParseSearch(raw: Record<string, unknown>): SearchShape {
+  try {
+    const parsed = searchSchema.parse(raw ?? {});
+    // Clamp para faixas válidas — nunca lança, apenas remove o campo inválido.
+    const dorms = parsed.dorms != null && parsed.dorms >= 1 && parsed.dorms <= 10
+      ? parsed.dorms
+      : undefined;
+    const faixa = parsed.faixa != null && parsed.faixa >= 0 && parsed.faixa <= 20
+      ? parsed.faixa
+      : undefined;
+    return { ...parsed, dorms, faixa };
+  } catch (err) {
+    if (typeof console !== "undefined") {
+      console.warn("[buscar] Falha ao interpretar filtros da URL, ignorando:", err);
+    }
+    return {};
+  }
+}
+
 export const Route = createFileRoute("/buscar")({
-  validateSearch: zodValidator(searchSchema),
+  validateSearch: (s: Record<string, unknown>) => safeParseSearch(s),
   loaderDeps: ({ search }) => search,
   // Redireciona busca-por-bairro (único filtro) para a rota canônica
   // do bairro programático — consolida link equity e evita duplicate content.
@@ -76,17 +117,35 @@ export const Route = createFileRoute("/buscar")({
       links: [{ rel: "canonical", href: canonical }],
     };
   },
-  errorComponent: ({ error, reset }) => (
-    <div className="min-h-screen grid place-items-center px-6 text-center">
-      <div>
-        <h1 className="font-display text-3xl">Erro na busca</h1>
-        <p className="mt-3 text-sm text-muted-foreground">{error.message}</p>
-        <button onClick={reset} className="mt-6 text-sm underline">
-          Tentar novamente
-        </button>
+  errorComponent: ({ error, reset }) => {
+    if (typeof console !== "undefined") {
+      console.error("[buscar] Erro inesperado na página de busca:", error);
+    }
+    return (
+      <div className="min-h-screen grid place-items-center px-6 text-center bg-background text-foreground">
+        <div className="max-w-md">
+          <h1 className="font-display text-3xl">Não foi possível carregar a busca</h1>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Não conseguimos interpretar os filtros da pesquisa. Você pode limpar os filtros
+            e recomeçar.
+          </p>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <Link
+              to="/buscar"
+              search={{}}
+              onClick={() => reset()}
+              className="inline-flex items-center rounded-full bg-foreground text-background px-4 py-2 text-sm"
+            >
+              Limpar filtros
+            </Link>
+            <Link to="/" className="text-sm underline">
+              Voltar ao início
+            </Link>
+          </div>
+        </div>
       </div>
-    </div>
-  ),
+    );
+  },
   notFoundComponent: () => (
     <div className="min-h-screen grid place-items-center">
       <Link to="/" className="underline">
