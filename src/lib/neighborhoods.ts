@@ -73,6 +73,12 @@ export const NEIGHBORHOODS: Neighborhood[] = [
     ],
     geo: { lat: -27.5818, lng: -48.5648 },
     related: ["agronomica", "centro", "joao-paulo"],
+    image: {
+      src: beiraMar720,
+      srcset: `${beiraMar720} 720w, ${beiraMar1280} 1280w`,
+      sizes: "(max-width: 640px) 25vw, 30vw",
+      alt: "Avenida Beira Mar Norte, Florianópolis",
+    },
   },
   {
     slug: "centro",
