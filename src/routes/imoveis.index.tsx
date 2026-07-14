@@ -144,27 +144,27 @@ function ImoveisIndex() {
                     {n.image && (
                       <div
                         aria-hidden="true"
-                        className="pointer-events-none absolute inset-y-0 right-0 w-[25%] sm:w-[30%]"
+                        className="pointer-events-none absolute inset-y-0 right-0 w-[35%] sm:w-[40%]"
                         style={{
                           WebkitMaskImage:
-                            "linear-gradient(to left, black 55%, transparent 100%)",
+                            "linear-gradient(to left, black 70%, transparent 100%)",
                           maskImage:
-                            "linear-gradient(to left, black 55%, transparent 100%)",
+                            "linear-gradient(to left, black 70%, transparent 100%)",
                         }}
                       >
                         <img
                           src={n.image.src}
                           srcSet={n.image.srcset}
-                          sizes={n.image.sizes ?? "(max-width: 640px) 25vw, 30vw"}
+                          sizes={n.image.sizes ?? "(max-width: 640px) 35vw, 40vw"}
                           alt=""
                           loading="lazy"
                           decoding="async"
                           className="h-full w-full object-cover"
                           style={{
-                            filter: "saturate(0.8) blur(1px)",
+                            filter: "saturate(0.85)",
                           }}
                         />
-                        <div className="absolute inset-0 bg-card/85" />
+                        <div className="absolute inset-0 bg-card/60" />
                       </div>
                     )}
                     <span className="relative mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-full bg-secondary text-foreground/70 ring-1 ring-black/5">
