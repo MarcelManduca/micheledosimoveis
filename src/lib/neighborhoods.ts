@@ -1,18 +1,44 @@
 // Programmatic SEO: neighborhood data for /imoveis/$slug routes.
 // One entry per region of actuation. Slugs are stable — do not rename
 // without updating sitemap and internal links.
-import beiraMar720 from "@/assets/hero-beiramar-720.webp";
-import beiraMar1280 from "@/assets/hero-beiramar-1280.webp";
+import beiraMar720 from "@/assets/bairros/bairro-beira-mar-norte-720.webp";
+import beiraMar1280 from "@/assets/bairros/bairro-beira-mar-norte-1280.webp";
 import centro720 from "@/assets/bairros/bairro-centro-720.webp";
 import centro1280 from "@/assets/bairros/bairro-centro-1280.webp";
 import agronomica720 from "@/assets/bairros/bairro-agronomica-720.webp";
 import agronomica1280 from "@/assets/bairros/bairro-agronomica-1280.webp";
 import jurereInt720 from "@/assets/bairros/bairro-jurere-internacional-720.webp";
 import jurereInt1280 from "@/assets/bairros/bairro-jurere-internacional-1280.webp";
-import campeche720 from "@/assets/bairros/bairro-campeche-720.webp";
-import campeche1280 from "@/assets/bairros/bairro-campeche-1280.webp";
+import jurereTrad720 from "@/assets/bairros/bairro-jurere-tradicional-720.webp";
+import jurereTrad1280 from "@/assets/bairros/bairro-jurere-tradicional-1280.webp";
+import praiaBrava720 from "@/assets/bairros/bairro-praia-brava-720.webp";
+import praiaBrava1280 from "@/assets/bairros/bairro-praia-brava-1280.webp";
+import joaoPaulo720 from "@/assets/bairros/bairro-joao-paulo-720.webp";
+import joaoPaulo1280 from "@/assets/bairros/bairro-joao-paulo-1280.webp";
+import cacupe720 from "@/assets/bairros/bairro-cacupe-720.webp";
+import cacupe1280 from "@/assets/bairros/bairro-cacupe-1280.webp";
+import santoAntonio720 from "@/assets/bairros/bairro-santo-antonio-de-lisboa-720.webp";
+import santoAntonio1280 from "@/assets/bairros/bairro-santo-antonio-de-lisboa-1280.webp";
+import itacorubi720 from "@/assets/bairros/bairro-itacorubi-720.webp";
+import itacorubi1280 from "@/assets/bairros/bairro-itacorubi-1280.webp";
+import trindade720 from "@/assets/bairros/bairro-trindade-720.webp";
+import trindade1280 from "@/assets/bairros/bairro-trindade-1280.webp";
+import santaMonica720 from "@/assets/bairros/bairro-santa-monica-720.webp";
+import santaMonica1280 from "@/assets/bairros/bairro-santa-monica-1280.webp";
+import corregoGrande720 from "@/assets/bairros/bairro-corrego-grande-720.webp";
+import corregoGrande1280 from "@/assets/bairros/bairro-corrego-grande-1280.webp";
 import lagoa720 from "@/assets/bairros/bairro-lagoa-da-conceicao-720.webp";
 import lagoa1280 from "@/assets/bairros/bairro-lagoa-da-conceicao-1280.webp";
+import cantoLagoa720 from "@/assets/bairros/bairro-canto-da-lagoa-720.webp";
+import cantoLagoa1280 from "@/assets/bairros/bairro-canto-da-lagoa-1280.webp";
+import campeche720 from "@/assets/bairros/bairro-campeche-720.webp";
+import campeche1280 from "@/assets/bairros/bairro-campeche-1280.webp";
+import novoCampeche720 from "@/assets/bairros/bairro-novo-campeche-720.webp";
+import novoCampeche1280 from "@/assets/bairros/bairro-novo-campeche-1280.webp";
+import rioTavares720 from "@/assets/bairros/bairro-rio-tavares-720.webp";
+import rioTavares1280 from "@/assets/bairros/bairro-rio-tavares-1280.webp";
+import morroPedras720 from "@/assets/bairros/bairro-morro-das-pedras-720.webp";
+import morroPedras1280 from "@/assets/bairros/bairro-morro-das-pedras-1280.webp";
 
 export type NeighborhoodImage = {
   // URL padrão (fallback). Deve corresponder à variante ~640w.
