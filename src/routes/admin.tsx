@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   adminListProperties,
+  adminPropertiesStats,
   deleteProperty,
   exportPropertiesXml,
   getMyAdminStatus,
@@ -66,6 +67,13 @@ function AdminPage() {
     enabled: !!status.data?.isAdmin,
   });
 
+  const stats = useQuery({
+    queryKey: ["admin-properties-stats"],
+    queryFn: () => adminPropertiesStats(),
+    enabled: !!status.data?.isAdmin,
+  });
+
+
   const [url, setUrl] = useState("");
   const [importFeatured, setImportFeatured] = useState(false);
   const [importLaunch, setImportLaunch] = useState(false);
@@ -76,28 +84,28 @@ function AdminPage() {
       setUrl("");
       setImportFeatured(false);
       setImportLaunch(false);
-      qc.invalidateQueries({ queryKey: ["admin-properties"] });
+      qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] });
     },
   });
 
   const featuredMut = useMutation({
     mutationFn: (v: { id: string; featured: boolean }) => setPropertyFeatured({ data: v }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }); },
   });
 
   const launchMut = useMutation({
     mutationFn: (v: { id: string; is_launch: boolean }) => setPropertyLaunch({ data: v }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }); },
   });
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteProperty({ data: { id } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }); },
   });
 
   const syncMut = useMutation({
     mutationFn: () => syncPropertiesAvailability(),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }); },
   });
 
   const exportMut = useMutation({
@@ -284,11 +292,11 @@ function AdminPage() {
         <div className="mt-16 flex flex-wrap items-end justify-between gap-4">
           <div>
             <h2 className="font-display text-2xl tracking-tight">Imóveis cadastrados</h2>
-            {list.data && (
+            {stats.data && (
               <p className="mt-2 inline-flex items-center gap-2 rounded-full bg-secondary/60 px-3 py-1 text-xs text-foreground">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                {list.data.filter((p) => (p as any).published).length} ativos
-                <span className="text-muted-foreground">· {list.data.length} no total</span>
+                {stats.data.active} ativos
+                <span className="text-muted-foreground">· {stats.data.total} no total</span>
               </p>
             )}
             <p className="mt-2 text-xs text-muted-foreground">
@@ -457,7 +465,7 @@ function AdminPage() {
                     <label className="inline-flex items-center gap-2 cursor-pointer text-xs">
                       <input
                         type="checkbox"
-                        checked={p.is_launch}
+                        checked={!!p.is_launch}
                         disabled={launchMut.isPending}
                         onChange={(e) =>
                           launchMut.mutate({ id: p.id, is_launch: e.target.checked })
