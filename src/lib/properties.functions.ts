@@ -463,12 +463,13 @@ export type SyncSummary = {
   details: Array<{ code: string; status: string; detail: string }>;
 };
 
-async function runAvailabilitySync(): Promise<SyncSummary> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+type AnySupabase = { from: (t: string) => any };
+
+async function runAvailabilitySync(db: AnySupabase): Promise<SyncSummary> {
   const { checkGralhaAvailability } = await import("./gralha-availability.server");
   const { scrapeGralhaProperty } = await import("./gralha-scraper.server");
 
-  const { data: rows, error } = await supabaseAdmin
+  const { data: rows, error } = await db
     .from("properties")
     .select("id, code, source_url, published")
     .not("source_url", "is", null);
@@ -483,7 +484,7 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
     details: [],
   };
 
-  for (const row of rows ?? []) {
+  for (const row of (rows ?? []) as Array<{ id: string; code: string; source_url: string | null; published: boolean }>) {
     if (!row.source_url) continue;
     summary.checked += 1;
     const result = await checkGralhaAvailability(row.source_url);
@@ -492,7 +493,7 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
     if (result.status === "not_found") {
       summary.unpublished += 1;
       summary.details.push({ code: row.code, status: "removido", detail: result.detail });
-      await supabaseAdmin
+      await db
         .from("properties")
         .update({
           last_checked_at: now,
@@ -507,7 +508,7 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
     if (result.status === "error") {
       summary.errors += 1;
       summary.details.push({ code: row.code, status: "erro", detail: result.detail });
-      await supabaseAdmin
+      await db
         .from("properties")
         .update({
           last_checked_at: now,
@@ -521,10 +522,9 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
     summary.available += 1;
     try {
       const scraped = await scrapeGralhaProperty(row.source_url);
-      const { error: upErr } = await supabaseAdmin
+      const { error: upErr } = await db
         .from("properties")
         .update({
-          // Refresh content fields; preserve featured/is_launch/published
           title: scraped.title,
           property_type: scraped.property_type,
           neighborhood: scraped.neighborhood,
@@ -551,27 +551,25 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
         .eq("id", row.id);
       if (upErr) throw upErr;
 
-      // Replace photo set
-      await supabaseAdmin.from("property_photos").delete().eq("property_id", row.id);
+      await db.from("property_photos").delete().eq("property_id", row.id);
       if (scraped.photos.length > 0) {
         const rowsToInsert = scraped.photos.slice(0, 80).map((url, i) => ({
           property_id: row.id,
           url,
           position: i,
         }));
-        await supabaseAdmin.from("property_photos").insert(rowsToInsert);
+        await db.from("property_photos").insert(rowsToInsert);
       }
       summary.refreshed += 1;
       summary.details.push({ code: row.code, status: "atualizado", detail: "Dados e fotos sincronizados" });
     } catch (err) {
-      // Listing is available but refresh failed — keep it published, log the issue.
       summary.errors += 1;
       summary.details.push({
         code: row.code,
         status: "erro_refresh",
         detail: (err as Error).message || "Falha ao atualizar dados",
       });
-      await supabaseAdmin
+      await db
         .from("properties")
         .update({
           last_checked_at: now,
@@ -587,10 +585,12 @@ export const syncPropertiesAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    return runAvailabilitySync();
+    return runAvailabilitySync(context.supabase as unknown as AnySupabase);
   });
 
 export async function _runAvailabilitySyncInternal() {
-  return runAvailabilitySync();
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return runAvailabilitySync(supabaseAdmin as unknown as AnySupabase);
 }
+
 
