@@ -225,7 +225,6 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => importSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { scrapeGralhaProperty } = await import("./gralha-scraper.server");
 
     let scraped;
@@ -238,7 +237,7 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
       throw new Error("Falha ao importar o imóvel. Verifique o link e tente novamente.");
     }
 
-    const { data: upserted, error: upErr } = await supabaseAdmin
+    const { data: upserted, error: upErr } = await context.supabase
       .from("properties")
       .upsert(
         {
@@ -273,7 +272,7 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
       .single();
     if (upErr || !upserted) safeError("Não foi possível salvar o imóvel.", upErr);
 
-    const { error: delErr } = await supabaseAdmin
+    const { error: delErr } = await context.supabase
       .from("property_photos")
       .delete()
       .eq("property_id", upserted!.id);
@@ -285,7 +284,7 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
         url,
         position: i,
       }));
-      const { error: phErr } = await supabaseAdmin.from("property_photos").insert(rows);
+      const { error: phErr } = await context.supabase.from("property_photos").insert(rows);
       if (phErr) safeError("Não foi possível salvar as fotos.", phErr);
     }
 
@@ -296,8 +295,7 @@ export const adminListProperties = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await context.supabase
       .from("properties")
       .select(
         "id, code, title, neighborhood, city, price_brl, featured, is_launch, published, created_at, cover_image",
@@ -369,8 +367,7 @@ export const exportPropertiesXml = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ xml: string; count: number; generatedAt: string }> => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await context.supabase
       .from("properties")
       .select("*, property_photos(url, position)")
       .order("created_at", { ascending: false });
@@ -424,8 +421,7 @@ export const setPropertyFeatured = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => featuredSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("properties")
       .update({ featured: data.featured })
       .eq("id", data.id);
@@ -438,8 +434,7 @@ export const setPropertyLaunch = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => launchSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("properties")
       .update({ is_launch: data.is_launch })
       .eq("id", data.id);
@@ -452,8 +447,7 @@ export const deleteProperty = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("properties").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("properties").delete().eq("id", data.id);
     if (error) safeError("Não foi possível excluir o imóvel.", error);
     return { ok: true };
   });
@@ -469,12 +463,13 @@ export type SyncSummary = {
   details: Array<{ code: string; status: string; detail: string }>;
 };
 
-async function runAvailabilitySync(): Promise<SyncSummary> {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+type AnySupabase = { from: (t: string) => any };
+
+async function runAvailabilitySync(db: AnySupabase): Promise<SyncSummary> {
   const { checkGralhaAvailability } = await import("./gralha-availability.server");
   const { scrapeGralhaProperty } = await import("./gralha-scraper.server");
 
-  const { data: rows, error } = await supabaseAdmin
+  const { data: rows, error } = await db
     .from("properties")
     .select("id, code, source_url, published")
     .not("source_url", "is", null);
@@ -489,7 +484,7 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
     details: [],
   };
 
-  for (const row of rows ?? []) {
+  for (const row of (rows ?? []) as Array<{ id: string; code: string; source_url: string | null; published: boolean }>) {
     if (!row.source_url) continue;
     summary.checked += 1;
     const result = await checkGralhaAvailability(row.source_url);
@@ -498,7 +493,7 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
     if (result.status === "not_found") {
       summary.unpublished += 1;
       summary.details.push({ code: row.code, status: "removido", detail: result.detail });
-      await supabaseAdmin
+      await db
         .from("properties")
         .update({
           last_checked_at: now,
@@ -513,7 +508,7 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
     if (result.status === "error") {
       summary.errors += 1;
       summary.details.push({ code: row.code, status: "erro", detail: result.detail });
-      await supabaseAdmin
+      await db
         .from("properties")
         .update({
           last_checked_at: now,
@@ -527,10 +522,9 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
     summary.available += 1;
     try {
       const scraped = await scrapeGralhaProperty(row.source_url);
-      const { error: upErr } = await supabaseAdmin
+      const { error: upErr } = await db
         .from("properties")
         .update({
-          // Refresh content fields; preserve featured/is_launch/published
           title: scraped.title,
           property_type: scraped.property_type,
           neighborhood: scraped.neighborhood,
@@ -557,27 +551,25 @@ async function runAvailabilitySync(): Promise<SyncSummary> {
         .eq("id", row.id);
       if (upErr) throw upErr;
 
-      // Replace photo set
-      await supabaseAdmin.from("property_photos").delete().eq("property_id", row.id);
+      await db.from("property_photos").delete().eq("property_id", row.id);
       if (scraped.photos.length > 0) {
         const rowsToInsert = scraped.photos.slice(0, 80).map((url, i) => ({
           property_id: row.id,
           url,
           position: i,
         }));
-        await supabaseAdmin.from("property_photos").insert(rowsToInsert);
+        await db.from("property_photos").insert(rowsToInsert);
       }
       summary.refreshed += 1;
       summary.details.push({ code: row.code, status: "atualizado", detail: "Dados e fotos sincronizados" });
     } catch (err) {
-      // Listing is available but refresh failed — keep it published, log the issue.
       summary.errors += 1;
       summary.details.push({
         code: row.code,
         status: "erro_refresh",
         detail: (err as Error).message || "Falha ao atualizar dados",
       });
-      await supabaseAdmin
+      await db
         .from("properties")
         .update({
           last_checked_at: now,
@@ -593,10 +585,12 @@ export const syncPropertiesAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    return runAvailabilitySync();
+    return runAvailabilitySync(context.supabase as unknown as AnySupabase);
   });
 
 export async function _runAvailabilitySyncInternal() {
-  return runAvailabilitySync();
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  return runAvailabilitySync(supabaseAdmin as unknown as AnySupabase);
 }
+
 
