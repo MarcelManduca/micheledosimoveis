@@ -225,7 +225,6 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => importSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { scrapeGralhaProperty } = await import("./gralha-scraper.server");
 
     let scraped;
@@ -238,7 +237,7 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
       throw new Error("Falha ao importar o imóvel. Verifique o link e tente novamente.");
     }
 
-    const { data: upserted, error: upErr } = await supabaseAdmin
+    const { data: upserted, error: upErr } = await context.supabase
       .from("properties")
       .upsert(
         {
@@ -273,7 +272,7 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
       .single();
     if (upErr || !upserted) safeError("Não foi possível salvar o imóvel.", upErr);
 
-    const { error: delErr } = await supabaseAdmin
+    const { error: delErr } = await context.supabase
       .from("property_photos")
       .delete()
       .eq("property_id", upserted!.id);
@@ -285,7 +284,7 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
         url,
         position: i,
       }));
-      const { error: phErr } = await supabaseAdmin.from("property_photos").insert(rows);
+      const { error: phErr } = await context.supabase.from("property_photos").insert(rows);
       if (phErr) safeError("Não foi possível salvar as fotos.", phErr);
     }
 
@@ -296,8 +295,7 @@ export const adminListProperties = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await context.supabase
       .from("properties")
       .select(
         "id, code, title, neighborhood, city, price_brl, featured, is_launch, published, created_at, cover_image",
