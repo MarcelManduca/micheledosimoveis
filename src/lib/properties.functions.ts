@@ -295,14 +295,43 @@ export const adminListProperties = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { data, error } = await context.supabase
-      .from("properties")
-      .select(
-        "id, code, title, neighborhood, city, price_brl, featured, is_launch, published, created_at, cover_image",
-      )
-      .order("created_at", { ascending: false });
-    if (error) safeError("Não foi possível listar os imóveis.", error);
-    return data ?? [];
+    const cols =
+      "id, code, title, neighborhood, city, price_brl, featured, is_launch, published, created_at, cover_image";
+    const PAGE = 1000;
+    const all: Array<Record<string, unknown>> = [];
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await context.supabase
+        .from("properties")
+        .select(cols)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: true })
+        .range(from, from + PAGE - 1);
+      if (error) safeError("Não foi possível listar os imóveis.", error);
+      const rows = (data ?? []) as Array<Record<string, unknown>>;
+      all.push(...rows);
+      if (rows.length < PAGE) break;
+    }
+    return all;
+  });
+
+export type AdminPropertiesStats = { total: number; active: number; inactive: number };
+
+export const adminPropertiesStats = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<AdminPropertiesStats> => {
+    await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
+    const [totalRes, activeRes] = await Promise.all([
+      context.supabase.from("properties").select("*", { count: "exact", head: true }),
+      context.supabase
+        .from("properties")
+        .select("*", { count: "exact", head: true })
+        .eq("published", true),
+    ]);
+    if (totalRes.error) safeError("Não foi possível contar os imóveis.", totalRes.error);
+    if (activeRes.error) safeError("Não foi possível contar os imóveis ativos.", activeRes.error);
+    const total = totalRes.count ?? 0;
+    const active = activeRes.count ?? 0;
+    return { total, active, inactive: Math.max(total - active, 0) };
   });
 
 export type PortfolioProperty = {
