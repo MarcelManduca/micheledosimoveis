@@ -457,7 +457,7 @@ function AdminPage() {
                     <label className="inline-flex items-center gap-2 cursor-pointer text-xs">
                       <input
                         type="checkbox"
-                        checked={p.is_launch}
+                        checked={!!p.is_launch}
                         disabled={launchMut.isPending}
                         onChange={(e) =>
                           launchMut.mutate({ id: p.id, is_launch: e.target.checked })
