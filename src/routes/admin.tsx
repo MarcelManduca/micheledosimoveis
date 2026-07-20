@@ -90,22 +90,22 @@ function AdminPage() {
 
   const featuredMut = useMutation({
     mutationFn: (v: { id: string; featured: boolean }) => setPropertyFeatured({ data: v }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }); },
   });
 
   const launchMut = useMutation({
     mutationFn: (v: { id: string; is_launch: boolean }) => setPropertyLaunch({ data: v }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }); },
   });
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteProperty({ data: { id } }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }); },
   });
 
   const syncMut = useMutation({
     mutationFn: () => syncPropertiesAvailability(),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }); },
   });
 
   const exportMut = useMutation({
