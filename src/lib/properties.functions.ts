@@ -291,14 +291,28 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
     return { id: upserted!.id, code: upserted!.code, photos: scraped.photos.length };
   });
 
+export type AdminPropertyRow = {
+  id: string;
+  code: string;
+  title: string;
+  neighborhood: string | null;
+  city: string | null;
+  price_brl: number | null;
+  featured: boolean;
+  is_launch: boolean | null;
+  published: boolean;
+  created_at: string;
+  cover_image: string | null;
+};
+
 export const adminListProperties = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .handler(async ({ context }): Promise<AdminPropertyRow[]> => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
     const cols =
       "id, code, title, neighborhood, city, price_brl, featured, is_launch, published, created_at, cover_image";
     const PAGE = 1000;
-    const all: Array<Record<string, unknown>> = [];
+    const all: AdminPropertyRow[] = [];
     for (let from = 0; ; from += PAGE) {
       const { data, error } = await context.supabase
         .from("properties")
@@ -307,7 +321,7 @@ export const adminListProperties = createServerFn({ method: "GET" })
         .order("id", { ascending: true })
         .range(from, from + PAGE - 1);
       if (error) safeError("Não foi possível listar os imóveis.", error);
-      const rows = (data ?? []) as Array<Record<string, unknown>>;
+      const rows = (data ?? []) as unknown as AdminPropertyRow[];
       all.push(...rows);
       if (rows.length < PAGE) break;
     }
