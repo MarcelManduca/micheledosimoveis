@@ -367,8 +367,7 @@ export const exportPropertiesXml = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ xml: string; count: number; generatedAt: string }> => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await context.supabase
       .from("properties")
       .select("*, property_photos(url, position)")
       .order("created_at", { ascending: false });
@@ -422,8 +421,7 @@ export const setPropertyFeatured = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => featuredSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("properties")
       .update({ featured: data.featured })
       .eq("id", data.id);
@@ -436,8 +434,7 @@ export const setPropertyLaunch = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => launchSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
+    const { error } = await context.supabase
       .from("properties")
       .update({ is_launch: data.is_launch })
       .eq("id", data.id);
@@ -450,8 +447,7 @@ export const deleteProperty = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => idSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("properties").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("properties").delete().eq("id", data.id);
     if (error) safeError("Não foi possível excluir o imóvel.", error);
     return { ok: true };
   });
