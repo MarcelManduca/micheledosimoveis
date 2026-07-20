@@ -67,6 +67,13 @@ function AdminPage() {
     enabled: !!status.data?.isAdmin,
   });
 
+  const stats = useQuery({
+    queryKey: ["admin-properties-stats"],
+    queryFn: () => adminPropertiesStats(),
+    enabled: !!status.data?.isAdmin,
+  });
+
+
   const [url, setUrl] = useState("");
   const [importFeatured, setImportFeatured] = useState(false);
   const [importLaunch, setImportLaunch] = useState(false);
