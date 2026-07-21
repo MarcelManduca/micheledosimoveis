@@ -1,0 +1,579 @@
+/**
+ * VRSync XML generator.
+ *
+ * Este módulo é INDEPENDENTE da exportação XML interna (que continua em
+ * `properties.functions.ts`). Aqui construímos um feed no padrão VRSync
+ * (Vista Real Sync) para sindicação com portais.
+ *
+ * Estratégia:
+ *  - Buscar todos os imóveis publicados em lotes de 1000 (contornando o
+ *    limite do PostgREST) usando o cliente público (RLS: anon lê publicados).
+ *  - Aplicar transformação, normalização de features (whitelist + fusões),
+ *    validação de tipologia e regras específicas por tipo.
+ *  - Produzir XML bem-formado + relatório de qualidade dos dados.
+ */
+import { createServerFn } from "@tanstack/react-start";
+import { createClient } from "@supabase/supabase-js";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Database } from "@/integrations/supabase/types";
+
+const SITE_URL = "https://micheledosimoveis.com.br";
+
+// ─────────────────────────── Cliente publishable ─────────────────────────
+function getPublicClient() {
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  if (!url || !key) throw new Error("Backend indisponível no momento.");
+  return createClient<Database>(url, key, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
+}
+
+async function assertAdmin(ctx: { supabase: any; userId: string }) {
+  const { data, error } = await ctx.supabase.rpc("has_role", {
+    _user_id: ctx.userId,
+    _role: "admin",
+  });
+  if (error) throw new Error("Não foi possível verificar suas permissões.");
+  if (!data) throw new Error("Acesso negado: apenas administradores.");
+}
+
+// ─────────────────────────── Tipos ─────────────────────────
+type PropertyRow = {
+  id: string;
+  code: string;
+  title: string;
+  property_type: string | null;
+  neighborhood: string | null;
+  city: string | null;
+  state: string | null;
+  address: string | null;
+  condo_name: string | null;
+  price_brl: number | null;
+  condo_fee_brl: number | null;
+  iptu_brl: number | null;
+  area_m2: number | null;
+  bedrooms: number | null;
+  suites: number | null;
+  bathrooms: number | null;
+  parking_spots: number | null;
+  description: string | null;
+  features: string[] | null;
+  condo_features: string[] | null;
+  cover_image: string | null;
+  published: boolean;
+  property_photos: Array<{ url: string; position: number }> | null;
+};
+
+export type VrsyncReport = {
+  generatedAt: string;
+  totalActive: number;
+  processed: number;
+  exported: number;
+  rejected: number;
+  missingAddress: number;
+  missingDescription: number;
+  missingPrice: number;
+  missingArea: number;
+  missingPhoto: number;
+  unmappedTypes: Array<{ code: string; type: string }>;
+  duplicateCodes: string[];
+  invalidFeaturesRemoved: number;
+  rejectionReasons: Array<{ code: string; reason: string }>;
+};
+
+// ─────────────────────────── Tipologias ─────────────────────────
+// Mapeia tipos do banco → PropertyType do VRSync
+const TYPE_MAP: Record<string, string> = {
+  "apartamento": "Apartamento",
+  "casa": "Casa",
+  "terreno": "Terreno",
+  "cobertura": "Cobertura",
+  "estúdio": "Studio",
+  "estudio": "Studio",
+  "apartamento duplex": "Apartamento Duplex",
+  "sala comercial": "Sala Comercial",
+  "casa de condomínio": "Casa de Condomínio",
+  "casa de condominio": "Casa de Condomínio",
+  "loja": "Loja",
+  "loft": "Loft",
+  "apartamento garden": "Apartamento Garden",
+  "casa comercial": "Casa Comercial",
+  "hotel/pousada": "Hotel/Pousada",
+  "hotel": "Hotel/Pousada",
+  "pousada": "Hotel/Pousada",
+  "sala": "Sala Comercial",
+  "prédio": "Prédio",
+  "predio": "Prédio",
+  "prédio residencial": "Prédio Residencial",
+  "predio residencial": "Prédio Residencial",
+  "terreno condomínio": "Terreno em Condomínio",
+  "terreno condominio": "Terreno em Condomínio",
+  "sítio/fazenda": "Sítio/Fazenda",
+  "sitio/fazenda": "Sítio/Fazenda",
+  "sítio": "Sítio/Fazenda",
+  "sitio": "Sítio/Fazenda",
+  "fazenda": "Sítio/Fazenda",
+};
+
+const TYPES_WITHOUT_BEDROOMS = new Set([
+  "Terreno",
+  "Terreno em Condomínio",
+  "Sala Comercial",
+  "Loja",
+  "Prédio",
+  "Casa Comercial",
+]);
+
+function mapPropertyType(raw: string | null): string | null {
+  if (!raw) return null;
+  const norm = raw.trim().toLowerCase();
+  return TYPE_MAP[norm] ?? null;
+}
+
+// ─────────────────────────── Features ─────────────────────────
+// Whitelist de features reconhecidas (VRSync). Chaves em minúsculo/normalizado.
+const FEATURE_WHITELIST: Record<string, string> = {
+  "piscina": "Piscina",
+  "piscina aquecida": "Piscina aquecida",
+  "academia": "Academia",
+  "sala de ginástica": "Academia",
+  "salão de festas": "Salão de festas",
+  "salao de festas": "Salão de festas",
+  "salão gourmet": "Salão gourmet",
+  "salao gourmet": "Salão gourmet",
+  "espaço gourmet": "Espaço gourmet",
+  "espaco gourmet": "Espaço gourmet",
+  "churrasqueira": "Churrasqueira",
+  "playground": "Playground",
+  "brinquedoteca": "Brinquedoteca",
+  "sala de jogos": "Sala de jogos",
+  "quadra": "Quadra esportiva",
+  "quadra esportiva": "Quadra esportiva",
+  "quadra de tênis": "Quadra de tênis",
+  "sauna": "Sauna",
+  "spa": "Spa",
+  "sala de massagem": "Sala de massagem",
+  "elevador": "Elevador",
+  "portaria 24h": "Portaria 24h",
+  "portaria 24 horas": "Portaria 24h",
+  "segurança 24h": "Segurança 24h",
+  "seguranca 24h": "Segurança 24h",
+  "vigilância": "Segurança 24h",
+  "circuito de segurança": "Circuito de segurança",
+  "cftv": "Circuito de segurança",
+  "garagem": "Garagem",
+  "vaga de garagem": "Garagem",
+  "bicicletário": "Bicicletário",
+  "bicicletario": "Bicicletário",
+  "lavanderia": "Lavanderia",
+  "coworking": "Coworking",
+  "espaço pet": "Espaço pet",
+  "espaco pet": "Espaço pet",
+  "pet place": "Espaço pet",
+  "área verde": "Área verde",
+  "area verde": "Área verde",
+  "jardim": "Jardim",
+  "solarium": "Solarium",
+  "solárium": "Solarium",
+  "deck": "Deck",
+  "hidromassagem": "Hidromassagem",
+  "banheira": "Banheira",
+  "sacada": "Sacada",
+  "sacada gourmet": "Sacada gourmet",
+  "varanda": "Varanda",
+  "varanda gourmet": "Varanda gourmet",
+  "ar condicionado": "Ar condicionado",
+  "aquecimento": "Aquecimento",
+  "aquecimento a gás": "Aquecimento a gás",
+  "aquecimento solar": "Aquecimento solar",
+  "gerador": "Gerador",
+  "mobiliado": "Mobiliado",
+  "semi mobiliado": "Semi mobiliado",
+  "semi-mobiliado": "Semi mobiliado",
+  "banheiro social": "Banheiro social",
+  "lavabo": "Lavabo",
+  "closet": "Closet",
+  "dependência de empregada": "Dependência de empregada",
+  "dependencia de empregada": "Dependência de empregada",
+  "copa cozinha": "Copa cozinha",
+  "copa": "Copa",
+  "cozinha americana": "Cozinha americana",
+  "cozinha planejada": "Cozinha planejada",
+  "área de serviço": "Área de serviço",
+  "area de serviço": "Área de serviço",
+  "area de servico": "Área de serviço",
+  "escritório": "Escritório",
+  "escritorio": "Escritório",
+  "home office": "Home office",
+  "vista mar": "Vista para o mar",
+  "vista para o mar": "Vista para o mar",
+  "vista panorâmica": "Vista panorâmica",
+  "frente para o mar": "Frente para o mar",
+  "pé na areia": "Pé na areia",
+  "pe na areia": "Pé na areia",
+};
+
+// Fragmentos inválidos (sozinhos não valem) que aparecem quebrados pelo scraper.
+const INVALID_FRAGMENTS = new Set(
+  [
+    "ínio", "ínio:", "inio", "inio:",
+    "banheiro", "social", "salão", "salao", "festas",
+    "infraestrutura", "infraestrutura do", "imóvel", "imovel",
+    "condomínio", "condominio", "condomínio:", "condominio:",
+    "copa", "cozinha", "de", "do", "da", "sala",
+  ].map((s) => s.toLowerCase()),
+);
+
+// Fusões: duas palavras adjacentes que deveriam ser uma feature composta.
+const FUSION_PAIRS: Array<[string, string, string]> = [
+  ["salão", "festas", "Salão de festas"],
+  ["salao", "festas", "Salão de festas"],
+  ["banheiro", "social", "Banheiro social"],
+  ["copa", "cozinha", "Copa cozinha"],
+  ["salão", "gourmet", "Salão gourmet"],
+  ["salao", "gourmet", "Salão gourmet"],
+  ["espaço", "gourmet", "Espaço gourmet"],
+  ["espaco", "gourmet", "Espaço gourmet"],
+  ["área", "gourmet", "Espaço gourmet"],
+  ["area", "gourmet", "Espaço gourmet"],
+  ["quadra", "tênis", "Quadra de tênis"],
+  ["quadra", "tenis", "Quadra de tênis"],
+  ["portaria", "24h", "Portaria 24h"],
+  ["vista", "mar", "Vista para o mar"],
+  ["frente", "mar", "Frente para o mar"],
+  ["pé", "areia", "Pé na areia"],
+  ["pe", "areia", "Pé na areia"],
+  ["ar", "condicionado", "Ar condicionado"],
+  ["cozinha", "americana", "Cozinha americana"],
+  ["cozinha", "planejada", "Cozinha planejada"],
+  ["área", "serviço", "Área de serviço"],
+  ["area", "servico", "Área de serviço"],
+  ["home", "office", "Home office"],
+];
+
+function norm(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[:;.,]+$/g, "")
+    .trim();
+}
+
+/**
+ * Normaliza uma lista de features/condo_features:
+ *  1. Funde pares adjacentes conhecidos (Salão + Festas → Salão de festas).
+ *  2. Descarta fragmentos inválidos.
+ *  3. Passa cada item por whitelist (com variantes normalizadas).
+ *  4. Remove duplicatas mantendo ordem.
+ * Retorna { valid, removed } onde `removed` é a contagem de itens rejeitados.
+ */
+export function normalizeFeatures(raw: string[] | null | undefined): {
+  valid: string[];
+  removed: number;
+} {
+  const items = (raw ?? []).map((s) => (s ?? "").trim()).filter(Boolean);
+  const fused: string[] = [];
+  let i = 0;
+  while (i < items.length) {
+    const a = norm(items[i]);
+    const b = i + 1 < items.length ? norm(items[i + 1]) : "";
+    const pair = FUSION_PAIRS.find(([x, y]) => x === a && y === b);
+    if (pair) {
+      fused.push(pair[2]);
+      i += 2;
+      continue;
+    }
+    // Se o item já é uma frase completa (>1 palavra), mantém como está.
+    fused.push(items[i]);
+    i += 1;
+  }
+
+  const seen = new Set<string>();
+  const valid: string[] = [];
+  let removed = 0;
+  for (const item of fused) {
+    const key = norm(item);
+    if (!key) {
+      removed += 1;
+      continue;
+    }
+    // Fragmento único inválido?
+    if (INVALID_FRAGMENTS.has(key) && !FEATURE_WHITELIST[key]) {
+      removed += 1;
+      continue;
+    }
+    const canonical = FEATURE_WHITELIST[key];
+    if (!canonical) {
+      removed += 1;
+      continue;
+    }
+    if (seen.has(canonical)) continue;
+    seen.add(canonical);
+    valid.push(canonical);
+  }
+  return { valid, removed };
+}
+
+// ─────────────────────────── Fotos ─────────────────────────
+function isValidHttpsUrl(u: string): boolean {
+  if (!u) return false;
+  try {
+    const p = new URL(u);
+    return p.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function normalizePhotos(
+  photos: Array<{ url: string; position: number }> | null,
+  cover: string | null,
+): string[] {
+  const list = (photos ?? [])
+    .slice()
+    .sort((a, b) => a.position - b.position)
+    .map((p) => p.url);
+  if (cover) list.unshift(cover);
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const url of list) {
+    if (!isValidHttpsUrl(url)) continue;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    out.push(url);
+  }
+  return out;
+}
+
+// ─────────────────────────── XML ─────────────────────────
+function xmlEscape(s: unknown): string {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function tag(name: string, value: unknown, attrs?: Record<string, string>): string {
+  const v = value == null || value === "" ? null : value;
+  const a = attrs
+    ? Object.entries(attrs)
+        .map(([k, val]) => ` ${k}="${xmlEscape(val)}"`)
+        .join("")
+    : "";
+  if (v == null) return `<${name}${a}/>`;
+  return `<${name}${a}>${xmlEscape(v)}</${name}>`;
+}
+
+// ─────────────────────────── Fetch paginado ─────────────────────────
+async function fetchAllPublished(): Promise<PropertyRow[]> {
+  const supabase = getPublicClient();
+  const cols =
+    "id, code, title, property_type, neighborhood, city, state, address, condo_name, price_brl, condo_fee_brl, iptu_brl, area_m2, bedrooms, suites, bathrooms, parking_spots, description, features, condo_features, cover_image, published, property_photos(url, position)";
+  const PAGE = 1000;
+  const all: PropertyRow[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from("properties")
+      .select(cols)
+      .eq("published", true)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) throw new Error(`Falha ao buscar imóveis: ${error.message}`);
+    const batch = (data ?? []) as unknown as PropertyRow[];
+    all.push(...batch);
+    if (batch.length < PAGE) break;
+  }
+  return all;
+}
+
+// ─────────────────────────── Builder ─────────────────────────
+export type VrsyncResult = { xml: string; report: VrsyncReport };
+
+export async function buildVrsync(): Promise<VrsyncResult> {
+  const generatedAt = new Date().toISOString();
+  const rows = await fetchAllPublished();
+
+  const report: VrsyncReport = {
+    generatedAt,
+    totalActive: rows.length,
+    processed: 0,
+    exported: 0,
+    rejected: 0,
+    missingAddress: 0,
+    missingDescription: 0,
+    missingPrice: 0,
+    missingArea: 0,
+    missingPhoto: 0,
+    unmappedTypes: [],
+    duplicateCodes: [],
+    invalidFeaturesRemoved: 0,
+    rejectionReasons: [],
+  };
+
+  const seenCodes = new Set<string>();
+  const listings: string[] = [];
+
+  for (const r of rows) {
+    report.processed += 1;
+
+    // Duplicata
+    if (seenCodes.has(r.code)) {
+      report.duplicateCodes.push(r.code);
+      report.rejected += 1;
+      report.rejectionReasons.push({ code: r.code, reason: "código duplicado" });
+      continue;
+    }
+
+    // Tipologia
+    const mappedType = mapPropertyType(r.property_type);
+    if (!mappedType) {
+      report.unmappedTypes.push({ code: r.code, type: r.property_type ?? "" });
+      report.rejected += 1;
+      report.rejectionReasons.push({
+        code: r.code,
+        reason: `tipologia não mapeada: ${r.property_type ?? "(vazio)"}`,
+      });
+      continue;
+    }
+
+    // Fotos
+    const photos = normalizePhotos(r.property_photos, r.cover_image);
+    if (photos.length === 0) report.missingPhoto += 1;
+
+    // Diagnóstico de dados
+    if (!r.address) report.missingAddress += 1;
+    if (!r.description) report.missingDescription += 1;
+    if (r.price_brl == null) report.missingPrice += 1;
+    if (r.area_m2 == null) report.missingArea += 1;
+
+    // Regras mínimas
+    if (!r.address) {
+      report.rejected += 1;
+      report.rejectionReasons.push({ code: r.code, reason: "sem endereço" });
+      continue;
+    }
+    if (r.price_brl == null || Number(r.price_brl) <= 0) {
+      report.rejected += 1;
+      report.rejectionReasons.push({ code: r.code, reason: "sem preço" });
+      continue;
+    }
+    if (photos.length === 0) {
+      report.rejected += 1;
+      report.rejectionReasons.push({ code: r.code, reason: "sem foto" });
+      continue;
+    }
+
+    // Regras específicas por tipo
+    const isNoBedroomType = TYPES_WITHOUT_BEDROOMS.has(mappedType);
+    if (!isNoBedroomType) {
+      // Tipos residenciais precisam ter área e ao menos 1 dormitório
+      if (r.area_m2 == null || Number(r.area_m2) <= 0) {
+        report.rejected += 1;
+        report.rejectionReasons.push({ code: r.code, reason: "sem área" });
+        continue;
+      }
+    } else {
+      // Terrenos e comerciais: sem exigência de dormitórios/banheiros
+    }
+
+    // Features normalizadas
+    const feat = normalizeFeatures(r.features);
+    const condoFeat = normalizeFeatures(r.condo_features);
+    report.invalidFeaturesRemoved += feat.removed + condoFeat.removed;
+    const allFeatures = Array.from(new Set([...feat.valid, ...condoFeat.valid]));
+
+    seenCodes.add(r.code);
+    report.exported += 1;
+
+    // ─────── XML do listing ───────
+    const detailUrl = `${SITE_URL}/imovel/${encodeURIComponent(r.code)}`;
+    const lines: string[] = [];
+    lines.push("  <Listing>");
+    lines.push(`    ${tag("ListingID", r.code)}`);
+    lines.push(`    ${tag("Title", r.title)}`);
+    lines.push(`    ${tag("TransactionType", "For Sale")}`);
+    lines.push(`    ${tag("PropertyType", mappedType)}`);
+    lines.push(`    ${tag("DetailViewUrl", detailUrl)}`);
+    lines.push(`    ${tag("ListPrice", r.price_brl, { currency: "BRL" })}`);
+    if (r.condo_fee_brl != null && Number(r.condo_fee_brl) > 0)
+      lines.push(`    ${tag("PropertyAdministrationFee", r.condo_fee_brl, { currency: "BRL" })}`);
+    if (r.iptu_brl != null && Number(r.iptu_brl) > 0)
+      lines.push(`    ${tag("YearlyTax", r.iptu_brl, { currency: "BRL" })}`);
+    if (r.area_m2 != null) lines.push(`    ${tag("LivingArea", r.area_m2, { unit: "square metres" })}`);
+    if (!isNoBedroomType) {
+      lines.push(`    ${tag("Bedrooms", r.bedrooms ?? 0)}`);
+      lines.push(`    ${tag("Suites", r.suites ?? 0)}`);
+      lines.push(`    ${tag("Bathrooms", r.bathrooms ?? 0)}`);
+    }
+    lines.push(`    ${tag("Garage", r.parking_spots ?? 0)}`);
+    if (r.description) lines.push(`    ${tag("Description", r.description)}`);
+
+    // Location
+    lines.push("    <Location displayAddress=\"Street\">");
+    lines.push(`      ${tag("Country", "BR")}`);
+    lines.push(`      ${tag("State", r.state ?? "SC")}`);
+    lines.push(`      ${tag("City", r.city ?? "Florianópolis")}`);
+    if (r.neighborhood) lines.push(`      ${tag("Neighborhood", r.neighborhood)}`);
+    lines.push(`      ${tag("Address", r.address)}`);
+    if (r.condo_name) lines.push(`      ${tag("Complement", r.condo_name)}`);
+    lines.push("    </Location>");
+
+    // Details/Features
+    if (allFeatures.length > 0) {
+      lines.push("    <Details>");
+      lines.push("      <Features>");
+      for (const f of allFeatures) lines.push(`        ${tag("Feature", f)}`);
+      lines.push("      </Features>");
+      lines.push("    </Details>");
+    }
+
+    // Media
+    lines.push("    <Media>");
+    photos.forEach((url, idx) => {
+      const attrs: Record<string, string> = {
+        medium: "image",
+        caption: idx === 0 ? "Principal" : `Foto ${idx + 1}`,
+      };
+      if (idx === 0) attrs.primary = "true";
+      lines.push(`      ${tag("Item", url, attrs)}`);
+    });
+    lines.push("    </Media>");
+
+    lines.push("  </Listing>");
+    listings.push(lines.join("\n"));
+  }
+
+  const header = [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    "<Carga>",
+    "  <Imoveis>",
+    `    <!-- VRSync feed · gerado em ${xmlEscape(generatedAt)} · ${report.exported} imóveis -->`,
+  ].join("\n");
+
+  const xml = [header, ...listings, "  </Imoveis>", "</Carga>"].join("\n");
+  return { xml, report };
+}
+
+// ─────────────────────────── Server functions ─────────────────────────
+/** Admin: gera VRSync e retorna XML + relatório de qualidade. */
+export const vrsyncExport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<VrsyncResult> => {
+    await assertAdmin({ supabase: context.supabase as any, userId: context.userId });
+    return buildVrsync();
+  });
+
+/** Admin: apenas o relatório (para o painel). */
+export const vrsyncReport = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<VrsyncReport> => {
+    await assertAdmin({ supabase: context.supabase as any, userId: context.userId });
+    const { report } = await buildVrsync();
+    return report;
+  });
