@@ -13,7 +13,8 @@ import {
   setPropertyLaunch,
   syncPropertiesAvailability,
 } from "@/lib/properties.functions";
-import { ArrowRight, ChevronLeft, ChevronRight, Download, ExternalLink, LogOut, RefreshCw, Rocket, Search, Star, Trash2, X } from "lucide-react";
+import { vrsyncExport } from "@/lib/vrsync.functions";
+import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, ClipboardCopy, Download, ExternalLink, FileWarning, LogOut, RefreshCw, Rocket, Search, Star, Trash2, X } from "lucide-react";
 
 
 export const Route = createFileRoute("/admin")({
