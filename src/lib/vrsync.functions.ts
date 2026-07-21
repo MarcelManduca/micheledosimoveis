@@ -61,6 +61,7 @@ type PropertyRow = {
   features: string[] | null;
   condo_features: string[] | null;
   cover_image: string | null;
+  featured: boolean | null;
   published: boolean;
   property_photos: Array<{ url: string; position: number }> | null;
 };
