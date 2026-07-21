@@ -125,6 +125,44 @@ function AdminPage() {
     },
   });
 
+  // VRSync (feed padrão para portais)
+  const [vrsyncReport, setVrsyncReport] = useState<null | Awaited<ReturnType<typeof vrsyncExport>>["report"]>(null);
+  const [showRejections, setShowRejections] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
+  const vrsyncMut = useMutation({
+    mutationFn: () => vrsyncExport(),
+    onSuccess: (res) => {
+      setVrsyncReport(res.report);
+      const blob = new Blob([res.xml], { type: "application/xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `vrsync-${stamp}.xml`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+  });
+  const vrsyncValidateMut = useMutation({
+    mutationFn: () => vrsyncExport(),
+    onSuccess: (res) => setVrsyncReport(res.report),
+  });
+  const vrsyncUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/vrsync.xml`
+      : "https://micheledosimoveis.com.br/vrsync.xml";
+  const copyVrsyncUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(vrsyncUrl);
+      setCopiedUrl(true);
+      setTimeout(() => setCopiedUrl(false), 1800);
+    } catch {
+      // ignore
+    }
+  };
+
   // ── Busca, filtros e paginação da tabela ─────────────────────────────
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"todos" | "ativos" | "inativos">("ativos");
