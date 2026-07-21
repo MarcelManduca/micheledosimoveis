@@ -440,8 +440,8 @@ export async function buildVrsync(): Promise<VrsyncResult> {
     }
 
     // Tipologia
-    const mappedType = mapPropertyType(r.property_type);
-    if (!mappedType) {
+    const mapped = mapPropertyType(r.property_type);
+    if (!mapped) {
       report.unmappedTypes.push({ code: r.code, type: r.property_type ?? "" });
       report.rejected += 1;
       report.rejectionReasons.push({
@@ -450,6 +450,7 @@ export async function buildVrsync(): Promise<VrsyncResult> {
       });
       continue;
     }
+    const { propertyType, usageType } = mapped;
 
     // Fotos
     const photos = normalizePhotos(r.property_photos, r.cover_image);
@@ -479,16 +480,13 @@ export async function buildVrsync(): Promise<VrsyncResult> {
     }
 
     // Regras específicas por tipo
-    const isNoBedroomType = TYPES_WITHOUT_BEDROOMS.has(mappedType);
+    const isNoBedroomType = TYPES_WITHOUT_BEDROOMS.has(propertyType);
     if (!isNoBedroomType) {
-      // Tipos residenciais precisam ter área e ao menos 1 dormitório
       if (r.area_m2 == null || Number(r.area_m2) <= 0) {
         report.rejected += 1;
         report.rejectionReasons.push({ code: r.code, reason: "sem área" });
         continue;
       }
-    } else {
-      // Terrenos e comerciais: sem exigência de dormitórios/banheiros
     }
 
     // Features normalizadas
@@ -500,73 +498,137 @@ export async function buildVrsync(): Promise<VrsyncResult> {
     seenCodes.add(r.code);
     report.exported += 1;
 
-    // ─────── XML do listing ───────
+    // Endereço: separar número final se houver ("Rua X, 123" → street + 123)
+    const addrParsed = parseAddress(r.address);
+
     const detailUrl = `${SITE_URL}/imovel/${encodeURIComponent(r.code)}`;
+    const publicationType = r.featured ? "PREMIUM" : "STANDARD";
+
     const lines: string[] = [];
-    lines.push("  <Listing>");
-    lines.push(`    ${tag("ListingID", r.code)}`);
-    lines.push(`    ${tag("Title", r.title)}`);
-    lines.push(`    ${tag("TransactionType", "For Sale")}`);
-    lines.push(`    ${tag("PropertyType", mappedType)}`);
-    lines.push(`    ${tag("DetailViewUrl", detailUrl)}`);
-    lines.push(`    ${tag("ListPrice", r.price_brl, { currency: "BRL" })}`);
-    if (r.condo_fee_brl != null && Number(r.condo_fee_brl) > 0)
-      lines.push(`    ${tag("PropertyAdministrationFee", r.condo_fee_brl, { currency: "BRL" })}`);
-    if (r.iptu_brl != null && Number(r.iptu_brl) > 0)
-      lines.push(`    ${tag("YearlyTax", r.iptu_brl, { currency: "BRL" })}`);
-    if (r.area_m2 != null) lines.push(`    ${tag("LivingArea", r.area_m2, { unit: "square metres" })}`);
-    if (!isNoBedroomType) {
-      lines.push(`    ${tag("Bedrooms", r.bedrooms ?? 0)}`);
-      lines.push(`    ${tag("Suites", r.suites ?? 0)}`);
-      lines.push(`    ${tag("Bathrooms", r.bathrooms ?? 0)}`);
-    }
-    lines.push(`    ${tag("Garage", r.parking_spots ?? 0)}`);
-    if (r.description) lines.push(`    ${tag("Description", r.description)}`);
-
-    // Location
-    lines.push("    <Location displayAddress=\"Street\">");
-    lines.push(`      ${tag("Country", "BR")}`);
-    lines.push(`      ${tag("State", r.state ?? "SC")}`);
-    lines.push(`      ${tag("City", r.city ?? "Florianópolis")}`);
-    if (r.neighborhood) lines.push(`      ${tag("Neighborhood", r.neighborhood)}`);
-    lines.push(`      ${tag("Address", r.address)}`);
-    if (r.condo_name) lines.push(`      ${tag("Complement", r.condo_name)}`);
-    lines.push("    </Location>");
-
-    // Details/Features
-    if (allFeatures.length > 0) {
-      lines.push("    <Details>");
-      lines.push("      <Features>");
-      for (const f of allFeatures) lines.push(`        ${tag("Feature", f)}`);
-      lines.push("      </Features>");
-      lines.push("    </Details>");
-    }
+    lines.push("    <Listing>");
+    lines.push(`      ${tag("ListingID", r.code)}`);
+    lines.push(`      <Title>${cdata(r.title)}</Title>`);
+    lines.push(`      ${tag("TransactionType", "For Sale")}`);
+    lines.push(`      ${tag("PublicationType", publicationType)}`);
+    lines.push(`      ${tag("DetailViewUrl", detailUrl)}`);
 
     // Media
-    lines.push("    <Media>");
+    lines.push("      <Media>");
     photos.forEach((url, idx) => {
       const attrs: Record<string, string> = {
         medium: "image",
         caption: idx === 0 ? "Principal" : `Foto ${idx + 1}`,
       };
       if (idx === 0) attrs.primary = "true";
-      lines.push(`      ${tag("Item", url, attrs)}`);
+      lines.push(`        ${tag("Item", url, attrs)}`);
     });
-    lines.push("    </Media>");
+    lines.push("      </Media>");
 
-    lines.push("  </Listing>");
+    // Details
+    lines.push("      <Details>");
+    lines.push(`        ${tag("PropertyType", propertyType)}`);
+    if (r.description) lines.push(`        <Description>${cdata(r.description)}</Description>`);
+    lines.push(`        ${tag("ListPrice", r.price_brl, { currency: "BRL" })}`);
+    if (r.condo_fee_brl != null && Number(r.condo_fee_brl) > 0)
+      lines.push(
+        `        ${tag("PropertyAdministrationFee", r.condo_fee_brl, { currency: "BRL" })}`,
+      );
+    if (r.iptu_brl != null && Number(r.iptu_brl) > 0) {
+      // Periodicidade não é armazenada; assumimos "Yearly" como default seguro
+      // do provedor (valor anual). Fonte: contrato de importação Michele dos Imóveis.
+      lines.push(
+        `        ${tag("Iptu", r.iptu_brl, { currency: "BRL", period: "Yearly" })}`,
+      );
+    }
+    if (r.area_m2 != null && Number(r.area_m2) > 0) {
+      const areaTagName = propertyType === "Land Lot" || propertyType === "Farm" ? "LotArea" : "LivingArea";
+      lines.push(`        ${tag(areaTagName, r.area_m2, { unit: "square metres" })}`);
+    }
+    if (!isNoBedroomType) {
+      lines.push(`        ${tag("Bedrooms", r.bedrooms ?? 0)}`);
+      lines.push(`        ${tag("Suites", r.suites ?? 0)}`);
+      lines.push(`        ${tag("Bathrooms", r.bathrooms ?? 0)}`);
+    }
+    lines.push(`        ${tag("Garage", r.parking_spots ?? 0)}`);
+    lines.push(`        ${tag("UsageType", usageType)}`);
+    if (allFeatures.length > 0) {
+      lines.push("        <Features>");
+      for (const f of allFeatures) lines.push(`          ${tag("Feature", f)}`);
+      lines.push("        </Features>");
+    }
+    lines.push("      </Details>");
+
+    // Location
+    lines.push('      <Location displayAddress="Street">');
+    lines.push(`        ${tag("Country", "Brasil", { abbreviation: "BR" })}`);
+    lines.push(`        ${tag("State", r.state ?? "Santa Catarina", { abbreviation: stateAbbr(r.state) })}`);
+    lines.push(`        ${tag("City", r.city ?? "Florianópolis")}`);
+    if (r.neighborhood) lines.push(`        ${tag("Neighborhood", r.neighborhood)}`);
+    lines.push(`        ${tag("Address", addrParsed.street)}`);
+    if (addrParsed.number) lines.push(`        ${tag("StreetNumber", addrParsed.number)}`);
+    if (r.condo_name) lines.push(`        ${tag("Complement", r.condo_name)}`);
+    lines.push("      </Location>");
+
+    lines.push("    </Listing>");
     listings.push(lines.join("\n"));
   }
 
   const header = [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    "<Carga>",
-    "  <Imoveis>",
-    `    <!-- VRSync feed · gerado em ${xmlEscape(generatedAt)} · ${report.exported} imóveis -->`,
+    '<ListingDataFeed',
+    '  xmlns="http://www.vivareal.com/schemas/1.0/VRSync"',
+    '  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"',
+    '  xsi:schemaLocation="http://www.vivareal.com/schemas/1.0/VRSync http://xml.vivareal.com/vrsync.xsd">',
+    "  <Header>",
+    `    ${tag("Provider", "Michele dos Imóveis")}`,
+    `    ${tag("Email", "micheledosimoveis@gmail.com")}`,
+    `    ${tag("ContactName", "Michele Prietsch")}`,
+    `    ${tag("PublishDate", generatedAt)}`,
+    `    ${tag("Telephone", "48 99182-8828")}`,
+    "  </Header>",
+    `  <!-- VRSync feed · gerado em ${xmlEscape(generatedAt)} · ${report.exported} imóveis -->`,
+    "  <Listings>",
   ].join("\n");
 
-  const xml = [header, ...listings, "  </Imoveis>", "</Carga>"].join("\n");
+  const xml = [header, ...listings, "  </Listings>", "</ListingDataFeed>"].join("\n");
   return { xml, report };
+}
+
+// ─────────────────────────── Helpers de formatação ─────────────────────────
+function cdata(s: string): string {
+  // Remove HTML e quebra fechamentos de CDATA hostis.
+  const clean = String(s ?? "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\]\]>/g, "]]]]><![CDATA[>")
+    // Remove caracteres de controle inválidos em XML 1.0
+    .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  return `<![CDATA[${clean}]]>`;
+}
+
+function parseAddress(raw: string): { street: string; number: string | null } {
+  const s = raw.trim();
+  // "Rua X, 123" | "Rua X 123" | "Rua X, nº 123"
+  const m = s.match(/^(.*?)[,\s]+(?:n[º°o]?\s*)?(\d{1,6})(?:\s*[-–].*)?$/i);
+  if (m) return { street: m[1].replace(/[,\s]+$/, "").trim(), number: m[2] };
+  return { street: s, number: null };
+}
+
+function stateAbbr(state: string | null): string {
+  if (!state) return "SC";
+  const t = state.trim();
+  if (t.length === 2) return t.toUpperCase();
+  const map: Record<string, string> = {
+    "santa catarina": "SC",
+    "são paulo": "SP",
+    "sao paulo": "SP",
+    "rio de janeiro": "RJ",
+    "paraná": "PR",
+    "parana": "PR",
+    "rio grande do sul": "RS",
+  };
+  return map[t.toLowerCase()] ?? "SC";
 }
 
 // ─────────────────────────── Server functions ─────────────────────────
