@@ -382,7 +382,7 @@ function tag(name: string, value: unknown, attrs?: Record<string, string>): stri
 async function fetchAllPublished(): Promise<PropertyRow[]> {
   const supabase = getPublicClient();
   const cols =
-    "id, code, title, property_type, neighborhood, city, state, address, condo_name, price_brl, condo_fee_brl, iptu_brl, area_m2, bedrooms, suites, bathrooms, parking_spots, description, features, condo_features, cover_image, published, property_photos(url, position)";
+    "id, code, title, property_type, neighborhood, city, state, address, condo_name, price_brl, condo_fee_brl, iptu_brl, area_m2, bedrooms, suites, bathrooms, parking_spots, description, features, condo_features, cover_image, featured, published, property_photos(url, position)";
   const PAGE = 1000;
   const all: PropertyRow[] = [];
   for (let from = 0; ; from += PAGE) {
