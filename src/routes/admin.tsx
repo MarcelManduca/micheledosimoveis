@@ -13,7 +13,8 @@ import {
   setPropertyLaunch,
   syncPropertiesAvailability,
 } from "@/lib/properties.functions";
-import { ArrowRight, ChevronLeft, ChevronRight, Download, ExternalLink, LogOut, RefreshCw, Rocket, Search, Star, Trash2, X } from "lucide-react";
+import { vrsyncExport } from "@/lib/vrsync.functions";
+import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, ClipboardCopy, Download, ExternalLink, FileWarning, LogOut, RefreshCw, Rocket, Search, Star, Trash2, X } from "lucide-react";
 
 
 export const Route = createFileRoute("/admin")({
@@ -123,6 +124,44 @@ function AdminPage() {
       URL.revokeObjectURL(url);
     },
   });
+
+  // VRSync (feed padrão para portais)
+  const [vrsyncReport, setVrsyncReport] = useState<null | Awaited<ReturnType<typeof vrsyncExport>>["report"]>(null);
+  const [showRejections, setShowRejections] = useState(false);
+  const [copiedUrl, setCopiedUrl] = useState(false);
+  const vrsyncMut = useMutation({
+    mutationFn: () => vrsyncExport(),
+    onSuccess: (res) => {
+      setVrsyncReport(res.report);
+      const blob = new Blob([res.xml], { type: "application/xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `vrsync-${stamp}.xml`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+  });
+  const vrsyncValidateMut = useMutation({
+    mutationFn: () => vrsyncExport(),
+    onSuccess: (res) => setVrsyncReport(res.report),
+  });
+  const vrsyncUrl =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/vrsync.xml`
+      : "https://micheledosimoveis.com.br/vrsync.xml";
+  const copyVrsyncUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(vrsyncUrl);
+      setCopiedUrl(true);
+      setTimeout(() => setCopiedUrl(false), 1800);
+    } catch {
+      // ignore
+    }
+  };
 
   // ── Busca, filtros e paginação da tabela ─────────────────────────────
   const [query, setQuery] = useState("");
@@ -343,6 +382,122 @@ function AdminPage() {
             {(syncMut.error as Error).message}
           </div>
         )}
+
+        {/* ─────────── VRSync ─────────── */}
+        <section className="mt-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Sindicação</div>
+              <h3 className="mt-1 font-display text-xl tracking-tight">VRSync</h3>
+              <p className="mt-1 text-xs text-muted-foreground max-w-lg">
+                Feed no padrão VRSync (Vista Real Sync) para envio a portais imobiliários.
+                Distinto do XML interno acima.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => vrsyncMut.mutate()}
+                disabled={vrsyncMut.isPending}
+                className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-4 py-2 text-xs font-medium hover:bg-foreground/90 transition disabled:opacity-60"
+              >
+                <Download className={`h-3.5 w-3.5 ${vrsyncMut.isPending ? "animate-pulse" : ""}`} />
+                {vrsyncMut.isPending ? "Gerando..." : "Baixar VRSync"}
+              </button>
+              <button
+                onClick={() => vrsyncValidateMut.mutate()}
+                disabled={vrsyncValidateMut.isPending}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium hover:bg-secondary transition disabled:opacity-60"
+              >
+                <CheckCircle2 className={`h-3.5 w-3.5 ${vrsyncValidateMut.isPending ? "animate-pulse" : ""}`} />
+                {vrsyncValidateMut.isPending ? "Validando..." : "Validar"}
+              </button>
+              <button
+                onClick={copyVrsyncUrl}
+                className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-medium hover:bg-secondary transition"
+              >
+                <ClipboardCopy className="h-3.5 w-3.5" />
+                {copiedUrl ? "URL copiada!" : "Copiar URL"}
+              </button>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="font-mono truncate">{vrsyncUrl}</span>
+            <a
+              href="/vrsync.xml"
+              target="_blank"
+              rel="noopener"
+              className="inline-flex items-center gap-1 text-foreground hover:underline"
+            >
+              abrir <ExternalLink className="h-3 w-3" />
+            </a>
+          </div>
+
+          {vrsyncMut.error && (
+            <div className="mt-3 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {(vrsyncMut.error as Error).message}
+            </div>
+          )}
+          {vrsyncValidateMut.error && (
+            <div className="mt-3 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {(vrsyncValidateMut.error as Error).message}
+            </div>
+          )}
+
+          {vrsyncReport && (
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+              <Stat label="Ativos no banco" value={vrsyncReport.totalActive} />
+              <Stat label="Exportados" value={vrsyncReport.exported} tone="ok" />
+              <Stat label="Rejeitados" value={vrsyncReport.rejected} tone={vrsyncReport.rejected > 0 ? "warn" : "ok"} />
+              <Stat
+                label="Gerado em"
+                value={new Date(vrsyncReport.generatedAt).toLocaleString("pt-BR")}
+                small
+              />
+              <Stat label="Sem endereço" value={vrsyncReport.missingAddress} />
+              <Stat label="Sem descrição" value={vrsyncReport.missingDescription} />
+              <Stat label="Sem preço" value={vrsyncReport.missingPrice} />
+              <Stat label="Sem área" value={vrsyncReport.missingArea} />
+              <Stat label="Sem foto" value={vrsyncReport.missingPhoto} />
+              <Stat label="Tipos não mapeados" value={vrsyncReport.unmappedTypes.length} />
+              <Stat label="Códigos duplicados" value={vrsyncReport.duplicateCodes.length} />
+              <Stat label="Features removidas" value={vrsyncReport.invalidFeaturesRemoved} />
+            </div>
+          )}
+
+          {vrsyncReport && vrsyncReport.rejectionReasons.length > 0 && (
+            <div className="mt-4">
+              <button
+                onClick={() => setShowRejections((v) => !v)}
+                className="inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                <FileWarning className="h-3.5 w-3.5" />
+                {showRejections ? "Ocultar" : "Ver"} relatório de rejeições ({vrsyncReport.rejectionReasons.length})
+              </button>
+              {showRejections && (
+                <div className="mt-3 max-h-72 overflow-auto rounded-xl border border-border bg-background text-xs">
+                  <table className="w-full">
+                    <thead className="sticky top-0 bg-secondary/60 text-left">
+                      <tr>
+                        <th className="px-3 py-2 font-medium">Código</th>
+                        <th className="px-3 py-2 font-medium">Motivo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {vrsyncReport.rejectionReasons.map((r, i) => (
+                        <tr key={i} className="border-t border-border">
+                          <td className="px-3 py-2 font-mono">{r.code}</td>
+                          <td className="px-3 py-2 text-muted-foreground">{r.reason}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+
         {/* Barra de busca e filtros */}
         <div className="mt-6 rounded-2xl border border-border bg-card p-3 sm:p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -545,3 +700,29 @@ function AdminPage() {
   );
 
 }
+
+function Stat({
+  label,
+  value,
+  tone,
+  small,
+}: {
+  label: string;
+  value: number | string;
+  tone?: "ok" | "warn";
+  small?: boolean;
+}) {
+  const toneCls =
+    tone === "ok"
+      ? "text-emerald-700"
+      : tone === "warn"
+        ? "text-amber-700"
+        : "text-foreground";
+  return (
+    <div className="rounded-xl border border-border bg-background px-3 py-2">
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className={`mt-0.5 font-medium ${small ? "text-xs" : "text-lg"} ${toneCls}`}>{value}</div>
+    </div>
+  );
+}
+

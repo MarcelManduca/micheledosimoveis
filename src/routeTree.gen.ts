@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VrsyncDotxmlRouteImport } from './routes/vrsync[.]xml'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SitemapCondominiosDotxmlRouteImport } from './routes/sitemap-condominios[.]xml'
 import { Route as SitemapBairrosDotxmlRouteImport } from './routes/sitemap-bairros[.]xml'
@@ -34,6 +35,11 @@ import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicHooksSyncPropertiesRouteImport } from './routes/api/public/hooks/sync-properties'
 
+const VrsyncDotxmlRoute = VrsyncDotxmlRouteImport.update({
+  id: '/vrsync.xml',
+  path: '/vrsync.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/sitemap-bairros.xml'
     | '/sitemap-condominios.xml'
     | '/sitemap.xml'
+    | '/vrsync.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/inteligencia-portfolio'
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/sitemap-bairros.xml'
     | '/sitemap-condominios.xml'
     | '/sitemap.xml'
+    | '/vrsync.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/inteligencia-portfolio'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/sitemap-bairros.xml'
     | '/sitemap-condominios.xml'
     | '/sitemap.xml'
+    | '/vrsync.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
     | '/admin/inteligencia-portfolio'
@@ -335,6 +347,7 @@ export interface RootRouteChildren {
   SitemapBairrosDotxmlRoute: typeof SitemapBairrosDotxmlRoute
   SitemapCondominiosDotxmlRoute: typeof SitemapCondominiosDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  VrsyncDotxmlRoute: typeof VrsyncDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   CondominioSlugRoute: typeof CondominioSlugRoute
@@ -350,6 +363,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vrsync.xml': {
+      id: '/vrsync.xml'
+      path: '/vrsync.xml'
+      fullPath: '/vrsync.xml'
+      preLoaderRoute: typeof VrsyncDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -545,6 +565,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapBairrosDotxmlRoute: SitemapBairrosDotxmlRoute,
   SitemapCondominiosDotxmlRoute: SitemapCondominiosDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  VrsyncDotxmlRoute: VrsyncDotxmlRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
