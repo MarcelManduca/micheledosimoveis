@@ -22,7 +22,7 @@ export const Route = createFileRoute("/vrsync.xml")({
         } catch (err) {
           console.error("vrsync.xml build failed", err);
           return new Response(
-            '<?xml version="1.0" encoding="UTF-8"?>\n<Carga><Erro>Feed indisponível no momento.</Erro></Carga>',
+            '<?xml version="1.0" encoding="UTF-8"?>\n<ListingDataFeed xmlns="http://www.vivareal.com/schemas/1.0/VRSync"><Error>Feed indisponível no momento.</Error></ListingDataFeed>',
             {
               status: 503,
               headers: { "content-type": "application/xml; charset=utf-8" },
