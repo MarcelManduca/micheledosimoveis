@@ -84,49 +84,57 @@ export type VrsyncReport = {
 };
 
 // ─────────────────────────── Tipologias ─────────────────────────
-// Mapeia tipos do banco → PropertyType do VRSync
-const TYPE_MAP: Record<string, string> = {
-  "apartamento": "Apartamento",
-  "casa": "Casa",
-  "terreno": "Terreno",
-  "cobertura": "Cobertura",
-  "estúdio": "Studio",
-  "estudio": "Studio",
-  "apartamento duplex": "Apartamento Duplex",
-  "sala comercial": "Sala Comercial",
-  "casa de condomínio": "Casa de Condomínio",
-  "casa de condominio": "Casa de Condomínio",
-  "loja": "Loja",
-  "loft": "Loft",
-  "apartamento garden": "Apartamento Garden",
-  "casa comercial": "Casa Comercial",
-  "hotel/pousada": "Hotel/Pousada",
-  "hotel": "Hotel/Pousada",
-  "pousada": "Hotel/Pousada",
-  "sala": "Sala Comercial",
-  "prédio": "Prédio",
-  "predio": "Prédio",
-  "prédio residencial": "Prédio Residencial",
-  "predio residencial": "Prédio Residencial",
-  "terreno condomínio": "Terreno em Condomínio",
-  "terreno condominio": "Terreno em Condomínio",
-  "sítio/fazenda": "Sítio/Fazenda",
-  "sitio/fazenda": "Sítio/Fazenda",
-  "sítio": "Sítio/Fazenda",
-  "sitio": "Sítio/Fazenda",
-  "fazenda": "Sítio/Fazenda",
+// Mapeia tipos do banco → PropertyType oficial do VRSync (enumeração em inglês)
+// aceita pelos portais (Viva Real / ZAP / OLX).
+const TYPE_MAP: Record<string, { propertyType: string; usageType: "Residential" | "Commercial" }> = {
+  "apartamento": { propertyType: "Apartment", usageType: "Residential" },
+  "apartamento duplex": { propertyType: "Apartment", usageType: "Residential" },
+  "apartamento garden": { propertyType: "Apartment", usageType: "Residential" },
+  "casa": { propertyType: "Home", usageType: "Residential" },
+  "casa de condomínio": { propertyType: "Condominium", usageType: "Residential" },
+  "casa de condominio": { propertyType: "Condominium", usageType: "Residential" },
+  "cobertura": { propertyType: "Penthouse", usageType: "Residential" },
+  "estúdio": { propertyType: "Studio", usageType: "Residential" },
+  "estudio": { propertyType: "Studio", usageType: "Residential" },
+  "loft": { propertyType: "Loft", usageType: "Residential" },
+  "kitnet": { propertyType: "Kitnet", usageType: "Residential" },
+  "terreno": { propertyType: "Land Lot", usageType: "Residential" },
+  "terreno condomínio": { propertyType: "Land Lot", usageType: "Residential" },
+  "terreno condominio": { propertyType: "Land Lot", usageType: "Residential" },
+  "terreno em condomínio": { propertyType: "Land Lot", usageType: "Residential" },
+  "sítio/fazenda": { propertyType: "Farm", usageType: "Residential" },
+  "sitio/fazenda": { propertyType: "Farm", usageType: "Residential" },
+  "sítio": { propertyType: "Farm", usageType: "Residential" },
+  "sitio": { propertyType: "Farm", usageType: "Residential" },
+  "fazenda": { propertyType: "Farm", usageType: "Residential" },
+  "sala comercial": { propertyType: "Office", usageType: "Commercial" },
+  "sala": { propertyType: "Office", usageType: "Commercial" },
+  "loja": { propertyType: "Store", usageType: "Commercial" },
+  "casa comercial": { propertyType: "Business", usageType: "Commercial" },
+  "prédio": { propertyType: "Residential Building", usageType: "Residential" },
+  "predio": { propertyType: "Residential Building", usageType: "Residential" },
+  "prédio residencial": { propertyType: "Residential Building", usageType: "Residential" },
+  "predio residencial": { propertyType: "Residential Building", usageType: "Residential" },
+  "prédio comercial": { propertyType: "Commercial Building", usageType: "Commercial" },
+  "predio comercial": { propertyType: "Commercial Building", usageType: "Commercial" },
+  "hotel/pousada": { propertyType: "Hotel", usageType: "Commercial" },
+  "hotel": { propertyType: "Hotel", usageType: "Commercial" },
+  "pousada": { propertyType: "Hotel", usageType: "Commercial" },
 };
 
 const TYPES_WITHOUT_BEDROOMS = new Set([
-  "Terreno",
-  "Terreno em Condomínio",
-  "Sala Comercial",
-  "Loja",
-  "Prédio",
-  "Casa Comercial",
+  "Land Lot",
+  "Office",
+  "Store",
+  "Business",
+  "Residential Building",
+  "Commercial Building",
+  "Hotel",
 ]);
 
-function mapPropertyType(raw: string | null): string | null {
+function mapPropertyType(
+  raw: string | null,
+): { propertyType: string; usageType: "Residential" | "Commercial" } | null {
   if (!raw) return null;
   const norm = raw.trim().toLowerCase();
   return TYPE_MAP[norm] ?? null;
