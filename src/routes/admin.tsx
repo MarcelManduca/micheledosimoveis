@@ -499,6 +499,10 @@ function AdminPage() {
           )}
         </section>
 
+        <VrsyncFeedsSection />
+
+
+
         {/* Barra de busca e filtros */}
         <div className="mt-6 rounded-2xl border border-border bg-card p-3 sm:p-4">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
