@@ -15,7 +15,7 @@ function xmlResponse(body: string, status: number, cacheable: boolean) {
   return new Response(body, { status, headers });
 }
 
-export const Route = createFileRoute("/vrsync/$slug.xml")({
+export const Route = createFileRoute("/vrsync/{$slug}.xml")({
   server: {
     handlers: {
       GET: async ({ params }) => {
