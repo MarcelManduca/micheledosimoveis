@@ -379,6 +379,57 @@ export type Database = {
         }
         Relationships: []
       }
+      vrsync_feeds: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          excluded_property_codes: string[]
+          filters: Json
+          id: string
+          included_property_codes: string[]
+          is_active: boolean
+          last_generated_at: string | null
+          max_items: number | null
+          name: string
+          slug: string
+          sort_by: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          excluded_property_codes?: string[]
+          filters?: Json
+          id?: string
+          included_property_codes?: string[]
+          is_active?: boolean
+          last_generated_at?: string | null
+          max_items?: number | null
+          name: string
+          slug: string
+          sort_by?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          excluded_property_codes?: string[]
+          filters?: Json
+          id?: string
+          included_property_codes?: string[]
+          is_active?: boolean
+          last_generated_at?: string | null
+          max_items?: number | null
+          name?: string
+          slug?: string
+          sort_by?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

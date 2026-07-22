@@ -24,6 +24,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ImoveisIndexRouteImport } from './routes/imoveis.index'
 import { Route as CondominiosIndexRouteImport } from './routes/condominios.index'
+import { Route as VrsyncChar123slugChar125DotxmlRouteImport } from './routes/vrsync.{$slug}[.]xml'
 import { Route as ImovelCodeRouteImport } from './routes/imovel.$code'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as CondominiosBairroRouteImport } from './routes/condominios.$bairro'
@@ -112,6 +113,12 @@ const CondominiosIndexRoute = CondominiosIndexRouteImport.update({
   path: '/condominios/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VrsyncChar123slugChar125DotxmlRoute =
+  VrsyncChar123slugChar125DotxmlRouteImport.update({
+    id: '/vrsync/{$slug}.xml',
+    path: '/vrsync/{$slug}.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ImovelCodeRoute = ImovelCodeRouteImport.update({
   id: '/imovel/$code',
   path: '/imovel/$code',
@@ -189,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -216,6 +224,7 @@ export interface FileRoutesByTo {
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
   '/condominios': typeof CondominiosIndexRoute
   '/imoveis': typeof ImoveisIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -244,6 +253,7 @@ export interface FileRoutesById {
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/condominios/$bairro'
     | '/imoveis/$slug'
     | '/imovel/$code'
+    | '/vrsync/{$slug}.xml'
     | '/condominios/'
     | '/imoveis/'
     | '/.lovable/oauth/consent'
@@ -300,6 +311,7 @@ export interface FileRouteTypes {
     | '/condominios/$bairro'
     | '/imoveis/$slug'
     | '/imovel/$code'
+    | '/vrsync/{$slug}.xml'
     | '/condominios'
     | '/imoveis'
     | '/.lovable/oauth/consent'
@@ -327,6 +339,7 @@ export interface FileRouteTypes {
     | '/condominios/$bairro'
     | '/imoveis/$slug'
     | '/imovel/$code'
+    | '/vrsync/{$slug}.xml'
     | '/condominios/'
     | '/imoveis/'
     | '/.lovable/oauth/consent'
@@ -354,6 +367,7 @@ export interface RootRouteChildren {
   CondominiosBairroRoute: typeof CondominiosBairroRoute
   ImoveisSlugRoute: typeof ImoveisSlugRoute
   ImovelCodeRoute: typeof ImovelCodeRoute
+  VrsyncChar123slugChar125DotxmlRoute: typeof VrsyncChar123slugChar125DotxmlRoute
   CondominiosIndexRoute: typeof CondominiosIndexRoute
   ImoveisIndexRoute: typeof ImoveisIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
@@ -468,6 +482,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CondominiosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vrsync/{$slug}.xml': {
+      id: '/vrsync/{$slug}.xml'
+      path: '/vrsync/{$slug}.xml'
+      fullPath: '/vrsync/{$slug}.xml'
+      preLoaderRoute: typeof VrsyncChar123slugChar125DotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/imovel/$code': {
       id: '/imovel/$code'
       path: '/imovel/$code'
@@ -573,6 +594,7 @@ const rootRouteChildren: RootRouteChildren = {
   CondominiosBairroRoute: CondominiosBairroRoute,
   ImoveisSlugRoute: ImoveisSlugRoute,
   ImovelCodeRoute: ImovelCodeRoute,
+  VrsyncChar123slugChar125DotxmlRoute: VrsyncChar123slugChar125DotxmlRoute,
   CondominiosIndexRoute: CondominiosIndexRoute,
   ImoveisIndexRoute: ImoveisIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,

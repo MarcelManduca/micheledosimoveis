@@ -14,6 +14,7 @@ import {
   syncPropertiesAvailability,
 } from "@/lib/properties.functions";
 import { vrsyncExport } from "@/lib/vrsync.functions";
+import { VrsyncFeedsSection } from "@/components/admin/VrsyncFeedsSection";
 import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, ClipboardCopy, Download, ExternalLink, FileWarning, LogOut, RefreshCw, Rocket, Search, Star, Trash2, X } from "lucide-react";
 
 
@@ -497,6 +498,10 @@ function AdminPage() {
             </div>
           )}
         </section>
+
+        <VrsyncFeedsSection />
+
+
 
         {/* Barra de busca e filtros */}
         <div className="mt-6 rounded-2xl border border-border bg-card p-3 sm:p-4">
