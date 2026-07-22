@@ -969,7 +969,7 @@ export const updateVrsyncFeed = createServerFn({ method: "POST" })
 
     const { data: row, error } = await context.supabase
       .from("vrsync_feeds")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.id)
       .select("*")
       .single();
