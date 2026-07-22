@@ -4,9 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>) => ({
-    next: typeof s.next === "string" ? s.next : undefined,
-  }),
+  validateSearch: (s: Record<string, unknown>): { next?: string } => {
+    return { next: typeof s.next === "string" ? s.next : undefined };
+  },
   head: () => ({ meta: [{ title: "Acesso administrativo · Michele Prietsch" }] }),
   component: AuthPage,
 });
