@@ -44,6 +44,9 @@ type FormState = {
   description: string;
   is_active: boolean;
   filters: FeedFilters;
+  neighborhoods_text: string;
+  cities_text: string;
+  property_types_text: string;
   included_property_codes: string;
   excluded_property_codes: string;
   max_items: string;
@@ -56,6 +59,9 @@ const EMPTY_FORM: FormState = {
   description: "",
   is_active: true,
   filters: { only_published: true },
+  neighborhoods_text: "",
+  cities_text: "",
+  property_types_text: "",
   included_property_codes: "",
   excluded_property_codes: "",
   max_items: "",
@@ -93,13 +99,17 @@ function brl(n: number | null) {
 }
 
 function feedToForm(feed: VrsyncFeedRecord): FormState {
+  const filters = feed.filters ?? {};
   return {
     id: feed.id,
     name: feed.name,
     slug: feed.slug,
     description: feed.description ?? "",
     is_active: feed.is_active,
-    filters: feed.filters ?? {},
+    filters,
+    neighborhoods_text: (filters.neighborhoods ?? []).join(", "),
+    cities_text: (filters.cities ?? []).join(", "),
+    property_types_text: (filters.property_types ?? []).join(", "),
     included_property_codes: (feed.included_property_codes ?? []).join(", "),
     excluded_property_codes: (feed.excluded_property_codes ?? []).join(", "),
     max_items: feed.max_items == null ? "" : String(feed.max_items),
@@ -108,18 +118,28 @@ function feedToForm(feed: VrsyncFeedRecord): FormState {
 }
 
 function formToPayload(f: FormState) {
+  const neighborhoods = parseList(f.neighborhoods_text);
+  const cities = parseList(f.cities_text);
+  const property_types = parseList(f.property_types_text);
+  const filters: FeedFilters = {
+    ...f.filters,
+    neighborhoods: neighborhoods.length ? neighborhoods : undefined,
+    cities: cities.length ? cities : undefined,
+    property_types: property_types.length ? property_types : undefined,
+  };
   return {
     name: f.name.trim(),
     slug: f.slug.trim(),
     description: f.description.trim() || null,
     is_active: f.is_active,
-    filters: f.filters,
+    filters,
     included_property_codes: parseList(f.included_property_codes),
     excluded_property_codes: parseList(f.excluded_property_codes),
     max_items: f.max_items.trim() ? Number(f.max_items) : null,
     sort_by: f.sort_by,
   };
 }
+
 
 function feedUrl(slug: string): string {
   if (typeof window !== "undefined") return `${window.location.origin}/vrsync/${slug}.xml`;
@@ -592,33 +612,34 @@ function FeedFormPanel({
             </Field>
           </div>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Field label="Bairros (separe por vírgula)">
+            <Field label="Bairros (separe por vírgula ou linha)">
               <textarea
                 rows={2}
-                value={(form.filters.neighborhoods ?? []).join(", ")}
-                onChange={(e) => setFilter("neighborhoods", parseList(e.target.value))}
+                value={form.neighborhoods_text}
+                onChange={(e) => setForm((f) => ({ ...f, neighborhoods_text: e.target.value }))}
                 className="input"
                 placeholder="Centro, Agronômica"
               />
             </Field>
-            <Field label="Cidades (separe por vírgula)">
+            <Field label="Cidades (separe por vírgula ou linha)">
               <textarea
                 rows={2}
-                value={(form.filters.cities ?? []).join(", ")}
-                onChange={(e) => setFilter("cities", parseList(e.target.value))}
+                value={form.cities_text}
+                onChange={(e) => setForm((f) => ({ ...f, cities_text: e.target.value }))}
                 className="input"
                 placeholder="Florianópolis"
               />
             </Field>
-            <Field label="Tipos (separe por vírgula)">
+            <Field label="Tipos (separe por vírgula ou linha)">
               <textarea
                 rows={2}
-                value={(form.filters.property_types ?? []).join(", ")}
-                onChange={(e) => setFilter("property_types", parseList(e.target.value))}
+                value={form.property_types_text}
+                onChange={(e) => setForm((f) => ({ ...f, property_types_text: e.target.value }))}
                 className="input"
                 placeholder="Apartamento, Cobertura"
               />
             </Field>
+
           </div>
           <div className="mt-3 flex flex-wrap gap-4 text-xs">
             <Check
