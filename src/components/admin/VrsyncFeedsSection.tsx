@@ -151,6 +151,7 @@ export function VrsyncFeedsSection() {
   const feedsQ = useQuery({ queryKey: ["vrsync-feeds"], queryFn: () => listVrsyncFeeds() });
 
   const [form, setForm] = useState<FormState | null>(null);
+  const [formNonce, setFormNonce] = useState(0);
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
 
   const createMut = useMutation({
