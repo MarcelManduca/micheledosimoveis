@@ -376,9 +376,7 @@ function FeedRow({
         )}
       </td>
       <td className="px-3 py-3 text-xs text-muted-foreground">
-        {feed.last_generated_at
-          ? new Date(feed.last_generated_at).toLocaleString("pt-BR")
-          : "—"}
+        {feed.last_generated_at ? <LocalDateTime iso={feed.last_generated_at} /> : "—"}
       </td>
       <td className="px-3 py-3">
         <div className="flex flex-wrap items-center justify-end gap-2 text-xs">
