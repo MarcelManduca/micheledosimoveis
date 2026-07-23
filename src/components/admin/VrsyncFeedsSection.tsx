@@ -460,13 +460,19 @@ function FeedFormPanel({
   submitting: boolean;
   error: string | null;
 }) {
-  const [form, setForm] = useState<FormState>(initial);
-  const [autoSlug, setAutoSlug] = useState(!initial.id);
+  const [form, setForm] = useState<FormState>(() => initial);
+  const [autoSlug, setAutoSlug] = useState<boolean>(() => !initial.id);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     if (autoSlug) setForm((f) => ({ ...f, slug: slugify(f.name) }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.name, autoSlug]);
+  }, [form.name, autoSlug, mounted]);
 
   const setFilter = <K extends keyof FeedFilters>(k: K, v: FeedFilters[K]) =>
     setForm((f) => ({ ...f, filters: { ...f.filters, [k]: v } }));
