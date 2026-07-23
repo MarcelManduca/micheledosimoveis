@@ -293,7 +293,7 @@ export function VrsyncFeedsSection() {
 
       {form && (
         <FeedFormPanel
-          key={form.id ?? "__new__"}
+          key={form.id ?? `__new__:${formNonce}`}
           initial={form}
           onCancel={() => setForm(null)}
           onSubmit={(payload) => {
