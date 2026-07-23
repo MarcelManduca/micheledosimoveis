@@ -965,3 +965,20 @@ function TopList({ title, items }: { title: string; items: Array<{ name: string;
     </div>
   );
 }
+
+/**
+ * Formata data/hora com o fuso do usuário apenas após a hidratação.
+ * Durante SSR/primeiro render renderiza o ISO original (idêntico no servidor
+ * e no cliente) para evitar mismatch de hydration causado por fuso.
+ */
+function LocalDateTime({ iso }: { iso: string }) {
+  const [text, setText] = useState<string>(iso);
+  useEffect(() => {
+    try {
+      setText(new Date(iso).toLocaleString("pt-BR"));
+    } catch {
+      setText(iso);
+    }
+  }, [iso]);
+  return <>{text}</>;
+}
