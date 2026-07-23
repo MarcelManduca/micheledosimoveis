@@ -376,9 +376,7 @@ function FeedRow({
         )}
       </td>
       <td className="px-3 py-3 text-xs text-muted-foreground">
-        {feed.last_generated_at
-          ? new Date(feed.last_generated_at).toLocaleString("pt-BR")
-          : "—"}
+        {feed.last_generated_at ? <LocalDateTime iso={feed.last_generated_at} /> : "—"}
       </td>
       <td className="px-3 py-3">
         <div className="flex flex-wrap items-center justify-end gap-2 text-xs">
@@ -462,13 +460,19 @@ function FeedFormPanel({
   submitting: boolean;
   error: string | null;
 }) {
-  const [form, setForm] = useState<FormState>(initial);
-  const [autoSlug, setAutoSlug] = useState(!initial.id);
+  const [form, setForm] = useState<FormState>(() => initial);
+  const [autoSlug, setAutoSlug] = useState<boolean>(() => !initial.id);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     if (autoSlug) setForm((f) => ({ ...f, slug: slugify(f.name) }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form.name, autoSlug]);
+  }, [form.name, autoSlug, mounted]);
 
   const setFilter = <K extends keyof FeedFilters>(k: K, v: FeedFilters[K]) =>
     setForm((f) => ({ ...f, filters: { ...f.filters, [k]: v } }));
@@ -960,4 +964,21 @@ function TopList({ title, items }: { title: string; items: Array<{ name: string;
       </ul>
     </div>
   );
+}
+
+/**
+ * Formata data/hora com o fuso do usuário apenas após a hidratação.
+ * Durante SSR/primeiro render renderiza o ISO original (idêntico no servidor
+ * e no cliente) para evitar mismatch de hydration causado por fuso.
+ */
+function LocalDateTime({ iso }: { iso: string }) {
+  const [text, setText] = useState<string>(iso);
+  useEffect(() => {
+    try {
+      setText(new Date(iso).toLocaleString("pt-BR"));
+    } catch {
+      setText(iso);
+    }
+  }, [iso]);
+  return <>{text}</>;
 }
