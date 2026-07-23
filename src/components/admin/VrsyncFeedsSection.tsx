@@ -612,33 +612,34 @@ function FeedFormPanel({
             </Field>
           </div>
           <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <Field label="Bairros (separe por vírgula)">
+            <Field label="Bairros (separe por vírgula ou linha)">
               <textarea
                 rows={2}
-                value={(form.filters.neighborhoods ?? []).join(", ")}
-                onChange={(e) => setFilter("neighborhoods", parseList(e.target.value))}
+                value={form.neighborhoods_text}
+                onChange={(e) => setForm((f) => ({ ...f, neighborhoods_text: e.target.value }))}
                 className="input"
                 placeholder="Centro, Agronômica"
               />
             </Field>
-            <Field label="Cidades (separe por vírgula)">
+            <Field label="Cidades (separe por vírgula ou linha)">
               <textarea
                 rows={2}
-                value={(form.filters.cities ?? []).join(", ")}
-                onChange={(e) => setFilter("cities", parseList(e.target.value))}
+                value={form.cities_text}
+                onChange={(e) => setForm((f) => ({ ...f, cities_text: e.target.value }))}
                 className="input"
                 placeholder="Florianópolis"
               />
             </Field>
-            <Field label="Tipos (separe por vírgula)">
+            <Field label="Tipos (separe por vírgula ou linha)">
               <textarea
                 rows={2}
-                value={(form.filters.property_types ?? []).join(", ")}
-                onChange={(e) => setFilter("property_types", parseList(e.target.value))}
+                value={form.property_types_text}
+                onChange={(e) => setForm((f) => ({ ...f, property_types_text: e.target.value }))}
                 className="input"
                 placeholder="Apartamento, Cobertura"
               />
             </Field>
+
           </div>
           <div className="mt-3 flex flex-wrap gap-4 text-xs">
             <Check
