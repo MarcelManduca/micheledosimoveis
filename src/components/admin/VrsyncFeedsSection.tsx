@@ -223,7 +223,11 @@ export function VrsyncFeedsSection() {
           </p>
         </div>
         <button
-          onClick={() => setForm({ ...EMPTY_FORM })}
+          type="button"
+          onClick={() => {
+            setForm({ ...EMPTY_FORM });
+            setFormNonce((n) => n + 1);
+          }}
           className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-xs font-medium text-background transition hover:bg-foreground/90"
         >
           <Plus className="h-3.5 w-3.5" /> Nova integração
