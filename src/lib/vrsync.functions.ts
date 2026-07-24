@@ -782,15 +782,80 @@ function orderQuery(q: PropertyQuery, sortBy: SortBy): PropertyQuery {
   }
 }
 
+function normalizeFilterValue(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
+}
+
+// Aliases: entradas do usuário → formas normalizadas equivalentes no banco.
+const PROPERTY_TYPE_ALIASES: Record<string, string[]> = {
+  studio: ["estudio"],
+  estudio: ["studio"],
+  kitnet: ["estudio", "studio"],
+  apto: ["apartamento"],
+  ap: ["apartamento"],
+};
+
+async function resolveDbPropertyTypes(
+  supabase: ReturnType<typeof getPublicClient>,
+  inputs: string[],
+): Promise<string[]> {
+  const wanted = new Set<string>();
+  for (const raw of inputs) {
+    const n = normalizeFilterValue(raw);
+    if (!n) continue;
+    wanted.add(n);
+    for (const alias of PROPERTY_TYPE_ALIASES[n] ?? []) wanted.add(alias);
+  }
+  if (wanted.size === 0) return [];
+
+  const { data, error } = await supabase
+    .from("properties")
+    .select("property_type")
+    .not("property_type", "is", null);
+  if (error) throw new Error(`Falha ao carregar tipologias: ${error.message}`);
+
+  const distinct = new Set<string>();
+  for (const row of (data ?? []) as Array<{ property_type: string | null }>) {
+    if (row.property_type) distinct.add(row.property_type);
+  }
+  const matched: string[] = [];
+  for (const dbValue of distinct) {
+    const n = normalizeFilterValue(dbValue);
+    // Match exato normalizado OU prefixo (ex.: "apartamento" cobre "apartamento duplex"/"garden").
+    for (const w of wanted) {
+      if (n === w || n.startsWith(`${w} `)) {
+        matched.push(dbValue);
+        break;
+      }
+    }
+  }
+  return matched;
+}
+
+async function resolveFilters(
+  supabase: ReturnType<typeof getPublicClient>,
+  filters: FeedFilters,
+): Promise<FeedFilters> {
+  if (!filters.property_types || filters.property_types.length === 0) return filters;
+  const dbTypes = await resolveDbPropertyTypes(supabase, filters.property_types);
+  // Se nenhuma tipologia corresponder no banco, mantemos array vazio para que o filtro retorne 0.
+  return { ...filters, property_types: dbTypes };
+}
+
 async function fetchFilteredProperties(cfg: FeedConfig): Promise<PropertyRow[]> {
   const supabase = getPublicClient();
   const PAGE = 1000;
   const HARD_CAP = 20000;
   const all: PropertyRow[] = [];
+  const resolvedFilters = await resolveFilters(supabase, cfg.filters);
 
   for (let from = 0; ; from += PAGE) {
     const base = supabase.from("properties").select(PROPERTY_COLS);
-    const filtered = applyFilters(base, cfg.filters, cfg.excluded_property_codes);
+    const filtered = applyFilters(base, resolvedFilters, cfg.excluded_property_codes);
     const ordered = orderQuery(filtered, cfg.sort_by);
     const { data, error } = await ordered.range(from, from + PAGE - 1);
     if (error) throw new Error(`Falha ao buscar imóveis: ${error.message}`);
@@ -799,6 +864,7 @@ async function fetchFilteredProperties(cfg: FeedConfig): Promise<PropertyRow[]> 
     if (batch.length < PAGE) break;
     if (all.length >= HARD_CAP) break;
   }
+
 
   // Included codes: merge in properties not already present
   if (cfg.included_property_codes.length > 0) {
