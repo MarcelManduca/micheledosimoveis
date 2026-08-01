@@ -175,6 +175,23 @@ export const adminSaveDevelopment = createServerFn({ method: "POST" })
       launch_date: payload.launch_date ? payload.launch_date : null,
       publication_status: payload.is_published ? "published" : "draft",
     };
+
+    if (payload.is_published) {
+      const { count } = id
+        ? await context.supabase
+            .from("development_properties")
+            .select("id", { count: "exact", head: true })
+            .eq("development_id", id)
+        : { count: 0 };
+      const blockers = publicationBlockers(
+        row as unknown as DevelopmentRow,
+        count ?? 0,
+      );
+      if (blockers.length > 0) {
+        throw new Error(`Não é possível publicar: ${blockers.join(" ")}`);
+      }
+    }
+
     const query = id
       ? context.supabase.from("developments").update(row).eq("id", id).select("*").single()
       : context.supabase.from("developments").insert(row).select("*").single();
