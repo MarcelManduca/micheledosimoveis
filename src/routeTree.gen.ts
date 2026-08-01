@@ -29,6 +29,7 @@ import { Route as VrsyncChar123slugChar125DotxmlRouteImport } from './routes/vrs
 import { Route as LancamentosSlugRouteImport } from './routes/lancamentos.$slug'
 import { Route as ImovelCodeRouteImport } from './routes/imovel.$code'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
+import { Route as ConstrutorasSlugRouteImport } from './routes/construtoras.$slug'
 import { Route as CondominiosBairroRouteImport } from './routes/condominios.$bairro'
 import { Route as CondominioSlugRouteImport } from './routes/condominio.$slug'
 import { Route as AdminLancamentosRouteImport } from './routes/admin.lancamentos'
@@ -143,6 +144,11 @@ const ImoveisSlugRoute = ImoveisSlugRouteImport.update({
   path: '/imoveis/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConstrutorasSlugRoute = ConstrutorasSlugRouteImport.update({
+  id: '/construtoras/$slug',
+  path: '/construtoras/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CondominiosBairroRoute = CondominiosBairroRouteImport.update({
   id: '/condominios/$bairro',
   path: '/condominios/$bairro',
@@ -220,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/admin/lancamentos': typeof AdminLancamentosRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
+  '/construtoras/$slug': typeof ConstrutorasSlugRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/lancamentos/$slug': typeof LancamentosSlugRoute
@@ -252,6 +259,7 @@ export interface FileRoutesByTo {
   '/admin/lancamentos': typeof AdminLancamentosRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
+  '/construtoras/$slug': typeof ConstrutorasSlugRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/lancamentos/$slug': typeof LancamentosSlugRoute
@@ -285,6 +293,7 @@ export interface FileRoutesById {
   '/admin/lancamentos': typeof AdminLancamentosRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
+  '/construtoras/$slug': typeof ConstrutorasSlugRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
   '/lancamentos/$slug': typeof LancamentosSlugRoute
@@ -319,6 +328,7 @@ export interface FileRouteTypes {
     | '/admin/lancamentos'
     | '/condominio/$slug'
     | '/condominios/$bairro'
+    | '/construtoras/$slug'
     | '/imoveis/$slug'
     | '/imovel/$code'
     | '/lancamentos/$slug'
@@ -351,6 +361,7 @@ export interface FileRouteTypes {
     | '/admin/lancamentos'
     | '/condominio/$slug'
     | '/condominios/$bairro'
+    | '/construtoras/$slug'
     | '/imoveis/$slug'
     | '/imovel/$code'
     | '/lancamentos/$slug'
@@ -383,6 +394,7 @@ export interface FileRouteTypes {
     | '/admin/lancamentos'
     | '/condominio/$slug'
     | '/condominios/$bairro'
+    | '/construtoras/$slug'
     | '/imoveis/$slug'
     | '/imovel/$code'
     | '/lancamentos/$slug'
@@ -413,6 +425,7 @@ export interface RootRouteChildren {
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   CondominioSlugRoute: typeof CondominioSlugRoute
   CondominiosBairroRoute: typeof CondominiosBairroRoute
+  ConstrutorasSlugRoute: typeof ConstrutorasSlugRoute
   ImoveisSlugRoute: typeof ImoveisSlugRoute
   ImovelCodeRoute: typeof ImovelCodeRoute
   LancamentosSlugRoute: typeof LancamentosSlugRoute
@@ -567,6 +580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ImoveisSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/construtoras/$slug': {
+      id: '/construtoras/$slug'
+      path: '/construtoras/$slug'
+      fullPath: '/construtoras/$slug'
+      preLoaderRoute: typeof ConstrutorasSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/condominios/$bairro': {
       id: '/condominios/$bairro'
       path: '/condominios/$bairro'
@@ -674,6 +694,7 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   CondominioSlugRoute: CondominioSlugRoute,
   CondominiosBairroRoute: CondominiosBairroRoute,
+  ConstrutorasSlugRoute: ConstrutorasSlugRoute,
   ImoveisSlugRoute: ImoveisSlugRoute,
   ImovelCodeRoute: ImovelCodeRoute,
   LancamentosSlugRoute: LancamentosSlugRoute,
