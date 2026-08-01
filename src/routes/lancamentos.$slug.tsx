@@ -70,7 +70,17 @@ export const Route = createFileRoute("/lancamentos/$slug")({
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Início", item: SITE },
           { "@type": "ListItem", position: 2, name: "Lançamentos", item: `${SITE}/lancamentos` },
-          { "@type": "ListItem", position: 3, name: d.name, item: url },
+          ...(d.neighborhood
+            ? [
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: d.neighborhood,
+                  item: `${SITE}/lancamentos?bairro=${encodeURIComponent(d.neighborhood)}`,
+                },
+                { "@type": "ListItem", position: 4, name: d.name, item: url },
+              ]
+            : [{ "@type": "ListItem", position: 3, name: d.name, item: url }]),
         ],
       },
       {
