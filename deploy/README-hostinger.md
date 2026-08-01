@@ -1,7 +1,30 @@
 # Runbook — Deploy Hostinger (Lovable → GitHub → VPS)
 
+## Deploy nativo (botão "Salvar e reimplantar")
+
+O painel roda apenas `install` + `npm run build` + start do entrypoint. Por isso a
+correção mora no próprio build:
+
+- `vite.config.ts` usa o preset Nitro `node-server` fora do build da Lovable e
+  força a saída em `.output/` (`.output/server/index.mjs` + `.output/public`).
+  O preset `node-server` sobe um HTTP server real e **serve os estáticos de
+  `.output/public`** — era isso que faltava (o preset Cloudflare não serve
+  arquivos, daí todos os `/assets/*` em 404).
+- `npm run build` roda `scripts/verify-build.mjs`, que **falha o build** se
+  `.output/server/index.mjs` ou arquivos `.css`/`.js` em `.output/public/assets`
+  não existirem. Se o painel/web server servir estáticos por docroot, defina
+  `STATIC_DOCROOT` nas variáveis de ambiente e o postbuild espelha `.output/public` lá.
+- `src/server.ts` tem um fallback: em runtime Node, qualquer 404 de arquivo é
+  procurado em `.output/public` antes de responder.
+
+Painel Hostinger: Output/entrypoint = `.output/server/index.mjs`, comando de build
+`npm run build`, `PORT`/`HOST` conforme o proxy. Nada de build commitado no Git.
+
+## Deploy manual (fallback por SSH)
+
 Arquitetura mantida: o Lovable publica no GitHub, a VPS Hostinger puxa `origin/main`,
 faz o build e serve via PM2 (+ Nginx/LiteSpeed na frente).
+
 
 ## Deploy padrão
 
