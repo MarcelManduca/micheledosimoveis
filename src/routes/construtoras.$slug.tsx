@@ -4,6 +4,7 @@ import { Building2, CalendarClock, ExternalLink, Instagram, MapPin } from "lucid
 import { ENABLE_LAUNCHES_VERTICAL } from "@/lib/feature-flags";
 import { getDeveloperRelated, getPublicDeveloper } from "@/lib/launches-public.functions";
 import type { PublicDevelopmentCard } from "@/lib/launches-public";
+import type { DeveloperRelated } from "@/lib/launches-related";
 import { LaunchCard } from "@/components/launches/LaunchCard";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
