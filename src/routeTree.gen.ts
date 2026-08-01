@@ -29,6 +29,7 @@ import { Route as ImovelCodeRouteImport } from './routes/imovel.$code'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as CondominiosBairroRouteImport } from './routes/condominios.$bairro'
 import { Route as CondominioSlugRouteImport } from './routes/condominio.$slug'
+import { Route as AdminLancamentosRouteImport } from './routes/admin.lancamentos'
 import { Route as AdminInteligenciaPortfolioRouteImport } from './routes/admin.inteligencia-portfolio'
 import { Route as AdminConstrutorasRouteImport } from './routes/admin.construtoras'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -140,6 +141,11 @@ const CondominioSlugRoute = CondominioSlugRouteImport.update({
   path: '/condominio/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLancamentosRoute = AdminLancamentosRouteImport.update({
+  id: '/lancamentos',
+  path: '/lancamentos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInteligenciaPortfolioRoute =
   AdminInteligenciaPortfolioRouteImport.update({
     id: '/inteligencia-portfolio',
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
+  '/admin/lancamentos': typeof AdminLancamentosRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
+  '/admin/lancamentos': typeof AdminLancamentosRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
@@ -258,6 +266,7 @@ export interface FileRoutesById {
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
+  '/admin/lancamentos': typeof AdminLancamentosRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
@@ -289,6 +298,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
+    | '/admin/lancamentos'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/imoveis/$slug'
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
+    | '/admin/lancamentos'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/imoveis/$slug'
@@ -347,6 +358,7 @@ export interface FileRouteTypes {
     | '/.well-known/oauth-protected-resource'
     | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
+    | '/admin/lancamentos'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/imoveis/$slug'
@@ -529,6 +541,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CondominioSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/lancamentos': {
+      id: '/admin/lancamentos'
+      path: '/lancamentos'
+      fullPath: '/admin/lancamentos'
+      preLoaderRoute: typeof AdminLancamentosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/inteligencia-portfolio': {
       id: '/admin/inteligencia-portfolio'
       path: '/inteligencia-portfolio'
@@ -584,11 +603,13 @@ declare module '@tanstack/react-router' {
 interface AdminRouteChildren {
   AdminConstrutorasRoute: typeof AdminConstrutorasRoute
   AdminInteligenciaPortfolioRoute: typeof AdminInteligenciaPortfolioRoute
+  AdminLancamentosRoute: typeof AdminLancamentosRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminConstrutorasRoute: AdminConstrutorasRoute,
   AdminInteligenciaPortfolioRoute: AdminInteligenciaPortfolioRoute,
+  AdminLancamentosRoute: AdminLancamentosRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
