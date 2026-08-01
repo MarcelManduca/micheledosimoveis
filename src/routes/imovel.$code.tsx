@@ -6,6 +6,7 @@ import { findNeighborhoodByName } from "@/lib/neighborhoods";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CalendarCheck } from "lucide-react";
 import { InternalLinkingSection } from "@/components/property/InternalLinkingSection";
+import { PropertyDevelopmentBanner } from "@/components/property/PropertyDevelopmentBanner";
 
 const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
@@ -550,6 +551,11 @@ function PropertyPage() {
           </div>
         </aside>
       </section>
+
+      {/* Aditivo (feature flag): vínculo com a vertical de lançamentos. */}
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <PropertyDevelopmentBanner code={p.code} />
+      </div>
 
       <InternalLinkingSection links={links} originPath={`/imovel/${p.code}`} />
 
