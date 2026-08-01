@@ -119,7 +119,8 @@ export const Route = createFileRoute("/construtoras/$slug")({
 });
 
 function ConstrutoraDetalhe() {
-  const { developer: dev, developments, delivered, related } = Route.useLoaderData();
+  const { developer: dev, developments, delivered } = Route.useLoaderData();
+  const related = Route.useLoaderData().related as DeveloperRelated;
   const [showMap, setShowMap] = useState(false);
 
   const mapQuery = [dev.city, dev.state].filter(Boolean).join(", ");
