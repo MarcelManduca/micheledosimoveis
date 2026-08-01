@@ -513,16 +513,29 @@ function LancamentoDetalhe() {
             <p className="mt-2 text-muted-foreground">
               Michele acompanha a negociação do início ao fim, com informações direto da fonte.
             </p>
-            <a
-              href={whatsapp}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-5 inline-flex rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background"
-            >
-              Falar no WhatsApp
-            </a>
+            <div className="mt-5 flex flex-wrap justify-center gap-3">
+              <a
+                href={whatsapp}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background"
+              >
+                Falar no WhatsApp
+              </a>
+              <a
+                href={whatsappTabela}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex rounded-full border border-border px-6 py-3 text-sm font-medium"
+              >
+                Solicitar tabela atualizada
+              </a>
+            </div>
           </section>
+
+          <LaunchRelatedSection related={related} developerName={d.developer?.name ?? null} />
         </div>
+
       </main>
 
       <SiteFooter />
