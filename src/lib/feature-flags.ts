@@ -9,6 +9,6 @@ function readFlag(value: unknown): boolean {
   return String(value ?? "").toLowerCase() === "true";
 }
 
-export const ENABLE_LAUNCHES_VERTICAL: boolean = readFlag(
-  import.meta.env["VITE_ENABLE_LAUNCHES_VERTICAL"],
-);
+// Contenção de produção: vertical desativada até nova homologação manual.
+// Não reativar por variável de ambiente sem aprovação explícita.
+export const ENABLE_LAUNCHES_VERTICAL: boolean = false;
