@@ -13,8 +13,21 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Fora do build da Lovable (ex.: deploy nativo GitHub -> Hostinger, Node/PM2),
+  // gerar saída Node em `.output/` — o preset `node-server` sobe um servidor
+  // HTTP real e serve automaticamente os estáticos de `.output/public`.
+  // Dentro do build da Lovable estes overrides são ignorados (Cloudflare forçado).
+  nitro: {
+    preset: process.env["NITRO_PRESET"] ?? "node-server",
+    output: {
+      dir: ".output",
+      publicDir: ".output/public",
+      serverDir: ".output/server",
+    },
+  },
   vite: {
     plugins: [mcpPlugin()],
   },
 });
+
 
