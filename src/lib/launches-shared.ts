@@ -62,6 +62,11 @@ export type DevelopmentRow = {
   seo_description: string | null;
   is_published: boolean;
   publication_status: string;
+  /** Revisão editorial da capa: pending | approved | rejected. */
+  cover_review_status?: string | null;
+  /** Revisão editorial do texto (institucional x descrição de unidade). */
+  description_review_status?: string | null;
+  review_notes?: string | null;
   created_at: string;
   updated_at: string;
 };
