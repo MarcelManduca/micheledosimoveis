@@ -140,16 +140,18 @@ export const adminListDevelopments = createServerFn({ method: "GET" })
 
     return rows.map<DevelopmentListItem>((row) => {
       const units_count = unitCounts.get(row.id) ?? 0;
-      const { score, issues, ready } = scoreDevelopment(row, units_count);
+      const { score, issues } = scoreDevelopment(row, units_count);
+      const blockers = publicationBlockers(row, units_count);
       const core = coreLaunchName(row.name) || normalizeLaunchText(row.name);
       return {
         ...row,
         units_count,
         quality_score: score,
-        quality_issues: issues,
-        ready_to_publish: ready,
+        quality_issues: blockers.length > 0 ? [...issues, ...blockers] : issues,
+        ready_to_publish: blockers.length === 0,
         potential_duplicate: (coreCount.get(core) ?? 0) > 1,
       };
+
     });
   });
 
