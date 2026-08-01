@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
-import { queryOptions, useQuery } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { stripSearchParams } from "@tanstack/react-router";
 import { z } from "zod";
@@ -143,7 +143,9 @@ export const Route = createFileRoute("/lancamentos/")({
 function LancamentosIndex() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
-  const list = useQuery(listQO(search));
+  // O loader hidrata exatamente este snapshot; suspense evita um primeiro
+  // render cliente sem facets e elimina divergência SSR/hidratação.
+  const list = useSuspenseQuery(listQO(search));
 
   const items = list.data?.items ?? [];
   const total = list.data?.total ?? 0;
