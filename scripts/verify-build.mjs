@@ -58,7 +58,7 @@ if (css.length === 0) fail("Nenhum arquivo .css gerado em .output/public/assets.
 if (js.length === 0) fail("Nenhum arquivo .js gerado em .output/public/assets.");
 
 console.log(
-  `[postbuild] OK: ${files.length} estáticos (${css.length} css / ${js.length} js) em .output/public/assets`,
+  `[postbuild] OK: ${files.length} estáticos (${css.length} css / ${js.length} js) em ${path.relative(root, assetsDir)}`,
 );
 
 const docroot = process.env["STATIC_DOCROOT"];
