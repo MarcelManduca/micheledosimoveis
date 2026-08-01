@@ -233,11 +233,15 @@ export type Database = {
           created_at: string
           description: string | null
           email: string | null
+          founded_year: number | null
           id: string
+          instagram: string | null
           is_active: boolean
           logo_url: string | null
           name: string
           phone: string | null
+          seo_description: string | null
+          seo_title: string | null
           slug: string
           state: string | null
           updated_at: string
@@ -248,11 +252,15 @@ export type Database = {
           created_at?: string
           description?: string | null
           email?: string | null
+          founded_year?: number | null
           id?: string
+          instagram?: string | null
           is_active?: boolean
           logo_url?: string | null
           name: string
           phone?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug: string
           state?: string | null
           updated_at?: string
@@ -263,11 +271,15 @@ export type Database = {
           created_at?: string
           description?: string | null
           email?: string | null
+          founded_year?: number | null
           id?: string
+          instagram?: string | null
           is_active?: boolean
           logo_url?: string | null
           name?: string
           phone?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
           slug?: string
           state?: string | null
           updated_at?: string
@@ -288,8 +300,9 @@ export type Database = {
           parking_spots: number | null
           position: number
           price_brl: number | null
+          property_id: string | null
           suites: number | null
-          unit_name: string
+          unit_name: string | null
           updated_at: string
         }
         Insert: {
@@ -304,8 +317,9 @@ export type Database = {
           parking_spots?: number | null
           position?: number
           price_brl?: number | null
+          property_id?: string | null
           suites?: number | null
-          unit_name: string
+          unit_name?: string | null
           updated_at?: string
         }
         Update: {
@@ -320,8 +334,9 @@ export type Database = {
           parking_spots?: number | null
           position?: number
           price_brl?: number | null
+          property_id?: string | null
           suites?: number | null
-          unit_name?: string
+          unit_name?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -332,16 +347,52 @@ export type Database = {
             referencedRelation: "developments"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "development_properties_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      development_suggestion_dismissals: {
+        Row: {
+          created_at: string
+          dismissed_by: string | null
+          id: string
+          label: string | null
+          suggestion_key: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dismissed_by?: string | null
+          id?: string
+          label?: string | null
+          suggestion_key: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dismissed_by?: string | null
+          id?: string
+          label?: string | null
+          suggestion_key?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       developments: {
         Row: {
           address: string | null
           amenities: string[]
+          architecture: string | null
           area_max_m2: number | null
           area_min_m2: number | null
           bedrooms_max: number | null
           bedrooms_min: number | null
+          brochure_url: string | null
           city: string
           cover_image: string | null
           created_at: string
@@ -349,9 +400,13 @@ export type Database = {
           description: string | null
           developer_id: string | null
           floors_count: number | null
+          gallery: string[]
           id: string
+          interiors: string | null
           is_published: boolean
+          landscaping: string | null
           latitude: number | null
+          launch_date: string | null
           longitude: number | null
           name: string
           neighborhood: string | null
@@ -369,14 +424,17 @@ export type Database = {
           towers_count: number | null
           units_count: number | null
           updated_at: string
+          video_url: string | null
         }
         Insert: {
           address?: string | null
           amenities?: string[]
+          architecture?: string | null
           area_max_m2?: number | null
           area_min_m2?: number | null
           bedrooms_max?: number | null
           bedrooms_min?: number | null
+          brochure_url?: string | null
           city?: string
           cover_image?: string | null
           created_at?: string
@@ -384,9 +442,13 @@ export type Database = {
           description?: string | null
           developer_id?: string | null
           floors_count?: number | null
+          gallery?: string[]
           id?: string
+          interiors?: string | null
           is_published?: boolean
+          landscaping?: string | null
           latitude?: number | null
+          launch_date?: string | null
           longitude?: number | null
           name: string
           neighborhood?: string | null
@@ -404,14 +466,17 @@ export type Database = {
           towers_count?: number | null
           units_count?: number | null
           updated_at?: string
+          video_url?: string | null
         }
         Update: {
           address?: string | null
           amenities?: string[]
+          architecture?: string | null
           area_max_m2?: number | null
           area_min_m2?: number | null
           bedrooms_max?: number | null
           bedrooms_min?: number | null
+          brochure_url?: string | null
           city?: string
           cover_image?: string | null
           created_at?: string
@@ -419,9 +484,13 @@ export type Database = {
           description?: string | null
           developer_id?: string | null
           floors_count?: number | null
+          gallery?: string[]
           id?: string
+          interiors?: string | null
           is_published?: boolean
+          landscaping?: string | null
           latitude?: number | null
+          launch_date?: string | null
           longitude?: number | null
           name?: string
           neighborhood?: string | null
@@ -439,6 +508,7 @@ export type Database = {
           towers_count?: number | null
           units_count?: number | null
           updated_at?: string
+          video_url?: string | null
         }
         Relationships: [
           {
