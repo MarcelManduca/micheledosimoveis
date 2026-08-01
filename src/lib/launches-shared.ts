@@ -189,7 +189,7 @@ export function coreLaunchName(input: string): string {
   return tokens.join(" ").trim();
 }
 
-function normalizeAddress(input: string | null): string {
+export function normalizeAddress(input: string | null): string {
   return normalizeLaunchText(input ?? "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
 }
 
