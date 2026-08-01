@@ -227,6 +227,229 @@ export type Database = {
         }
         Relationships: []
       }
+      developers: {
+        Row: {
+          city: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          phone: string | null
+          slug: string
+          state: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          phone?: string | null
+          slug: string
+          state?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          phone?: string | null
+          slug?: string
+          state?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      development_properties: {
+        Row: {
+          area_m2: number | null
+          bathrooms: number | null
+          bedrooms: number | null
+          created_at: string
+          development_id: string
+          floor_plan_url: string | null
+          id: string
+          is_available: boolean
+          parking_spots: number | null
+          position: number
+          price_brl: number | null
+          suites: number | null
+          unit_name: string
+          updated_at: string
+        }
+        Insert: {
+          area_m2?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          development_id: string
+          floor_plan_url?: string | null
+          id?: string
+          is_available?: boolean
+          parking_spots?: number | null
+          position?: number
+          price_brl?: number | null
+          suites?: number | null
+          unit_name: string
+          updated_at?: string
+        }
+        Update: {
+          area_m2?: number | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          created_at?: string
+          development_id?: string
+          floor_plan_url?: string | null
+          id?: string
+          is_available?: boolean
+          parking_spots?: number | null
+          position?: number
+          price_brl?: number | null
+          suites?: number | null
+          unit_name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "development_properties_development_id_fkey"
+            columns: ["development_id"]
+            isOneToOne: false
+            referencedRelation: "developments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      developments: {
+        Row: {
+          address: string | null
+          amenities: string[]
+          area_max_m2: number | null
+          area_min_m2: number | null
+          bedrooms_max: number | null
+          bedrooms_min: number | null
+          city: string
+          cover_image: string | null
+          created_at: string
+          delivery_estimate: string | null
+          description: string | null
+          developer_id: string | null
+          floors_count: number | null
+          id: string
+          is_published: boolean
+          latitude: number | null
+          longitude: number | null
+          name: string
+          neighborhood: string | null
+          parking_spots_max: number | null
+          parking_spots_min: number | null
+          postal_code: string | null
+          price_max_brl: number | null
+          price_min_brl: number | null
+          publication_status: string
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          stage: string
+          state: string
+          towers_count: number | null
+          units_count: number | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[]
+          area_max_m2?: number | null
+          area_min_m2?: number | null
+          bedrooms_max?: number | null
+          bedrooms_min?: number | null
+          city?: string
+          cover_image?: string | null
+          created_at?: string
+          delivery_estimate?: string | null
+          description?: string | null
+          developer_id?: string | null
+          floors_count?: number | null
+          id?: string
+          is_published?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          neighborhood?: string | null
+          parking_spots_max?: number | null
+          parking_spots_min?: number | null
+          postal_code?: string | null
+          price_max_brl?: number | null
+          price_min_brl?: number | null
+          publication_status?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          stage?: string
+          state?: string
+          towers_count?: number | null
+          units_count?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[]
+          area_max_m2?: number | null
+          area_min_m2?: number | null
+          bedrooms_max?: number | null
+          bedrooms_min?: number | null
+          city?: string
+          cover_image?: string | null
+          created_at?: string
+          delivery_estimate?: string | null
+          description?: string | null
+          developer_id?: string | null
+          floors_count?: number | null
+          id?: string
+          is_published?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          neighborhood?: string | null
+          parking_spots_max?: number | null
+          parking_spots_min?: number | null
+          postal_code?: string | null
+          price_max_brl?: number | null
+          price_min_brl?: number | null
+          publication_status?: string
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          stage?: string
+          state?: string
+          towers_count?: number | null
+          units_count?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "developments_developer_id_fkey"
+            columns: ["developer_id"]
+            isOneToOne: false
+            referencedRelation: "developers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       properties: {
         Row: {
           address: string | null
