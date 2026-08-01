@@ -311,6 +311,14 @@ function LancamentoDetalhe() {
                   Ver unidades disponíveis
                 </a>
               ) : null}
+              <a
+                href={whatsappTabela}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-border px-5 py-3 text-sm font-medium"
+              >
+                Solicitar tabela atualizada
+              </a>
               {d.brochure_url ? (
                 <a
                   href={d.brochure_url}
@@ -324,26 +332,15 @@ function LancamentoDetalhe() {
             </div>
           </header>
 
-          {(d.stats.price_min !== null || area || d.stats.bedrooms.length) ? (
-            <dl className="mt-8 grid gap-4 rounded-2xl border border-border bg-card p-5 sm:grid-cols-3">
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-muted-foreground">Valores</dt>
-                <dd className="mt-1 font-medium">
-                  {priceRange(d.stats.price_min, d.stats.price_max)}
-                </dd>
+          <dl className="mt-8 grid gap-x-6 gap-y-4 rounded-2xl border border-border bg-card p-5 sm:grid-cols-2 lg:grid-cols-4">
+            {summary.map(([label, value]) => (
+              <div key={label}>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
+                <dd className="mt-1 text-sm font-medium">{value || "Sob consulta"}</dd>
               </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-muted-foreground">Áreas</dt>
-                <dd className="mt-1 font-medium">{area ?? "Sob consulta"}</dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-muted-foreground">Dormitórios</dt>
-                <dd className="mt-1 font-medium">
-                  {d.stats.bedrooms.length ? `${d.stats.bedrooms.join(", ")} dorm.` : "Sob consulta"}
-                </dd>
-              </div>
-            </dl>
-          ) : null}
+            ))}
+          </dl>
+
 
           {d.description ? (
             <Section title="Sobre o empreendimento">
