@@ -245,6 +245,16 @@ function AdminPage() {
             <Link to="/admin/inteligencia-portfolio" className="hidden sm:inline text-muted-foreground hover:text-foreground">
               Inteligência de portfólio
             </Link>
+            {ENABLE_LAUNCHES_VERTICAL ? (
+              <>
+                <Link to="/admin/lancamentos" className="hidden sm:inline text-muted-foreground hover:text-foreground">
+                  Lançamentos
+                </Link>
+                <Link to="/admin/construtoras" className="hidden sm:inline text-muted-foreground hover:text-foreground">
+                  Construtoras
+                </Link>
+              </>
+            ) : null}
             <span className="hidden sm:inline text-muted-foreground">{userEmail}</span>
             <button
               onClick={signOut}
