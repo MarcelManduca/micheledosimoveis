@@ -9,6 +9,7 @@ import {
   PlayCircle,
   Sparkles,
 } from "lucide-react";
+import type { PublicUnit } from "@/lib/launches-public";
 import { ENABLE_LAUNCHES_VERTICAL } from "@/lib/feature-flags";
 import { getPublicDevelopment } from "@/lib/launches-public.functions";
 import { SiteHeader } from "@/components/home/SiteHeader";
@@ -71,7 +72,7 @@ export const Route = createFileRoute("/lancamentos/$slug")({
         url,
         ...(image ? { image } : {}),
         ...(d.description ? { description: d.description } : {}),
-        ...(d.amenities?.length ? { amenityFeature: d.amenities.map((a) => ({ "@type": "LocationFeatureSpecification", name: a })) } : {}),
+        ...(d.amenities?.length ? { amenityFeature: d.amenities.map((a: string) => ({ "@type": "LocationFeatureSpecification", name: a })) } : {}),
         address: {
           "@type": "PostalAddress",
           streetAddress: d.address ?? undefined,
@@ -169,7 +170,7 @@ function LancamentoDetalhe() {
   const [showVideo, setShowVideo] = useState(false);
 
   const hero = d.cover_image ?? d.gallery?.[0] ?? null;
-  const gallery = (d.gallery ?? []).filter((g) => g !== hero);
+  const gallery = (d.gallery ?? []).filter((g: string) => g !== hero);
   const area = areaRange(d.stats.area_min, d.stats.area_max);
   const videoId = youtubeId(d.video_url);
   const mapQuery = [d.address, d.neighborhood, d.city, d.state].filter(Boolean).join(", ");
@@ -304,7 +305,7 @@ function LancamentoDetalhe() {
           {gallery.length ? (
             <Section title="Galeria">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {gallery.slice(0, 12).map((src, i) => (
+                {gallery.slice(0, 12).map((src: string, i: number) => (
                   <img
                     key={src + i}
                     src={src}
@@ -342,7 +343,7 @@ function LancamentoDetalhe() {
           {d.amenities?.length ? (
             <Section title="Comodidades">
               <ul className="flex flex-wrap gap-2">
-                {d.amenities.map((a) => (
+                {d.amenities.map((a: string) => (
                   <li
                     key={a}
                     className="inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm"
@@ -386,7 +387,7 @@ function LancamentoDetalhe() {
                 Unidades reais em carteira, vinculadas ao empreendimento.
               </p>
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {d.units.map((u) => {
+                {d.units.map((u: PublicUnit) => {
                   const inner = (
                     <>
                       <p className="font-medium">{u.unit_name ?? u.property?.title ?? "Unidade"}</p>
