@@ -125,7 +125,7 @@ export const Route = createFileRoute("/lancamentos/")({
 
 function LancamentosIndex() {
   const search = Route.useSearch();
-  const navigate = useNavigate({ from: "/lancamentos" });
+  const navigate = useNavigate({ from: Route.fullPath });
   const list = useQuery(listQO(search));
 
   const items = list.data?.items ?? [];
