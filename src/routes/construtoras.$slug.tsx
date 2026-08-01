@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { lazy, Suspense, useState } from "react";
 import { Building2, CalendarClock, ExternalLink, Instagram, MapPin } from "lucide-react";
 import { ENABLE_LAUNCHES_VERTICAL } from "@/lib/feature-flags";
-import { getPublicDeveloper } from "@/lib/launches-public.functions";
+import { getDeveloperRelated, getPublicDeveloper } from "@/lib/launches-public.functions";
 import type { PublicDevelopmentCard } from "@/lib/launches-public";
 import { LaunchCard } from "@/components/launches/LaunchCard";
 import { SiteHeader } from "@/components/home/SiteHeader";
