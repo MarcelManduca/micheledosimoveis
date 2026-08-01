@@ -11,7 +11,8 @@ import {
 } from "lucide-react";
 import type { PublicUnit } from "@/lib/launches-public";
 import { ENABLE_LAUNCHES_VERTICAL } from "@/lib/feature-flags";
-import { getPublicDevelopment } from "@/lib/launches-public.functions";
+import { getLaunchRelated, getPublicDevelopment } from "@/lib/launches-public.functions";
+import { LaunchRelatedSection } from "@/components/launches/LaunchRelatedLinks";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import MapPlaceholder from "@/components/MapPlaceholder";
