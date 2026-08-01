@@ -2,8 +2,9 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { lazy, Suspense, useState } from "react";
 import { Building2, CalendarClock, ExternalLink, Instagram, MapPin } from "lucide-react";
 import { ENABLE_LAUNCHES_VERTICAL } from "@/lib/feature-flags";
-import { getPublicDeveloper } from "@/lib/launches-public.functions";
+import { getDeveloperRelated, getPublicDeveloper } from "@/lib/launches-public.functions";
 import type { PublicDevelopmentCard } from "@/lib/launches-public";
+import type { DeveloperRelated } from "@/lib/launches-related";
 import { LaunchCard } from "@/components/launches/LaunchCard";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
@@ -20,7 +21,8 @@ export const Route = createFileRoute("/construtoras/$slug")({
   loader: async ({ params }) => {
     const data = await getPublicDeveloper({ data: { slug: params.slug } });
     if (!data) throw notFound();
-    return data;
+    const related = await getDeveloperRelated({ data: { developerId: data.developer.id } });
+    return { ...data, related };
   },
   head: ({ params, loaderData }) => {
     const url = `${SITE}/construtoras/${params.slug}`;
@@ -119,6 +121,7 @@ export const Route = createFileRoute("/construtoras/$slug")({
 
 function ConstrutoraDetalhe() {
   const { developer: dev, developments, delivered } = Route.useLoaderData();
+  const related = Route.useLoaderData().related as DeveloperRelated;
   const [showMap, setShowMap] = useState(false);
 
   const mapQuery = [dev.city, dev.state].filter(Boolean).join(", ");
@@ -202,6 +205,27 @@ function ConstrutoraDetalhe() {
           </p>
         ) : null}
 
+        <dl className="mt-8 grid gap-x-6 gap-y-4 rounded-2xl border border-border bg-card p-5 sm:grid-cols-2 lg:grid-cols-4">
+          {(
+            [
+              ["Fundação", dev.founded_year ? String(dev.founded_year) : null],
+              ["Cidade sede", [dev.city, dev.state].filter(Boolean).join("/") || null],
+              ["Empreendimentos publicados", String(related.stats.published)],
+              [
+                "Unidades disponíveis",
+                related.stats.unitsAvailable > 0 ? String(related.stats.unitsAvailable) : "Sob consulta",
+              ],
+            ] as Array<[string, string | null]>
+          )
+            .filter(([, v]) => v)
+            .map(([label, value]) => (
+              <div key={label}>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
+                <dd className="mt-1 text-sm font-medium">{value}</dd>
+              </div>
+            ))}
+        </dl>
+
         <section className="mt-12">
           <h2 className="text-xl font-semibold">Lançamentos publicados</h2>
           {developments.length ? (
@@ -244,6 +268,85 @@ function ConstrutoraDetalhe() {
             </div>
           </section>
         ) : null}
+
+        {related.otherDevelopers.length || related.neighborhoods.length ? (
+          <section className="mt-14">
+            <h2 className="text-xl font-semibold">Conheça também</h2>
+
+            {related.neighborhoods.length ? (
+              <div className="mt-5">
+                <h3 className="text-sm font-medium text-muted-foreground">Bairros onde atua</h3>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {related.neighborhoods.map((n) => (
+                    <li key={n.name}>
+                      <Link
+                        to="/lancamentos"
+                        search={{ bairro: n.name }}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm hover:bg-secondary"
+                      >
+                        <MapPin className="h-3.5 w-3.5" /> {n.name}
+                        <span className="text-xs text-muted-foreground">({n.count})</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {related.neighborhoods.some((n) => n.slug) ? (
+              <div className="mt-6">
+                <h3 className="text-sm font-medium text-muted-foreground">Lançamentos e imóveis relacionados</h3>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {related.neighborhoods
+                    .filter((n) => n.slug)
+                    .map((n) => (
+                      <li key={`guia-${n.slug}`}>
+                        <Link
+                          to="/imoveis/$slug"
+                          params={{ slug: n.slug as string }}
+                          className="inline-flex rounded-full border border-border px-4 py-2 text-sm hover:bg-secondary"
+                        >
+                          Imóveis em {n.name}
+                        </Link>
+                      </li>
+                    ))}
+                  <li>
+                    <Link
+                      to="/lancamentos"
+                      className="inline-flex rounded-full border border-border px-4 py-2 text-sm hover:bg-secondary"
+                    >
+                      Todos os lançamentos
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            ) : null}
+
+            {related.otherDevelopers.length ? (
+              <div className="mt-6">
+                <h3 className="text-sm font-medium text-muted-foreground">Outras construtoras</h3>
+                <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {related.otherDevelopers.map((o) => (
+                    <li key={o.slug}>
+                      <Link
+                        to="/construtoras/$slug"
+                        params={{ slug: o.slug }}
+                        className="flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 transition hover:shadow-md"
+                      >
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <span className="flex-1 text-sm font-medium">{o.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {o.count} {o.count === 1 ? "empreendimento" : "empreendimentos"}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
+
 
         <section className="mt-14 rounded-3xl border border-border bg-card p-8 text-center">
           <h2 className="text-xl font-semibold">Interesse em um empreendimento desta construtora?</h2>

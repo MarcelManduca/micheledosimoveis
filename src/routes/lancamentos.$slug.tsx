@@ -11,7 +11,8 @@ import {
 } from "lucide-react";
 import type { PublicUnit } from "@/lib/launches-public";
 import { ENABLE_LAUNCHES_VERTICAL } from "@/lib/feature-flags";
-import { getPublicDevelopment } from "@/lib/launches-public.functions";
+import { getLaunchRelated, getPublicDevelopment } from "@/lib/launches-public.functions";
+import { LaunchRelatedSection } from "@/components/launches/LaunchRelatedLinks";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import MapPlaceholder from "@/components/MapPlaceholder";
@@ -29,7 +30,14 @@ export const Route = createFileRoute("/lancamentos/$slug")({
   loader: async ({ params }) => {
     const development = await getPublicDevelopment({ data: { slug: params.slug } });
     if (!development) throw notFound();
-    return { development };
+    const related = await getLaunchRelated({
+      data: {
+        slug: development.slug,
+        neighborhood: development.neighborhood,
+        developerId: development.developer_id,
+      },
+    });
+    return { development, related };
   },
   head: ({ params, loaderData }) => {
     const url = `${SITE}/lancamentos/${params.slug}`;
@@ -62,7 +70,17 @@ export const Route = createFileRoute("/lancamentos/$slug")({
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Início", item: SITE },
           { "@type": "ListItem", position: 2, name: "Lançamentos", item: `${SITE}/lancamentos` },
-          { "@type": "ListItem", position: 3, name: d.name, item: url },
+          ...(d.neighborhood
+            ? [
+                {
+                  "@type": "ListItem",
+                  position: 3,
+                  name: d.neighborhood,
+                  item: `${SITE}/lancamentos?bairro=${encodeURIComponent(d.neighborhood)}`,
+                },
+                { "@type": "ListItem", position: 4, name: d.name, item: url },
+              ]
+            : [{ "@type": "ListItem", position: 3, name: d.name, item: url }]),
         ],
       },
       {
@@ -165,7 +183,7 @@ function youtubeId(url: string | null): string | null {
 }
 
 function LancamentoDetalhe() {
-  const { development: d } = Route.useLoaderData();
+  const { development: d, related } = Route.useLoaderData();
   const [showMap, setShowMap] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
 
@@ -178,6 +196,26 @@ function LancamentoDetalhe() {
   const whatsapp = buildWhatsAppUrl(
     `Olá Michele! Tenho interesse no empreendimento ${d.name}${d.neighborhood ? ` (${d.neighborhood})` : ""}. Pode me enviar mais informações?`,
   );
+  const whatsappTabela = buildWhatsAppUrl(
+    `Olá Michele! Pode me enviar a tabela atualizada de valores e disponibilidade do ${d.name}${d.neighborhood ? ` (${d.neighborhood})` : ""}?`,
+  );
+
+  const summary: Array<[string, string]> = [
+    ["Bairro", [d.neighborhood, d.city].filter(Boolean).join(" · ")],
+    ["Construtora", d.developer?.name ?? "Sob consulta"],
+    ["Estágio", stageLabel(d.stage)],
+    ["Entrega", d.delivery_estimate ?? "Sob consulta"],
+    [
+      "Tipologias",
+      d.stats.bedrooms.length ? `${d.stats.bedrooms.join(", ")} dorm.` : "Sob consulta",
+    ],
+    ["Área", area ?? "Sob consulta"],
+    ["Faixa de preço", priceRange(d.stats.price_min, d.stats.price_max)],
+    [
+      "Unidades disponíveis",
+      d.stats.units_available > 0 ? String(d.stats.units_available) : "Sob consulta",
+    ],
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -193,9 +231,22 @@ function LancamentoDetalhe() {
             <Link to="/lancamentos" className="hover:underline">
               Lançamentos
             </Link>
+            {d.neighborhood ? (
+              <>
+                <span className="mx-1.5">/</span>
+                <Link
+                  to="/lancamentos"
+                  search={{ bairro: d.neighborhood }}
+                  className="hover:underline"
+                >
+                  {d.neighborhood}
+                </Link>
+              </>
+            ) : null}
             <span className="mx-1.5">/</span>
             <span>{d.name}</span>
           </nav>
+
 
           <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl bg-secondary">
             {hero ? (
@@ -260,6 +311,14 @@ function LancamentoDetalhe() {
                   Ver unidades disponíveis
                 </a>
               ) : null}
+              <a
+                href={whatsappTabela}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-full border border-border px-5 py-3 text-sm font-medium"
+              >
+                Solicitar tabela atualizada
+              </a>
               {d.brochure_url ? (
                 <a
                   href={d.brochure_url}
@@ -273,26 +332,15 @@ function LancamentoDetalhe() {
             </div>
           </header>
 
-          {(d.stats.price_min !== null || area || d.stats.bedrooms.length) ? (
-            <dl className="mt-8 grid gap-4 rounded-2xl border border-border bg-card p-5 sm:grid-cols-3">
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-muted-foreground">Valores</dt>
-                <dd className="mt-1 font-medium">
-                  {priceRange(d.stats.price_min, d.stats.price_max)}
-                </dd>
+          <dl className="mt-8 grid gap-x-6 gap-y-4 rounded-2xl border border-border bg-card p-5 sm:grid-cols-2 lg:grid-cols-4">
+            {summary.map(([label, value]) => (
+              <div key={label}>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
+                <dd className="mt-1 text-sm font-medium">{value || "Sob consulta"}</dd>
               </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-muted-foreground">Áreas</dt>
-                <dd className="mt-1 font-medium">{area ?? "Sob consulta"}</dd>
-              </div>
-              <div>
-                <dt className="text-xs uppercase tracking-wide text-muted-foreground">Dormitórios</dt>
-                <dd className="mt-1 font-medium">
-                  {d.stats.bedrooms.length ? `${d.stats.bedrooms.join(", ")} dorm.` : "Sob consulta"}
-                </dd>
-              </div>
-            </dl>
-          ) : null}
+            ))}
+          </dl>
+
 
           {d.description ? (
             <Section title="Sobre o empreendimento">
@@ -465,16 +513,29 @@ function LancamentoDetalhe() {
             <p className="mt-2 text-muted-foreground">
               Michele acompanha a negociação do início ao fim, com informações direto da fonte.
             </p>
-            <a
-              href={whatsapp}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-5 inline-flex rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background"
-            >
-              Falar no WhatsApp
-            </a>
+            <div className="mt-5 flex flex-wrap justify-center gap-3">
+              <a
+                href={whatsapp}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background"
+              >
+                Falar no WhatsApp
+              </a>
+              <a
+                href={whatsappTabela}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex rounded-full border border-border px-6 py-3 text-sm font-medium"
+              >
+                Solicitar tabela atualizada
+              </a>
+            </div>
           </section>
+
+          <LaunchRelatedSection related={related} developerName={d.developer?.name ?? null} />
         </div>
+
       </main>
 
       <SiteFooter />
