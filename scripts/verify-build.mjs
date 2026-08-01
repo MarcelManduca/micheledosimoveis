@@ -16,9 +16,19 @@ import path from "node:path";
 import process from "node:process";
 
 const root = process.cwd();
-const outputDir = path.join(root, ".output");
-const serverEntry = path.join(outputDir, "server", "index.mjs");
-const publicDir = path.join(outputDir, "public");
+
+// Layouts suportados:
+//  - Node/Hostinger (preset node-server): .output/server/index.mjs + .output/public
+//  - Lovable/Cloudflare (preset cloudflare-module): dist/server/index.mjs + dist/client
+const layouts = [
+  { server: ".output/server/index.mjs", public: ".output/public" },
+  { server: "dist/server/index.mjs", public: "dist/client" },
+];
+const layout =
+  layouts.find((l) => existsSync(path.join(root, l.public, "assets"))) ?? layouts[0];
+
+const serverEntry = path.join(root, layout.server);
+const publicDir = path.join(root, layout.public);
 const assetsDir = path.join(publicDir, "assets");
 
 function fail(message) {
