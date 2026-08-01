@@ -6,6 +6,7 @@ import { findNeighborhoodByName } from "@/lib/neighborhoods";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { CalendarCheck } from "lucide-react";
 import { InternalLinkingSection } from "@/components/property/InternalLinkingSection";
+import { PropertyDevelopmentBanner } from "@/components/property/PropertyDevelopmentBanner";
 
 const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 

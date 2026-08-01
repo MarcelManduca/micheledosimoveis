@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { WHATSAPP_URL } from "@/lib/site-config";
+import { ENABLE_LAUNCHES_VERTICAL } from "@/lib/feature-flags";
 import logoWhite from "@/assets/brand/logo-white.webp";
 import logoWhite160 from "@/assets/brand/logo-white-160.webp";
 import logoWhite320 from "@/assets/brand/logo-white-320.webp";
@@ -68,6 +69,9 @@ export function SiteHeader({ variant = "dark" }: { variant?: Variant } = {}) {
             <a href="#imoveis" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Imóveis</a>
             <a href="#regioes" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Regiões</a>
             <Link to="/anuncie" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Anuncie</Link>
+            {ENABLE_LAUNCHES_VERTICAL ? (
+              <Link to="/lancamentos" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Lançamentos</Link>
+            ) : null}
             <a href="#sobre" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Sobre</a>
             <a href="#contato" className={isLight ? "hover:text-foreground transition" : "hover:text-white transition"}>Contato</a>
           </nav>
@@ -145,6 +149,15 @@ export function SiteHeader({ variant = "dark" }: { variant?: Variant } = {}) {
               >
                 Buscar imóveis
               </Link>
+              {ENABLE_LAUNCHES_VERTICAL ? (
+                <Link
+                  to="/lancamentos"
+                  onClick={() => setMobileOpen(false)}
+                  className="py-3 border-b border-border/60 hover:text-accent transition"
+                >
+                  Lançamentos
+                </Link>
+              ) : null}
             </nav>
             <a
               href={WHATSAPP_URL}
