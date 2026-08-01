@@ -39,6 +39,21 @@ export function publicationBlockers(row: DevelopmentRow, unitsCount: number): st
   }
   if (!filled(row.slug)) blockers.push("Sem slug.");
 
+  if (row.cover_review_status !== "approved") {
+    blockers.push(
+      row.cover_review_status === "rejected"
+        ? "Capa inadequada (reprovada na revisão editorial)."
+        : "Capa pendente de revisão editorial.",
+    );
+  }
+  if (row.description_review_status !== "approved") {
+    blockers.push(
+      row.description_review_status === "rejected"
+        ? "Descrição de unidade em vez de descrição institucional do empreendimento."
+        : "Descrição pendente de revisão editorial.",
+    );
+  }
+
   const editorial = (row.description ?? "").trim().length >= PUBLICATION_MIN_DESCRIPTION;
   if (unitsCount < 1 && !editorial) {
     blockers.push("Sem unidade relacionada e sem conteúdo editorial robusto.");
