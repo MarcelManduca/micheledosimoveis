@@ -29,7 +29,14 @@ export const Route = createFileRoute("/lancamentos/$slug")({
   loader: async ({ params }) => {
     const development = await getPublicDevelopment({ data: { slug: params.slug } });
     if (!development) throw notFound();
-    return { development };
+    const related = await getLaunchRelated({
+      data: {
+        slug: development.slug,
+        neighborhood: development.neighborhood,
+        developerId: development.developer_id,
+      },
+    });
+    return { development, related };
   },
   head: ({ params, loaderData }) => {
     const url = `${SITE}/lancamentos/${params.slug}`;
