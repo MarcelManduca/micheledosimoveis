@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 import {
   type DevelopmentRow,
@@ -177,3 +178,19 @@ function toCard(
   };
 }
 
+export const listSchema = z.object({
+  q: z.string().trim().default(""),
+  neighborhood: z.string().trim().default(""),
+  developer: z.string().trim().default(""),
+  stage: z.string().trim().default(""),
+  delivery: z.string().trim().default(""),
+  price_min: z.number().nullable().default(null),
+  price_max: z.number().nullable().default(null),
+  bedrooms: z.number().nullable().default(null),
+  sort: z.string().trim().default("relevance"),
+  page: z.number().int().default(1),
+  page_size: z.number().int().default(12),
+});
+
+
+export type ListDevelopmentsInput = z.infer<typeof listSchema>;
