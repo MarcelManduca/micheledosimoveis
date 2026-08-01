@@ -22,6 +22,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AnuncieRouteImport } from './routes/anuncie'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LancamentosIndexRouteImport } from './routes/lancamentos.index'
 import { Route as ImoveisIndexRouteImport } from './routes/imoveis.index'
 import { Route as CondominiosIndexRouteImport } from './routes/condominios.index'
 import { Route as VrsyncChar123slugChar125DotxmlRouteImport } from './routes/vrsync.{$slug}[.]xml'
@@ -103,6 +104,11 @@ const AdminRoute = AdminRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LancamentosIndexRoute = LancamentosIndexRouteImport.update({
+  id: '/lancamentos/',
+  path: '/lancamentos/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ImoveisIndexRoute = ImoveisIndexRouteImport.update({
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
+  '/lancamentos/': typeof LancamentosIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
@@ -243,6 +250,7 @@ export interface FileRoutesByTo {
   '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
   '/condominios': typeof CondominiosIndexRoute
   '/imoveis': typeof ImoveisIndexRoute
+  '/lancamentos': typeof LancamentosIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
@@ -274,6 +282,7 @@ export interface FileRoutesById {
   '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
+  '/lancamentos/': typeof LancamentosIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/api/public/hooks/sync-properties': typeof ApiPublicHooksSyncPropertiesRoute
@@ -306,6 +315,7 @@ export interface FileRouteTypes {
     | '/vrsync/{$slug}.xml'
     | '/condominios/'
     | '/imoveis/'
+    | '/lancamentos/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/hooks/sync-properties'
@@ -336,6 +346,7 @@ export interface FileRouteTypes {
     | '/vrsync/{$slug}.xml'
     | '/condominios'
     | '/imoveis'
+    | '/lancamentos'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/hooks/sync-properties'
@@ -366,6 +377,7 @@ export interface FileRouteTypes {
     | '/vrsync/{$slug}.xml'
     | '/condominios/'
     | '/imoveis/'
+    | '/lancamentos/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/api/public/hooks/sync-properties'
@@ -394,6 +406,7 @@ export interface RootRouteChildren {
   VrsyncChar123slugChar125DotxmlRoute: typeof VrsyncChar123slugChar125DotxmlRoute
   CondominiosIndexRoute: typeof CondominiosIndexRoute
   ImoveisIndexRoute: typeof ImoveisIndexRoute
+  LancamentosIndexRoute: typeof LancamentosIndexRoute
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicHooksSyncPropertiesRoute: typeof ApiPublicHooksSyncPropertiesRoute
@@ -490,6 +503,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/lancamentos/': {
+      id: '/lancamentos/'
+      path: '/lancamentos'
+      fullPath: '/lancamentos/'
+      preLoaderRoute: typeof LancamentosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/imoveis/': {
@@ -639,6 +659,7 @@ const rootRouteChildren: RootRouteChildren = {
   VrsyncChar123slugChar125DotxmlRoute: VrsyncChar123slugChar125DotxmlRoute,
   CondominiosIndexRoute: CondominiosIndexRoute,
   ImoveisIndexRoute: ImoveisIndexRoute,
+  LancamentosIndexRoute: LancamentosIndexRoute,
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicHooksSyncPropertiesRoute: ApiPublicHooksSyncPropertiesRoute,
