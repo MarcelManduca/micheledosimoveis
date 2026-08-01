@@ -395,9 +395,11 @@ export type Database = {
           brochure_url: string | null
           city: string
           cover_image: string | null
+          cover_review_status: string
           created_at: string
           delivery_estimate: string | null
           description: string | null
+          description_review_status: string
           developer_id: string | null
           floors_count: number | null
           gallery: string[]
@@ -416,6 +418,7 @@ export type Database = {
           price_max_brl: number | null
           price_min_brl: number | null
           publication_status: string
+          review_notes: string | null
           seo_description: string | null
           seo_title: string | null
           slug: string
@@ -437,9 +440,11 @@ export type Database = {
           brochure_url?: string | null
           city?: string
           cover_image?: string | null
+          cover_review_status?: string
           created_at?: string
           delivery_estimate?: string | null
           description?: string | null
+          description_review_status?: string
           developer_id?: string | null
           floors_count?: number | null
           gallery?: string[]
@@ -458,6 +463,7 @@ export type Database = {
           price_max_brl?: number | null
           price_min_brl?: number | null
           publication_status?: string
+          review_notes?: string | null
           seo_description?: string | null
           seo_title?: string | null
           slug: string
@@ -479,9 +485,11 @@ export type Database = {
           brochure_url?: string | null
           city?: string
           cover_image?: string | null
+          cover_review_status?: string
           created_at?: string
           delivery_estimate?: string | null
           description?: string | null
+          description_review_status?: string
           developer_id?: string | null
           floors_count?: number | null
           gallery?: string[]
@@ -500,6 +508,7 @@ export type Database = {
           price_max_brl?: number | null
           price_min_brl?: number | null
           publication_status?: string
+          review_notes?: string | null
           seo_description?: string | null
           seo_title?: string | null
           slug?: string
