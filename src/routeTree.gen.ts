@@ -26,6 +26,7 @@ import { Route as LancamentosIndexRouteImport } from './routes/lancamentos.index
 import { Route as ImoveisIndexRouteImport } from './routes/imoveis.index'
 import { Route as CondominiosIndexRouteImport } from './routes/condominios.index'
 import { Route as VrsyncChar123slugChar125DotxmlRouteImport } from './routes/vrsync.{$slug}[.]xml'
+import { Route as LancamentosSlugRouteImport } from './routes/lancamentos.$slug'
 import { Route as ImovelCodeRouteImport } from './routes/imovel.$code'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as CondominiosBairroRouteImport } from './routes/condominios.$bairro'
@@ -127,6 +128,11 @@ const VrsyncChar123slugChar125DotxmlRoute =
     path: '/vrsync/{$slug}.xml',
     getParentRoute: () => rootRouteImport,
   } as any)
+const LancamentosSlugRoute = LancamentosSlugRouteImport.update({
+  id: '/lancamentos/$slug',
+  path: '/lancamentos/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ImovelCodeRoute = ImovelCodeRouteImport.update({
   id: '/imovel/$code',
   path: '/imovel/$code',
@@ -216,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/lancamentos/$slug': typeof LancamentosSlugRoute
   '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/lancamentos/$slug': typeof LancamentosSlugRoute
   '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
   '/condominios': typeof CondominiosIndexRoute
   '/imoveis': typeof ImoveisIndexRoute
@@ -279,6 +287,7 @@ export interface FileRoutesById {
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
   '/imovel/$code': typeof ImovelCodeRoute
+  '/lancamentos/$slug': typeof LancamentosSlugRoute
   '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
@@ -312,6 +321,7 @@ export interface FileRouteTypes {
     | '/condominios/$bairro'
     | '/imoveis/$slug'
     | '/imovel/$code'
+    | '/lancamentos/$slug'
     | '/vrsync/{$slug}.xml'
     | '/condominios/'
     | '/imoveis/'
@@ -343,6 +353,7 @@ export interface FileRouteTypes {
     | '/condominios/$bairro'
     | '/imoveis/$slug'
     | '/imovel/$code'
+    | '/lancamentos/$slug'
     | '/vrsync/{$slug}.xml'
     | '/condominios'
     | '/imoveis'
@@ -374,6 +385,7 @@ export interface FileRouteTypes {
     | '/condominios/$bairro'
     | '/imoveis/$slug'
     | '/imovel/$code'
+    | '/lancamentos/$slug'
     | '/vrsync/{$slug}.xml'
     | '/condominios/'
     | '/imoveis/'
@@ -403,6 +415,7 @@ export interface RootRouteChildren {
   CondominiosBairroRoute: typeof CondominiosBairroRoute
   ImoveisSlugRoute: typeof ImoveisSlugRoute
   ImovelCodeRoute: typeof ImovelCodeRoute
+  LancamentosSlugRoute: typeof LancamentosSlugRoute
   VrsyncChar123slugChar125DotxmlRoute: typeof VrsyncChar123slugChar125DotxmlRoute
   CondominiosIndexRoute: typeof CondominiosIndexRoute
   ImoveisIndexRoute: typeof ImoveisIndexRoute
@@ -533,6 +546,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VrsyncChar123slugChar125DotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lancamentos/$slug': {
+      id: '/lancamentos/$slug'
+      path: '/lancamentos/$slug'
+      fullPath: '/lancamentos/$slug'
+      preLoaderRoute: typeof LancamentosSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/imovel/$code': {
       id: '/imovel/$code'
       path: '/imovel/$code'
@@ -656,6 +676,7 @@ const rootRouteChildren: RootRouteChildren = {
   CondominiosBairroRoute: CondominiosBairroRoute,
   ImoveisSlugRoute: ImoveisSlugRoute,
   ImovelCodeRoute: ImovelCodeRoute,
+  LancamentosSlugRoute: LancamentosSlugRoute,
   VrsyncChar123slugChar125DotxmlRoute: VrsyncChar123slugChar125DotxmlRoute,
   CondominiosIndexRoute: CondominiosIndexRoute,
   ImoveisIndexRoute: ImoveisIndexRoute,
