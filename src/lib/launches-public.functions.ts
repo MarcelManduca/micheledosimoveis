@@ -209,3 +209,21 @@ export const getDevelopmentForPropertyCode = createServerFn({ method: "GET" })
     if (!isPubliclyEligible(development, count ?? 0)) return null;
     return { slug: development.slug, name: development.name, neighborhood: development.neighborhood };
   });
+
+/** Linkagem interna contextual da página de lançamento (somente leitura). */
+export const getLaunchRelated = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        slug: z.string().trim().min(1),
+        neighborhood: z.string().trim().max(120).nullable().default(null),
+        developerId: z.string().trim().nullable().default(null),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }): Promise<LaunchRelated> => loadLaunchRelated(data));
+
+/** Indicadores e "Conheça também" da página de construtora (somente leitura). */
+export const getDeveloperRelated = createServerFn({ method: "GET" })
+  .inputValidator((input: unknown) => z.object({ developerId: z.string().trim().min(1) }).parse(input))
+  .handler(async ({ data }): Promise<DeveloperRelated> => loadDeveloperRelated(data.developerId));
