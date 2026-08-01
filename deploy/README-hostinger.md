@@ -1,93 +1,61 @@
-# Runbook — Deploy Hostinger (Lovable → GitHub → VPS)
+# Runbook — Deploy nativo Lovable → GitHub → Hostinger
 
-## Deploy nativo (botão "Salvar e reimplantar")
+## Contrato de build (o único caminho oficial)
 
-O painel roda apenas `install` + `npm run build` + start do entrypoint. Por isso a
-correção mora no próprio build:
+Painel Hostinger (Web App Node.js):
 
-- `vite.config.ts` usa o preset Nitro `node-server` fora do build da Lovable e
-  força a saída em `.output/` (`.output/server/index.mjs` + `.output/public`).
-  O preset `node-server` sobe um HTTP server real e **serve os estáticos de
-  `.output/public`** — era isso que faltava (o preset Cloudflare não serve
-  arquivos, daí todos os `/assets/*` em 404).
-- `npm run build` roda `scripts/verify-build.mjs`, que **falha o build** se
-  `.output/server/index.mjs` ou arquivos `.css`/`.js` em `.output/public/assets`
-  não existirem. Se o painel/web server servir estáticos por docroot, defina
-  `STATIC_DOCROOT` nas variáveis de ambiente e o postbuild espelha `.output/public` lá.
-- `src/server.ts` tem um fallback: em runtime Node, qualquer 404 de arquivo é
-  procurado em `.output/public` antes de responder.
+- configuração predefinida: **Nitro**
+- branch: `main`
+- Node: 22.x
+- gerenciador: npm
+- comando de build: `npm run build`
+- diretório de saída: `.output`
+- arquivo de entrada: `server/index.mjs`
 
-Painel Hostinger: Output/entrypoint = `.output/server/index.mjs`, comando de build
-`npm run build`, `PORT`/`HOST` conforme o proxy. Nada de build commitado no Git.
+Basta clicar em **Salvar e reimplantar**. Sem SSH, sem PM2 manual, sem cópia de
+arquivos por operador.
 
-## Deploy manual (fallback por SSH)
+O que garante isso no repositório:
 
-Arquitetura mantida: o Lovable publica no GitHub, a VPS Hostinger puxa `origin/main`,
-faz o build e serve via PM2 (+ Nginx/LiteSpeed na frente).
+- `package.json` → `"build": "vite build"` (sem postbuild).
+- `vite.config.ts` → `nitro: { preset: process.env.NITRO_PRESET ?? "node-server" }`.
+  O preset `node-server` gera `.output/server/index.mjs` + `.output/public` e
+  **serve os estáticos de `/assets/*` no próprio processo Node**. Se o painel
+  definir `NITRO_PRESET`, esse valor tem precedência. Dentro do build da Lovable
+  o bloco é ignorado (a plataforma força Cloudflare e saída em `dist/`).
+- `src/server.ts` é apenas o wrapper de erro SSR + cache headers (baseline). Ele
+  **não** serve arquivos de disco — quem faz isso é o preset `node-server`.
 
+### Causa do incidente "site sem CSS"
 
-## Deploy padrão
+O build publicado na Hostinger estava saindo com preset Cloudflare, que não tem
+camada de estáticos em runtime Node: o SSR respondia HTML normalmente, mas todo
+`/assets/*.css|js` caía em 404 (agravado pelo cache negativo do LiteSpeed).
+Fixar o preset Node no `vite.config.ts` restaura o comportamento original.
 
-```bash
-cd /var/www/michele-imoveis
-bash deploy/update.sh
-```
-
-Se o LiteSpeed/Apache serve os estáticos direto do docroot (em vez de proxy para o Node),
-informe o caminho para que o script espelhe `.output/public` lá:
-
-```bash
-STATIC_DOCROOT=/home/USER/domains/micheledosimoveis.com.br/public_html bash deploy/update.sh
-```
-
-## O que o script garante
-
-1. `git fetch` + `git reset --hard origin/main` (sem merge sujo na VPS).
-2. Remove `.output` e `node_modules/.cache` antes de buildar.
-3. `bun install --frozen-lockfile` + `bun run build` (fallback `npm ci`).
-4. **Falha o deploy antes do reload** se faltar `.output/server/index.mjs`,
-   se `.output/public/assets` não existir, estiver vazio ou sem `.css`/`.js`.
-5. Copia os estáticos para o docroot e confere a contagem de arquivos.
-6. `pm2 reload` (ou `pm2 start` se o processo não existir).
-7. Healthcheck: `/` deve responder 200 **e** um arquivo real de `/assets/*.css`
-   deve responder 200. `/vrsync.xml` é apenas reportado.
-
-## Incidente "site sem CSS" (404 em /assets)
-
-Causa: o HTML SSR novo foi publicado, mas os arquivos de `.output/public/assets`
-nunca chegaram ao diretório servido pelo web server — os hashes referenciados no HTML
-não existiam em disco e o LiteSpeed devolvia 404 (com cache negativo).
-
-Correção manual, se preciso:
+### Verificação local do mesmo build
 
 ```bash
-cd /var/www/michele-imoveis
-ls -la .output/public/assets | head          # os arquivos existem?
-find .output/public/assets -type f | wc -l
-# se estiver servindo por docroot:
-rsync -a --delete .output/public/assets/ "$STATIC_DOCROOT/assets/"
-# purge do cache LiteSpeed:
-/usr/local/lsws/bin/lswsctrl restart
-pm2 reload michele-imoveis
+rm -rf .output dist node_modules/.cache
+npm ci
+npm run build
+node .output/server/index.mjs   # PORT/HOST conforme o proxy
 ```
 
-Validação final (deve retornar 200 em todos):
+Deve existir `.output/server/index.mjs` e arquivos `.css`/`.js` em
+`.output/public/assets`. Testado: `/`, `/assets/*.css`, `/assets/*.js`,
+`/sitemap.xml` e `/vrsync.xml` respondem 200; `/lancamentos` responde 404
+(vertical desativada por feature flag).
 
-```bash
-curl -sI https://www.micheledosimoveis.com.br/ | head -1
-CSS=$(curl -s https://www.micheledosimoveis.com.br/ | grep -o '/assets/[^"]*\.css' | head -1)
-curl -sI "https://www.micheledosimoveis.com.br$CSS" | head -1
-```
+## Fallback opcional por SSH (`deploy/update.sh`)
+
+Mantido apenas como plano B de emergência (git reset + build + verificação de
+assets + pm2 reload). **Não faz parte do fluxo normal** — o deploy oficial é o
+botão do painel.
 
 ## /vrsync.xml em 503
 
-O feed é gerado sob demanda com milhares de imóveis. O 503/504 vem do timeout do
-proxy, não do app. `deploy/nginx-hostinger.conf` já define `proxy_read_timeout 300s`
-e `proxy_buffering off` para `^/vrsync.*\.xml$`. Após alterar:
-
-```bash
-nginx -t && systemctl reload nginx
-```
-
-No LiteSpeed, aumentar equivalentes: `Connection Timeout` e o timeout do
-external app / proxy context para 300s.
+O feed é gerado sob demanda com milhares de imóveis; 503/504 é timeout de proxy.
+`deploy/nginx-hostinger.conf` usa `proxy_read_timeout 300s` e `proxy_buffering off`
+para `^/vrsync.*\.xml$`. No LiteSpeed, ajustar `Connection Timeout` e o timeout do
+external app para 300s.
