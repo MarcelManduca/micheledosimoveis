@@ -203,6 +203,27 @@ function ConstrutoraDetalhe() {
           </p>
         ) : null}
 
+        <dl className="mt-8 grid gap-x-6 gap-y-4 rounded-2xl border border-border bg-card p-5 sm:grid-cols-2 lg:grid-cols-4">
+          {(
+            [
+              ["Fundação", dev.founded_year ? String(dev.founded_year) : null],
+              ["Cidade sede", [dev.city, dev.state].filter(Boolean).join("/") || null],
+              ["Empreendimentos publicados", String(related.stats.published)],
+              [
+                "Unidades disponíveis",
+                related.stats.unitsAvailable > 0 ? String(related.stats.unitsAvailable) : "Sob consulta",
+              ],
+            ] as Array<[string, string | null]>
+          )
+            .filter(([, v]) => v)
+            .map(([label, value]) => (
+              <div key={label}>
+                <dt className="text-xs uppercase tracking-wide text-muted-foreground">{label}</dt>
+                <dd className="mt-1 text-sm font-medium">{value}</dd>
+              </div>
+            ))}
+        </dl>
+
         <section className="mt-12">
           <h2 className="text-xl font-semibold">Lançamentos publicados</h2>
           {developments.length ? (
