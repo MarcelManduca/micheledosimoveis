@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { stripSearchParams } from "@tanstack/react-router";
 import { z } from "zod";
 import { Search } from "lucide-react";
 import { ENABLE_LAUNCHES_VERTICAL } from "@/lib/feature-flags";
@@ -53,6 +54,22 @@ function listQO(s: LaunchSearch) {
 
 export const Route = createFileRoute("/lancamentos/")({
   validateSearch: zodValidator(searchSchema),
+  search: {
+    middlewares: [
+      stripSearchParams({
+        q: "",
+        bairro: "",
+        construtora: "",
+        estagio: "",
+        entrega: "",
+        preco_min: null,
+        preco_max: null,
+        dorms: null,
+        ordem: "relevance",
+        pagina: 1,
+      }),
+    ],
+  },
   beforeLoad: () => {
     if (!ENABLE_LAUNCHES_VERTICAL) throw notFound();
   },
