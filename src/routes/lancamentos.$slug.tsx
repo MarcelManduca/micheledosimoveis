@@ -183,7 +183,7 @@ function youtubeId(url: string | null): string | null {
 }
 
 function LancamentoDetalhe() {
-  const { development: d } = Route.useLoaderData();
+  const { development: d, related } = Route.useLoaderData();
   const [showMap, setShowMap] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
 
@@ -196,6 +196,26 @@ function LancamentoDetalhe() {
   const whatsapp = buildWhatsAppUrl(
     `Olá Michele! Tenho interesse no empreendimento ${d.name}${d.neighborhood ? ` (${d.neighborhood})` : ""}. Pode me enviar mais informações?`,
   );
+  const whatsappTabela = buildWhatsAppUrl(
+    `Olá Michele! Pode me enviar a tabela atualizada de valores e disponibilidade do ${d.name}${d.neighborhood ? ` (${d.neighborhood})` : ""}?`,
+  );
+
+  const summary: Array<[string, string]> = [
+    ["Bairro", [d.neighborhood, d.city].filter(Boolean).join(" · ")],
+    ["Construtora", d.developer?.name ?? "Sob consulta"],
+    ["Estágio", stageLabel(d.stage)],
+    ["Entrega", d.delivery_estimate ?? "Sob consulta"],
+    [
+      "Tipologias",
+      d.stats.bedrooms.length ? `${d.stats.bedrooms.join(", ")} dorm.` : "Sob consulta",
+    ],
+    ["Área", area ?? "Sob consulta"],
+    ["Faixa de preço", priceRange(d.stats.price_min, d.stats.price_max)],
+    [
+      "Unidades disponíveis",
+      d.stats.units_available > 0 ? String(d.stats.units_available) : "Sob consulta",
+    ],
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -211,9 +231,22 @@ function LancamentoDetalhe() {
             <Link to="/lancamentos" className="hover:underline">
               Lançamentos
             </Link>
+            {d.neighborhood ? (
+              <>
+                <span className="mx-1.5">/</span>
+                <Link
+                  to="/lancamentos"
+                  search={{ bairro: d.neighborhood }}
+                  className="hover:underline"
+                >
+                  {d.neighborhood}
+                </Link>
+              </>
+            ) : null}
             <span className="mx-1.5">/</span>
             <span>{d.name}</span>
           </nav>
+
 
           <div className="relative aspect-[16/9] w-full overflow-hidden rounded-3xl bg-secondary">
             {hero ? (
