@@ -28,10 +28,15 @@ O que garante isso no repositório:
 
 ### Causa do incidente "site sem CSS"
 
-O build publicado na Hostinger estava saindo com preset Cloudflare, que não tem
-camada de estáticos em runtime Node: o SSR respondia HTML normalmente, mas todo
-`/assets/*.css|js` caía em 404 (agravado pelo cache negativo do LiteSpeed).
-Fixar o preset Node no `vite.config.ts` restaura o comportamento original.
+> O build efetivo na Hostinger passou a resolver para um preset incompatível com
+> o runtime Node. A correção fixa explicitamente `node-server`, removendo a
+> dependência da resolução implícita de preset e garantindo `.output/server` +
+> `.output/public` no mesmo artefato.
+
+Nota histórica: houve baseline funcional **sem** configuração explícita de preset;
+o problema surgiu quando a resolução implícita mudou de destino. Fixar o preset
+elimina essa dependência.
+
 
 ### Verificação local do mesmo build
 
