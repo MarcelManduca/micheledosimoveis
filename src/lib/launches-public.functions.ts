@@ -5,7 +5,6 @@ import {
   type DevelopmentRow,
 } from "@/lib/launches-shared";
 import {
-  type PublicDeveloperDetail,
   type PublicDevelopmentDetail,
   type PublicUnit,
   buildStats,

@@ -4,7 +4,6 @@ import type { Database } from "@/integrations/supabase/types";
 import {
   type DevelopmentRow,
   type DeveloperRow,
-  coreLaunchName,
   normalizeLaunchText,
   scoreDevelopment,
 } from "@/lib/launches-shared";
@@ -71,7 +70,7 @@ export type PublicDevelopmentDetail = DevelopmentRow & {
   stats: UnitStats;
 };
 
-function getPublicClient() {
+export function getPublicClient() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_PUBLISHABLE_KEY;
   if (!url || !key) throw new Error("Backend indisponível no momento.");
@@ -80,7 +79,7 @@ function getPublicClient() {
   });
 }
 
-function emptyStats(): UnitStats {
+export function emptyStats(): UnitStats {
   return {
     units_total: 0,
     units_available: 0,
@@ -100,7 +99,7 @@ type RawUnit = {
   is_available: boolean;
 };
 
-function buildStats(units: RawUnit[]): UnitStats {
+export function buildStats(units: RawUnit[]): UnitStats {
   const stats = emptyStats();
   const beds = new Set<number>();
   for (const u of units) {
@@ -129,7 +128,7 @@ export function isPubliclyEligible(row: DevelopmentRow, unitsCount: number): boo
   return unitsCount > 0 || hasEditorial;
 }
 
-async function loadEligible() {
+export async function loadEligible() {
   const supabase = getPublicClient();
   const [devsRes, unitsRes, developersRes] = await Promise.all([
     supabase.from("developments").select("*").eq("is_published", true).limit(1000),
@@ -157,7 +156,7 @@ async function loadEligible() {
   return { rows, unitsByDev, developers };
 }
 
-function toCard(
+export function toCard(
   row: DevelopmentRow,
   units: RawUnit[],
   developer: DeveloperRow | null,
@@ -194,3 +193,5 @@ export const listSchema = z.object({
 
 
 export type ListDevelopmentsInput = z.infer<typeof listSchema>;
+
+export { normalizeLaunchText };
