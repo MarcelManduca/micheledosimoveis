@@ -267,6 +267,85 @@ function ConstrutoraDetalhe() {
           </section>
         ) : null}
 
+        {related.otherDevelopers.length || related.neighborhoods.length ? (
+          <section className="mt-14">
+            <h2 className="text-xl font-semibold">Conheça também</h2>
+
+            {related.neighborhoods.length ? (
+              <div className="mt-5">
+                <h3 className="text-sm font-medium text-muted-foreground">Bairros onde atua</h3>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {related.neighborhoods.map((n) => (
+                    <li key={n.name}>
+                      <Link
+                        to="/lancamentos"
+                        search={{ bairro: n.name }}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm hover:bg-secondary"
+                      >
+                        <MapPin className="h-3.5 w-3.5" /> {n.name}
+                        <span className="text-xs text-muted-foreground">({n.count})</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+            {related.neighborhoods.some((n) => n.slug) ? (
+              <div className="mt-6">
+                <h3 className="text-sm font-medium text-muted-foreground">Lançamentos e imóveis relacionados</h3>
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {related.neighborhoods
+                    .filter((n) => n.slug)
+                    .map((n) => (
+                      <li key={`guia-${n.slug}`}>
+                        <Link
+                          to="/imoveis/$slug"
+                          params={{ slug: n.slug as string }}
+                          className="inline-flex rounded-full border border-border px-4 py-2 text-sm hover:bg-secondary"
+                        >
+                          Imóveis em {n.name}
+                        </Link>
+                      </li>
+                    ))}
+                  <li>
+                    <Link
+                      to="/lancamentos"
+                      className="inline-flex rounded-full border border-border px-4 py-2 text-sm hover:bg-secondary"
+                    >
+                      Todos os lançamentos
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+            ) : null}
+
+            {related.otherDevelopers.length ? (
+              <div className="mt-6">
+                <h3 className="text-sm font-medium text-muted-foreground">Outras construtoras</h3>
+                <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {related.otherDevelopers.map((o) => (
+                    <li key={o.slug}>
+                      <Link
+                        to="/construtoras/$slug"
+                        params={{ slug: o.slug }}
+                        className="flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-4 transition hover:shadow-md"
+                      >
+                        <Building2 className="h-4 w-4 text-muted-foreground" />
+                        <span className="flex-1 text-sm font-medium">{o.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {o.count} {o.count === 1 ? "empreendimento" : "empreendimentos"}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
+
+
         <section className="mt-14 rounded-3xl border border-border bg-card p-8 text-center">
           <h2 className="text-xl font-semibold">Interesse em um empreendimento desta construtora?</h2>
           <a
