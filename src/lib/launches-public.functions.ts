@@ -16,6 +16,12 @@ import {
   normalizeLaunchText,
   toCard,
 } from "@/lib/launches-public";
+import {
+  type DeveloperRelated,
+  type LaunchRelated,
+  loadDeveloperRelated,
+  loadLaunchRelated,
+} from "@/lib/launches-related";
 
 /**
  * Server functions PÚBLICAS da vertical de LANÇAMENTOS (thin wrapper).
