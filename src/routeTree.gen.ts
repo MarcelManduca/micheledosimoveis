@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VrsyncDotxmlRouteImport } from './routes/vrsync[.]xml'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SitemapLancamentosDotxmlRouteImport } from './routes/sitemap-lancamentos[.]xml'
 import { Route as SitemapCondominiosDotxmlRouteImport } from './routes/sitemap-condominios[.]xml'
 import { Route as SitemapBairrosDotxmlRouteImport } from './routes/sitemap-bairros[.]xml'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
@@ -51,6 +52,12 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapLancamentosDotxmlRoute =
+  SitemapLancamentosDotxmlRouteImport.update({
+    id: '/sitemap-lancamentos.xml',
+    path: '/sitemap-lancamentos.xml',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const SitemapCondominiosDotxmlRoute =
   SitemapCondominiosDotxmlRouteImport.update({
     id: '/sitemap-condominios.xml',
@@ -217,6 +224,7 @@ export interface FileRoutesByFullPath {
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
+  '/sitemap-lancamentos.xml': typeof SitemapLancamentosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -250,6 +258,7 @@ export interface FileRoutesByTo {
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
+  '/sitemap-lancamentos.xml': typeof SitemapLancamentosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -284,6 +293,7 @@ export interface FileRoutesById {
   '/privacidade': typeof PrivacidadeRoute
   '/sitemap-bairros.xml': typeof SitemapBairrosDotxmlRoute
   '/sitemap-condominios.xml': typeof SitemapCondominiosDotxmlRoute
+  '/sitemap-lancamentos.xml': typeof SitemapLancamentosDotxmlRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
@@ -319,6 +329,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap-condominios.xml'
+    | '/sitemap-lancamentos.xml'
     | '/sitemap.xml'
     | '/vrsync.xml'
     | '/.mcp/list-tools'
@@ -352,6 +363,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap-condominios.xml'
+    | '/sitemap-lancamentos.xml'
     | '/sitemap.xml'
     | '/vrsync.xml'
     | '/.mcp/list-tools'
@@ -385,6 +397,7 @@ export interface FileRouteTypes {
     | '/privacidade'
     | '/sitemap-bairros.xml'
     | '/sitemap-condominios.xml'
+    | '/sitemap-lancamentos.xml'
     | '/sitemap.xml'
     | '/vrsync.xml'
     | '/.mcp/list-tools'
@@ -419,6 +432,7 @@ export interface RootRouteChildren {
   PrivacidadeRoute: typeof PrivacidadeRoute
   SitemapBairrosDotxmlRoute: typeof SitemapBairrosDotxmlRoute
   SitemapCondominiosDotxmlRoute: typeof SitemapCondominiosDotxmlRoute
+  SitemapLancamentosDotxmlRoute: typeof SitemapLancamentosDotxmlRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   VrsyncDotxmlRoute: typeof VrsyncDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
@@ -452,6 +466,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap-lancamentos.xml': {
+      id: '/sitemap-lancamentos.xml'
+      path: '/sitemap-lancamentos.xml'
+      fullPath: '/sitemap-lancamentos.xml'
+      preLoaderRoute: typeof SitemapLancamentosDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap-condominios.xml': {
@@ -687,6 +708,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacidadeRoute: PrivacidadeRoute,
   SitemapBairrosDotxmlRoute: SitemapBairrosDotxmlRoute,
   SitemapCondominiosDotxmlRoute: SitemapCondominiosDotxmlRoute,
+  SitemapLancamentosDotxmlRoute: SitemapLancamentosDotxmlRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   VrsyncDotxmlRoute: VrsyncDotxmlRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,

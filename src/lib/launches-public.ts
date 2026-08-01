@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
+import { publicationBlockers } from "@/lib/launches-publication";
 import {
   type DevelopmentRow,
   type DeveloperRow,
@@ -14,8 +15,8 @@ import {
  * sem qualquer escrita e sem tocar em imóveis, condomínios ou VRSync.
  */
 
-/** Score mínimo editorial para exposição pública. */
-export const PUBLIC_MIN_SCORE = 50;
+/** Score mínimo editorial para exposição pública (Sprint 4: 70). */
+export const PUBLIC_MIN_SCORE = 70;
 /** Tamanho mínimo de descrição para considerar "conteúdo editorial suficiente". */
 export const PUBLIC_MIN_DESCRIPTION = 200;
 
@@ -122,10 +123,7 @@ export function buildStats(units: RawUnit[]): UnitStats {
 /** Critério único de exposição pública — usado na lista e no detalhe. */
 export function isPubliclyEligible(row: DevelopmentRow, unitsCount: number): boolean {
   if (!row.is_published || row.publication_status !== "published") return false;
-  const { score } = scoreDevelopment(row, unitsCount);
-  if (score < PUBLIC_MIN_SCORE) return false;
-  const hasEditorial = (row.description ?? "").trim().length >= PUBLIC_MIN_DESCRIPTION;
-  return unitsCount > 0 || hasEditorial;
+  return publicationBlockers(row, unitsCount).length === 0;
 }
 
 export async function loadEligible() {
