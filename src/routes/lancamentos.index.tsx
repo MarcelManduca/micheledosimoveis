@@ -135,7 +135,7 @@ function LancamentosIndex() {
   const page = Math.min(Math.max(1, search.pagina), totalPages);
 
   const update = (patch: Partial<LaunchSearch>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch, pagina: patch.pagina ?? 1 }) });
+    navigate({ search: (prev: LaunchSearch) => ({ ...prev, ...patch, pagina: patch.pagina ?? 1 }) });
 
   const selectClass =
     "h-11 rounded-xl border border-border bg-background px-3 text-sm text-foreground";
