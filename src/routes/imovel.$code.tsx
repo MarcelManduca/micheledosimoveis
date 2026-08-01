@@ -551,6 +551,11 @@ function PropertyPage() {
         </aside>
       </section>
 
+      {/* Aditivo (feature flag): vínculo com a vertical de lançamentos. */}
+      <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <PropertyDevelopmentBanner code={p.code} />
+      </div>
+
       <InternalLinkingSection links={links} originPath={`/imovel/${p.code}`} />
 
       {/* Lightbox */}
