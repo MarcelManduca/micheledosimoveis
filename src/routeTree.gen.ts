@@ -30,6 +30,7 @@ import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as CondominiosBairroRouteImport } from './routes/condominios.$bairro'
 import { Route as CondominioSlugRouteImport } from './routes/condominio.$slug'
 import { Route as AdminInteligenciaPortfolioRouteImport } from './routes/admin.inteligencia-portfolio'
+import { Route as AdminConstrutorasRouteImport } from './routes/admin.construtoras'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -145,6 +146,11 @@ const AdminInteligenciaPortfolioRoute =
     path: '/inteligencia-portfolio',
     getParentRoute: () => AdminRoute,
   } as any)
+const AdminConstrutorasRoute = AdminConstrutorasRouteImport.update({
+  id: '/construtoras',
+  path: '/construtoras',
+  getParentRoute: () => AdminRoute,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -191,6 +197,7 @@ export interface FileRoutesByFullPath {
   '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
@@ -248,6 +256,7 @@ export interface FileRoutesById {
   '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
@@ -278,6 +287,7 @@ export interface FileRouteTypes {
     | '/vrsync.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
     | '/condominio/$slug'
     | '/condominios/$bairro'
@@ -306,6 +316,7 @@ export interface FileRouteTypes {
     | '/vrsync.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
     | '/condominio/$slug'
     | '/condominios/$bairro'
@@ -334,6 +345,7 @@ export interface FileRouteTypes {
     | '/vrsync.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
     | '/condominio/$slug'
     | '/condominios/$bairro'
@@ -524,6 +536,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInteligenciaPortfolioRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/construtoras': {
+      id: '/admin/construtoras'
+      path: '/construtoras'
+      fullPath: '/admin/construtoras'
+      preLoaderRoute: typeof AdminConstrutorasRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -563,10 +582,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminConstrutorasRoute: typeof AdminConstrutorasRoute
   AdminInteligenciaPortfolioRoute: typeof AdminInteligenciaPortfolioRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminConstrutorasRoute: AdminConstrutorasRoute,
   AdminInteligenciaPortfolioRoute: AdminInteligenciaPortfolioRoute,
 }
 
