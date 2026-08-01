@@ -15,6 +15,7 @@ import {
 } from "@/lib/properties.functions";
 import { vrsyncExport } from "@/lib/vrsync.functions";
 import { VrsyncFeedsSection } from "@/components/admin/VrsyncFeedsSection";
+import { ENABLE_LAUNCHES_VERTICAL } from "@/lib/feature-flags";
 import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, ClipboardCopy, Download, ExternalLink, FileWarning, LogOut, RefreshCw, Rocket, Search, Star, Trash2, X } from "lucide-react";
 
 
@@ -245,6 +246,16 @@ function AdminPage() {
             <Link to="/admin/inteligencia-portfolio" className="hidden sm:inline text-muted-foreground hover:text-foreground">
               Inteligência de portfólio
             </Link>
+            {ENABLE_LAUNCHES_VERTICAL ? (
+              <>
+                <Link to="/admin/lancamentos" className="hidden sm:inline text-muted-foreground hover:text-foreground">
+                  Lançamentos
+                </Link>
+                <Link to="/admin/construtoras" className="hidden sm:inline text-muted-foreground hover:text-foreground">
+                  Construtoras
+                </Link>
+              </>
+            ) : null}
             <span className="hidden sm:inline text-muted-foreground">{userEmail}</span>
             <button
               onClick={signOut}

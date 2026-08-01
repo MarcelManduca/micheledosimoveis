@@ -29,7 +29,9 @@ import { Route as ImovelCodeRouteImport } from './routes/imovel.$code'
 import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as CondominiosBairroRouteImport } from './routes/condominios.$bairro'
 import { Route as CondominioSlugRouteImport } from './routes/condominio.$slug'
+import { Route as AdminLancamentosRouteImport } from './routes/admin.lancamentos'
 import { Route as AdminInteligenciaPortfolioRouteImport } from './routes/admin.inteligencia-portfolio'
+import { Route as AdminConstrutorasRouteImport } from './routes/admin.construtoras'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -139,12 +141,22 @@ const CondominioSlugRoute = CondominioSlugRouteImport.update({
   path: '/condominio/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminLancamentosRoute = AdminLancamentosRouteImport.update({
+  id: '/lancamentos',
+  path: '/lancamentos',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminInteligenciaPortfolioRoute =
   AdminInteligenciaPortfolioRouteImport.update({
     id: '/inteligencia-portfolio',
     path: '/inteligencia-portfolio',
     getParentRoute: () => AdminRoute,
   } as any)
+const AdminConstrutorasRoute = AdminConstrutorasRouteImport.update({
+  id: '/construtoras',
+  path: '/construtoras',
+  getParentRoute: () => AdminRoute,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -191,7 +203,9 @@ export interface FileRoutesByFullPath {
   '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
+  '/admin/lancamentos': typeof AdminLancamentosRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
@@ -219,7 +233,9 @@ export interface FileRoutesByTo {
   '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
+  '/admin/lancamentos': typeof AdminLancamentosRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
@@ -248,7 +264,9 @@ export interface FileRoutesById {
   '/vrsync.xml': typeof VrsyncDotxmlRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
+  '/admin/lancamentos': typeof AdminLancamentosRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/imoveis/$slug': typeof ImoveisSlugRoute
@@ -278,7 +296,9 @@ export interface FileRouteTypes {
     | '/vrsync.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
+    | '/admin/lancamentos'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/imoveis/$slug'
@@ -306,7 +326,9 @@ export interface FileRouteTypes {
     | '/vrsync.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
+    | '/admin/lancamentos'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/imoveis/$slug'
@@ -334,7 +356,9 @@ export interface FileRouteTypes {
     | '/vrsync.xml'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
+    | '/admin/lancamentos'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/imoveis/$slug'
@@ -517,11 +541,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CondominioSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/lancamentos': {
+      id: '/admin/lancamentos'
+      path: '/lancamentos'
+      fullPath: '/admin/lancamentos'
+      preLoaderRoute: typeof AdminLancamentosRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/inteligencia-portfolio': {
       id: '/admin/inteligencia-portfolio'
       path: '/inteligencia-portfolio'
       fullPath: '/admin/inteligencia-portfolio'
       preLoaderRoute: typeof AdminInteligenciaPortfolioRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/construtoras': {
+      id: '/admin/construtoras'
+      path: '/construtoras'
+      fullPath: '/admin/construtoras'
+      preLoaderRoute: typeof AdminConstrutorasRouteImport
       parentRoute: typeof AdminRoute
     }
     '/.well-known/oauth-protected-resource': {
@@ -563,11 +601,15 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminConstrutorasRoute: typeof AdminConstrutorasRoute
   AdminInteligenciaPortfolioRoute: typeof AdminInteligenciaPortfolioRoute
+  AdminLancamentosRoute: typeof AdminLancamentosRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminConstrutorasRoute: AdminConstrutorasRoute,
   AdminInteligenciaPortfolioRoute: AdminInteligenciaPortfolioRoute,
+  AdminLancamentosRoute: AdminLancamentosRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
