@@ -31,6 +31,7 @@ import {
 } from "@/lib/launches-schemas";
 
 export * from "@/lib/launches-shared";
+export { DEVELOPMENT_STAGES } from "@/lib/launches-schemas";
 
 /* ───────── Construtoras ───────── */
 

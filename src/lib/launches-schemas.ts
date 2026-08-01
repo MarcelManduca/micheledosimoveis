@@ -7,7 +7,7 @@ import { z } from "zod";
 const nullableText = z.string().trim().optional().nullable();
 const nullableNumber = z.number().nullable().optional();
 
-const developerSchema = z.object({
+export const developerSchema = z.object({
   id: z.string().uuid().optional().nullable(),
   slug: z.string().min(1),
   name: z.string().trim().min(1, "Informe o nome da construtora."),
@@ -32,7 +32,7 @@ export const DEVELOPMENT_STAGES = [
   { value: "ready", label: "Pronto para morar" },
 ] as const;
 
-const developmentSchema = z.object({
+export const developmentSchema = z.object({
   id: z.string().uuid().optional().nullable(),
   slug: z.string().min(1),
   name: z.string().trim().min(1, "Informe o nome do lançamento."),
@@ -67,12 +67,12 @@ const developmentSchema = z.object({
   is_published: z.boolean().default(false),
 });
 
-function fail(message: string, error: unknown): never {
+export function fail(message: string, error: unknown): never {
   console.error("[launches]", message, error);
   throw new Error(message);
 }
 
-function isUniqueViolation(error: unknown): boolean {
+export function isUniqueViolation(error: unknown): boolean {
   const code = (error as { code?: string } | null)?.code;
   return code === "23505";
 }
