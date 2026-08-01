@@ -20,7 +20,8 @@ export const Route = createFileRoute("/construtoras/$slug")({
   loader: async ({ params }) => {
     const data = await getPublicDeveloper({ data: { slug: params.slug } });
     if (!data) throw notFound();
-    return data;
+    const related = await getDeveloperRelated({ data: { developerId: data.developer.id } });
+    return { ...data, related };
   },
   head: ({ params, loaderData }) => {
     const url = `${SITE}/construtoras/${params.slug}`;
