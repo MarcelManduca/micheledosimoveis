@@ -87,11 +87,33 @@ async function main() {
   let copySuccess = false;
   try {
     fs.cpSync(sourceAssetsDir, tempDir, { recursive: true });
+
+    // Create .htaccess inside staging directory to disable Passenger for assets/
+    const stagingHtaccess = path.join(tempDir, ".htaccess");
+    fs.writeFileSync(stagingHtaccess, "PassengerEnabled off\n", "utf8");
+
+    // Create probe file inside staging directory
+    const stagingProbe = path.join(tempDir, "__hostinger-assets-probe.txt");
+    fs.writeFileSync(stagingProbe, "hostinger-static-assets-ok\n", "utf8");
+
     const copiedFiles = fs.readdirSync(tempDir);
-    log(`Successfully copied ${copiedFiles.length} files to temporary directory.`);
+    const hasStagingCss = copiedFiles.some((f) => f.endsWith(".css"));
+    const hasStagingJs = copiedFiles.some((f) => f.endsWith(".js"));
+    const hasStagingHtaccess = fs.existsSync(stagingHtaccess);
+    const hasStagingProbe = fs.existsSync(stagingProbe);
+
+    if (!hasStagingCss || !hasStagingJs || !hasStagingHtaccess || !hasStagingProbe) {
+      error("Staging directory validation failed: missing CSS, JS, .htaccess, or probe file.");
+      if (fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
+      process.exit(1);
+    }
+
+    log(`Successfully prepared staging directory with ${copiedFiles.length} files (including .htaccess and probe file).`);
     copySuccess = true;
   } catch (err) {
-    error(`Failed to copy assets to temporary directory: ${err.message}`);
+    error(`Failed to copy assets or write staging files: ${err.message}`);
     if (fs.existsSync(tempDir)) {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
