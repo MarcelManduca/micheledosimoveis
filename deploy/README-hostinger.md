@@ -1,66 +1,66 @@
-# Runbook — Deploy nativo Lovable → GitHub → Hostinger
+# Runbook — Deploy Nativo Lovable → GitHub → Hostinger
 
-## Contrato de build (o único caminho oficial)
+## 1. Configuração Oficial de Produção (Hostinger)
 
 Painel Hostinger (Web App Node.js):
 
-- configuração predefinida: **Nitro**
-- branch: `main`
-- Node: 22.x
-- gerenciador: npm
-- comando de build: `npm run build`
-- diretório de saída: `.output`
-- arquivo de entrada: `server/index.mjs`
+* **Branch de Produção:** `production`
+* **Framework Predefinido:** Nitro
+* **Versão do Node.js:** `22.x`
+* **Diretório Raiz (Root):** `./`
+* **Gerenciador de Pacotes:** npm
+* **Comando de Build:** `npm run build`
+* **Diretório de Saída:** `.output`
+* **Arquivo de Entrada (Entry File):** `server/index.mjs`
+* **Variável de Ambiente:** `NITRO_PRESET=node-server`
 
-Basta clicar em **Salvar e reimplantar**. Sem SSH, sem PM2 manual, sem cópia de
-arquivos por operador.
+---
 
-O que garante isso no repositório:
+## 2. Causa Final do Incidente e Prevenção de Perda de Variáveis
 
-- `package.json` → `"build": "vite build"` (sem postbuild).
-- `vite.config.ts` → `nitro: { preset: process.env.NITRO_PRESET ?? "node-server" }`.
-  O preset `node-server` gera `.output/server/index.mjs` + `.output/public` e
-  **serve os estáticos de `/assets/*` no próprio processo Node**. Se o painel
-  definir `NITRO_PRESET`, esse valor tem precedência. Dentro do build da Lovable
-  o bloco é ignorado (a plataforma força Cloudflare e saída em `dist/`).
-- `src/server.ts` é apenas o wrapper de erro SSR + cache headers (baseline). Ele
-  **não** serve arquivos de disco — quem faz isso é o preset `node-server`.
+### Causa Raiz Auditada:
+Ao alterar a integração do GitHub no painel da Hostinger da branch `main` para a branch `production`, a plataforma recriou o ambiente de implantação e as variáveis de ambiente previamente cadastradas não foram preservadas (apenas a `NITRO_PRESET` permaneceu). A ausência das variáveis do Supabase causou falha na execução do SSR/backend, embora a compilação do build e dos estáticos estivesse 100% correta.
 
-### Causa do incidente "site sem CSS"
+### Variáveis de Ambiente Obrigatórias (Nomes):
+* `VITE_SUPABASE_URL`
+* `SUPABASE_URL`
+* `VITE_SUPABASE_PUBLISHABLE_KEY`
+* `SUPABASE_PUBLISHABLE_KEY`
+* `NITRO_PRESET`
 
-> O build efetivo na Hostinger passou a resolver para um preset incompatível com
-> o runtime Node. A correção fixa explicitamente `node-server`, removendo a
-> dependência da resolução implícita de preset e garantindo `.output/server` +
-> `.output/public` no mesmo artefato.
+### Checklist Obrigatório Antes de Alterar Branch, Repositório ou Integração na Hostinger:
+- [ ] **Inventariar:** Listar todas as variáveis de ambiente ativas no painel da Hostinger.
+- [ ] **Backup Seguro:** Fazer backup seguro dos valores das variáveis fora do repositório.
+- [ ] **Alterar Integração:** Modificar a branch (`production`), repositório ou integração no hPanel.
+- [ ] **Restaurar e Conferir:** Cadastrar novamente e conferir os valores de todas as variáveis no hPanel.
+- [ ] **Implantar:** Executar o deploy no painel.
+- [ ] **Validar Produção:** Testar a aplicação em produção via Chrome DevTools MCP.
 
-Nota histórica: houve baseline funcional **sem** configuração explícita de preset;
-o problema surgiu quando a resolução implícita mudou de destino. Fixar o preset
-elimina essa dependência.
+> 🔒 **Regra de Segurança de Segredos:** Valores secretos (senhas, chaves privadas, tokens, cookies e chaves de API sensíveis) **nunca devem ser commitados no repositório, registrados em arquivos de documentação ou enviados em chats**.
 
+---
 
-### Verificação local do mesmo build
+## 3. Garantias do Repositório
+
+* `package.json` → `"build": "vite build"` (sem scripts pós-build).
+* `vite.config.ts` → `nitro: { preset: process.env.NITRO_PRESET ?? "node-server" }`.  
+  O preset `node-server` gera `.output/server/index.mjs` + `.output/public` e **serve os estáticos de `/assets/*` no próprio processo Node.js**.
+* `src/server.ts` → Wrapper de erro SSR + cabeçalhos de cache. Quem serve arquivos estáticos de disco é o preset `node-server`.
+
+---
+
+## 4. Verificação Local do Build de Produção
 
 ```bash
-rm -rf .output dist node_modules/.cache
-npm ci
-npm run build
-node .output/server/index.mjs   # PORT/HOST conforme o proxy
+npm ci --legacy-peer-deps
+NITRO_PRESET=node-server npm run build
+node scripts/verify-production-contract.mjs
 ```
 
-Deve existir `.output/server/index.mjs` e arquivos `.css`/`.js` em
-`.output/public/assets`. Testado: `/`, `/assets/*.css`, `/assets/*.js`,
-`/sitemap.xml` e `/vrsync.xml` respondem 200; `/lancamentos` responde 404
-(vertical desativada por feature flag).
+Deve confirmar a existência de `.output/server/index.mjs` e arquivos `.css`/`.js` em `.output/public/assets`.
 
-## Fallback opcional por SSH (`deploy/update.sh`)
+---
 
-Mantido apenas como plano B de emergência (git reset + build + verificação de
-assets + pm2 reload). **Não faz parte do fluxo normal** — o deploy oficial é o
-botão do painel.
+## 5. Fallback Opcional por SSH (`deploy/update.sh`)
 
-## /vrsync.xml em 503
-
-O feed é gerado sob demanda com milhares de imóveis; 503/504 é timeout de proxy.
-`deploy/nginx-hostinger.conf` usa `proxy_read_timeout 300s` e `proxy_buffering off`
-para `^/vrsync.*\.xml$`. No LiteSpeed, ajustar `Connection Timeout` e o timeout do
-external app para 300s.
+Mantido como plano B de emergência (`git reset` + build + verificação de assets + `pm2 reload`). O fluxo oficial de produção é a implantação via branch `production` na Hostinger.

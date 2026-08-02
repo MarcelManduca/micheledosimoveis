@@ -54,24 +54,44 @@ Ao realizar modificações no banco de dados ou Supabase:
 
 ---
 
-## 5. Veredito do Incidente e Contrato Hostinger
+## 5. Veredito do Incidente e Causa Raiz Auditada
 
-### Causa Raiz Auditada:
-1. **Configuração do Nitro:** O preset correto para execução no Phusion Passenger (Node.js 22) é o `node-server` (`NITRO_PRESET=node-server`).
-2. **Contrato de Saída:** O build do Nitro deve produzir `.output/server/index.mjs` para rotas dinâmicas (SSR) e `.output/public/assets` para estáticos.
-3. **Resolução:** Mantém-se o contrato oficial do Nitro sem scripts de manipulação de diretórios da hospedagem.
+### Causa Final do Incidente:
+Ao alterar a integração do GitHub no painel da Hostinger da branch `main` para a branch `production`, o ambiente de implantação foi recriado pela plataforma e as variáveis de ambiente previamente cadastradas não foram preservadas (apenas a `NITRO_PRESET` permaneceu). A ausência das variáveis do Supabase causou a falha no tempo de execução do SSR/backend, embora o processo de build e a geração dos assets estáticos tivessem ocorrido com sucesso.
 
-### Contrato de Produção:
-* **Framework:** TanStack Start + React 19 + Nitro 3
-* **Runtime:** Node.js 22 + Phusion Passenger (LiteSpeed)
-* **Preset:** `node-server` (`NITRO_PRESET=node-server`)
-* **Comando de Build:** `npm run build` (`vite build`)
-* **Output:** `.output`
-* **Entry File:** `server/index.mjs`
+### Variáveis de Ambiente Obrigatórias (Apenas os Nomes):
+* `VITE_SUPABASE_URL`
+* `SUPABASE_URL`
+* `VITE_SUPABASE_PUBLISHABLE_KEY`
+* `SUPABASE_PUBLISHABLE_KEY`
+* `NITRO_PRESET`
+
+### Checklist Obrigatório Antes de Alterar Branch, Repositório ou Integração na Hostinger:
+- [ ] **Inventariar:** Listar todas as variáveis de ambiente cadastradas no painel da Hostinger.
+- [ ] **Backup:** Fazer backup seguro dos valores das variáveis fora do repositório.
+- [ ] **Alterar Integração:** Modificar a branch, repositório ou integração no painel da Hostinger.
+- [ ] **Restaurar e Conferir:** Cadastrar novamente e conferir todas as variáveis no painel.
+- [ ] **Implantar:** Executar a implantação (deploy).
+- [ ] **Validar Produção:** Validar o funcionamento completo da aplicação e rotas em produção via Chrome DevTools MCP.
+
+> 🔒 **Regra de Segurança de Segredos:** Valores secretos (senhas, chaves privadas, tokens, cookies e chaves de API sensíveis) **nunca devem ser commitados no repositório, registrados em arquivos de documentação ou enviados em chats**.
 
 ---
 
-## 6. Lista de Arquivos Protegidos
+## 6. Configuração Final da Produção (Hostinger)
+
+* **Branch de Produção:** `production`
+* **Framework Predefinido:** Nitro
+* **Versão do Node.js:** `22.x`
+* **Diretório Raiz (Root):** `./`
+* **Comando de Build:** `npm run build`
+* **Diretório de Saída (Output):** `.output`
+* **Ponto de Entrada (Entry File):** `server/index.mjs`
+* **Variável de Ambiente:** `NITRO_PRESET=node-server`
+
+---
+
+## 7. Lista de Arquivos Protegidos
 
 Os seguintes arquivos pertencem à categoria de Infraestrutura e não podem ser modificados em tarefas Funcionais:
 
@@ -84,7 +104,7 @@ Os seguintes arquivos pertencem à categoria de Infraestrutura e não podem ser 
 
 ---
 
-## 7. Prompt-Base para Agentes de IA
+## 8. Prompt-Base para Agentes de IA
 
 Ao solicitar novas tarefas a agentes de IA (Antigravity ou Lovable), utilize:
 
@@ -102,7 +122,7 @@ REGRAS DE SEGURANÇA E ARQUITETURA:
 
 ---
 
-## 8. Checklist de Validação de Produção
+## 9. Checklist de Validação de Produção
 
 Antes de aprovar a PR para a branch `production`, valide:
 
@@ -114,7 +134,7 @@ Antes de aprovar a PR para a branch `production`, valide:
 
 ---
 
-## 9. Procedimento de Rollback
+## 10. Procedimento de Rollback
 
 Em caso de falha após o deploy da branch `production`:
 
