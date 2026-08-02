@@ -10,19 +10,44 @@ function error(msg) {
 }
 
 async function main() {
-  const hostingerPublicHtml = process.env.HOSTINGER_PUBLIC_HTML;
+  let targetPublicHtml = null;
 
-  if (!hostingerPublicHtml || hostingerPublicHtml.trim() === "") {
+  const envPublicHtml = process.env.HOSTINGER_PUBLIC_HTML;
+  if (envPublicHtml && envPublicHtml.trim() !== "") {
+    targetPublicHtml = path.resolve(envPublicHtml.trim());
+  } else {
+    const currentCwd = process.cwd();
+    const isSourceBasename = path.basename(currentCwd) === "source";
+    const parentDir = path.dirname(currentCwd);
+    const isBuildsParent = path.basename(parentDir) === ".builds";
+
+    if (isSourceBasename && isBuildsParent) {
+      const domainRoot = path.dirname(parentDir);
+      targetPublicHtml = path.join(domainRoot, "public_html");
+    }
+  }
+
+  if (!targetPublicHtml) {
     log("Hostinger publish skipped");
     process.exit(0);
   }
 
-  const targetPublicHtml = path.resolve(hostingerPublicHtml.trim());
+  if (!path.isAbsolute(targetPublicHtml)) {
+    error(`Target public_html path must be absolute: ${targetPublicHtml}`);
+    process.exit(1);
+  }
+
+  if (path.basename(targetPublicHtml) !== "public_html") {
+    error(`Target directory basename must be exactly 'public_html', got: ${path.basename(targetPublicHtml)}`);
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(targetPublicHtml) || !fs.statSync(targetPublicHtml).isDirectory()) {
+    error(`Target public_html directory does not exist or is not a directory: ${targetPublicHtml}`);
+    process.exit(1);
+  }
+
   const sourceAssetsDir = path.resolve(process.cwd(), ".output/public/assets");
-
-  log(`Target public_html: ${targetPublicHtml}`);
-  log(`Source assets dir: ${sourceAssetsDir}`);
-
   if (!fs.existsSync(sourceAssetsDir)) {
     error(`Source directory does not exist: ${sourceAssetsDir}`);
     process.exit(1);
@@ -37,10 +62,9 @@ async function main() {
     process.exit(1);
   }
 
-  if (!fs.existsSync(targetPublicHtml)) {
-    error(`Target HOSTINGER_PUBLIC_HTML directory does not exist: ${targetPublicHtml}`);
-    process.exit(1);
-  }
+  log("Hostinger environment detected");
+  log(`Target public_html: ${targetPublicHtml}`);
+  log(`Source assets dir: ${sourceAssetsDir}`);
 
   const targetAssetsDir = path.join(targetPublicHtml, "assets");
   const tempDirName = `.assets-tmp-${Date.now()}`;
@@ -89,10 +113,6 @@ async function main() {
   } catch (err) {
     error(`Failed during atomic directory swap: ${err.message}`);
     log("Initiating automatic rollback...");
-
-    if (fs.existsSync(targetAssetsDir) && !fs.existsSync(tempDir)) {
-      // Swapped partially or corrupted
-    }
 
     if (oldAssetsRenamed && fs.existsSync(oldBackupDir)) {
       try {
