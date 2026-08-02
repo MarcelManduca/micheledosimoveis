@@ -17,13 +17,22 @@ async function main() {
     targetPublicHtml = path.resolve(envPublicHtml.trim());
   } else {
     const currentCwd = process.cwd();
-    const isSourceBasename = path.basename(currentCwd) === "source";
+    const currentBasename = path.basename(currentCwd);
     const parentDir = path.dirname(currentCwd);
-    const isBuildsParent = path.basename(parentDir) === ".builds";
+    const parentBasename = path.basename(parentDir);
 
-    if (isSourceBasename && isBuildsParent) {
+    // Structure A: /dominio/.builds/source
+    if (currentBasename === "source" && parentBasename === ".builds") {
       const domainRoot = path.dirname(parentDir);
       targetPublicHtml = path.join(domainRoot, "public_html");
+    }
+    // Structure B: /dominio/.builds/source/repository
+    else if (currentBasename === "repository" && parentBasename === "source") {
+      const grandParentDir = path.dirname(parentDir);
+      if (path.basename(grandParentDir) === ".builds") {
+        const domainRoot = path.dirname(grandParentDir);
+        targetPublicHtml = path.join(domainRoot, "public_html");
+      }
     }
   }
 
