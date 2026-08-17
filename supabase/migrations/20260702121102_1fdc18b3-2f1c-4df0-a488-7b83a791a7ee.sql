@@ -1,4 +1,6 @@
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
+
 -- Table to hold internal cron auth tokens accessible only via service_role.
 CREATE TABLE IF NOT EXISTS public.cron_secrets (
   name TEXT PRIMARY KEY,
@@ -19,5 +21,5 @@ FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 -- Seed a random token that pg_cron and the sync webhook will share.
 INSERT INTO public.cron_secrets (name, token)
-VALUES ('sync', encode(gen_random_bytes(32), 'hex'))
+VALUES ('sync', encode(extensions.gen_random_bytes(32), 'hex'))
 ON CONFLICT (name) DO NOTHING;
