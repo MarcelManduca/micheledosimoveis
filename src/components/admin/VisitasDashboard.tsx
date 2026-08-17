@@ -25,9 +25,13 @@ export function VisitasDashboard() {
     queryFn: () => fetch("/data/equipes.json").then(r => r.json()),
   });
 
+  const [periodo, setPeriodo] = useState<"janeiro" | "ano">("janeiro");
+
   const { stats, total, error } = useMemo(() => {
-    // 1. Filtragem (exemplo: Janeiro 2026)
-    const visitasFiltradas = visitas.filter(v => v.data.startsWith("2026-01"));
+    // 1. Filtragem
+    const visitasFiltradas = periodo === "janeiro" 
+      ? visitas.filter(v => v.data.startsWith("2026-01"))
+      : visitas;
     
     // 2. Agrupamento em UMA ÚNICA PASSAGEM
     const grupos = visitasFiltradas.reduce((acc, v) => {
@@ -48,15 +52,24 @@ export function VisitasDashboard() {
     }, {} as Record<string, { label: string; count: number }>);
 
     const rows = Object.values(grupos).filter(r => !(r.label === "Sem equipe" && r.count === 0));
+    
+    // Ordenação para garantir consistência
+    const order = ["Equipe 0", "Equipe 1", "Equipe não disponível", "Sem equipe"];
+    rows.sort((a, b) => {
+      const idxA = order.indexOf(a.label);
+      const idxB = order.indexOf(b.label);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      if (idxA !== -1) return -1;
+      if (idxB !== -1) return 1;
+      return a.label.localeCompare(b.label);
+    });
+
     const totalDasLinhas = rows.reduce((sum, r) => sum + r.count, 0);
 
     // 3. Asserção obrigatória
     let assertionError = null;
     if (visitasFiltradas.length > 0 && totalDasLinhas !== visitasFiltradas.length) {
       assertionError = `Erro de integridade: Soma das linhas (${totalDasLinhas}) diverge do total filtrado (${visitasFiltradas.length}).`;
-      if (process.env.NODE_ENV === 'development') {
-        console.error(assertionError);
-      }
     }
 
     return { 
@@ -64,7 +77,8 @@ export function VisitasDashboard() {
       total: totalDasLinhas,
       error: assertionError 
     };
-  }, [visitas, equipes]);
+  }, [visitas, equipes, periodo]);
+
 
   if (isLoadingVisitas) return <div>Carregando dashboard...</div>;
   if (error) return (
