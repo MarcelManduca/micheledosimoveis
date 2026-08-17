@@ -91,14 +91,30 @@ export function VisitasDashboard() {
 
   return (
     <div className="space-y-6">
+      <div className="flex gap-2">
+        <button
+          onClick={() => setPeriodo("janeiro")}
+          className={`px-4 py-2 rounded-full text-xs font-medium transition \${periodo === "janeiro" ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}\`}
+        >
+          Janeiro 2026
+        </button>
+        <button
+          onClick={() => setPeriodo("ano")}
+          className={`px-4 py-2 rounded-full text-xs font-medium transition \${periodo === "ano" ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}\`}
+        >
+          Ano Atual
+        </button>
+      </div>
+
       <div className="rounded-xl border border-border bg-card overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Equipe</TableHead>
-              <TableHead className="text-right">Visitas (Jan/26)</TableHead>
+              <TableHead className="text-right">Visitas (\${periodo === "janeiro" ? "Jan/26" : "Total Ano"})</TableHead>
             </TableRow>
           </TableHeader>
+
           <TableBody>
             {stats.map((row) => (
               <TableRow key={row.label}>
