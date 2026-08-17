@@ -6,7 +6,7 @@ Site institucional e plataforma de captação imobiliária da corretora **Michel
 
 * **Framework Principal:** TanStack Start (React 19 + Nitro 3)
 * **Estilização:** Tailwind CSS v4
-* **Backend e Banco de Dados:** Lovable Cloud (Supabase) para banco, autenticação, armazenamento e funções server-side
+* **Backend e Banco de Dados:** Supabase independente (PostgreSQL, autenticação, armazenamento e funções server-side)
 * **Ambiente de Produção Oficial:** Hostinger (Node.js 22 + Phusion Passenger / LiteSpeed)
 * **Branch de Integração (Lovable):** `main`
 * **Branch de Produção (Hostinger):** `production`
