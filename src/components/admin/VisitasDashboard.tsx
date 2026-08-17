@@ -25,7 +25,7 @@ export function VisitasDashboard() {
     queryFn: () => fetch("/data/equipes.json").then(r => r.json()),
   });
 
-  const { stats, error } = useMemo(() => {
+  const { stats, total, error } = useMemo(() => {
     // 1. Filtragem (exemplo: Janeiro 2026)
     const visitasFiltradas = visitas.filter(v => v.data.startsWith("2026-01"));
     
