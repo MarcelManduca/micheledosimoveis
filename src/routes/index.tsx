@@ -84,42 +84,57 @@ function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased">
       {/* CORREÇÃO P0 URGENTE: o commit 3b8e2f1 introduziu dupla contagem e agrupamento incorreto.
-      
-      ## Mapeamento obrigatório
-      
-      Utilize exatamente:
-      
-      - "0" → Equipe 0
-      - "1" → Equipe 1
-      - "NAO_DISPONIVEL" → Equipe não disponível
-      - "SEM_EQUIPE" → Sem equipe
-      - códigos comerciais → nome canônico de equipes.json
-      
-      Valores nulos ou códigos desconhecidos não devem ser convertidos em “Sem equipe”. Use “Equipe não disponível” ou um grupo técnico separado, sem duplicar registros. No contrato atual não existem visitas com código nulo.
-      
-      ## Eliminar dupla contagem
-      
-      Cada visita deve pertencer a exatamente um grupo.
-      
-      Não crie a linha “Sem equipe” somando novamente registros já incluídos em “demais equipes”. O agrupamento deve ser uma única passagem pelos registros, utilizando uma chave canônica exclusiva.
-      
-      Adicione uma asserção em desenvolvimento:
-      
-      sum(visitas de todas as linhas, exceto TOTAL EMPRESA) === total de visitas filtradas
-      
-      ## Totais obrigatórios
-      
-      ### Janeiro de 2026
-      
-      - Equipe 0: 12;
-      - Equipe 1: 48;
-      - Equipe não disponível: 37;
-      - Sem equipe: 0;
-      - Total Empresa: 463, nunca 475.
-      
-      ### Ano atual
-      
-      - Equipe 0:
+      PARE: você repetiu o resultado do commit 3b8e2f1, que está reprovado. Não considere a tarefa concluída.
+
+      Em janeiro existem 463 visitas, não 475. As 12 visitas excedentes pertencem à Equipe 0.
+
+      ## Implementação exata para visitas
+
+      Não use o lookup de equipes como fonte primária para agrupar visitas. visitas_detalhes.json já contém os campos canônicos:
+      - equipe_codigo
+      - equipe_nome
+
+      Agrupe cada visita uma única vez usando:
+      - chave: String(visita.equipe_codigo)
+      - rótulo primário: visita.equipe_nome
+
+      Regras complementares somente se equipe_nome estiver vazio:
+      - código "0" → Equipe 0
+      - código "1" → Equipe 1
+      - código "NAO_DISPONIVEL" → Equipe não disponível
+      - código "SEM_EQUIPE" → Sem equipe
+      - qualquer outro código → resolver em equipes.json
+
+      Não crie linhas adicionais depois do agrupamento. Não some “não mapeados” separadamente. Não utilize um segundo reduce, filtro ou fallback que possa incluir novamente visitas já agrupadas.
+
+      ## Asserção obrigatória
+
+      Antes da renderização:
+      totalDasLinhas = soma de visitas de todas as linhas do agrupamento
+      Exigir:
+      totalDasLinhas === visitasFiltradas.length
+
+      Se divergir, lançar erro em desenvolvimento e não renderizar TOTAL EMPRESA incorreto.
+
+      ## Resultados exatos
+
+      Janeiro:
+      - Equipe 0: 12
+      - Equipe 1: 48
+      - Equipe não disponível: 37
+      - Sem equipe: 0
+      - Total Empresa: 463
+
+      Ano atual:
+      - Equipe 0: 79
+      - Equipe 1: 425
+      - Equipe não disponível: 112
+      - Sem equipe: 0
+      - Total Empresa: 3.388
+
+      O grupo “demais equipes” de janeiro sem NAO_DISPONIVEL já soma 426 e inclui as 12 visitas da Equipe 0. Portanto, não se pode somar 12 novamente.
+
+      Remova a linha “Sem equipe” quando não houver registros SEM_EQUIPE.
       */}
       <SiteHeader />
       <Hero />

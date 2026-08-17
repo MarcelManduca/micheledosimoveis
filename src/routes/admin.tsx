@@ -15,6 +15,7 @@ import {
 } from "@/lib/properties.functions";
 import { vrsyncExport } from "@/lib/vrsync.functions";
 import { VrsyncFeedsSection } from "@/components/admin/VrsyncFeedsSection";
+import { VisitasDashboard } from "@/components/admin/VisitasDashboard";
 import { ENABLE_LAUNCHES_VERTICAL } from "@/lib/feature-flags";
 import { ArrowRight, CheckCircle2, ChevronLeft, ChevronRight, ClipboardCopy, Download, ExternalLink, FileWarning, LogOut, RefreshCw, Rocket, Search, Star, Trash2, X } from "lucide-react";
 
@@ -395,7 +396,17 @@ function AdminPage() {
           </div>
         )}
 
+        {/* ─────────── Dashboard de Visitas ─────────── */}
+        <section className="mt-10">
+          <div className="mb-6">
+            <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Performance</div>
+            <h3 className="mt-1 font-display text-xl tracking-tight">Dashboard de Visitas</h3>
+          </div>
+          <VisitasDashboard />
+        </section>
+
         {/* ─────────── VRSync ─────────── */}
+
         <section className="mt-10 rounded-2xl border border-border bg-card p-5 sm:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
