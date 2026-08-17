@@ -79,8 +79,8 @@ export function VisitasDashboard() {
     };
   }, [visitas, equipes, periodo]);
 
-
   if (isLoadingVisitas) return <div>Carregando dashboard...</div>;
+  
   if (error) return (
     <Alert variant="destructive">
       <FileWarning className="h-4 w-4" />
@@ -94,13 +94,13 @@ export function VisitasDashboard() {
       <div className="flex gap-2">
         <button
           onClick={() => setPeriodo("janeiro")}
-          className={`px-4 py-2 rounded-full text-xs font-medium transition \${periodo === "janeiro" ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}\`}
+          className={`px-4 py-2 rounded-full text-xs font-medium transition ${periodo === "janeiro" ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}`}
         >
           Janeiro 2026
         </button>
         <button
           onClick={() => setPeriodo("ano")}
-          className={`px-4 py-2 rounded-full text-xs font-medium transition \${periodo === "ano" ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}\`}
+          className={`px-4 py-2 rounded-full text-xs font-medium transition ${periodo === "ano" ? "bg-foreground text-background" : "bg-secondary text-muted-foreground hover:text-foreground"}`}
         >
           Ano Atual
         </button>
@@ -111,10 +111,9 @@ export function VisitasDashboard() {
           <TableHeader>
             <TableRow>
               <TableHead>Equipe</TableHead>
-              <TableHead className="text-right">Visitas (\${periodo === "janeiro" ? "Jan/26" : "Total Ano"})</TableHead>
+              <TableHead className="text-right">Visitas {periodo === "janeiro" ? "(Jan/26)" : "(Total Ano)"}</TableHead>
             </TableRow>
           </TableHeader>
-
           <TableBody>
             {stats.map((row) => (
               <TableRow key={row.label}>
