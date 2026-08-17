@@ -83,6 +83,44 @@ function Index() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans antialiased">
+      {/* CORREÇÃO P0 URGENTE: o commit 3b8e2f1 introduziu dupla contagem e agrupamento incorreto.
+      
+      ## Mapeamento obrigatório
+      
+      Utilize exatamente:
+      
+      - "0" → Equipe 0
+      - "1" → Equipe 1
+      - "NAO_DISPONIVEL" → Equipe não disponível
+      - "SEM_EQUIPE" → Sem equipe
+      - códigos comerciais → nome canônico de equipes.json
+      
+      Valores nulos ou códigos desconhecidos não devem ser convertidos em “Sem equipe”. Use “Equipe não disponível” ou um grupo técnico separado, sem duplicar registros. No contrato atual não existem visitas com código nulo.
+      
+      ## Eliminar dupla contagem
+      
+      Cada visita deve pertencer a exatamente um grupo.
+      
+      Não crie a linha “Sem equipe” somando novamente registros já incluídos em “demais equipes”. O agrupamento deve ser uma única passagem pelos registros, utilizando uma chave canônica exclusiva.
+      
+      Adicione uma asserção em desenvolvimento:
+      
+      sum(visitas de todas as linhas, exceto TOTAL EMPRESA) === total de visitas filtradas
+      
+      ## Totais obrigatórios
+      
+      ### Janeiro de 2026
+      
+      - Equipe 0: 12;
+      - Equipe 1: 48;
+      - Equipe não disponível: 37;
+      - Sem equipe: 0;
+      - Total Empresa: 463, nunca 475.
+      
+      ### Ano atual
+      
+      - Equipe 0:
+      */}
       <SiteHeader />
       <Hero />
       <FiltersSection />
