@@ -508,127 +508,310 @@ export type SyncSummary = {
 
 type AnySupabase = { from: (t: string) => any };
 
+async function runWithConcurrencyLimit(
+  limit: number,
+  items: any[],
+  fn: (item: any) => Promise<void>
+) {
+  const executing: Promise<void>[] = [];
+  for (const item of items) {
+    const p = fn(item);
+    executing.push(p);
+    const clean = p.then(() => {
+      const idx = executing.indexOf(p);
+      if (idx !== -1) executing.splice(idx, 1);
+    });
+    if (executing.length >= limit) {
+      await Promise.race(executing);
+    }
+  }
+  await Promise.all(executing);
+}
+
+function numberOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
 async function runAvailabilitySync(db: AnySupabase): Promise<SyncSummary> {
   const { checkGralhaAvailability } = await import("./gralha-availability.server");
-  const { scrapeGralhaProperty } = await import("./gralha-scraper.server");
+  const { scrapeGralhaProperty, fetchGralhaApiItem } = await import("./gralha-scraper.server");
 
+  // 1. Buscar imóveis integrados
   const { data: rows, error } = await db
     .from("properties")
-    .select("id, code, source_url, published")
+    .select("id, code, source_url, published, price_brl, last_check_status")
     .not("source_url", "is", null);
   if (error) safeError("Não foi possível listar imóveis para sincronizar.", error);
 
-  const summary: SyncSummary = {
-    checked: 0,
-    available: 0,
-    refreshed: 0,
-    unpublished: 0,
-    errors: 0,
-    details: [],
+  // 2. Verificar lock distribuído ativo (execução iniciada há menos de 60 minutos)
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { data: activeRuns } = await db
+    .from("sync_runs")
+    .select("id")
+    .eq("status", "running")
+    .gt("started_at", oneHourAgo)
+    .limit(1);
+
+  if (activeRuns && activeRuns.length > 0) {
+    throw new Error("Sincronização já em andamento no servidor.");
+  }
+
+  // 3. Registrar início do sync
+  const { data: runRow, error: runError } = await db
+    .from("sync_runs")
+    .insert({
+      status: "running",
+      total: rows?.length ?? 0,
+      started_at: new Date().toISOString(),
+    })
+    .select("id")
+    .single();
+
+  if (runError || !runRow) {
+    throw new Error(`Falha ao registrar início da sincronização: ${runError?.message || "Erro desconhecido"}`);
+  }
+
+  let lastDbUpdate = Date.now();
+  let completedCount = 0;
+  let availableCount = 0;
+  let refreshedCount = 0;
+  let unpublishedCount = 0;
+  let errorCount = 0;
+  const detailsList: any[] = [];
+
+  const saveProgress = async (force = false) => {
+    completedCount += 1;
+    // Gravar no banco de dados com throttling a cada 20 imóveis ou 3 segundos
+    if (force || completedCount % 20 === 0 || Date.now() - lastDbUpdate > 3000) {
+      lastDbUpdate = Date.now();
+      await db
+        .from("sync_runs")
+        .update({
+          checked: completedCount,
+          available: availableCount,
+          refreshed: refreshedCount,
+          unpublished: unpublishedCount,
+          errors: errorCount,
+          details: detailsList.slice(-20), // Manter apenas as últimas 20 entradas para não sobrecarregar
+        })
+        .eq("id", runRow.id);
+    }
   };
 
-  for (const row of (rows ?? []) as Array<{ id: string; code: string; source_url: string | null; published: boolean }>) {
-    if (!row.source_url) continue;
-    summary.checked += 1;
-    const result = await checkGralhaAvailability(row.source_url);
+  const processRow = async (row: any) => {
+    if (!row.source_url) return;
     const now = new Date().toISOString();
-
-    if (result.status === "not_found") {
-      summary.unpublished += 1;
-      summary.details.push({ code: row.code, status: "removido", detail: result.detail });
-      await db
-        .from("properties")
-        .update({
-          last_checked_at: now,
-          last_check_status: `not_found: ${result.detail}`,
-          unavailable_since: now,
-          published: false,
-        })
-        .eq("id", row.id);
-      continue;
-    }
-
-    if (result.status === "error") {
-      summary.errors += 1;
-      summary.details.push({ code: row.code, status: "erro", detail: result.detail });
-      await db
-        .from("properties")
-        .update({
-          last_checked_at: now,
-          last_check_status: `error: ${result.detail}`,
-        })
-        .eq("id", row.id);
-      continue;
-    }
-
-    // Available — re-scrape to refresh price, photos, description, etc.
-    summary.available += 1;
     try {
-      const scraped = await scrapeGralhaProperty(row.source_url);
-      const { error: upErr } = await db
-        .from("properties")
-        .update({
-          title: scraped.title,
-          property_type: scraped.property_type,
-          neighborhood: scraped.neighborhood,
-          city: scraped.city,
-          state: scraped.state,
-          address: scraped.address,
-          condo_name: scraped.condo_name,
-          price_brl: scraped.price_brl,
-          condo_fee_brl: scraped.condo_fee_brl,
-          iptu_brl: scraped.iptu_brl,
-          area_m2: scraped.area_m2,
-          bedrooms: scraped.bedrooms,
-          suites: scraped.suites,
-          bathrooms: scraped.bathrooms,
-          parking_spots: scraped.parking_spots,
-          description: scraped.description,
-          features: scraped.features,
-          condo_features: scraped.condo_features,
-          cover_image: scraped.cover_image,
-          last_checked_at: now,
-          last_check_status: "available",
-          unavailable_since: null,
-        })
-        .eq("id", row.id);
-      if (upErr) throw upErr;
+      // Pre-check usando a API JSON leve e rápida do Gralha
+      const apiItem = await fetchGralhaApiItem(row.code);
+      if (apiItem) {
+        availableCount += 1;
+        const apiPrice = numberOrNull(apiItem.valorPromocional) ?? numberOrNull(apiItem.valorVenda);
+        const priceChanged = apiPrice !== row.price_brl;
+        const wasUnavailable = !row.published || row.last_check_status !== "available";
 
-      await db.from("property_photos").delete().eq("property_id", row.id);
-      if (scraped.photos.length > 0) {
-        const rowsToInsert = scraped.photos.slice(0, 80).map((url, i) => ({
-          property_id: row.id,
-          url,
-          position: i,
-        }));
-        await db.from("property_photos").insert(rowsToInsert);
+        if (priceChanged || wasUnavailable) {
+          // Atualização completa (HTML Scrape e fotos) devido a alteração
+          const scraped = await scrapeGralhaProperty(row.source_url);
+          const { error: upErr } = await db
+            .from("properties")
+            .update({
+              title: scraped.title,
+              property_type: scraped.property_type,
+              neighborhood: scraped.neighborhood,
+              city: scraped.city,
+              state: scraped.state,
+              address: scraped.address,
+              condo_name: scraped.condo_name,
+              price_brl: scraped.price_brl,
+              condo_fee_brl: scraped.condo_fee_brl,
+              iptu_brl: scraped.iptu_brl,
+              area_m2: scraped.area_m2,
+              bedrooms: scraped.bedrooms,
+              suites: scraped.suites,
+              bathrooms: scraped.bathrooms,
+              parking_spots: scraped.parking_spots,
+              description: scraped.description,
+              features: scraped.features,
+              condo_features: scraped.condo_features,
+              cover_image: scraped.cover_image,
+              last_checked_at: now,
+              last_check_status: "available",
+              unavailable_since: null,
+            })
+            .eq("id", row.id);
+          if (upErr) throw upErr;
+
+          await db.from("property_photos").delete().eq("property_id", row.id);
+          if (scraped.photos.length > 0) {
+            const rowsToInsert = scraped.photos.slice(0, 80).map((url, i) => ({
+              property_id: row.id,
+              url,
+              position: i,
+            }));
+            await db.from("property_photos").insert(rowsToInsert);
+          }
+          refreshedCount += 1;
+          detailsList.push({
+            code: row.code,
+            status: "atualizado",
+            detail: `Dados/fotos sincronizados (Preço anterior: R$ ${row.price_brl || "—"} -> Novo: R$ ${apiPrice})`
+          });
+        } else {
+          // Sem alterações - apenas atualiza carimbo de verificação
+          const { error: upErr } = await db
+            .from("properties")
+            .update({
+              last_checked_at: now,
+              last_check_status: "available",
+              unavailable_since: null,
+            })
+            .eq("id", row.id);
+          if (upErr) throw upErr;
+          detailsList.push({ code: row.code, status: "ok", detail: "Sem alterações de preço ou status" });
+        }
+      } else {
+        // Fallback: se não achar na API, checar a disponibilidade no HTML
+        const result = await checkGralhaAvailability(row.source_url);
+        if (result.status === "not_found") {
+          unpublishedCount += 1;
+          detailsList.push({ code: row.code, status: "removido", detail: result.detail });
+          await db
+            .from("properties")
+            .update({
+              last_checked_at: now,
+              last_check_status: `not_found: ${result.detail}`,
+              unavailable_since: now,
+              published: false,
+            })
+            .eq("id", row.id);
+        } else if (result.status === "error") {
+          errorCount += 1;
+          detailsList.push({ code: row.code, status: "erro_fallback", detail: `API indisponível, fallback HTML: ${result.detail}` });
+          await db
+            .from("properties")
+            .update({
+              last_checked_at: now,
+              last_check_status: `api_fallback_error: ${result.detail}`,
+            })
+            .eq("id", row.id);
+        } else {
+          // Encontrou no HTML - sincroniza as modificações
+          const scraped = await scrapeGralhaProperty(row.source_url);
+          const { error: upErr } = await db
+            .from("properties")
+            .update({
+              title: scraped.title,
+              price_brl: scraped.price_brl,
+              last_checked_at: now,
+              last_check_status: "available",
+              unavailable_since: null,
+            })
+            .eq("id", row.id);
+          if (upErr) throw upErr;
+          refreshedCount += 1;
+          detailsList.push({ code: row.code, status: "atualizado_fallback", detail: "API indisponível, resincronizado via HTML" });
+        }
       }
-      summary.refreshed += 1;
-      summary.details.push({ code: row.code, status: "atualizado", detail: "Dados e fotos sincronizados" });
     } catch (err) {
-      summary.errors += 1;
-      summary.details.push({
+      errorCount += 1;
+      detailsList.push({
         code: row.code,
-        status: "erro_refresh",
-        detail: (err as Error).message || "Falha ao atualizar dados",
+        status: "erro",
+        detail: (err as Error).message || "Falha ao processar imóvel",
       });
       await db
         .from("properties")
         .update({
           last_checked_at: now,
-          last_check_status: `refresh_error: ${(err as Error).message || "desconhecido"}`,
+          last_check_status: `error: ${(err as Error).message || "desconhecido"}`,
         })
         .eq("id", row.id);
+    } finally {
+      await saveProgress(false);
     }
+  };
+
+  try {
+    // Processar em blocos concorrentes de 10
+    await runWithConcurrencyLimit(10, rows ?? [], processRow);
+
+    // 4. Gravar finalização com sucesso
+    await db
+      .from("sync_runs")
+      .update({
+        status: "completed",
+        ended_at: new Date().toISOString(),
+        checked: completedCount,
+        available: availableCount,
+        refreshed: refreshedCount,
+        unpublished: unpublishedCount,
+        errors: errorCount,
+        details: detailsList, // Salva o histórico completo no final
+      })
+      .eq("id", runRow.id);
+
+  } catch (err) {
+    // 5. Registrar falha catastrófica da execução
+    await db
+      .from("sync_runs")
+      .update({
+        status: "failed",
+        ended_at: new Date().toISOString(),
+        errors: errorCount + 1,
+        details: [...detailsList, { code: "SYSTEM", status: "crash", detail: (err as Error).message }],
+      })
+      .eq("id", runRow.id);
+    throw err;
   }
-  return summary;
+
+  return {
+    checked: completedCount,
+    available: availableCount,
+    refreshed: refreshedCount,
+    unpublished: unpublishedCount,
+    errors: errorCount,
+    details: detailsList,
+  };
 }
 
 export const syncPropertiesAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    return runAvailabilitySync(context.supabase as unknown as AnySupabase);
+    
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+        const { data: activeRuns } = await (context.supabase as any)
+      .from("sync_runs")
+      .select("id")
+      .eq("status", "running")
+      .gt("started_at", oneHourAgo)
+      .limit(1);
+
+    if (activeRuns && activeRuns.length > 0) {
+      throw new Error("Sincronização já em andamento.");
+    }
+
+    // Disparar sincronização em background
+    runAvailabilitySync(context.supabase as unknown as AnySupabase)
+      .then((res) => console.log("[Admin ServerFn] Sincronização concluída com sucesso:", res))
+      .catch((err) => console.error("[Admin ServerFn] Erro na sincronização:", err));
+
+    return { ok: true, message: "Sincronização iniciada com sucesso em segundo plano." };
+  });
+
+export const getSyncProgress = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
+    const { data, error } = await (context.supabase as any)
+      .from("sync_runs")
+      .select("*")
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) safeError("Falha ao obter progresso da sincronização.", error);
+    return data;
   });
 
 export async function _runAvailabilitySyncInternal() {
