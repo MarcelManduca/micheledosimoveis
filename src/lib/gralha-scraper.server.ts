@@ -103,7 +103,7 @@ const VERIFIED_GRALHA_PRICES_BRL: Record<string, number> = {
   "43278": 15_800_000,
 };
 
-type GralhaApiItem = {
+export type GralhaApiItem = {
   id?: number;
   codigo?: string;
   tipo?: string | null;
@@ -138,7 +138,7 @@ function stripPriceSuffix(s: string) {
     .trim();
 }
 
-async function fetchGralhaApiItem(codeOrId: string): Promise<GralhaApiItem | null> {
+export async function fetchGralhaApiItem(codeOrId: string): Promise<GralhaApiItem | null> {
   const apiUrl = new URL("https://www.gralhaimoveis.com.br/api/anuncios/search");
   apiUrl.searchParams.set("finalidade", "venda");
   apiUrl.searchParams.set("codigo", codeOrId);
