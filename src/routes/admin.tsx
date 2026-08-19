@@ -12,6 +12,7 @@ import {
   setPropertyFeatured,
   setPropertyLaunch,
   syncPropertiesAvailability,
+  getSyncProgress,
 } from "@/lib/properties.functions";
 import { vrsyncExport } from "@/lib/vrsync.functions";
 import { VrsyncFeedsSection } from "@/components/admin/VrsyncFeedsSection";
@@ -37,6 +38,66 @@ function AdminPage() {
   const isChildRoute = pathname !== "/admin" && pathname !== "/admin/";
   const [sessionReady, setSessionReady] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  const [syncProgress, setSyncProgress] = useState<{
+    id?: string;
+    status: string;
+    checked: number;
+    total: number;
+    available: number;
+    refreshed: number;
+    unpublished: number;
+    errors: number;
+    details: Array<{ code: string; status: string; detail: string }>;
+    ended_at: string | null;
+  } | null>(null);
+  const [isPollingSync, setIsPollingSync] = useState(false);
+
+  // Polling de progresso da sincronização
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    const fetchProgress = async () => {
+      try {
+        const progress = await getSyncProgress();
+        if (progress) {
+          setSyncProgress(progress as any);
+          if (progress.status !== "running") {
+            setIsPollingSync(false);
+            qc.invalidateQueries({ queryKey: ["admin-properties"] });
+            qc.invalidateQueries({ queryKey: ["admin-properties-stats"] });
+          }
+        } else {
+          // Se retornar null (tabela inexistente), desativa polling
+          setIsPollingSync(false);
+        }
+      } catch (err) {
+        console.error("Erro ao obter progresso:", err);
+        setIsPollingSync(false);
+      }
+    };
+
+    if (isPollingSync) {
+      fetchProgress(); // Carrega imediatamente
+      timer = setInterval(fetchProgress, 2000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isPollingSync, qc]);
+
+  // Verificar status ao montar para retomar polling se já estiver rodando
+  useEffect(() => {
+    if (sessionReady) {
+      getSyncProgress().then((progress) => {
+        if (progress) {
+          setSyncProgress(progress as any);
+          if (progress.status === "running") {
+            setIsPollingSync(true);
+          }
+        }
+      }).catch(console.error);
+    }
+  }, [sessionReady]);
 
   useEffect(() => {
     let mounted = true;
@@ -109,7 +170,22 @@ function AdminPage() {
 
   const syncMut = useMutation({
     mutationFn: () => syncPropertiesAvailability(),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }); },
+    onSuccess: () => {
+      setIsPollingSync(true);
+      setSyncProgress({
+        status: "running",
+        checked: 0,
+        total: 0,
+        available: 0,
+        refreshed: 0,
+        unpublished: 0,
+        errors: 0,
+        details: [],
+        ended_at: null
+      });
+      qc.invalidateQueries({ queryKey: ["admin-properties"] });
+      qc.invalidateQueries({ queryKey: ["admin-properties-stats"] });
+    },
   });
 
   const exportMut = useMutation({
@@ -384,9 +460,104 @@ function AdminPage() {
             {(exportMut.error as Error).message}
           </div>
         )}
-        {syncMut.data && (
-          <div className="mt-3 rounded-xl bg-secondary/60 px-4 py-3 text-xs text-foreground">
-            Verificados {syncMut.data.checked} · atualizados {syncMut.data.refreshed ?? 0} · disponíveis {syncMut.data.available} · despublicados {syncMut.data.unpublished} · erros {syncMut.data.errors}
+        {syncProgress && (syncProgress.status === "running" || isPollingSync || syncProgress.status === "completed" || syncProgress.status === "failed") && (
+          <div className="mt-6 rounded-2xl border border-border/80 bg-card/60 backdrop-blur-md p-5 shadow-lg relative overflow-hidden transition-all duration-300">
+            {/* Linha decorativa de progresso se estiver ativo */}
+            {syncProgress.status === "running" && (
+              <div className="absolute top-0 left-0 right-0 h-1 bg-secondary overflow-hidden">
+                <div 
+                  className="h-full bg-emerald-500 animate-pulse transition-all duration-500 origin-left" 
+                  style={{ width: `${syncProgress.total ? (syncProgress.checked / syncProgress.total) * 100 : 5}%` }}
+                />
+              </div>
+            )}
+            
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 className="font-display font-medium text-lg flex items-center gap-2">
+                  {syncProgress.status === "running" ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin text-emerald-500" />
+                      <span>Sincronizando imóveis da Gralha...</span>
+                    </>
+                  ) : syncProgress.status === "completed" ? (
+                    <>
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600 animate-bounce" />
+                      <span>Sincronização concluída</span>
+                    </>
+                  ) : (
+                    <>
+                      <FileWarning className="h-4 w-4 text-destructive" />
+                      <span>Sincronização interrompida com falha</span>
+                    </>
+                  )}
+                </h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {syncProgress.status === "running" 
+                    ? `Sincronizando lote de imóveis via fila assíncrona paralela (concorrência de 10).`
+                    : `Última sincronização finalizada em ${syncProgress.ended_at ? new Date(syncProgress.ended_at).toLocaleString("pt-BR") : "—"}`}
+                </p>
+              </div>
+              
+              <div className="text-right">
+                <div className="text-sm font-semibold">
+                  {syncProgress.checked} / {syncProgress.total} imóveis
+                </div>
+                <div className="text-xs text-muted-foreground mt-0.5">
+                  {syncProgress.total ? Math.round((syncProgress.checked / syncProgress.total) * 100) : 0}% concluído
+                </div>
+              </div>
+            </div>
+
+            {/* Barra de progresso visual */}
+            <div className="mt-4 w-full bg-secondary/80 rounded-full h-2 overflow-hidden">
+              <div 
+                className={`h-full rounded-full transition-all duration-500 ${syncProgress.status === 'failed' ? 'bg-destructive' : 'bg-emerald-500'}`} 
+                style={{ width: `${syncProgress.total ? (syncProgress.checked / syncProgress.total) * 100 : 0}%` }}
+              />
+            </div>
+
+            {/* Grid de estatísticas */}
+            <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+              <div className="rounded-xl border border-border/60 bg-background/50 px-3 py-2">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Disponíveis</div>
+                <div className="mt-0.5 font-medium text-lg text-emerald-700">{syncProgress.available}</div>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-background/50 px-3 py-2">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Sincronizados</div>
+                <div className="mt-0.5 font-medium text-lg text-blue-700">{syncProgress.refreshed}</div>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-background/50 px-3 py-2">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Despublicados</div>
+                <div className="mt-0.5 font-medium text-lg text-amber-700">{syncProgress.unpublished}</div>
+              </div>
+              <div className="rounded-xl border border-border/60 bg-background/50 px-3 py-2">
+                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Erros</div>
+                <div className={`mt-0.5 font-medium text-lg ${syncProgress.errors > 0 ? "text-destructive" : "text-muted-foreground"}`}>{syncProgress.errors}</div>
+              </div>
+            </div>
+
+            {/* Logs de detalhes (últimos 5 eventos) */}
+            {syncProgress.details && syncProgress.details.length > 0 && (
+              <div className="mt-5">
+                <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Últimos eventos:</div>
+                <div className="mt-2 rounded-xl border border-border bg-black/5 dark:bg-white/5 font-mono text-[10px] p-3 space-y-1.5 max-h-40 overflow-y-auto">
+                  {syncProgress.details.slice(-5).map((detail, idx) => (
+                    <div key={idx} className="flex items-start gap-2 border-b border-border/20 last:border-0 pb-1.5 last:pb-0">
+                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold uppercase ${
+                        detail.status === "ok" ? "bg-emerald-500/10 text-emerald-600" :
+                        detail.status === "atualizado" ? "bg-blue-500/10 text-blue-600" :
+                        detail.status === "removido" ? "bg-amber-500/10 text-amber-600" : "bg-destructive/10 text-destructive"
+                      }`}>
+                        {detail.status}
+                      </span>
+                      <span className="font-semibold text-foreground/80">Cód. {detail.code}:</span>
+                      <span className="text-muted-foreground truncate flex-1">{detail.detail}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
