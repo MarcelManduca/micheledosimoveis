@@ -6,19 +6,73 @@
  * These tests exercise REAL production code:
  *  - processRowsToXml (the XML core, including published defense)
  *  - normalizeFeatures (feature whitelist + fusion)
- *  - matchPropertyAgainstFilters (in-memory mirror of SQL filter logic)
+ *  - applyFilters (real SQL query builder filter logic exercised via FakeQuery)
  *
  * No network, no Supabase connection required.
  */
 import {
   processRowsToXml,
   normalizeFeatures,
-  matchPropertyAgainstFilters,
+  applyFilters,
   type PropertyRow,
   type FeedFilters,
 } from "./vrsync.functions";
 import * as fs from "node:fs";
 import * as path from "node:path";
+
+// ─────────────────────── Fake Query Builder ───────────────────────
+/**
+ * Generic in-memory query builder implementing the subset of Supabase/PostgREST
+ * methods called by `applyFilters`. Does not implement business logic of filters,
+ * only interprets generic operations (eq, gte, lte, gt, in, not, neq) on data.
+ */
+class FakeQuery<T extends Record<string, any>> {
+  items: T[];
+
+  constructor(items: T[]) {
+    this.items = [...items];
+  }
+
+  eq(col: string, val: any): this {
+    this.items = this.items.filter((item) => item[col] === val);
+    return this;
+  }
+
+  gte(col: string, val: any): this {
+    this.items = this.items.filter((item) => item[col] != null && item[col] >= val);
+    return this;
+  }
+
+  lte(col: string, val: any): this {
+    this.items = this.items.filter((item) => item[col] != null && item[col] <= val);
+    return this;
+  }
+
+  gt(col: string, val: any): this {
+    this.items = this.items.filter((item) => item[col] != null && item[col] > val);
+    return this;
+  }
+
+  in(col: string, values: any[]): this {
+    this.items = this.items.filter((item) => values.includes(item[col]));
+    return this;
+  }
+
+  neq(col: string, val: any): this {
+    this.items = this.items.filter((item) => item[col] !== val);
+    return this;
+  }
+
+  not(col: string, operator: string, val: any): this {
+    if (operator === "is" && val === null) {
+      this.items = this.items.filter((item) => item[col] !== null && item[col] !== undefined);
+    } else if (operator === "in" && typeof val === "string") {
+      const parsed = val.replace(/^\(|\)$/g, "").split(",").map((s) => s.trim());
+      this.items = this.items.filter((item) => !parsed.includes(String(item[col])));
+    }
+    return this;
+  }
+}
 
 // ─────────────────────── Helpers ───────────────────────
 let passed = 0;
@@ -105,7 +159,6 @@ test("03 — foto adicionada aparece no XML", () => {
   });
   const { xml } = processRowsToXml([row]);
   const itemCount = (xml.match(/<Item /g) || []).length;
-  // cover_image + 3 photos, but cover deduplicates if not in list = 1 cover + 3 photos = 4
   assert(itemCount === 4, `esperado 4 fotos (cover + 3), encontrado ${itemCount}`);
 });
 
@@ -153,7 +206,6 @@ test("06 — published=false desaparece do feed geral (processRowsToXml)", () =>
 
 // ── 07: published=false desaparece do feed segmentado ──
 test("07 — published=false desaparece do feed segmentado (processRowsToXml)", () => {
-  // Feed segmentado também usa processRowsToXml; a defesa é no núcleo
   const rows = [
     makeRow({ code: "SEG01", published: true, neighborhood: "Ingleses" }),
     makeRow({ code: "SEG02", published: false, neighborhood: "Ingleses" }),
@@ -167,8 +219,6 @@ test("07 — published=false desaparece do feed segmentado (processRowsToXml)", 
 
 // ── 08: published=false + included_property_codes continua fora ──
 test("08 — published=false + included_property_codes continua fora do XML", () => {
-  // Simula cenário: imóvel foi colocado manualmente em included_property_codes
-  // mas depois foi despublicado. A defesa no núcleo deve removê-lo.
   const included = makeRow({ code: "INC01", published: false });
   const normal = makeRow({ code: "NRM01", published: true });
   const { xml } = processRowsToXml([included, normal]);
@@ -178,88 +228,64 @@ test("08 — published=false + included_property_codes continua fora do XML", ()
 
 // ── 09: published=false→true volta ao feed quando atende filtros ──
 test("09 — published=false→true volta ao feed quando atende filtros", () => {
-  // Imóvel começa como false, processRowsToXml exclui
   const rowOff = makeRow({ code: "TOGGLE01", published: false });
   const { xml: xmlOff } = processRowsToXml([rowOff]);
   assert(!xmlOff.includes("TOGGLE01"), "com published=false não deve estar");
 
-  // Imóvel volta para true, processRowsToXml inclui
   const rowOn = makeRow({ code: "TOGGLE01", published: true });
   const { xml: xmlOn } = processRowsToXml([rowOn]);
   assert(xmlOn.includes("<ListingID>TOGGLE01</ListingID>"), "com published=true deve voltar ao feed");
 });
 
 // ── 10: alteração de preço faz imóvel entrar no filtro ──
-test("10 — preço dentro da faixa → selecionado (matchPropertyAgainstFilters real)", () => {
+test("10 — preço dentro da faixa → selecionado (applyFilters real)", () => {
   const filters: FeedFilters = { price_min: 400000, price_max: 600000 };
-  const row = makeRow({ code: "PRICE01", price_brl: 500000, published: true });
-  const match = matchPropertyAgainstFilters(row, filters, []);
-  assert(match === true, "preço 500k dentro de 400k-600k deve ser selecionado");
-
-  // Preço muda para dentro da faixa (era fora)
-  const rowEnters = makeRow({ code: "PRICE02", price_brl: 450000, published: true });
-  assert(matchPropertyAgainstFilters(rowEnters, filters, []) === true, "preço 450k entra na faixa");
+  const items = [
+    makeRow({ code: "PRICE01", price_brl: 500000, published: true }),
+    makeRow({ code: "PRICE02", price_brl: 450000, published: true }),
+  ];
+  const query = new FakeQuery(items);
+  const filtered = (applyFilters(query as any, filters, []) as unknown as FakeQuery<PropertyRow>).items;
+  assert(filtered.some((r) => r.code === "PRICE01"), "preço 500k dentro de 400k-600k deve ser selecionado");
+  assert(filtered.some((r) => r.code === "PRICE02"), "preço 450k dentro de 400k-600k deve ser selecionado");
+  assert(filtered.length === 2, "ambos devem ser selecionados");
 });
 
 // ── 11: alteração de preço faz imóvel sair do filtro ──
-test("11 — preço fora da faixa → não selecionado (matchPropertyAgainstFilters real)", () => {
+test("11 — preço fora da faixa → não selecionado (applyFilters real)", () => {
   const filters: FeedFilters = { price_min: 400000, price_max: 600000 };
-
-  const rowAbove = makeRow({ code: "OUT01", price_brl: 700000, published: true });
-  assert(matchPropertyAgainstFilters(rowAbove, filters, []) === false, "preço 700k acima do max deve sair");
-
-  const rowBelow = makeRow({ code: "OUT02", price_brl: 300000, published: true });
-  assert(matchPropertyAgainstFilters(rowBelow, filters, []) === false, "preço 300k abaixo do min deve sair");
+  const items = [
+    makeRow({ code: "IN01", price_brl: 500000, published: true }),
+    makeRow({ code: "OUT01", price_brl: 700000, published: true }),
+    makeRow({ code: "OUT02", price_brl: 300000, published: true }),
+  ];
+  const query = new FakeQuery(items);
+  const filtered = (applyFilters(query as any, filters, []) as unknown as FakeQuery<PropertyRow>).items;
+  assert(filtered.some((r) => r.code === "IN01"), "preço 500k dentro da faixa deve ser mantido");
+  assert(!filtered.some((r) => r.code === "OUT01"), "preço 700k acima do max deve sair");
+  assert(!filtered.some((r) => r.code === "OUT02"), "preço 300k abaixo do min deve sair");
+  assert(filtered.length === 1, "apenas 1 item deve permanecer");
 });
 
 // ── 12: alteração de bairro/tipo muda participação no feed ──
-test("12 — bairro/tipo alterado muda participação (matchPropertyAgainstFilters real)", () => {
+test("12 — bairro/tipo alterado muda participação (applyFilters real)", () => {
   const filters: FeedFilters = {
     neighborhoods: ["Ingleses", "Canasvieiras"],
     property_types: ["apartamento"],
   };
-
-  const rowIn = makeRow({
-    code: "NB01",
-    neighborhood: "Ingleses",
-    property_type: "apartamento",
-    published: true,
-  });
-  assert(matchPropertyAgainstFilters(rowIn, filters, []) === true, "Ingleses + apartamento → dentro");
-
-  const rowNeighOut = makeRow({
-    code: "NB02",
-    neighborhood: "Centro",
-    property_type: "apartamento",
-    published: true,
-  });
-  assert(
-    matchPropertyAgainstFilters(rowNeighOut, filters, []) === false,
-    "Centro + apartamento → fora (bairro não está na lista)",
-  );
-
-  const rowTypeOut = makeRow({
-    code: "NB03",
-    neighborhood: "Ingleses",
-    property_type: "terreno",
-    published: true,
-  });
-  assert(
-    matchPropertyAgainstFilters(rowTypeOut, filters, []) === false,
-    "Ingleses + terreno → fora (tipo não está na lista)",
-  );
-
-  // Bairro muda para um que está na lista → volta
-  const rowChanged = makeRow({
-    code: "NB04",
-    neighborhood: "Canasvieiras",
-    property_type: "apartamento",
-    published: true,
-  });
-  assert(
-    matchPropertyAgainstFilters(rowChanged, filters, []) === true,
-    "Canasvieiras + apartamento → dentro (bairro mudou para um da lista)",
-  );
+  const items = [
+    makeRow({ code: "NB01", neighborhood: "Ingleses", property_type: "apartamento", published: true }),
+    makeRow({ code: "NB02", neighborhood: "Centro", property_type: "apartamento", published: true }),
+    makeRow({ code: "NB03", neighborhood: "Ingleses", property_type: "terreno", published: true }),
+    makeRow({ code: "NB04", neighborhood: "Canasvieiras", property_type: "apartamento", published: true }),
+  ];
+  const query = new FakeQuery(items);
+  const filtered = (applyFilters(query as any, filters, []) as unknown as FakeQuery<PropertyRow>).items;
+  assert(filtered.some((r) => r.code === "NB01"), "Ingleses + apartamento → dentro");
+  assert(!filtered.some((r) => r.code === "NB02"), "Centro + apartamento → fora (bairro não está na lista)");
+  assert(!filtered.some((r) => r.code === "NB03"), "Ingleses + terreno → fora (tipo não está na lista)");
+  assert(filtered.some((r) => r.code === "NB04"), "Canasvieiras + apartamento → dentro (bairro da lista)");
+  assert(filtered.length === 2, "apenas NB01 e NB04 devem ser selecionados");
 });
 
 // ── 13: features atuais são usadas ──
@@ -314,13 +340,6 @@ test("15 — feed preserva XML bem-formado", () => {
   // Verify escaping: raw & and < should not appear outside CDATA
   const outsideCdata = xml.replace(/<!\[CDATA\[.*?\]\]>/gs, "");
   assert(!outsideCdata.includes(" & "), "& fora de CDATA deve estar escapado");
-  assert(
-    !outsideCdata.match(/<(?![\/?!])/g)?.some((m) => {
-      // False positives: valid XML tags
-      return false;
-    }),
-    "XML deve ser bem-formado",
-  );
 
   // VRSync namespace preserved
   assert(

@@ -737,7 +737,7 @@ type PropertyQuery = ReturnType<
   ReturnType<SupabaseClient<Database>["from"]>["select"]
 >;
 
-function applyFilters(base: PropertyQuery, filters: FeedFilters, excludeCodes: string[]): PropertyQuery {
+export function applyFilters(base: PropertyQuery, filters: FeedFilters, excludeCodes: string[]): PropertyQuery {
   let q = base;
   const requirePublished = filters.only_published !== false; // default true
   if (requirePublished) q = q.eq("published", true);
@@ -765,44 +765,6 @@ function applyFilters(base: PropertyQuery, filters: FeedFilters, excludeCodes: s
     if (safe.length > 0) q = q.not("code", "in", `(${safe.join(",")})`);
   }
   return q;
-}
-
-/**
- * In-memory mirror of the SQL filter logic in `applyFilters`.
- * Used as a defense layer and directly testable without a database.
- * Every condition here must match the corresponding SQL filter above.
- */
-export function matchPropertyAgainstFilters(
-  row: PropertyRow & { is_launch?: boolean },
-  filters: FeedFilters,
-  excludeCodes: string[],
-): boolean {
-  const requirePublished = filters.only_published !== false;
-  if (requirePublished && !row.published) return false;
-  if (filters.only_featured && !row.featured) return false;
-  if (filters.only_launch && !(row as any).is_launch) return false;
-  if (filters.price_min != null && (row.price_brl == null || row.price_brl < filters.price_min)) return false;
-  if (filters.price_max != null && (row.price_brl == null || row.price_brl > filters.price_max)) return false;
-  if (filters.area_min != null && (row.area_m2 == null || row.area_m2 < filters.area_min)) return false;
-  if (filters.area_max != null && (row.area_m2 == null || row.area_m2 > filters.area_max)) return false;
-  if (filters.bedrooms_min != null && (row.bedrooms == null || row.bedrooms < filters.bedrooms_min)) return false;
-  if (filters.bedrooms_max != null && (row.bedrooms == null || row.bedrooms > filters.bedrooms_max)) return false;
-  if (filters.suites_min != null && (row.suites == null || row.suites < filters.suites_min)) return false;
-  if (filters.parking_min != null && (row.parking_spots == null || row.parking_spots < filters.parking_min)) return false;
-  if (filters.neighborhoods && filters.neighborhoods.length > 0) {
-    if (!row.neighborhood || !filters.neighborhoods.includes(row.neighborhood)) return false;
-  }
-  if (filters.cities && filters.cities.length > 0) {
-    if (!row.city || !filters.cities.includes(row.city)) return false;
-  }
-  if (filters.property_types && filters.property_types.length > 0) {
-    if (!row.property_type || !filters.property_types.includes(row.property_type)) return false;
-  }
-  if (filters.require_description && (!row.description || row.description === "")) return false;
-  if (filters.require_address && (!row.address || row.address === "")) return false;
-  if (filters.require_area && (row.area_m2 == null || row.area_m2 <= 0)) return false;
-  if (excludeCodes.length > 0 && excludeCodes.includes(row.code)) return false;
-  return true;
 }
 
 function orderQuery(q: PropertyQuery, sortBy: SortBy): PropertyQuery {
