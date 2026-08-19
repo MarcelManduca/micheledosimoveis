@@ -225,70 +225,51 @@ export const importGralhaProperty = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => importSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
-    const { scrapeGralhaProperty } = await import("./gralha-scraper.server");
+    const { syncOneGralhaProperty } = await import("./gralha-property-sync.server");
 
-    let scraped;
-    try {
-      scraped = await scrapeGralhaProperty(data.url);
-    } catch (err) {
-      console.error("scrapeGralhaProperty failed", err);
-      // Surface a stable, user-safe message; don't echo upstream errors that
-      // might include internal hostnames, stack frames, or HTML snippets.
-      throw new Error("Falha ao importar o imóvel. Verifique o link e tente novamente.");
+    const result = await syncOneGralhaProperty(context.supabase, {
+      url: data.url,
+      featured: data.featured,
+      isLaunch: data.isLaunch,
+    });
+
+    if (result.mode === "error") {
+      throw new Error(result.error || "Falha ao importar o imóvel. Verifique o link e tente novamente.");
     }
 
-    const { data: upserted, error: upErr } = await context.supabase
+    return { id: result.id, code: result.code, photos: result.photosAdded };
+  });
+
+const singleSyncSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export const syncSingleGralhaPropertyFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => singleSyncSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin({ supabase: context.supabase as never, userId: context.userId });
+
+    const { data: prop, error } = await context.supabase
       .from("properties")
-      .upsert(
-        {
-          code: scraped.code,
-          source_url: scraped.source_url,
-          title: scraped.title,
-          property_type: scraped.property_type,
-          neighborhood: scraped.neighborhood,
-          city: scraped.city,
-          state: scraped.state,
-          address: scraped.address,
-          condo_name: scraped.condo_name,
-          price_brl: scraped.price_brl,
-          condo_fee_brl: scraped.condo_fee_brl,
-          iptu_brl: scraped.iptu_brl,
-          area_m2: scraped.area_m2,
-          bedrooms: scraped.bedrooms,
-          suites: scraped.suites,
-          bathrooms: scraped.bathrooms,
-          parking_spots: scraped.parking_spots,
-          description: scraped.description,
-          features: scraped.features,
-          condo_features: scraped.condo_features,
-          cover_image: scraped.cover_image,
-          published: true,
-          featured: data.featured,
-          is_launch: data.isLaunch,
-        },
-        { onConflict: "code" },
-      )
-      .select("id, code")
+      .select("source_url")
+      .eq("id", data.id)
       .single();
-    if (upErr || !upserted) safeError("Não foi possível salvar o imóvel.", upErr);
 
-    const { error: delErr } = await context.supabase
-      .from("property_photos")
-      .delete()
-      .eq("property_id", upserted!.id);
-    if (delErr) safeError("Não foi possível atualizar as fotos.", delErr);
-
-    if (scraped.photos.length > 0) {
-      const rows = scraped.photos.slice(0, 80).map((url, i) => ({
-        property_id: upserted!.id,
-        url,
-        position: i,
-      }));
-      const { error: phErr } = await context.supabase.from("property_photos").insert(rows);
-      if (phErr) safeError("Não foi possível salvar as fotos.", phErr);
+    if (error || !prop || !prop.source_url) {
+      throw new Error("Imóvel não possui link de origem para atualizar.");
     }
 
-    return { id: upserted!.id, code: upserted!.code, photos: scraped.photos.length };
+    const { syncOneGralhaProperty } = await import("./gralha-property-sync.server");
+    const result = await syncOneGralhaProperty(context.supabase, {
+      url: prop.source_url,
+    });
+
+    if (result.mode === "error") {
+      throw new Error(result.error || "Falha ao sincronizar o imóvel.");
+    }
+
+    return result;
   });
 
 export type AdminPropertyRow = {
@@ -497,131 +478,142 @@ export const deleteProperty = createServerFn({ method: "POST" })
 
 // ───────── Availability + full refresh sync ─────────
 
+// ───────── Availability + full refresh sync ─────────
+
 export type SyncSummary = {
   checked: number;
   available: number;
   refreshed: number;
+  unchanged?: number;
   unpublished: number;
+  republished?: number;
   errors: number;
   details: Array<{ code: string; status: string; detail: string }>;
 };
 
 type AnySupabase = { from: (t: string) => any };
 
-async function runAvailabilitySync(db: AnySupabase): Promise<SyncSummary> {
-  const { checkGralhaAvailability } = await import("./gralha-availability.server");
-  const { scrapeGralhaProperty } = await import("./gralha-scraper.server");
-
-  const { data: rows, error } = await db
-    .from("properties")
-    .select("id, code, source_url, published")
-    .not("source_url", "is", null);
-  if (error) safeError("Não foi possível listar imóveis para sincronizar.", error);
-
-  const summary: SyncSummary = {
-    checked: 0,
-    available: 0,
-    refreshed: 0,
-    unpublished: 0,
-    errors: 0,
-    details: [],
-  };
-
-  for (const row of (rows ?? []) as Array<{ id: string; code: string; source_url: string | null; published: boolean }>) {
-    if (!row.source_url) continue;
-    summary.checked += 1;
-    const result = await checkGralhaAvailability(row.source_url);
-    const now = new Date().toISOString();
-
-    if (result.status === "not_found") {
-      summary.unpublished += 1;
-      summary.details.push({ code: row.code, status: "removido", detail: result.detail });
-      await db
-        .from("properties")
-        .update({
-          last_checked_at: now,
-          last_check_status: `not_found: ${result.detail}`,
-          unavailable_since: now,
-          published: false,
-        })
-        .eq("id", row.id);
-      continue;
-    }
-
-    if (result.status === "error") {
-      summary.errors += 1;
-      summary.details.push({ code: row.code, status: "erro", detail: result.detail });
-      await db
-        .from("properties")
-        .update({
-          last_checked_at: now,
-          last_check_status: `error: ${result.detail}`,
-        })
-        .eq("id", row.id);
-      continue;
-    }
-
-    // Available — re-scrape to refresh price, photos, description, etc.
-    summary.available += 1;
-    try {
-      const scraped = await scrapeGralhaProperty(row.source_url);
-      const { error: upErr } = await db
-        .from("properties")
-        .update({
-          title: scraped.title,
-          property_type: scraped.property_type,
-          neighborhood: scraped.neighborhood,
-          city: scraped.city,
-          state: scraped.state,
-          address: scraped.address,
-          condo_name: scraped.condo_name,
-          price_brl: scraped.price_brl,
-          condo_fee_brl: scraped.condo_fee_brl,
-          iptu_brl: scraped.iptu_brl,
-          area_m2: scraped.area_m2,
-          bedrooms: scraped.bedrooms,
-          suites: scraped.suites,
-          bathrooms: scraped.bathrooms,
-          parking_spots: scraped.parking_spots,
-          description: scraped.description,
-          features: scraped.features,
-          condo_features: scraped.condo_features,
-          cover_image: scraped.cover_image,
-          last_checked_at: now,
-          last_check_status: "available",
-          unavailable_since: null,
-        })
-        .eq("id", row.id);
-      if (upErr) throw upErr;
-
-      await db.from("property_photos").delete().eq("property_id", row.id);
-      if (scraped.photos.length > 0) {
-        const rowsToInsert = scraped.photos.slice(0, 80).map((url, i) => ({
-          property_id: row.id,
-          url,
-          position: i,
-        }));
-        await db.from("property_photos").insert(rowsToInsert);
-      }
-      summary.refreshed += 1;
-      summary.details.push({ code: row.code, status: "atualizado", detail: "Dados e fotos sincronizados" });
-    } catch (err) {
-      summary.errors += 1;
-      summary.details.push({
-        code: row.code,
-        status: "erro_refresh",
-        detail: (err as Error).message || "Falha ao atualizar dados",
-      });
-      await db
-        .from("properties")
-        .update({
-          last_checked_at: now,
-          last_check_status: `refresh_error: ${(err as Error).message || "desconhecido"}`,
-        })
-        .eq("id", row.id);
+async function runWithConcurrencyLimit(
+  limit: number,
+  items: any[],
+  fn: (item: any) => Promise<void>
+) {
+  const executing: Promise<void>[] = [];
+  for (const item of items) {
+    const p = fn(item);
+    executing.push(p);
+    const clean = p.then(() => {
+      const idx = executing.indexOf(p);
+      if (idx !== -1) executing.splice(idx, 1);
+    });
+    if (executing.length >= limit) {
+      await Promise.race(executing);
     }
   }
-  return summary;
+  await Promise.all(executing);
+}
+
+function numberOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+export async function runAvailabilitySync(db: AnySupabase): Promise<SyncSummary> {
+  const { syncOneGralhaProperty } = await import("./gralha-property-sync.server");
+
+  // Buscar lote rotativo de no máximo 25 imóveis (ordenados por last_checked_at ASC, NULLS FIRST, id ASC)
+  const { data: rows, error } = await db
+    .from("properties")
+    .select("id, code, source_url")
+    .not("source_url", "is", null)
+    .order("last_checked_at", { ascending: true, nullsFirst: true })
+    .order("id", { ascending: true })
+    .limit(25);
+  if (error) safeError("Não foi possível listar imóveis para sincronizar.", error);
+
+  let checkedCount = 0;
+  let availableCount = 0;
+  let refreshedCount = 0;
+  let unchangedCount = 0;
+  let unpublishedCount = 0;
+  let republishedCount = 0;
+  let errorCount = 0;
+  const detailsList: Array<{ code: string; status: string; detail: string }> = [];
+
+  const processRow = async (row: any) => {
+    if (!row.source_url) return;
+    checkedCount += 1;
+    try {
+      const result = await syncOneGralhaProperty(db, { url: row.source_url });
+      if (result.mode === "error") {
+        errorCount += 1;
+        detailsList.push({
+          code: row.code || "unknown",
+          status: "erro",
+          detail: result.error || "Erro de rede ou timeout",
+        });
+      } else if (result.mode === "unpublished") {
+        unpublishedCount += 1;
+        detailsList.push({
+          code: row.code || "unknown",
+          status: "indisponivel",
+          detail: "Imóvel indisponível ou removido na origem",
+        });
+      } else {
+        availableCount += 1;
+        if (result.mode === "republished") {
+          republishedCount += 1;
+          refreshedCount += 1;
+          detailsList.push({
+            code: row.code || "unknown",
+            status: "republicado",
+            detail: `Imóvel republicado e atualizado (Campos: ${result.changedFields.join(", ")})`,
+          });
+        } else if (result.mode === "updated") {
+          refreshedCount += 1;
+          detailsList.push({
+            code: row.code || "unknown",
+            status: "atualizado",
+            detail: `Campos atualizados: ${result.changedFields.join(", ")} (Fotos: +${result.photosAdded} / -${result.photosRemoved} / ~${result.photosReordered})`,
+          });
+        } else if (result.mode === "created") {
+          refreshedCount += 1;
+          detailsList.push({
+            code: row.code || "unknown",
+            status: "criado",
+            detail: "Imóvel importado e criado",
+          });
+        } else {
+          unchangedCount += 1;
+          detailsList.push({
+            code: row.code || "unknown",
+            status: "sem_alteracao",
+            detail: "Sem alterações de conteúdo",
+          });
+        }
+      }
+    } catch (err) {
+      errorCount += 1;
+      detailsList.push({
+        code: row.code || "unknown",
+        status: "erro",
+        detail: (err as Error).message || "Erro desconhecido",
+      });
+    }
+  };
+
+  // Processar o lote de até 25 imóveis com concorrência paralela de 5
+  await runWithConcurrencyLimit(5, rows ?? [], processRow);
+
+  return {
+    checked: checkedCount,
+    available: availableCount,
+    refreshed: refreshedCount,
+    unchanged: unchangedCount,
+    unpublished: unpublishedCount,
+    republished: republishedCount,
+    errors: errorCount,
+    details: detailsList,
+  };
 }
 
 export const syncPropertiesAvailability = createServerFn({ method: "POST" })
