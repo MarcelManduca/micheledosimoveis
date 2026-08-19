@@ -401,7 +401,7 @@ export async function syncOneGralhaProperty(
       checkField("code", scraped.code, existing.code);
       checkField("source_url", url, existing.source_url);
 
-      const isRepublishing = !existing.published || existing.last_check_status !== "available";
+      const isRepublishing = existing.published === false;
       if (isRepublishing) {
         updateData.published = true;
         updateData.unavailable_since = null;

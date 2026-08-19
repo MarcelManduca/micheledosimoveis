@@ -667,13 +667,65 @@ async function runTests() {
   {
     console.log("Cenário 21: reimport com URL ID diferente do code interno...");
     const db = new MockSupabase();
-    db.singleReturn = {
-      id: "uuid-123",
-      code: "11111",
-      source_url: "https://www.gralhaimoveis.com.br/imovel/11111",
-      published: true,
-      price_brl: 500000,
-      last_check_status: "available",
+    let queryCount = 0;
+    db.from = (table: string) => {
+      let orExpr = "";
+      return {
+        select() { return this; },
+        or(expr: string) {
+          orExpr = expr;
+          return this;
+        },
+        order() { return this; },
+        async maybeSingle() {
+          queryCount++;
+          // Primeira busca: code = 99999 OR source_url = https://.../99999 => retorna null
+          if (queryCount === 1) {
+            assert(orExpr.includes("code.eq.99999") || orExpr.includes("source_url.eq.https://www.gralhaimoveis.com.br/imovel/99999"), "Primeira busca usa dados da URL");
+            return { data: null, error: null };
+          }
+          // Segunda busca: code = 11111 OR source_url = https://.../99999 => retorna existente
+          if (queryCount === 2) {
+            assert(orExpr.includes("code.eq.11111"), "Segunda busca usa o código real 11111");
+            return {
+              data: {
+                id: "uuid-123",
+                code: "11111",
+                source_url: "https://www.gralhaimoveis.com.br/imovel/11111",
+                published: true,
+                price_brl: 500000,
+                last_check_status: "available",
+              },
+              error: null,
+            };
+          }
+          return { data: null, error: null };
+        },
+        async then(resolve: any) {
+          resolve({ data: [], error: null });
+        },
+        update(data: any) {
+          db.queries.push({ action: "update", table, data });
+          return this;
+        },
+        insert(data: any) {
+          db.queries.push({ action: "insert", table, data });
+          return { data: [], error: null };
+        },
+        delete() {
+          db.queries.push({ action: "delete", table });
+          return {
+            eq() {
+              return {
+                async in() {
+                  return { data: null, error: null };
+                }
+              };
+            }
+          } as any;
+        },
+        eq() { return this; }
+      } as any;
     };
 
     mockFetchResponses.set("https://www.gralhaimoveis.com.br/imovel/99999", {
@@ -703,13 +755,65 @@ async function runTests() {
   {
     console.log("Cenário 22: mesma propriedade com nova URL...");
     const db = new MockSupabase();
-    db.singleReturn = {
-      id: "uuid-123",
-      code: "11111",
-      source_url: "https://www.gralhaimoveis.com.br/imovel/11111",
-      published: true,
-      price_brl: 500000,
-      last_check_status: "available",
+    let queryCount = 0;
+    db.from = (table: string) => {
+      let orExpr = "";
+      return {
+        select() { return this; },
+        or(expr: string) {
+          orExpr = expr;
+          return this;
+        },
+        order() { return this; },
+        async maybeSingle() {
+          queryCount++;
+          // Primeira busca: code = newurl OR source_url = newurl => retorna null
+          if (queryCount === 1) {
+            assert(orExpr.includes("code.eq.newurl") || orExpr.includes("source_url.eq.https://www.gralhaimoveis.com.br/imovel/newurl"), "Primeira busca usa dados de newurl");
+            return { data: null, error: null };
+          }
+          // Segunda busca: code = 11111 OR source_url = newurl => retorna existente
+          if (queryCount === 2) {
+            assert(orExpr.includes("code.eq.11111"), "Segunda busca usa o código real 11111");
+            return {
+              data: {
+                id: "uuid-123",
+                code: "11111",
+                source_url: "https://www.gralhaimoveis.com.br/imovel/11111",
+                published: true,
+                price_brl: 500000,
+                last_check_status: "available",
+              },
+              error: null,
+            };
+          }
+          return { data: null, error: null };
+        },
+        async then(resolve: any) {
+          resolve({ data: [], error: null });
+        },
+        update(data: any) {
+          db.queries.push({ action: "update", table, data });
+          return this;
+        },
+        insert(data: any) {
+          db.queries.push({ action: "insert", table, data });
+          return { data: [], error: null };
+        },
+        delete() {
+          db.queries.push({ action: "delete", table });
+          return {
+            eq() {
+              return {
+                async in() {
+                  return { data: null, error: null };
+                }
+              };
+            }
+          } as any;
+        },
+        eq() { return this; }
+      } as any;
     };
 
     mockFetchResponses.set("https://www.gralhaimoveis.com.br/imovel/newurl", {
@@ -1088,6 +1192,43 @@ async function runTests() {
 
     console.log(`  Max observed concurrency: ${maxObservedConcurrency}`);
     assert(maxObservedConcurrency <= 5, "Concorrência máxima observada deveria ser no máximo 5");
+    console.log("  Passou! ✅");
+  }
+
+  // Cenário 28: semântica de republicação segura (published=true + last_check_status=error + sucesso => não republished)
+  {
+    console.log("Cenário 28: semântica de republicação segura (NÃO republished)...");
+    const db = new MockSupabase();
+    db.singleReturn = {
+      id: "uuid-123",
+      code: "11111",
+      source_url: "https://www.gralhaimoveis.com.br/imovel/11111",
+      published: true,
+      price_brl: 500000,
+      last_check_status: "error: Timeout",
+    };
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/imovel/11111", {
+      ok: true,
+      status: 200,
+      text: generateHtml("11111", "500.000"),
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true", {
+      ok: true,
+      status: 200,
+      text: JSON.stringify({ items: [{ codigo: "11111", valorVenda: 500000 }] }),
+      url: "https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true",
+    });
+
+    const result = await syncOneGralhaProperty(db, {
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    assert(result.mode === "no_change" || result.mode === "updated", "Não deveria ser republished");
+    assert(result.publishedBefore === true, "publishedBefore era true");
+    assert(result.publishedAfter === true, "publishedAfter permanece true");
     console.log("  Passou! ✅");
   }
 
