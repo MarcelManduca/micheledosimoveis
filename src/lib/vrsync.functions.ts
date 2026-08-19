@@ -40,7 +40,7 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
 }
 
 // ─────────────────────────── Tipos ─────────────────────────
-type PropertyRow = {
+export type PropertyRow = {
   id: string;
   code: string;
   title: string;
@@ -411,11 +411,13 @@ export type VrsyncResult = { xml: string; report: VrsyncReport };
  * segmentados (`buildVrsyncForFeed`).
  */
 export function processRowsToXml(rows: PropertyRow[]): VrsyncResult {
+  // ── Defesa absoluta: nenhum imóvel não publicado pode entrar em qualquer feed ──
+  const safeRows = rows.filter((r) => r.published === true);
   const generatedAt = new Date().toISOString();
 
   const report: VrsyncReport = {
     generatedAt,
-    totalActive: rows.length,
+    totalActive: safeRows.length,
     processed: 0,
     exported: 0,
     rejected: 0,
@@ -433,7 +435,7 @@ export function processRowsToXml(rows: PropertyRow[]): VrsyncResult {
   const seenCodes = new Set<string>();
   const listings: string[] = [];
 
-  for (const r of rows) {
+  for (const r of safeRows) {
     report.processed += 1;
 
     if (seenCodes.has(r.code)) {
@@ -587,7 +589,9 @@ export function processRowsToXml(rows: PropertyRow[]): VrsyncResult {
 
 export async function buildVrsync(): Promise<VrsyncResult> {
   const rows = await fetchAllPublished();
-  return processRowsToXml(rows);
+  // Defesa adicional: garantir que somente publicados entram no XML
+  const safeRows = rows.filter((r) => r.published === true);
+  return processRowsToXml(safeRows);
 }
 
 // ─────────────────────────── Helpers de formatação ─────────────────────────
@@ -733,7 +737,7 @@ type PropertyQuery = ReturnType<
   ReturnType<SupabaseClient<Database>["from"]>["select"]
 >;
 
-function applyFilters(base: PropertyQuery, filters: FeedFilters, excludeCodes: string[]): PropertyQuery {
+export function applyFilters(base: PropertyQuery, filters: FeedFilters, excludeCodes: string[]): PropertyQuery {
   let q = base;
   const requirePublished = filters.only_published !== false; // default true
   if (requirePublished) q = q.eq("published", true);
@@ -879,7 +883,8 @@ async function fetchFilteredProperties(cfg: FeedConfig): Promise<PropertyRow[]> 
         const { data, error } = await supabase
           .from("properties")
           .select(PROPERTY_COLS)
-          .in("code", codes);
+          .in("code", codes)
+          .eq("published", true);
         if (error) throw new Error(`Falha ao carregar códigos incluídos: ${error.message}`);
         all.push(...((data ?? []) as unknown as PropertyRow[]));
       }
@@ -891,6 +896,9 @@ async function fetchFilteredProperties(cfg: FeedConfig): Promise<PropertyRow[]> 
   if (cfg.filters.require_photo) {
     out = out.filter((r) => normalizePhotos(r.property_photos, r.cover_image).length > 0);
   }
+
+  // ── Defesa final: nenhum imóvel não publicado pode seguir para o XML ──
+  out = out.filter((r) => r.published === true);
 
   // Manual ordering: sort by position in included_property_codes
   if (cfg.sort_by === "manual" && cfg.included_property_codes.length > 0) {

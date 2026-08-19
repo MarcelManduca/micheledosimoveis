@@ -1,7 +1,7 @@
 /**
  * Endpoint público: /vrsync.xml
  * Retorna o feed VRSync com Content-Type application/xml.
- * Cacheado por 30 min no CDN para evitar sobrecarga.
+ * Cacheado por 5 min no CDN para evitar sobrecarga.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { buildVrsync } from "@/lib/vrsync.functions";
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/vrsync.xml")({
             status: 200,
             headers: {
               "content-type": "application/xml; charset=utf-8",
-              "cache-control": "public, max-age=1800, s-maxage=1800",
+              "cache-control": "public, max-age=300, s-maxage=300",
             },
           });
         } catch (err) {
