@@ -12,6 +12,7 @@ import {
   setPropertyFeatured,
   setPropertyLaunch,
   syncPropertiesAvailability,
+  syncSingleGralhaPropertyFn,
 } from "@/lib/properties.functions";
 import { vrsyncExport } from "@/lib/vrsync.functions";
 import { VrsyncFeedsSection } from "@/components/admin/VrsyncFeedsSection";
@@ -110,6 +111,22 @@ function AdminPage() {
   const syncMut = useMutation({
     mutationFn: () => syncPropertiesAvailability(),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ["admin-properties"] }); qc.invalidateQueries({ queryKey: ["admin-properties-stats"] }); },
+  });
+
+  const [singleSyncResult, setSingleSyncResult] = useState<any | null>(null);
+  const [singleSyncError, setSingleSyncError] = useState<string | null>(null);
+  const syncSingleMut = useMutation({
+    mutationFn: (id: string) => syncSingleGralhaPropertyFn({ data: { id } }),
+    onSuccess: (res) => {
+      setSingleSyncResult(res);
+      setSingleSyncError(null);
+      qc.invalidateQueries({ queryKey: ["admin-properties"] });
+      qc.invalidateQueries({ queryKey: ["admin-properties-stats"] });
+    },
+    onError: (err: any) => {
+      setSingleSyncResult(null);
+      setSingleSyncError(err.message || "Falha ao sincronizar o imóvel.");
+    },
   });
 
   const exportMut = useMutation({
@@ -387,6 +404,38 @@ function AdminPage() {
         {syncMut.data && (
           <div className="mt-3 rounded-xl bg-secondary/60 px-4 py-3 text-xs text-foreground">
             Verificados {syncMut.data.checked} · atualizados {syncMut.data.refreshed ?? 0} · disponíveis {syncMut.data.available} · despublicados {syncMut.data.unpublished} · erros {syncMut.data.errors}
+          </div>
+        )}
+
+        {singleSyncResult && (
+          <div className="mt-3 rounded-xl bg-secondary/60 px-4 py-3 text-xs text-foreground flex items-center justify-between gap-3">
+            <div>
+              <span className="font-semibold">Atualização individual (Cód: {singleSyncResult.code}):</span>{" "}
+              {singleSyncResult.mode === "no_change" && "Nenhuma alteração encontrada na Gralha."}
+              {singleSyncResult.mode === "unpublished" && "Imóvel inativo/despublicado."}
+              {singleSyncResult.mode === "republished" && "Imóvel ativo/republicado."}
+              {singleSyncResult.mode === "updated" && "Imóvel atualizado com novos dados/fotos."}
+              {singleSyncResult.mode === "created" && "Imóvel criado com sucesso."}
+              {" · "}
+              <span>
+                Preço: {singleSyncResult.changedFields.includes("price_brl") ? "Preço alterado" : "sem alteração"} ·{" "}
+                Descrição: {singleSyncResult.changedFields.includes("description") ? "Descrição alterada" : "sem alteração"} ·{" "}
+                Fotos: +{singleSyncResult.photosAdded} / -{singleSyncResult.photosRemoved} / {singleSyncResult.photosReordered} reordenadas ·{" "}
+                Status: {singleSyncResult.publishedAfter ? "ativo" : "inativo"}
+              </span>
+            </div>
+            <button onClick={() => setSingleSyncResult(null)} className="text-muted-foreground hover:text-foreground">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {singleSyncError && (
+          <div className="mt-3 rounded-xl bg-destructive/10 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
+            <span>{singleSyncError}</span>
+            <button onClick={() => setSingleSyncError(null)} className="text-muted-foreground hover:text-foreground">
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
 
@@ -672,6 +721,13 @@ function AdminPage() {
                       >
                         <ExternalLink className="h-4 w-4" /> Ver
                       </Link>
+                      <button
+                        onClick={() => syncSingleMut.mutate(p.id)}
+                        disabled={syncSingleMut.isPending}
+                        className="text-muted-foreground hover:text-amber-600 inline-flex items-center gap-1 disabled:opacity-50"
+                      >
+                        <RefreshCw className={`h-4 w-4 ${syncSingleMut.isPending ? "animate-spin" : ""}`} /> Atualizar
+                      </button>
                       <button
                         onClick={() => {
                           if (confirm("Excluir este imóvel?")) deleteMut.mutate(p.id);
