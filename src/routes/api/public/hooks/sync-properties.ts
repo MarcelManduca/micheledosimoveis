@@ -65,55 +65,17 @@ export const Route = createFileRoute("/api/public/hooks/sync-properties")({
           });
         }
         try {
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-          
-          let isRunning = false;
-          try {
-            // Verificar lock ativo de forma resiliente
-            const { data: activeRuns, error: lockError } = await supabaseAdmin
-              .from("sync_runs")
-              .select("id")
-              .eq("status", "running")
-              .gt("started_at", oneHourAgo)
-              .limit(1);
-
-            if (lockError) {
-              if (lockError.code !== "42P01" && !lockError.message?.includes("relation") && !lockError.message?.includes("schema cache")) {
-                throw lockError;
-              }
-            } else if (activeRuns && activeRuns.length > 0) {
-              isRunning = true;
-            }
-          } catch (err: any) {
-            console.warn("[Cron Hook] Falha ao verificar lock em sync_runs, prosseguindo com execução:", err.message);
-          }
-
-          if (isRunning) {
-            return new Response(
-              JSON.stringify({ ok: false, error: "Sincronização já em andamento." }),
-              { status: 409, headers: { "Content-Type": "application/json" } }
-            );
-          }
-
           const { _runAvailabilitySyncInternal } = await import(
             "@/lib/properties.functions"
           );
-
-          // Disparar sincronização em background (sem await)
-          _runAvailabilitySyncInternal()
-            .then((summary) => console.log("[Cron Hook] Sincronização em background concluída com sucesso:", summary))
-            .catch((err) => console.error("[Cron Hook] Erro na sincronização em background:", err));
-
-          return new Response(
-            JSON.stringify({ ok: true, message: "Sincronização iniciada em segundo plano.", status: "processing" }),
-            { status: 202, headers: { "Content-Type": "application/json" } }
-          );
+          const summary = await _runAvailabilitySyncInternal();
+          return Response.json({ ok: true, ...summary });
         } catch (err) {
-          console.error("sync-properties failed to initiate", err);
+          console.error("sync-properties failed", err);
+          // Don't leak internal error messages.
           return new Response(
-            JSON.stringify({ ok: false, error: "Falha ao iniciar sincronização." }),
-            { status: 500, headers: { "Content-Type": "application/json" } }
+            JSON.stringify({ ok: false, error: "Sync failed" }),
+            { status: 500, headers: { "Content-Type": "application/json" } },
           );
         }
       },
