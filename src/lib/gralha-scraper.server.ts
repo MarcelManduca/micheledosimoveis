@@ -95,14 +95,6 @@ const ALLOWED_HOSTS = new Set(["gralhaimoveis.com.br", "www.gralhaimoveis.com.br
 const MAX_HTML_BYTES = 4 * 1024 * 1024; // 4 MB
 const FETCH_TIMEOUT_MS = 15_000;
 
-const VERIFIED_GRALHA_PRICES_BRL: Record<string, number> = {
-  "42345": 5_750_000,
-  "36102": 18_000_000,
-  "29782": 18_000_000,
-  "25335": 18_000_000,
-  "43278": 15_800_000,
-};
-
 export type GralhaApiItem = {
   id?: number;
   codigo?: string;
@@ -170,6 +162,123 @@ export async function fetchGralhaApiItem(codeOrId: string): Promise<GralhaApiIte
   } finally {
     clearTimeout(timer);
   }
+}
+
+export async function parseGralhaPropertyHtml(html: string, url: string): Promise<ScrapedProperty> {
+  let u: URL;
+  try {
+    u = new URL(url);
+  } catch {
+    throw new Error("URL inválida.");
+  }
+  const urlCodeMatch = u.pathname.match(/(\d{4,})/);
+  const urlCode = urlCodeMatch ? urlCodeMatch[1] : u.pathname.split("/").filter(Boolean).pop() || "";
+  if (!urlCode) throw new Error("Não foi possível identificar o código do imóvel na URL.");
+
+  const title =
+    stripPriceSuffix(pickMeta(html, "og:title") ?? "") ||
+    stripPriceSuffix(html.match(/<title>([^<]+)<\/title>/i)?.[1] ?? "") ||
+    "Imóvel";
+  const cover = pickMeta(html, "og:image");
+
+  // All gallery images
+  const imgSet = new Set<string>();
+  for (const m of html.matchAll(
+    /https:\/\/gralha2\.inforcedata\.com\.br\/api\/image\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)/gi,
+  )) {
+    imgSet.add(m[0]);
+  }
+  // Put cover first if present
+  const photos: string[] = [];
+  if (cover && imgSet.has(cover)) {
+    photos.push(cover);
+    imgSet.delete(cover);
+  }
+  photos.push(...Array.from(imgSet));
+
+  const text = stripTags(html);
+
+  // Pull headline numbers from the page text
+  const areaMatch = text.match(/(\d{2,4})\s*m²/);
+  const bedroomsMatch = text.match(/(\d+)\s*dormit[óo]rios?/i);
+  const suitesMatch = text.match(/\((\d+)\s*su[íi]tes?\)/i) || text.match(/(\d+)\s*su[íi]tes?/i);
+  const bathroomsMatch = text.match(/(\d+)\s*banheiros?/i);
+  const parkingMatch = text.match(/(\d+)\s*vagas?/i);
+
+  const priceMatch =
+    text.match(/Valor de venda:\s*R\$\s*([\d.,]+)/i) ||
+    text.match(/R\$\s*([\d.,]{4,})/);
+  const condoFeeMatch = text.match(/Condom[íi]nio:\s*R\$\s*([\d.,]+)/i);
+  const iptuMatch = text.match(/IPTU(?:\s*Mensal)?:\s*R\$\s*([\d.,]+)/i);
+
+  // Location block: "Condomínio: X Bairro: Y - Cidade, UF Endereço: Z"
+  const condoNameMatch = text.match(/Condom[íi]nio:\s*([^B]+?)\s+Bairro:/i);
+  const bairroMatch = text.match(/Bairro:\s*([^-]+?)\s*-\s*([^,]+),\s*([A-Z]{2})/);
+  const enderecoMatch = text.match(/Endere[çc]o:\s*([^F]+?)(?:\s+Fechar|\s+Gostou|$)/i);
+
+  // Type: try to read from breadcrumb-ish text ("imóveis venda apartamento Bairro - 3 domitórios")
+  const typeMatch = text.match(/im[óo]veis\s+(?:venda|aluguel|loca[çc][ãa]o)\s+([a-zçãáéíóúâêôõ]+)/i);
+
+  const description = sliceBetween(text, "Sobre este imóvel", [
+    "Infraestrutura do Imóvel",
+    "Infraestrutura do Condom",
+    "Localização do Imóvel",
+  ]);
+  const features = splitFeatures(
+    sliceBetween(text, "Infraestrutura do Imóvel", [
+      "Infraestrutura do Condom",
+      "Localização do Imóvel",
+      "Vídeo",
+    ]),
+  );
+  const condoFeatures = splitFeatures(
+    sliceBetween(text, "Infraestrutura do Condom", [
+      "Localização do Imóvel",
+      "Vídeo",
+      "Gostou deste im",
+    ]),
+  );
+
+  // Internal Gralha reference code (e.g. "Cod: 42345") — preferred over the URL id
+  const internalCodeMatch = text.match(/\bCod(?:igo|\.)?\s*[:#]?\s*(\d{3,7})\b/i);
+  const code = internalCodeMatch ? internalCodeMatch[1] : urlCode;
+  const apiItem = (await fetchGralhaApiItem(code)) ?? (await fetchGralhaApiItem(urlCode));
+  const apiPrice = numberOrNull(apiItem?.valorPromocional) ?? numberOrNull(apiItem?.valorVenda);
+  let finalPrice: number | null = apiPrice;
+  if (apiItem?.ocultarValor) {
+    finalPrice = null;
+  } else if (finalPrice === null) {
+    finalPrice = parseBrlNumber(priceMatch?.[1] ?? null);
+  }
+  const finalCode = apiItem?.codigo || code;
+  const apiCondoName = apiItem?.condominio || apiItem?.empreendimento || null;
+  const apiAddress = [apiItem?.logradouro, apiItem?.numero].filter(Boolean).join(", ") || null;
+  const apiArea = numberOrNull(apiItem?.areaConstruida);
+
+  return {
+    code: finalCode,
+    source_url: url,
+    title: title.trim(),
+    property_type: apiItem?.tipo?.toLowerCase() ?? (typeMatch ? typeMatch[1].toLowerCase() : null),
+    neighborhood: apiItem?.bairro ?? bairroMatch?.[1].trim() ?? null,
+    city: apiItem?.cidade ?? bairroMatch?.[2].trim() ?? null,
+    state: apiItem?.estadoSigla ?? bairroMatch?.[3].trim() ?? null,
+    address: apiAddress ?? (enderecoMatch ? enderecoMatch[1].trim() : null),
+    condo_name: apiCondoName ?? (condoNameMatch ? condoNameMatch[1].trim() : null),
+    price_brl: finalPrice,
+    condo_fee_brl: parseBrlNumber(condoFeeMatch?.[1] ?? null),
+    iptu_brl: parseBrlNumber(iptuMatch?.[1] ?? null),
+    area_m2: apiArea ?? (areaMatch ? Number(areaMatch[1]) : null),
+    bedrooms: numberOrNull(apiItem?.quartos) ?? (bedroomsMatch ? Number(bedroomsMatch[1]) : null),
+    suites: numberOrNull(apiItem?.suites) ?? (suitesMatch ? Number(suitesMatch[1]) : null),
+    bathrooms: numberOrNull(apiItem?.banheiros) ?? (bathroomsMatch ? Number(bathroomsMatch[1]) : null),
+    parking_spots: numberOrNull(apiItem?.vagas) ?? (parkingMatch ? Number(parkingMatch[1]) : null),
+    description,
+    features: apiItem?.caracteristicas?.length ? apiItem.caracteristicas : features,
+    condo_features: condoFeatures,
+    cover_image: cover || photos[0] || null,
+    photos,
+  };
 }
 
 export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty> {
@@ -242,103 +351,5 @@ export async function scrapeGralhaProperty(url: string): Promise<ScrapedProperty
     clearTimeout(timer);
   }
 
-  const title =
-    stripPriceSuffix(pickMeta(html, "og:title") ?? "") ||
-    stripPriceSuffix(html.match(/<title>([^<]+)<\/title>/i)?.[1] ?? "") ||
-    "Imóvel";
-  const cover = pickMeta(html, "og:image");
-
-  // All gallery images
-  const imgSet = new Set<string>();
-  for (const m of html.matchAll(
-    /https:\/\/gralha2\.inforcedata\.com\.br\/api\/image\/[A-Za-z0-9_./-]+\.(?:jpg|jpeg|png|webp)/gi,
-  )) {
-    imgSet.add(m[0]);
-  }
-  // Put cover first if present
-  const photos: string[] = [];
-  if (cover && imgSet.has(cover)) {
-    photos.push(cover);
-    imgSet.delete(cover);
-  }
-  // Heuristic: skip very low ids (logos/banners) — keep all in their natural order
-  photos.push(...Array.from(imgSet));
-
-  const text = stripTags(html);
-
-  // Pull headline numbers from the page text
-  const areaMatch = text.match(/(\d{2,4})\s*m²/);
-  const bedroomsMatch = text.match(/(\d+)\s*dormit[óo]rios?/i);
-  const suitesMatch = text.match(/\((\d+)\s*su[íi]tes?\)/i) || text.match(/(\d+)\s*su[íi]tes?/i);
-  const bathroomsMatch = text.match(/(\d+)\s*banheiros?/i);
-  const parkingMatch = text.match(/(\d+)\s*vagas?/i);
-
-  const priceMatch =
-    text.match(/Valor de venda:\s*R\$\s*([\d.,]+)/i) ||
-    text.match(/R\$\s*([\d.,]{4,})/);
-  const condoFeeMatch = text.match(/Condom[íi]nio:\s*R\$\s*([\d.,]+)/i);
-  const iptuMatch = text.match(/IPTU(?:\s*Mensal)?:\s*R\$\s*([\d.,]+)/i);
-
-  // Location block: "Condomínio: X Bairro: Y - Cidade, UF Endereço: Z"
-  const condoNameMatch = text.match(/Condom[íi]nio:\s*([^B]+?)\s+Bairro:/i);
-  const bairroMatch = text.match(/Bairro:\s*([^-]+?)\s*-\s*([^,]+),\s*([A-Z]{2})/);
-  const enderecoMatch = text.match(/Endere[çc]o:\s*([^F]+?)(?:\s+Fechar|\s+Gostou|$)/i);
-
-  // Type: try to read from breadcrumb-ish text ("imóveis venda apartamento Bairro - 3 domitórios")
-  const typeMatch = text.match(/im[óo]veis\s+(?:venda|aluguel|loca[çc][ãa]o)\s+([a-zçãáéíóúâêôõ]+)/i);
-
-  const description = sliceBetween(text, "Sobre este imóvel", [
-    "Infraestrutura do Imóvel",
-    "Infraestrutura do Condom",
-    "Localização do Imóvel",
-  ]);
-  const features = splitFeatures(
-    sliceBetween(text, "Infraestrutura do Imóvel", [
-      "Infraestrutura do Condom",
-      "Localização do Imóvel",
-      "Vídeo",
-    ]),
-  );
-  const condoFeatures = splitFeatures(
-    sliceBetween(text, "Infraestrutura do Condom", [
-      "Localização do Imóvel",
-      "Vídeo",
-      "Gostou deste im",
-    ]),
-  );
-
-  // Internal Gralha reference code (e.g. "Cod: 42345") — preferred over the URL id
-  const internalCodeMatch = text.match(/\bCod(?:igo|\.)?\s*[:#]?\s*(\d{3,7})\b/i);
-  const code = internalCodeMatch ? internalCodeMatch[1] : urlCode;
-  const apiItem = (await fetchGralhaApiItem(code)) ?? (await fetchGralhaApiItem(urlCode));
-  const apiPrice = numberOrNull(apiItem?.valorPromocional) ?? numberOrNull(apiItem?.valorVenda);
-  const finalCode = apiItem?.codigo || code;
-  const apiCondoName = apiItem?.condominio || apiItem?.empreendimento || null;
-  const apiAddress = [apiItem?.logradouro, apiItem?.numero].filter(Boolean).join(", ") || null;
-  const apiArea = numberOrNull(apiItem?.areaConstruida);
-
-  return {
-    code: finalCode,
-    source_url: url,
-    title: title.trim(),
-    property_type: apiItem?.tipo?.toLowerCase() ?? (typeMatch ? typeMatch[1].toLowerCase() : null),
-    neighborhood: apiItem?.bairro ?? bairroMatch?.[1].trim() ?? null,
-    city: apiItem?.cidade ?? bairroMatch?.[2].trim() ?? null,
-    state: apiItem?.estadoSigla ?? bairroMatch?.[3].trim() ?? null,
-    address: apiAddress ?? (enderecoMatch ? enderecoMatch[1].trim() : null),
-    condo_name: apiCondoName ?? (condoNameMatch ? condoNameMatch[1].trim() : null),
-    price_brl: VERIFIED_GRALHA_PRICES_BRL[finalCode] ?? apiPrice ?? parseBrlNumber(priceMatch?.[1] ?? null),
-    condo_fee_brl: parseBrlNumber(condoFeeMatch?.[1] ?? null),
-    iptu_brl: parseBrlNumber(iptuMatch?.[1] ?? null),
-    area_m2: apiArea ?? (areaMatch ? Number(areaMatch[1]) : null),
-    bedrooms: numberOrNull(apiItem?.quartos) ?? (bedroomsMatch ? Number(bedroomsMatch[1]) : null),
-    suites: numberOrNull(apiItem?.suites) ?? (suitesMatch ? Number(suitesMatch[1]) : null),
-    bathrooms: numberOrNull(apiItem?.banheiros) ?? (bathroomsMatch ? Number(bathroomsMatch[1]) : null),
-    parking_spots: numberOrNull(apiItem?.vagas) ?? (parkingMatch ? Number(parkingMatch[1]) : null),
-    description,
-    features: apiItem?.caracteristicas?.length ? apiItem.caracteristicas : features,
-    condo_features: condoFeatures,
-    cover_image: cover || photos[0] || null,
-    photos,
-  };
+  return parseGralhaPropertyHtml(html, url);
 }
