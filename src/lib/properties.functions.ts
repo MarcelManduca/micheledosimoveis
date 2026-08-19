@@ -517,7 +517,7 @@ function numberOrNull(value: unknown): number | null {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-async function runAvailabilitySync(db: AnySupabase): Promise<SyncSummary> {
+export async function runAvailabilitySync(db: AnySupabase): Promise<SyncSummary> {
   const { syncOneGralhaProperty } = await import("./gralha-property-sync.server");
 
   // Buscar lote rotativo de no máximo 25 imóveis (ordenados por last_checked_at ASC, NULLS FIRST, id ASC)

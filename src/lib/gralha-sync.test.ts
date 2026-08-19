@@ -663,6 +663,434 @@ async function runTests() {
     console.log("  Passou! ✅");
   }
 
+  // Cenário 21: reimport com URL ID diferente do code interno
+  {
+    console.log("Cenário 21: reimport com URL ID diferente do code interno...");
+    const db = new MockSupabase();
+    db.singleReturn = {
+      id: "uuid-123",
+      code: "11111",
+      source_url: "https://www.gralhaimoveis.com.br/imovel/11111",
+      published: true,
+      price_brl: 500000,
+      last_check_status: "available",
+    };
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/imovel/99999", {
+      ok: true,
+      status: 200,
+      text: generateHtml("11111", "550.000"),
+      url: "https://www.gralhaimoveis.com.br/imovel/99999",
+    });
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true", {
+      ok: true,
+      status: 200,
+      text: JSON.stringify({ items: [{ codigo: "11111", valorVenda: 550000 }] }),
+      url: "https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true",
+    });
+
+    const result = await syncOneGralhaProperty(db, {
+      url: "https://www.gralhaimoveis.com.br/imovel/99999",
+    });
+
+    assert(result.mode === "updated", "Deveria resolver para updated");
+    assert(result.id === "uuid-123", "Preservou o ID correto");
+    console.log("  Passou! ✅");
+  }
+
+  // Cenário 22: mesma propriedade com nova URL
+  {
+    console.log("Cenário 22: mesma propriedade com nova URL...");
+    const db = new MockSupabase();
+    db.singleReturn = {
+      id: "uuid-123",
+      code: "11111",
+      source_url: "https://www.gralhaimoveis.com.br/imovel/11111",
+      published: true,
+      price_brl: 500000,
+      last_check_status: "available",
+    };
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/imovel/newurl", {
+      ok: true,
+      status: 200,
+      text: generateHtml("11111", "500.000"),
+      url: "https://www.gralhaimoveis.com.br/imovel/newurl",
+    });
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true", {
+      ok: true,
+      status: 200,
+      text: JSON.stringify({ items: [{ codigo: "11111", valorVenda: 500000 }] }),
+      url: "https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true",
+    });
+
+    const result = await syncOneGralhaProperty(db, {
+      url: "https://www.gralhaimoveis.com.br/imovel/newurl",
+    });
+
+    assert(result.mode === "updated", "Deveria ser updated");
+    assert(result.changedFields.includes("source_url"), "source_url deve constar nas modificações");
+    const upQuery = db.queries.find((q) => q.action === "update" && q.table === "properties");
+    assert(upQuery.data.source_url === "https://www.gralhaimoveis.com.br/imovel/newurl", "Atualizou source_url");
+    console.log("  Passou! ✅");
+  }
+
+  // Cenário 23: erro na busca existente => sem INSERT
+  {
+    console.log("Cenário 23: erro na busca existente => sem INSERT...");
+    const db = new MockSupabase();
+    db.from = () => {
+      return {
+        select() {
+          return {
+            eq() { return this; },
+            or() { return this; },
+            async maybeSingle() {
+              return { data: null, error: new Error("DB Error") };
+            },
+          };
+        },
+      } as any;
+    };
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/imovel/11111", {
+      ok: true,
+      status: 200,
+      text: generateHtml("11111", "500.000"),
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true", {
+      ok: true,
+      status: 200,
+      text: JSON.stringify({ items: [{ codigo: "11111", valorVenda: 500000 }] }),
+      url: "https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true",
+    });
+
+    const result = await syncOneGralhaProperty(db, {
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    assert(result.mode === "error", "Registrou modo error");
+    assert(result.error && (result.error.includes("Erro ao buscar imóvel") || result.error.includes("Erro ao consultar imóvel")), "Erro controlado");
+    console.log("  Passou! ✅");
+  }
+
+  // Cenário 24: erro DELETE fotos
+  {
+    console.log("Cenário 24: erro DELETE fotos...");
+    const db = new MockSupabase();
+    db.singleReturn = {
+      id: "uuid-123",
+      code: "11111",
+      source_url: "https://www.gralhaimoveis.com.br/imovel/11111",
+      price_brl: 500000,
+      published: true,
+      last_check_status: "available",
+    };
+
+    db.photosReturn = [
+      { id: "ph-1", url: "https://gralha2.inforcedata.com.br/api/image/photo_old.jpg", position: 0 },
+    ];
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/imovel/11111", {
+      ok: true,
+      status: 200,
+      text: generateHtml("11111", "500.000"),
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true", {
+      ok: true,
+      status: 200,
+      text: JSON.stringify({ items: [{ codigo: "11111", valorVenda: 500000 }] }),
+      url: "https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true",
+    });
+
+    const originalFrom = db.from.bind(db);
+    db.from = (table: string) => {
+      if (table === "property_photos") {
+        return {
+          select() { return this; },
+          eq() { return this; },
+          in() { return this; },
+          order() { return this; },
+          delete() {
+            return {
+              eq() {
+                return {
+                  async in() {
+                    return { data: null, error: new Error("Delete Photo Error") };
+                  },
+                };
+              },
+            } as any;
+          },
+          async then(resolve: any) {
+            resolve({ data: db.photosReturn, error: null });
+          },
+        } as any;
+      }
+      return originalFrom(table);
+    };
+
+    const result = await syncOneGralhaProperty(db, {
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    assert(result.mode === "error", "Registrou modo error");
+    assert(result.error && result.error.includes("Delete Photo Error"), "Erro controlado de delete");
+    console.log("  Passou! ✅");
+  }
+
+  // Cenário 25: erro UPDATE posição
+  {
+    console.log("Cenário 25: erro UPDATE posição...");
+    const db = new MockSupabase();
+    db.singleReturn = {
+      id: "uuid-123",
+      code: "11111",
+      source_url: "https://www.gralhaimoveis.com.br/imovel/11111",
+      price_brl: 500000,
+      published: true,
+      last_check_status: "available",
+    };
+
+    db.photosReturn = [
+      { id: "ph-1", url: "https://gralha2.inforcedata.com.br/api/image/photo2.jpg", position: 0 },
+      { id: "ph-2", url: "https://gralha2.inforcedata.com.br/api/image/photo1.jpg", position: 1 },
+      { id: "ph-3", url: "https://gralha2.inforcedata.com.br/api/image/photo3.jpg", position: 2 },
+    ];
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/imovel/11111", {
+      ok: true,
+      status: 200,
+      text: generateHtml("11111", "500.000"),
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true", {
+      ok: true,
+      status: 200,
+      text: JSON.stringify({ items: [{ codigo: "11111", valorVenda: 500000 }] }),
+      url: "https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true",
+    });
+
+    const originalFrom = db.from.bind(db);
+    db.from = (table: string) => {
+      if (table === "property_photos") {
+        return {
+          select() { return this; },
+          eq() { return this; },
+          order() { return this; },
+          update() {
+            return {
+              async eq() {
+                return { error: new Error("Update Photo Position Error") };
+              },
+            } as any;
+          },
+          async then(resolve: any) {
+            resolve({ data: db.photosReturn, error: null });
+          },
+        } as any;
+      }
+      return originalFrom(table);
+    };
+
+    const result = await syncOneGralhaProperty(db, {
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    assert(result.mode === "error", "Registrou modo error");
+    assert(result.error && result.error.includes("Update Photo Position Error"), "Erro controlado de posição");
+    console.log("  Passou! ✅");
+  }
+
+  // Cenário 26: erro INSERT fotos
+  {
+    console.log("Cenário 26: erro INSERT fotos...");
+    const db = new MockSupabase();
+    db.singleReturn = {
+      id: "uuid-123",
+      code: "11111",
+      source_url: "https://www.gralhaimoveis.com.br/imovel/11111",
+      price_brl: 500000,
+      published: true,
+      last_check_status: "available",
+    };
+
+    db.photosReturn = [];
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/imovel/11111", {
+      ok: true,
+      status: 200,
+      text: generateHtml("11111", "500.000"),
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true", {
+      ok: true,
+      status: 200,
+      text: JSON.stringify({ items: [{ codigo: "11111", valorVenda: 500000 }] }),
+      url: "https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true",
+    });
+
+    const originalFrom = db.from.bind(db);
+    db.from = (table: string) => {
+      if (table === "property_photos") {
+        return {
+          select() { return this; },
+          eq() { return this; },
+          order() { return this; },
+          async insert() {
+            return { error: new Error("Insert Photos Error") };
+          },
+          async then(resolve: any) {
+            resolve({ data: db.photosReturn, error: null });
+          },
+        } as any;
+      }
+      return originalFrom(table);
+    };
+
+    const result = await syncOneGralhaProperty(db, {
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    assert(result.mode === "error", "Registrou modo error");
+    assert(result.error && result.error.includes("Insert Photos Error"), "Erro controlado de insert");
+    console.log("  Passou! ✅");
+  }
+
+  // Cenário 27: API 5xx + HTML 200 => preservar campo existente
+  {
+    console.log("Cenário 27: API 5xx + HTML 200 => preservar campo existente...");
+    const db = new MockSupabase();
+    db.singleReturn = {
+      id: "uuid-123",
+      code: "11111",
+      source_url: "https://www.gralhaimoveis.com.br/imovel/11111",
+      price_brl: 500000,
+      published: true,
+      last_check_status: "available",
+      bedrooms: 3,
+      suites: 2,
+    };
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/imovel/11111", {
+      ok: true,
+      status: 200,
+      text: generateHtml("11111", "500.000"),
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    mockFetchResponses.set("https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true", {
+      ok: false,
+      status: 502,
+      text: "Bad Gateway",
+      url: "https://www.gralhaimoveis.com.br/api/anuncios/search?finalidade=venda&codigo=11111&page=1&pagesize=1&somenteImoveis=true",
+    });
+
+    await syncOneGralhaProperty(db, {
+      url: "https://www.gralhaimoveis.com.br/imovel/11111",
+    });
+
+    const upQuery = db.queries.find((q) => q.action === "update" && q.table === "properties");
+    if (upQuery) {
+      assert(upQuery.data.bedrooms === undefined, "Preservou bedrooms (não enviou no update)");
+      assert(upQuery.data.suites === undefined, "Preservou suites");
+    }
+    console.log("  Passou! ✅");
+  }
+
+  // Cenário Concorrência: Verificar concorrência máxima de 5
+  {
+    console.log("Cenário Concorrência: maxObservedConcurrency <= 5...");
+    const db = new MockSupabase();
+    
+    const mockProperties = Array.from({ length: 25 }, (_, i) => ({
+      id: `prop-${i}`,
+      code: `code-${i}`,
+      source_url: `https://www.gralhaimoveis.com.br/imovel/${i}`,
+      published: true,
+      last_check_status: "available",
+    }));
+
+    db.singleReturn = mockProperties;
+
+    db.from = (table: string) => {
+      const currentQuery: any = { table };
+      return {
+        select() { return this; },
+        not() { return this; },
+        eq() { return this; },
+        order() { return this; },
+        limit() { return this; },
+        async then(resolve: any) {
+          if (table === "properties") {
+            resolve({ data: mockProperties, error: null });
+          } else {
+            resolve({ data: [], error: null });
+          }
+        },
+        update() {
+          return {
+            async eq() {
+              return { error: null };
+            }
+          } as any;
+        },
+        maybeSingle() {
+          const matched = mockProperties.find(p => p.source_url === currentQuery.source_url);
+          return Promise.resolve({ data: matched || null, error: null });
+        }
+      } as any;
+    };
+
+    let activeFetches = 0;
+    let maxObservedConcurrency = 0;
+
+    globalThis.fetch = (async (url: string) => {
+      activeFetches++;
+      if (activeFetches > maxObservedConcurrency) {
+        maxObservedConcurrency = activeFetches;
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 30));
+      activeFetches--;
+
+      return {
+        ok: true,
+        status: 200,
+        text: async () => generateHtml("11111", "500.000"),
+        url,
+        body: {
+          getReader() {
+            let readCount = 0;
+            return {
+              async read() {
+                if (readCount > 0) return { done: true, value: null };
+                readCount++;
+                return { done: false, value: new TextEncoder().encode(generateHtml("11111", "500.000")) as any };
+              },
+              async cancel() {},
+            };
+          },
+        },
+      } as any;
+    }) as any;
+
+    const { runAvailabilitySync } = await import("./properties.functions");
+    await runAvailabilitySync(db as any);
+
+    console.log(`  Max observed concurrency: ${maxObservedConcurrency}`);
+    assert(maxObservedConcurrency <= 5, "Concorrência máxima observada deveria ser no máximo 5");
+    console.log("  Passou! ✅");
+  }
+
   console.log("\n✅ TODOS OS TESTES PASSARAM COM SUCESSO!");
 }
 

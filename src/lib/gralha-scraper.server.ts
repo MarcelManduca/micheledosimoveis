@@ -130,7 +130,12 @@ function stripPriceSuffix(s: string) {
     .trim();
 }
 
-export async function fetchGralhaApiItem(codeOrId: string): Promise<GralhaApiItem | null> {
+export type ApiResult =
+  | { status: "ok"; data: GralhaApiItem }
+  | { status: "not_found" }
+  | { status: "error"; error: Error };
+
+export async function fetchGralhaApiItem(codeOrId: string): Promise<ApiResult> {
   const apiUrl = new URL("https://www.gralhaimoveis.com.br/api/anuncios/search");
   apiUrl.searchParams.set("finalidade", "venda");
   apiUrl.searchParams.set("codigo", codeOrId);
@@ -150,21 +155,27 @@ export async function fetchGralhaApiItem(codeOrId: string): Promise<GralhaApiIte
         "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
       },
     });
-    if (!resp.ok) return null;
+    if (!resp.ok) {
+      return { status: "error", error: new Error(`HTTP ${resp.status}`) };
+    }
     const data = (await resp.json()) as { items?: GralhaApiItem[] };
     const item = data.items?.[0] ?? null;
-    if (!item) return null;
+    if (!item) return { status: "not_found" };
     const requested = String(codeOrId);
-    if (String(item.codigo ?? "") !== requested && String(item.id ?? "") !== requested) return null;
-    return item;
-  } catch {
-    return null;
+    if (String(item.codigo ?? "") !== requested && String(item.id ?? "") !== requested) return { status: "not_found" };
+    return { status: "ok", data: item };
+  } catch (err) {
+    return { status: "error", error: err as Error };
   } finally {
     clearTimeout(timer);
   }
 }
 
-export async function parseGralhaPropertyHtml(html: string, url: string): Promise<ScrapedProperty> {
+export async function parseGralhaPropertyHtml(
+  html: string,
+  url: string,
+  existingProperty?: any
+): Promise<ScrapedProperty> {
   let u: URL;
   try {
     u = new URL(url);
@@ -242,39 +253,93 @@ export async function parseGralhaPropertyHtml(html: string, url: string): Promis
   // Internal Gralha reference code (e.g. "Cod: 42345") — preferred over the URL id
   const internalCodeMatch = text.match(/\bCod(?:igo|\.)?\s*[:#]?\s*(\d{3,7})\b/i);
   const code = internalCodeMatch ? internalCodeMatch[1] : urlCode;
-  const apiItem = (await fetchGralhaApiItem(code)) ?? (await fetchGralhaApiItem(urlCode));
+
+  // Distinguish API status
+  let apiItem: GralhaApiItem | null = null;
+  let isApiError = false;
+
+  const res1 = await fetchGralhaApiItem(code);
+  if (res1.status === "ok") {
+    apiItem = res1.data;
+  } else if (res1.status === "error") {
+    isApiError = true;
+  }
+
+  if (!apiItem && !isApiError) {
+    const res2 = await fetchGralhaApiItem(urlCode);
+    if (res2.status === "ok") {
+      apiItem = res2.data;
+    } else if (res2.status === "error") {
+      isApiError = true;
+    }
+  }
+
+  const getVal = (htmlVal: any, apiVal: any, existingKey: string) => {
+    if (apiItem) {
+      return apiVal !== undefined && apiVal !== null ? apiVal : htmlVal;
+    }
+    if (isApiError && existingProperty && (htmlVal === null || htmlVal === undefined)) {
+      return existingProperty[existingKey] !== undefined ? existingProperty[existingKey] : null;
+    }
+    return htmlVal;
+  };
+
   const apiPrice = numberOrNull(apiItem?.valorPromocional) ?? numberOrNull(apiItem?.valorVenda);
   let finalPrice: number | null = apiPrice;
   if (apiItem?.ocultarValor) {
     finalPrice = null;
-  } else if (finalPrice === null) {
-    finalPrice = parseBrlNumber(priceMatch?.[1] ?? null);
+  } else if (apiItem) {
+    if (finalPrice === null) {
+      finalPrice = parseBrlNumber(priceMatch?.[1] ?? null);
+    }
+  } else {
+    const htmlPrice = parseBrlNumber(priceMatch?.[1] ?? null);
+    if (isApiError && existingProperty && htmlPrice === null) {
+      finalPrice = existingProperty.price_brl;
+    } else {
+      finalPrice = htmlPrice;
+    }
   }
+
   const finalCode = apiItem?.codigo || code;
   const apiCondoName = apiItem?.condominio || apiItem?.empreendimento || null;
   const apiAddress = [apiItem?.logradouro, apiItem?.numero].filter(Boolean).join(", ") || null;
   const apiArea = numberOrNull(apiItem?.areaConstruida);
 
+  const parsedType = typeMatch ? typeMatch[1].toLowerCase() : null;
+  const parsedNeigh = bairroMatch?.[1].trim() ?? null;
+  const parsedCity = bairroMatch?.[2].trim() ?? null;
+  const parsedState = bairroMatch?.[3].trim() ?? null;
+  const parsedAddress = enderecoMatch ? enderecoMatch[1].trim() : null;
+  const parsedCondo = condoNameMatch ? condoNameMatch[1].trim() : null;
+  const parsedFee = parseBrlNumber(condoFeeMatch?.[1] ?? null);
+  const parsedIptu = parseBrlNumber(iptuMatch?.[1] ?? null);
+  const parsedArea = areaMatch ? Number(areaMatch[1]) : null;
+  const parsedBedrooms = bedroomsMatch ? Number(bedroomsMatch[1]) : null;
+  const parsedSuites = suitesMatch ? Number(suitesMatch[1]) : null;
+  const parsedBathrooms = bathroomsMatch ? Number(bathroomsMatch[1]) : null;
+  const parsedParking = parkingMatch ? Number(parkingMatch[1]) : null;
+
   return {
     code: finalCode,
     source_url: url,
     title: title.trim(),
-    property_type: apiItem?.tipo?.toLowerCase() ?? (typeMatch ? typeMatch[1].toLowerCase() : null),
-    neighborhood: apiItem?.bairro ?? bairroMatch?.[1].trim() ?? null,
-    city: apiItem?.cidade ?? bairroMatch?.[2].trim() ?? null,
-    state: apiItem?.estadoSigla ?? bairroMatch?.[3].trim() ?? null,
-    address: apiAddress ?? (enderecoMatch ? enderecoMatch[1].trim() : null),
-    condo_name: apiCondoName ?? (condoNameMatch ? condoNameMatch[1].trim() : null),
+    property_type: getVal(parsedType, apiItem?.tipo?.toLowerCase(), "property_type"),
+    neighborhood: getVal(parsedNeigh, apiItem?.bairro, "neighborhood"),
+    city: getVal(parsedCity, apiItem?.cidade, "city"),
+    state: getVal(parsedState, apiItem?.estadoSigla, "state"),
+    address: getVal(parsedAddress, apiAddress, "address"),
+    condo_name: getVal(parsedCondo, apiCondoName, "condo_name"),
     price_brl: finalPrice,
-    condo_fee_brl: parseBrlNumber(condoFeeMatch?.[1] ?? null),
-    iptu_brl: parseBrlNumber(iptuMatch?.[1] ?? null),
-    area_m2: apiArea ?? (areaMatch ? Number(areaMatch[1]) : null),
-    bedrooms: numberOrNull(apiItem?.quartos) ?? (bedroomsMatch ? Number(bedroomsMatch[1]) : null),
-    suites: numberOrNull(apiItem?.suites) ?? (suitesMatch ? Number(suitesMatch[1]) : null),
-    bathrooms: numberOrNull(apiItem?.banheiros) ?? (bathroomsMatch ? Number(bathroomsMatch[1]) : null),
-    parking_spots: numberOrNull(apiItem?.vagas) ?? (parkingMatch ? Number(parkingMatch[1]) : null),
+    condo_fee_brl: getVal(parsedFee, null, "condo_fee_brl"),
+    iptu_brl: getVal(parsedIptu, null, "iptu_brl"),
+    area_m2: getVal(parsedArea, apiArea, "area_m2"),
+    bedrooms: getVal(parsedBedrooms, numberOrNull(apiItem?.quartos), "bedrooms"),
+    suites: getVal(parsedSuites, numberOrNull(apiItem?.suites), "suites"),
+    bathrooms: getVal(parsedBathrooms, numberOrNull(apiItem?.banheiros), "bathrooms"),
+    parking_spots: getVal(parsedParking, numberOrNull(apiItem?.vagas), "parking_spots"),
     description,
-    features: apiItem?.caracteristicas?.length ? apiItem.caracteristicas : features,
+    features: getVal(features, apiItem?.caracteristicas?.length ? apiItem.caracteristicas : null, "features"),
     condo_features: condoFeatures,
     cover_image: cover || photos[0] || null,
     photos,
