@@ -40,7 +40,7 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
 }
 
 // ─────────────────────────── Tipos ─────────────────────────
-type PropertyRow = {
+export type PropertyRow = {
   id: string;
   code: string;
   title: string;
@@ -411,11 +411,13 @@ export type VrsyncResult = { xml: string; report: VrsyncReport };
  * segmentados (`buildVrsyncForFeed`).
  */
 export function processRowsToXml(rows: PropertyRow[]): VrsyncResult {
+  // ── Defesa absoluta: nenhum imóvel não publicado pode entrar em qualquer feed ──
+  const safeRows = rows.filter((r) => r.published === true);
   const generatedAt = new Date().toISOString();
 
   const report: VrsyncReport = {
     generatedAt,
-    totalActive: rows.length,
+    totalActive: safeRows.length,
     processed: 0,
     exported: 0,
     rejected: 0,
@@ -433,7 +435,7 @@ export function processRowsToXml(rows: PropertyRow[]): VrsyncResult {
   const seenCodes = new Set<string>();
   const listings: string[] = [];
 
-  for (const r of rows) {
+  for (const r of safeRows) {
     report.processed += 1;
 
     if (seenCodes.has(r.code)) {
@@ -587,7 +589,9 @@ export function processRowsToXml(rows: PropertyRow[]): VrsyncResult {
 
 export async function buildVrsync(): Promise<VrsyncResult> {
   const rows = await fetchAllPublished();
-  return processRowsToXml(rows);
+  // Defesa adicional: garantir que somente publicados entram no XML
+  const safeRows = rows.filter((r) => r.published === true);
+  return processRowsToXml(safeRows);
 }
 
 // ─────────────────────────── Helpers de formatação ─────────────────────────
@@ -763,6 +767,44 @@ function applyFilters(base: PropertyQuery, filters: FeedFilters, excludeCodes: s
   return q;
 }
 
+/**
+ * In-memory mirror of the SQL filter logic in `applyFilters`.
+ * Used as a defense layer and directly testable without a database.
+ * Every condition here must match the corresponding SQL filter above.
+ */
+export function matchPropertyAgainstFilters(
+  row: PropertyRow & { is_launch?: boolean },
+  filters: FeedFilters,
+  excludeCodes: string[],
+): boolean {
+  const requirePublished = filters.only_published !== false;
+  if (requirePublished && !row.published) return false;
+  if (filters.only_featured && !row.featured) return false;
+  if (filters.only_launch && !(row as any).is_launch) return false;
+  if (filters.price_min != null && (row.price_brl == null || row.price_brl < filters.price_min)) return false;
+  if (filters.price_max != null && (row.price_brl == null || row.price_brl > filters.price_max)) return false;
+  if (filters.area_min != null && (row.area_m2 == null || row.area_m2 < filters.area_min)) return false;
+  if (filters.area_max != null && (row.area_m2 == null || row.area_m2 > filters.area_max)) return false;
+  if (filters.bedrooms_min != null && (row.bedrooms == null || row.bedrooms < filters.bedrooms_min)) return false;
+  if (filters.bedrooms_max != null && (row.bedrooms == null || row.bedrooms > filters.bedrooms_max)) return false;
+  if (filters.suites_min != null && (row.suites == null || row.suites < filters.suites_min)) return false;
+  if (filters.parking_min != null && (row.parking_spots == null || row.parking_spots < filters.parking_min)) return false;
+  if (filters.neighborhoods && filters.neighborhoods.length > 0) {
+    if (!row.neighborhood || !filters.neighborhoods.includes(row.neighborhood)) return false;
+  }
+  if (filters.cities && filters.cities.length > 0) {
+    if (!row.city || !filters.cities.includes(row.city)) return false;
+  }
+  if (filters.property_types && filters.property_types.length > 0) {
+    if (!row.property_type || !filters.property_types.includes(row.property_type)) return false;
+  }
+  if (filters.require_description && (!row.description || row.description === "")) return false;
+  if (filters.require_address && (!row.address || row.address === "")) return false;
+  if (filters.require_area && (row.area_m2 == null || row.area_m2 <= 0)) return false;
+  if (excludeCodes.length > 0 && excludeCodes.includes(row.code)) return false;
+  return true;
+}
+
 function orderQuery(q: PropertyQuery, sortBy: SortBy): PropertyQuery {
   switch (sortBy) {
     case "price_desc":
@@ -879,7 +921,8 @@ async function fetchFilteredProperties(cfg: FeedConfig): Promise<PropertyRow[]> 
         const { data, error } = await supabase
           .from("properties")
           .select(PROPERTY_COLS)
-          .in("code", codes);
+          .in("code", codes)
+          .eq("published", true);
         if (error) throw new Error(`Falha ao carregar códigos incluídos: ${error.message}`);
         all.push(...((data ?? []) as unknown as PropertyRow[]));
       }
@@ -891,6 +934,9 @@ async function fetchFilteredProperties(cfg: FeedConfig): Promise<PropertyRow[]> 
   if (cfg.filters.require_photo) {
     out = out.filter((r) => normalizePhotos(r.property_photos, r.cover_image).length > 0);
   }
+
+  // ── Defesa final: nenhum imóvel não publicado pode seguir para o XML ──
+  out = out.filter((r) => r.published === true);
 
   // Manual ordering: sort by position in included_property_codes
   if (cfg.sort_by === "manual" && cfg.included_property_codes.length > 0) {

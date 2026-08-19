@@ -10,7 +10,7 @@ function xmlResponse(body: string, status: number, cacheable: boolean) {
   const headers: Record<string, string> = {
     "content-type": "application/xml; charset=utf-8",
   };
-  if (cacheable) headers["cache-control"] = "public, max-age=1800, s-maxage=1800";
+  if (cacheable) headers["cache-control"] = "public, max-age=300, s-maxage=300";
   else headers["cache-control"] = "no-store";
   return new Response(body, { status, headers });
 }
