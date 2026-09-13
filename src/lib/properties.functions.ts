@@ -691,12 +691,14 @@ export async function runAvailabilitySync(db: AnySupabase): Promise<SyncSummary>
           status: "erro",
           detail: result.error || "Erro de rede ou timeout",
         });
-      } else if (result.mode === "unpublished") {
+      } else if (result.mode === "unpublished" || result.publishedAfter === false) {
         unpublishedCount += 1;
         detailsList.push({
           code: row.code || "unknown",
-          status: "indisponivel",
-          detail: "Imóvel indisponível ou removido na origem",
+          status: result.publishedAfter === false ? "bloqueado_admin" : "indisponivel",
+          detail: result.publishedAfter === false
+            ? "Imóvel mantido bloqueado administrativamente (published=false)"
+            : "Imóvel indisponível ou removido na origem",
         });
       } else {
         availableCount += 1;

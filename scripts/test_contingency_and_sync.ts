@@ -180,12 +180,19 @@ async function runContingencyAndSyncTest() {
       error: syncResult.error,
     });
 
-    // 4. Validação direta do registro no banco após execução do sync real
+    // 4. Validação do retorno da função e do registro persistido no banco
     const dbRecord = psql("SELECT published::text || '|' || last_check_status FROM public.properties WHERE code = '34547';");
     console.log("Estado no banco de dados PostgreSQL após o sync:", dbRecord);
 
-    assert(dbRecord.startsWith("false|administratively_blocked"), "Sincronizador Real: O syncOneGralhaProperty gravou published=false e last_check_status='administratively_blocked'");
-    assert(syncResult.error === null, "Sincronizador Real: A execução foi concluída sem erro fatal");
+    const [dbPublishedStr, dbLastCheckStatus] = dbRecord.split("|");
+    const dbPublished = dbPublishedStr === "true";
+
+    assert(syncResult.publishedAfter === false, "Sincronizador Retorno: syncResult.publishedAfter é false para unidade bloqueada");
+    assert(syncResult.mode !== "republished", "Sincronizador Retorno: syncResult.mode NÃO indica republicação para unidade bloqueada");
+    assert(syncResult.publishedAfter === dbPublished, "Sincronizador Paridade: syncResult.publishedAfter é idêntico ao valor persistido no banco");
+    assert(dbPublished === false, "Sincronizador Banco: properties.published está persistido como false no banco");
+    assert(dbLastCheckStatus === "administratively_blocked", "Sincronizador Banco: last_check_status está persistido como 'administratively_blocked'");
+    assert(syncResult.error === null, "Sincronizador Execução: A sincronização foi concluída sem erro fatal");
 
   } finally {
     globalThis.fetch = originalFetch;

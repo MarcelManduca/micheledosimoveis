@@ -494,11 +494,22 @@ export async function syncOneGralhaProperty(
       }
 
       const hasPhotoChanges = photosAdded > 0 || photosRemoved > 0 || photosReordered > 0;
-      const mode = isRepublishing
-        ? "republished"
-        : (changedFields.length > 0 || hasPhotoChanges)
-        ? "updated"
-        : "no_change";
+      let mode: SyncResult["mode"];
+      if (isBlocked) {
+        if (publishedBefore) {
+          mode = "unpublished";
+        } else if (changedFields.length > 0 || hasPhotoChanges) {
+          mode = "updated";
+        } else {
+          mode = "no_change";
+        }
+      } else if (isRepublishing) {
+        mode = "republished";
+      } else if (changedFields.length > 0 || hasPhotoChanges) {
+        mode = "updated";
+      } else {
+        mode = "no_change";
+      }
 
       return {
         mode,
@@ -507,13 +518,14 @@ export async function syncOneGralhaProperty(
         photosRemoved,
         photosReordered,
         publishedBefore,
-        publishedAfter: true,
+        publishedAfter: isBlocked ? false : true,
         error: null,
         id: existing.id,
         code: scraped.code,
       };
     } else {
       // Criar novo registro
+      const isBlocked = await isCodeAdministrativelyBlocked(scraped.code, db);
       const { data: inserted, error: insErr } = await db
         .from("properties")
         .insert({
@@ -538,13 +550,11 @@ export async function syncOneGralhaProperty(
           features: scraped.features,
           condo_features: scraped.condo_features,
           cover_image: scraped.cover_image,
-          published: !(await isCodeAdministrativelyBlocked(scraped.code, db)),
+          published: !isBlocked,
           featured,
           is_launch: isLaunch,
           last_checked_at: now,
-          last_check_status: (await isCodeAdministrativelyBlocked(scraped.code, db))
-            ? "administratively_blocked"
-            : "available",
+          last_check_status: isBlocked ? "administratively_blocked" : "available",
           unavailable_since: null,
         })
         .select("id")
@@ -590,7 +600,7 @@ export async function syncOneGralhaProperty(
         photosRemoved: 0,
         photosReordered: 0,
         publishedBefore: false,
-        publishedAfter: true,
+        publishedAfter: !isBlocked,
         error: null,
         id: inserted.id,
         code: scraped.code,
