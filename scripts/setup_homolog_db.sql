@@ -1,7 +1,7 @@
 -- Setup Completo do Ambiente de Homologação Isolado
 -- Banco: michele_homolog
 
--- 1. Criação de Roles Supabase
+-- 1. Criação e Configuração de Roles Supabase (com BYPASSRLS no service_role)
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
@@ -13,9 +13,24 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
     CREATE ROLE service_role NOLOGIN;
   END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticator') THEN
+    CREATE ROLE authenticator NOINHERIT LOGIN;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'test_runner') THEN
+    CREATE ROLE test_runner LOGIN NOSUPERUSER NOBYPASSRLS;
+  END IF;
 END $$;
 
-GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
+-- Configuração explícita de BYPASSRLS no service_role (reproduzível)
+ALTER ROLE service_role BYPASSRLS;
+
+-- Permissões de troca de papel para o authenticator, test_runner e para o usuário local
+GRANT anon, authenticated, service_role TO authenticator;
+GRANT anon, authenticated, service_role TO test_runner;
+GRANT anon, authenticated, service_role TO CURRENT_USER;
+
+GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role, authenticator, test_runner;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO test_runner;
 
 -- 2. Schema Auth e funções de autenticação / autorização
 CREATE SCHEMA IF NOT EXISTS auth;
@@ -99,5 +114,12 @@ GRANT ALL ON public.properties, public.property_photos TO service_role;
 ALTER TABLE public.properties ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.property_photos ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Public properties select" ON public.properties FOR SELECT TO anon, authenticated USING (published = true);
-CREATE POLICY "Public photos select" ON public.property_photos FOR SELECT TO anon, authenticated USING (true);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'properties' AND policyname = 'Public properties select') THEN
+    CREATE POLICY "Public properties select" ON public.properties FOR SELECT TO anon, authenticated USING (published = true);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'property_photos' AND policyname = 'Public photos select') THEN
+    CREATE POLICY "Public photos select" ON public.property_photos FOR SELECT TO anon, authenticated USING (true);
+  END IF;
+END $$;
