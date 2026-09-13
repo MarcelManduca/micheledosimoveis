@@ -34,23 +34,23 @@ const SECTIONS: readonly CondominiumSection[] = [
     developer: "Empreendimento Consolidado",
     location: "Avenida Governador Irineu Bornhausen, 3600 · Agronômica (Beira-Mar Norte)",
     architecture:
-      "O La Perle é um dos marcos residenciais de altíssimo padrão mais reconhecidos da orla da Agronômica na Beira-Mar Norte. Com volumetria imponente e recuo generoso em relação à avenida, o projeto prioriza a integração visual com a Baía Norte através de amplas esquadrias panorâmicas e pé-direito amplo nas áreas sociais. O edifício conta com hall social privativo por prumada, proporcionando privacidade na circulação dos moradores.",
+      "O La Perle é um dos marcos residenciais de altíssimo padrão mais reconhecidos da orla da Agronômica na Beira-Mar Norte. Com volumetria marcante e recuo em relação à avenida, o projeto prioriza a integração visual com a Baía Norte através de esquadrias panorâmicas e sacada social. O edifício conta com hall privativo por prumada.",
     typologies:
-      "As plantas do edifício são conhecidas pela generosidade de espaço. No acervo consultado pela Michele dos Imóveis, constam unidades com 316 m² de área privativa (e até 471 m² de área total), configuradas com 3 ou 4 suítes e 4 vagas de garagem. As áreas sociais incluem living para múltiplos ambientes, sala de jantar formal e ampla sacada envidraçada com churrasqueira voltada diretamente para o mar.",
+      "As plantas do edifício são conhecidas pela generosidade de espaço. No acervo histórico consultado pela imobiliária, consta unidade com 316 m² de área privativa, configurada com 3 suítes e 4 vagas de garagem, além de living integrado e sacada com churrasqueira voltada diretamente para o mar.",
     amenities:
-      "A estrutura de lazer e segurança é completa: piscina externa adulto e infantil com solarium, piscina aquecida / spa coberto, sauna seca e úmida, academia de musculação e aeróbicos totalmente equipada, salão de festas decorado, salão de jogos, playground infantil, guarita blindada com monitoramento 24h e vagas demarcadas para visitantes.",
+      "A estrutura de lazer e segurança do condomínio dispõe de piscinas externa e aquecida, sauna, fitness center, salão de festas, salão de jogos, playground e portaria 24 horas.",
     coastRelation:
-      "Localização direta em frente ao mar (frente baía). As unidades dos andares intermediários e altos desfrutam de vista aberta para a baía e para o pôr do sol, enquanto os acessos viários facilitam tanto o deslocamento para o Centro quanto para o Norte da Ilha.",
+      "Localização direta em frente ao mar (frente baía). As unidades dos andares intermediários e altos desfrutam de vista aberta para a baía, com acesso viário prático ao Centro e ao Norte da Ilha.",
     editorialProfile:
-      "Ideal para famílias que priorizam áreas privativas amplas em um endereço consolidado de prestígio, com a conveniência de estar à beira-mar com serviços e segurança de alto padrão.",
+      "Perfil para famílias que priorizam áreas privativas amplas em endereço consolidado à beira-mar, com estrutura condominial completa.",
     faqs: [
       {
         q: "Qual a metragem dos apartamentos no La Perle Beira Mar?",
-        a: "As unidades catalogadas possuem cerca de 316 m² privativos, com 3 ou 4 suítes e 4 vagas de garagem, proporcionando ambientes sociais amplos voltados para a baía.",
+        a: "A unidade catalogada no acervo possui cerca de 316 m² privativos, configurada com 3 suítes e 4 vagas de garagem.",
       },
       {
         q: "O condomínio La Perle possui piscina aquecida?",
-        a: "Sim, além da piscina externa com deck, o La Perle conta com spa e piscina térmica coberta, além de saunas e fitness center completo.",
+        a: "Sim, além da piscina externa, o La Perle conta com spa e piscina térmica coberta, além de saunas e fitness center.",
       },
     ],
   },
@@ -60,15 +60,15 @@ const SECTIONS: readonly CondominiumSection[] = [
     developer: "Lumis Construtora",
     location: "Avenida Jornalista Rubens de Arruda Ramos, 2354 · Beira-Mar Norte",
     architecture:
-      "Projetado pela Lumis Construtora, o João Eduardo Moritz Residence destaca-se pelo rigor arquitetônico contemporâneo. A fachada foi executada com sistemas de esquadrias de alta performance desenvolvidos pela Lohn Esquadrias, garantindo elevado isolamento acústico contra o fluxo da avenida e máxima estanqueidade. O edifício opera no conceito de uma unidade por andar, com hall social independente e aberturas que favorecem iluminação e ventilação cruzada.",
+      "Projetado pela Lumis Construtora, o João Eduardo Moritz Residence opera no conceito de um apartamento por andar com hall privativo. A fachada foi executada com sistemas de esquadrias de alta performance desenvolvidos pela Lohn Esquadrias para atenuação acústica e conforto térmico.",
     typologies:
-      "Apartamentos de 4 suítes, com metragens privativas observadas no catálogo em torno de 280 m² a 350 m². As plantas privilegiam living integrado com vista frontal da baía, suíte máster com closet e hidromassagem, dependência de serviço e até 4 vagas de garagem com depósito individual.",
+      "Apartamentos de 4 suítes, com registros cadastrais no catálogo em torno de 280 m² a 350 m² privativos. As plantas privilegiam living integrado com vista frontal da orla da Beira-Mar Norte e vagas de garagem.",
     amenities:
-      "O condomínio oferece espaço gourmet climatizado, salão de festas mobiliado, piscina aquecida, fitness center equipado, controle de acesso biométrico e portaria 24 horas com clausura de segurança.",
+      "O condomínio oferece espaço gourmet, salão de festas, piscina aquecida, fitness center e portaria 24 horas com controle de acesso.",
     coastRelation:
       "Localização na Avenida Jornalista Rubens de Arruda Ramos, de frente para a baía, permitindo contemplar a orla e o calçadão da Beira-Mar Norte.",
     editorialProfile:
-      "Voltado para compradores que priorizam privacidade residencial (uma unidade por andar), projeto assinado por construtora de referência e engenharia de esquadrias qualificada.",
+      "Voltado para compradores que priorizam privacidade residencial (uma unidade por andar) e engenharia de esquadrias qualificada na orla.",
     faqs: [
       {
         q: "Quem é a construtora responsável pelo João Eduardo Moritz?",
@@ -76,7 +76,7 @@ const SECTIONS: readonly CondominiumSection[] = [
       },
       {
         q: "Quantos apartamentos há por andar no João Eduardo Moritz?",
-        a: "O empreendimento possui apenas um apartamento por andar, garantindo exclusividade, hall social privativo e circulação de ar cruzada em todas as faces.",
+        a: "O empreendimento possui apenas um apartamento por andar, garantindo exclusividade, hall social privativo e circulação de ar cruzada.",
       },
     ],
   },
@@ -86,23 +86,23 @@ const SECTIONS: readonly CondominiumSection[] = [
     developer: "CFL Imóveis",
     location: "Praça Governador Celso Ramos / Rua Frei Caneca, 17 · Agronômica",
     architecture:
-      "Desenvolvido pela CFL, o Acqua é uma referência de sofisticação que une o paisagismo requintado à tranquilidade da Praça Governador Celso Ramos. Sua arquitetura equilibra painéis de vidro e acabamentos nobres, com acessos concebidos para harmonizar a rotina do morador com o refúgio arborizado do entorno.",
+      "Desenvolvido pela CFL, o Acqua é uma referência de padrão construtivo que une arquitetura contemporânea ao paisagismo da Praça Governador Celso Ramos.",
     typologies:
-      "Apartamentos de 3 e 4 suítes, com plantas privativas entre 220 m² e 353 m² (com áreas totais que superam 400 m² nas coberturas e unidades diferenciadas). Os imóveis dispõem de varanda gourmet integrada, suíte máster generosa e 3 a 4 vagas de garagem.",
+      "Apartamentos de 3 e 4 suítes, com registros no acervo de unidades com cerca de 221 m² privativos (planta de 4 suítes e 4 vagas no acervo da unidade 31776) e varanda gourmet integrada.",
     amenities:
-      "Parque aquático com piscina de raia e deck molhado, academia profissional, spa com sauna e sala de massagem, salão de festas com lounge gourmet, brinquedoteca, playground, gerador próprio para áreas comuns e portaria blindada com monitoramento perimetral.",
+      "Área de lazer com piscina de raia e deck, academia, spa com sauna, salão de festas com lounge gourmet, brinquedoteca, playground e portaria 24 horas.",
     coastRelation:
-      "Localizado a poucos passos da orla, no coração da Praça Celso Ramos. Combina a proximidade imediata da Beira-Mar com a tranquilidade de uma rua arborizada e preservada.",
+      "Localizado a poucos passos da orla, na Praça Celso Ramos. Combina a proximidade da Beira-Mar com a tranquilidade de rua arborizada.",
     editorialProfile:
-      "Ideal para quem busca a assinatura CFL de acabamento e deseja morar próximo à Beira-Mar, mas com a atmosfera mais acolhedora e verde da Praça Celso Ramos.",
+      "Para quem busca a assinatura CFL e deseja morar próximo à Beira-Mar com a atmosfera verde da Praça Celso Ramos.",
     faqs: [
       {
         q: "Qual o endereço do condomínio Acqua?",
-        a: "O empreendimento situa-se na região nobre da Praça Governador Celso Ramos, com acesso principal e cadastros pelo logradouro da Rua Frei Caneca, 17, na Agronômica.",
+        a: "O empreendimento situa-se na região da Praça Governador Celso Ramos, com acessos e cadastros pelo logradouro da Rua Frei Caneca, 17, na Agronômica.",
       },
       {
-        q: "Quais as metragens disponíveis no Acqua da CFL?",
-        a: "As plantas tipo apresentam cerca de 221 m² privativos (4 suítes), existindo também unidades diferenciadas e coberturas que ultrapassam 350 m² privativos.",
+        q: "Quais as metragens registradas no Acqua da CFL?",
+        a: "As plantas tipo catalogadas apresentam cerca de 221 m² privativos (4 suítes), existindo também unidades diferenciadas e coberturas no empreendimento.",
       },
     ],
   },
@@ -112,23 +112,23 @@ const SECTIONS: readonly CondominiumSection[] = [
     developer: "WOA Empreendimentos Imobiliários",
     location: "Simphonia WOA Beiramar · Agronômica / Beira-Mar Norte",
     architecture:
-      "O Opera House é uma das torres de maior porte do complexo Simphonia WOA Beiramar. O edifício emprega o sistema de fachadas ventiladas Fundermax, proporcionando eficiência energética, conforto térmico e maior durabilidade externa. As áreas comuns contam com projeto luminotécnico e decoração contemporânea.",
+      "Torre de grande porte do complexo Simphonia WOA Beiramar. O edifício emprega fachada ventilada com painéis Fundermax, proporcionando eficiência energética, conforto térmico e proteção contra intempéries litorâneas.",
     typologies:
-      "Apartamentos de 4 suítes com áreas privativas entre 250 m² e 380 m², desenhados com amplas aberturas envidraçadas no living social, sacada com churrasqueira a carvão e área íntima reservada.",
+      "Apartamentos de 4 suítes com áreas privativas amplas (~250 m² a 380 m²), projetados com aberturas envidraçadas no living social e sacada com churrasqueira.",
     amenities:
-      "Infraestrutura de lazer privativa para a torre: piscina térmica coberta, piscina externa adulto/infantil, academia de ginástica completa, salão de festas com espaço gourmet, brinquedoteca e segurança integrada 24h.",
+      "Infraestrutura de lazer privativa para a torre: piscina térmica coberta, piscina externa, academia, salão de festas com espaço gourmet e portaria 24 horas.",
     coastRelation:
-      "Posicionamento frontal voltado para a baía, garantindo vista panorâmica da orla e fácil acesso à ciclovia da Beira-Mar Norte.",
+      "Posicionamento frontal voltado para a baía, garantindo vista da orla e acesso à ciclovia da Beira-Mar Norte.",
     editorialProfile:
-      "Projetado para famílias que buscam a solidez construtiva da WOA e desejam apartamentos de 4 suítes de grande porte com vista para a baía.",
+      "Projetado para famílias que buscam a solidez construtiva da WOA em apartamentos de 4 suítes de grande porte.",
     faqs: [
       {
         q: "O que é o complexo Simphonia WOA Beiramar?",
-        a: "É um masterplan da WOA composto por quatro edifícios independentes (Opera House, Sonata Place, Jazz Club e Soprano Hall), cada um com sua própria torre, acessos e lazer privativo.",
+        a: "É um complexo da WOA composto por quatro edifícios independentes (Opera House, Sonata Place, Jazz Club e Soprano Hall), cada um com torre, acessos e lazer privativos.",
       },
       {
         q: "Qual o diferencial tecnológico da fachada do Opera House?",
-        a: "O uso de fachada ventilada com placas Fundermax, que melhora o isolamento térmico e acústico e reduz a necessidade de manutenção externa decorrente da exposição litorânea.",
+        a: "O uso de fachada ventilada com placas Fundermax, proporcionando isolamento termoacústico e durabilidade na orla.",
       },
     ],
   },
@@ -138,23 +138,23 @@ const SECTIONS: readonly CondominiumSection[] = [
     developer: "WOA Empreendimentos Imobiliários",
     location: "Rua Comandante Constantino Nicolau Spyrides, 4152 · Agronômica",
     architecture:
-      "Torre independente do Simphonia WOA Beiramar com identidade arquitetônica moderna e atemporal. Projetada com esquadrias termoacústicas, persianas automatizadas e acabamentos refinados em mármore e porcelanato nas áreas sociais comuns.",
+      "Torre independente do Simphonia WOA Beiramar com identidade arquitetônica contemporânea e acesso pela Rua Comandante Constantino Nicolau Spyrides.",
     typologies:
-      "Plantas equilibradas de 3 suítes com áreas privativas que variam de 131 m² a 175 m². Dispõe de living para dois ambientes, varanda com churrasqueira e 2 a 3 vagas de garagem com infraestrutura para recarga de veículo elétrico.",
+      "Plantas de 3 suítes com 131 m² privativos (unidade 30870 no acervo), living social integrado, sacada com churrasqueira e vagas de garagem.",
     amenities:
-      "Piscina adulto e infantil com deck ensolarado, salão de festas gourmet totalmente equipado e climatizado, espaço fitness, playground infantil e guarita com controle de acesso rigoroso.",
+      "Piscina adulto e infantil com deck, salão de festas gourmet equipado, espaço fitness, playground e portaria 24 horas.",
     coastRelation:
-      "Localizado junto à Rua Constantino Nicolau Spyrides, a poucos metros da orla, permitindo acesso prático ao calçadão da Beira-Mar.",
+      "Localizado junto à Rua Constantino Nicolau Spyrides, a poucos metros da orla, permitindo acesso prático ao calçadão.",
     editorialProfile:
-      "Excelente para casais e famílias que buscam a qualidade de vida da Beira-Mar com plantas de 3 suítes funcionais e custos condominiais equilibrados.",
+      "Ideal para famílias que buscam a localização da Beira-Mar com plantas de 3 suítes funcionais.",
     faqs: [
       {
         q: "Quantas suítes têm os apartamentos no Sonata Place?",
-        a: "A maioria das unidades conta com 3 suítes completas, lavabo social e sacada gourmet com churrasqueira a carvão.",
+        a: "A unidade catalogada no acervo conta com 3 suítes, lavabo social e sacada com churrasqueira.",
       },
       {
         q: "Onde fica o acesso ao Sonata Place?",
-        a: "O acesso se dá pela Rua Comandante Constantino Nicolau Spyrides, 4152, facilitando o fluxo de entrada e saída sem o tráfego direto da avenida principal.",
+        a: "O acesso se dá pela Rua Comandante Constantino Nicolau Spyrides, 4152, facilitando o fluxo de entrada e saída sem o tráfego direto da avenida.",
       },
     ],
   },
@@ -164,23 +164,23 @@ const SECTIONS: readonly CondominiumSection[] = [
     developer: "WOA Empreendimentos Imobiliários",
     location: "Boulevard / Servidão Paulo Zimmer, 101 · Agronômica",
     architecture:
-      "O Jazz Club compõe o Simphonia WOA trazendo um conceito de luxo dinâmico e contemporâneo. Com projeto de interiores sofisticado no hall de entrada e acabamentos externos duráveis em fachada ventilada, destaca-se pela fluidez de seus espaços.",
+      "O Jazz Club integra o conjunto Simphonia WOA com projeto contemporâneo e fachada ventilada.",
     typologies:
-      "Unidades de 2 e 3 suítes com metragens privativas entre 99 m² e 135 m². O layout integra cozinha, living e sacada com churrasqueira, otimizando o uso social e a luminosidade natural.",
+      "Unidades de 3 suítes com 107 m² privativos (unidade 22461 no acervo), com layout integrando living e sacada com churrasqueira.",
     amenities:
-      "Piscina aquecida, fitness center moderno, lounge bar com espaço gourmet para confraternizações, bicicletário, área de convivência externa e sistema de monitoramento eletrônico 24h.",
+      "Piscina aquecida, fitness center, lounge gourmet, bicicletário e portaria 24 horas.",
     coastRelation:
-      "Situado no Boulevard Paulo Zimmer, a passos da Beira-Mar Norte, em uma alameda tranquila com paisagismo planejado.",
+      "Situado na Servidão Paulo Zimmer, a poucos passos da Beira-Mar Norte, em alameda arborizada.",
     editorialProfile:
-      "Muito procurado por executivos, jovens casais ou investidores que buscam um produto premium com plantas inteligentes de 2 a 3 suítes na região central da ilha.",
+      "Indicado para quem busca um residencial moderno com plantas de 3 suítes na Agronômica.",
     faqs: [
       {
-        q: "Qual a faixa de metragem das unidades no Jazz Club?",
-        a: "Os apartamentos variam entre 99 m² e 135 m² privativos, com 2 a 3 suítes e 2 vagas de garagem.",
+        q: "Qual a metragem da unidade catalogada no Jazz Club?",
+        a: "A unidade do acervo possui 107 m² privativos, configurada com 3 suítes e 2 vagas de garagem.",
       },
       {
         q: "O Jazz Club possui área de lazer compartilhada com outros prédios?",
-        a: "Não. Embora integre o conjunto Simphonia, o Jazz Club possui guarita, piscina, academia e salão de festas 100% exclusivos para seus condôminos.",
+        a: "Não. Embora integre o complexo Simphonia, o Jazz Club possui portaria, piscina, academia e salão de festas privativos de sua torre.",
       },
     ],
   },
@@ -190,23 +190,23 @@ const SECTIONS: readonly CondominiumSection[] = [
     developer: "WOA Empreendimentos Imobiliários",
     location: "Boulevard / Servidão Paulo Zimmer, 55 · Agronômica",
     architecture:
-      "O Soprano Hall completa o quarteto WOA com foco em residências familiares espaçosas. Sua torre imponente utiliza revestimentos tecnológicos de fachada ventilada Fundermax e amplas varandas que valorizam a incidência de luz natural e a ventilação.",
+      "Torre do complexo WOA com fachada ventilada Fundermax e varandas amplas voltadas para a orla da Agronômica.",
     typologies:
-      "Apartamentos de 3 e 4 suítes com metragens privativas entre 168 m² e 237 m². As unidades destacam-se por living amplo em 3 ambientes, lavabo, dependência ou área de serviço estendida e 3 a 4 vagas de garagem.",
+      "Apartamentos com 168 m² de área privativa (unidade 44022 no acervo), 3 suítes, living amplo, sacada com churrasqueira e vagas de garagem.",
     amenities:
-      "Piscina com raia e deck molhado, salão de festas amplo com cozinha de apoio, espaço fitness com equipamentos de alta tecnologia, playground, pet place e portaria 24 horas.",
+      "Piscina com deck, salão de festas climatizado, espaço fitness, playground e portaria 24 horas.",
     coastRelation:
-      "Posicionado no Boulevard Paulo Zimmer com vista para a orla da Agronômica e acesso rápido tanto à Beira-Mar quanto às vias internas do bairro.",
+      "Posicionado na Servidão Paulo Zimmer com vista para a orla da Agronômica e acesso rápido à Beira-Mar.",
     editorialProfile:
-      "Voltado para famílias que necessitam de 3 ou 4 suítes com áreas privativas generosas e lazer refinado em ambiente estritamente residencial.",
+      "Voltado para famílias que necessitam de 3 suítes com metragens generosas e lazer privativo.",
     faqs: [
       {
-        q: "Qual a configuração das plantas do Soprano Hall?",
-        a: "O edifício oferece plantas de 3 e 4 suítes (168 m² a 237 m² privativos), com ampla sacada com churrasqueira e até 4 vagas de garagem.",
+        q: "Qual a configuração da planta do Soprano Hall no acervo?",
+        a: "A unidade catalogada possui 168 m² privativos, configurada com 3 suítes, ampla sacada com churrasqueira e 3 vagas de garagem.",
       },
       {
-        q: "Quais os diferenciais de lazer do Soprano Hall?",
-        a: "Conta com piscina com deck molhado, salão de festas decorado, academia moderna e playground infantil com segurança 24h.",
+        q: "Quais os itens de lazer do Soprano Hall?",
+        a: "Conta com piscina com deck, salão de festas, academia e playground infantil com portaria 24 horas.",
       },
     ],
   },
@@ -216,23 +216,23 @@ const SECTIONS: readonly CondominiumSection[] = [
     developer: "Construtora Fontana",
     location: "Travessa Felipe Godinho e Silva, 30 (esq. Rua Sidnei Nocetti) · Agronômica",
     architecture:
-      "Comunicado como pronto para morar pela Construtora Fontana em dezembro de 2023, o Residencial Villa Celimontana traz para a Agronômica a proposta de um home club residencial. Sua arquitetura contemporânea integra acabamentos de qualidade, hall com pé-direito duplo e áreas de lazer setorizadas.",
+      "Comunicado como pronto para morar pela Construtora Fontana em dezembro de 2023, o Residencial Villa Celimontana traz para a Agronômica a proposta de um home club residencial.",
     typologies:
-      "Apartamentos de 2 e 3 dormitórios (com 1 ou 2 suítes), com metragens privativas entre 79 m² e 134 m². Inclui persianas integradas nos dormitórios, sacada com churrasqueira a carvão e 1 a 2 vagas de garagem.",
+      "Apartamentos com opções de 2 dormitórios (1 suíte, ~79 m² privativos no acervo da unidade 43575), sacada com churrasqueira e vaga de garagem.",
     amenities:
-      "Complexo de lazer 'Home Club': piscinas adulto e infantil, bar da piscina, academia completa, espaço gourmet, salão de festas, espaço teen, brinquedoteca, playground, pet place e guarita de segurança 24 horas.",
+      "Complexo de lazer 'Home Club': piscinas adulto e infantil, bar da piscina, academia, espaço gourmet, salão de festas, brinquedoteca, playground, pet place e portaria 24 horas.",
     coastRelation:
-      "Localizado no interior do bairro Agronômica, em ponto estratégico próximo a serviços essenciais, a cerca de 3 minutos de carro da orla da Beira-Mar Norte.",
+      "Localizado no interior do bairro Agronômica, em ponto residencial a cerca de 3 minutos de carro da orla da Beira-Mar Norte.",
     editorialProfile:
-      "Perfeito para famílias que valorizam uma infraestrutura completa de lazer para os filhos e desejam morar em um edifício novo, com custo condominial otimizado.",
+      "Para famílias que valorizam infraestrutura completa de lazer e desejam residir em condomínio recente na Agronômica.",
     faqs: [
       {
-        q: "Quando foi entregue o Villa Celimontana?",
+        q: "Quando foi concluído o Villa Celimontana?",
         a: "O residencial foi comunicado como pronto para morar pela Construtora Fontana em dezembro de 2023.",
       },
       {
         q: "O Villa Celimontana fica de frente para o mar?",
-        a: "Não. Fica situado na Travessa Felipe Godinho e Silva, no coração da Agronômica, oferecendo tranquilidade residencial próxima aos principais pontos da cidade.",
+        a: "Não. Fica situado na Travessa Felipe Godinho e Silva, no interior da Agronômica, próximo aos serviços do bairro.",
       },
     ],
   },
@@ -367,8 +367,8 @@ function BeiraMarArticle() {
               Condomínios de luxo na Beira-Mar Norte e Agronômica
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-relaxed text-white/85">
-              Análise aprofundada de 8 edifícios icônicos: arquitetura, tipologias, diferenciais construtivos,
-              lazer e acervo de imóveis selecionados por Michele Prietsch.
+              Análise de 8 edifícios emblemáticos: arquitetura, tipologias, diferenciais construtivos,
+              lazer e acervo de imóveis catalogados.
             </p>
             <p className="mt-8 text-sm text-white/75">Michele dos Imóveis · Guia Editorial de Alto Padrão</p>
           </div>
@@ -629,7 +629,7 @@ function BeiraMarArticle() {
               </div>
               <p className="mt-5 text-background/85 leading-relaxed text-sm sm:text-base">
                 Conte quais condomínios você deseja conhecer, a metragem ideal e suas prioridades de moradia.
-                Michele realiza curadoria personalizada de oportunidades ativas e opções <strong className="text-white">off-market</strong> na Beira-Mar Norte e Agronômica.
+                Michele realiza atendimento consultivo de oportunidades na Beira-Mar Norte e Agronômica.
               </p>
               <a
                 href={buildWhatsAppUrl(
@@ -646,8 +646,7 @@ function BeiraMarArticle() {
 
             <aside className="border-t border-border pt-6 text-xs text-muted-foreground space-y-2">
               <p>
-                Fontes técnicas e documentais: portfólios institucionais da Lumis/Lohn Esquadrias, Fundermax, CFL Imóveis e Construtora Fontana.
-                Fotografias: acervo de imóveis apresentado no site de Michele dos Imóveis. As características específicas de cada unidade e a disponibilidade devem ser confirmadas no atendimento.
+                Fontes técnicas e documentais: registros cadastrais históricos do acervo interno da imobiliária e documentação técnica pública das construtoras e fabricantes (Lumis, CFL, WOA, Construtora Fontana, Fundermax, Lohn Esquadrias). As características específicas de cada unidade e a disponibilidade devem ser confirmadas no atendimento.
               </p>
               <p>
                 <Link

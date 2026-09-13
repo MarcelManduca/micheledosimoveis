@@ -16,7 +16,15 @@ export default defineTool({
     const { isCodeAdministrativelyBlocked, resolveEditorialPreservedSnapshot } = await import(
       "../../editorial-preserved"
     );
-    const isBlocked = await isCodeAdministrativelyBlocked(code);
+    let isBlocked = false;
+    try {
+      isBlocked = await isCodeAdministrativelyBlocked(code);
+    } catch (err: any) {
+      return {
+        content: [{ type: "text", text: `Falha técnica ao verificar bloqueio administrativo: ${err?.message || err}` }],
+        isError: true,
+      };
+    }
     if (isBlocked) {
       return { content: [{ type: "text", text: `No published or preserved property with code ${code}` }] };
     }

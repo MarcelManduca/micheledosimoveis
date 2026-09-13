@@ -282,10 +282,15 @@ export function getEditorialPreservedSnapshot(code: string): EditorialPreservedP
  * Consulta autoritativa em lote de códigos com bloqueio administrativo.
  * Executada exclusivamente no servidor via cliente com privilégio de leitura administrativa
  * para não sofrer ocultação pela política RLS pública.
+ * Fail-Closed: Falha ao carregar supabaseAdmin ou erro de banco/tabela dispara erro controlado.
  */
 export async function fetchAdministrativelyBlockedCodes(
   privilegedClient?: any,
 ): Promise<Set<string>> {
+  if (typeof window !== "undefined") {
+    throw new Error("Operação administrativa não permitida no ambiente de cliente (navegador).");
+  }
+
   const blockedSet = new Set<string>();
 
   // 1. Bloqueios explícitos em memória (override de emergência)
@@ -295,39 +300,39 @@ export async function fetchAdministrativelyBlockedCodes(
     }
   }
 
-  // 2. Consulta autoritativa no servidor (supabaseAdmin ou mock privilegiado)
+  // 2. Obtenção do cliente administrativo no servidor
   let client = privilegedClient;
-  if (!client && typeof window === "undefined") {
+  if (!client) {
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       client = supabaseAdmin;
-    } catch {
-      // Ambiente sem admin client
+    } catch (err: any) {
+      throw new Error(
+        `Falha de configuração: cliente administrativo (supabaseAdmin) indisponível: ${err?.message || err}`,
+      );
     }
   }
 
-  if (client) {
-    const { data, error } = await client
-      .from("editorial_preserved_properties")
-      .select("code")
-      .eq("is_admin_blocked", true);
+  if (!client) {
+    throw new Error(
+      "Falha de configuração: cliente administrativo ausente para verificação autoritativa de bloqueios.",
+    );
+  }
 
-    if (error) {
-      const isMissingTable =
-        error.code === "42P01" ||
-        error.code === "PGRST205" ||
-        error.message?.includes("does not exist") ||
-        error.message?.includes("Could not find the table");
+  const { data, error } = await client
+    .from("editorial_preserved_properties")
+    .select("code")
+    .eq("is_admin_blocked", true);
 
-      if (!isMissingTable) {
-        throw new Error(
-          `Falha técnica na consulta autoritativa de bloqueios: ${error.message} (código: ${error.code})`,
-        );
-      }
-    } else if (data) {
-      for (const row of data) {
-        if (row.code) blockedSet.add(row.code);
-      }
+  if (error) {
+    throw new Error(
+      `Falha técnica na consulta autoritativa de bloqueios: ${error.message} (código: ${error.code})`,
+    );
+  }
+
+  if (data) {
+    for (const row of data) {
+      if (row.code) blockedSet.add(row.code);
     }
   }
 
@@ -337,12 +342,17 @@ export async function fetchAdministrativelyBlockedCodes(
 /**
  * Checagem persistente e autoritativa de bloqueio administrativo para um código.
  * Prevalece sobre properties.published = true e impede qualquer exibição comercial ou de acervo.
- * Executa exclusivamente no servidor via cliente privilegiado ou mock fornecido.
+ * Executa exclusivamente no servidor via cliente privilegiado ou supabaseAdmin.
+ * Fail-Closed: Falha ao carregar cliente ou erro de schema/banco dispara erro controlado.
  */
 export async function isCodeAdministrativelyBlocked(
   code: string,
   privilegedClient?: any,
 ): Promise<boolean> {
+  if (typeof window !== "undefined") {
+    throw new Error("Operação administrativa não permitida no ambiente de cliente (navegador).");
+  }
+
   if (!code) return false;
 
   // 1. Verificação explícita em catálogo estático local (override de emergência)
@@ -350,39 +360,39 @@ export async function isCodeAdministrativelyBlocked(
     return true;
   }
 
-  // 2. Consulta autoritativa ao banco no servidor
+  // 2. Obtenção do cliente administrativo no servidor
   let client = privilegedClient;
-  if (!client && typeof window === "undefined") {
+  if (!client) {
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       client = supabaseAdmin;
-    } catch {
-      // Ignora se não for ambiente de servidor
+    } catch (err: any) {
+      throw new Error(
+        `Falha de configuração: cliente administrativo (supabaseAdmin) indisponível: ${err?.message || err}`,
+      );
     }
   }
 
-  if (client) {
-    const { data, error } = await client
-      .from("editorial_preserved_properties")
-      .select("is_admin_blocked")
-      .eq("code", code)
-      .maybeSingle();
+  if (!client) {
+    throw new Error(
+      "Falha de configuração: cliente administrativo ausente para checagem autoritativa de bloqueio.",
+    );
+  }
 
-    if (error) {
-      const isMissingTable =
-        error.code === "42P01" ||
-        error.code === "PGRST205" ||
-        error.message?.includes("does not exist") ||
-        error.message?.includes("Could not find the table");
+  const { data, error } = await client
+    .from("editorial_preserved_properties")
+    .select("is_admin_blocked")
+    .eq("code", code)
+    .maybeSingle();
 
-      if (!isMissingTable) {
-        throw new Error(
-          `Falha técnica na checagem de bloqueio administrativo: ${error.message} (código: ${error.code})`,
-        );
-      }
-    } else if (data) {
-      return Boolean(data.is_admin_blocked);
-    }
+  if (error) {
+    throw new Error(
+      `Falha técnica na checagem de bloqueio administrativo: ${error.message} (código: ${error.code})`,
+    );
+  }
+
+  if (data) {
+    return Boolean(data.is_admin_blocked);
   }
 
   return false;

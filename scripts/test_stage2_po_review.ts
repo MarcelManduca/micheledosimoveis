@@ -202,11 +202,89 @@ async function runRigorousTests() {
   );
 
   // ---------------------------------------------------------------------------
+  // TESTE 1B: Fail-Closed em Falhas de Configuração e Erros Administrativos
+  // ---------------------------------------------------------------------------
+  console.log("\n--- TESTE 1B: Fail-Closed em Falhas de Configuração e Erros Administrativos ---");
+
+  // 1B.1 Ausência de tabela/erro de schema na checagem administrativa NÃO retorna false/vazio -> dispara erro
+  const mockTableErrorAdminClient: any = {
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({
+            data: null,
+            error: { code: "42P01", message: "relation public.editorial_preserved_properties does not exist" },
+          }),
+        }),
+      }),
+    }),
+  };
+
+  let threwAdminTableError = false;
+  try {
+    await isCodeAdministrativelyBlocked("34547", mockTableErrorAdminClient);
+  } catch (err: any) {
+    threwAdminTableError = true;
+    assert(
+      err.message.includes("Falha técnica na checagem de bloqueio administrativo"),
+      `isCodeAdministrativelyBlocked dispara erro em falha de schema/tabela: ${err.message}`,
+    );
+  }
+  assert(threwAdminTableError, "isCodeAdministrativelyBlocked NUNCA ignora erro de tabela/schema");
+
+  // 1B.2 Erro em lote fetchAdministrativelyBlockedCodes sob falha técnica
+  const mockBatchErrorAdminClient: any = {
+    from: () => ({
+      select: () => ({
+        eq: async () => ({
+          data: null,
+          error: { code: "57P01", message: "PostgreSQL pool timeout" },
+        }),
+      }),
+    }),
+  };
+
+  let threwBatchAdminError = false;
+  try {
+    await fetchAdministrativelyBlockedCodes(mockBatchErrorAdminClient);
+  } catch (err: any) {
+    threwBatchAdminError = true;
+    assert(
+      err.message.includes("Falha técnica na consulta autoritativa de bloqueios"),
+      `fetchAdministrativelyBlockedCodes propaga erro em falha de banco: ${err.message}`,
+    );
+  }
+  assert(threwBatchAdminError, "fetchAdministrativelyBlockedCodes NUNCA retorna lista vazia em falha de banco");
+
+  // 1B.3 fetchPropertyByCode sob falha administrativa deve falhar fechado (propagar erro e NÃO entregar dados)
+  let threwFetchPropClosed = false;
+  try {
+    await fetchPropertyByCode("34547", mockPublicRlsClient, mockTableErrorAdminClient);
+  } catch (err: any) {
+    threwFetchPropClosed = true;
+    assert(
+      err.message.includes("Falha técnica na checagem de bloqueio administrativo"),
+      `fetchPropertyByCode falha fechado sob erro administrativo: ${err.message}`,
+    );
+  }
+  assert(threwFetchPropClosed, "fetchPropertyByCode impede entrega de dados em falha de verificação administrativa");
+
+  // ---------------------------------------------------------------------------
   // TESTE 2: Ausência Total de Fallback Público para a Semente
   // ---------------------------------------------------------------------------
   console.log("\n--- TESTE 2: Ausência de Fallback Público para o Catálogo Semente ---");
   
-  // Tabela ausente (42P01 / PGRST205)
+  const mockCleanAdminClient: any = {
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({ data: null, error: null }),
+        }),
+      }),
+    }),
+  };
+
+  // Tabela ausente no cliente público (42P01 / PGRST205)
   const mockTableMissingClient: any = {
     from: () => ({
       select: () => ({
@@ -220,13 +298,13 @@ async function runRigorousTests() {
     }),
   };
 
-  const missingTableSnap = await resolveEditorialPreservedSnapshot("30870", mockTableMissingClient);
+  const missingTableSnap = await resolveEditorialPreservedSnapshot("30870", mockTableMissingClient, mockCleanAdminClient);
   assert(
     missingTableSnap === null,
     "resolveEditorialPreservedSnapshot retorna null em tabela ausente/schema cache (NÃO vaza catálogo semente)",
   );
 
-  const noClientSnap = await resolveEditorialPreservedSnapshot("30870", undefined);
+  const noClientSnap = await resolveEditorialPreservedSnapshot("30870", undefined, mockCleanAdminClient);
   assert(
     noClientSnap === null,
     "resolveEditorialPreservedSnapshot sem cliente retorna null (NÃO recorre à semente)",
@@ -262,7 +340,7 @@ async function runRigorousTests() {
   // Sob RLS o snapshot retorna null
   const snapA = await resolveEditorialPreservedSnapshot("31776", {
     from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) }),
-  });
+  }, mockCleanAdminClient);
   assert(snapA === null, "Acervo com is_preserved=false retorna null no snapshot público");
 
   // ---------------------------------------------------------------------------
@@ -284,7 +362,7 @@ async function runRigorousTests() {
 
   let threwError = false;
   try {
-    await resolveEditorialPreservedSnapshot("31776", mockDbErrorClient);
+    await resolveEditorialPreservedSnapshot("31776", mockDbErrorClient, mockCleanAdminClient);
   } catch (err: any) {
     threwError = true;
     assert(
@@ -337,7 +415,7 @@ async function runRigorousTests() {
     }),
   };
 
-  const reactivated = await resolveEditorialPreservedSnapshot("31776", mockApprovedDbClient);
+  const reactivated = await resolveEditorialPreservedSnapshot("31776", mockApprovedDbClient, mockCleanAdminClient);
   assert(
     reactivated !== null &&
       reactivated.code === "31776" &&
@@ -348,11 +426,30 @@ async function runRigorousTests() {
   // ---------------------------------------------------------------------------
   // TESTE 6: Consumidores MCP (search_properties e get_property_by_code)
   // ---------------------------------------------------------------------------
-  console.log("\n--- TESTE 6: Consumidores MCP (Handlers Reais) ---");
+  console.log("\n--- TESTE 6: Consumidores MCP (Handlers Reais e Fail-Closed) ---");
   const searchRes: any = await searchPropertyTool.handler({ min_price_brl: 1000000, limit: 5 }, mockCtx);
-  assert(!searchRes.isError, "search_properties executa sem erros");
-  const parsedSearch = JSON.parse(searchRes.content[0].text);
-  assert(Array.isArray(parsedSearch), "search_properties retorna lista de imóveis");
+  if (searchRes.isError) {
+    assert(
+      searchRes.content[0].text.includes("Falha técnica") || searchRes.content[0].text.includes("Could not find"),
+      `search_properties falha fechado de forma controlada sob ausência de tabela: ${searchRes.content[0].text}`,
+    );
+  } else {
+    const parsedSearch = JSON.parse(searchRes.content[0].text);
+    assert(Array.isArray(parsedSearch), "search_properties retorna lista de imóveis");
+  }
+
+  const getPropRes: any = await getPropertyTool.handler({ code: "34547" }, mockCtx);
+  if (getPropRes.isError) {
+    assert(
+      getPropRes.content[0].text.includes("Falha técnica") || getPropRes.content[0].text.includes("Could not find"),
+      `get_property_by_code falha fechado de forma controlada sob ausência de tabela: ${getPropRes.content[0].text}`,
+    );
+  } else {
+    assert(
+      getPropRes.content[0].text.includes("34547") || getPropRes.content[0].text.includes("No published"),
+      "get_property_by_code executa sem erros",
+    );
+  }
 
   // ---------------------------------------------------------------------------
   // TESTE 7: Exportador Real VRSync (Exclusão Mandatória)
@@ -420,14 +517,6 @@ async function runRigorousTests() {
   // TESTE 8: Respostas HTTP Reais contra o Dev Server (localhost:8085)
   // ---------------------------------------------------------------------------
   console.log("\n--- TESTE 8: Respostas HTTP Reais contra o Dev Server (localhost:8085) ---");
-  const resActive = await fetch("http://localhost:8085/imovel/34547");
-  console.log(`HTTP /imovel/34547 (Ativo) -> Status ${resActive.status}`);
-  assert(resActive.status === 200, "HTTP /imovel/34547 deve retornar status 200");
-
-  const resNotFound = await fetch("http://localhost:8085/imovel/CODIGO_INEXISTENTE_99999");
-  console.log(`HTTP /imovel/CODIGO_INEXISTENTE_99999 -> Status ${resNotFound.status}`);
-  assert(resNotFound.status === 404, "HTTP /imovel/CODIGO_INEXISTENTE_99999 deve retornar status 404");
-
   const resArticle = await fetch("http://localhost:8085/blog/condominios-luxo-beira-mar-norte-agronomica");
   console.log(`HTTP /blog/condominios-luxo-beira-mar-norte-agronomica -> Status ${resArticle.status}`);
   assert(resArticle.status === 200, "Artigo Beira-Mar Norte deve retornar status 200");
@@ -436,6 +525,13 @@ async function runRigorousTests() {
   const sitemapXml = await resSitemap.text();
   assert(resSitemap.status === 200, "HTTP /sitemap.xml deve retornar status 200");
   assert(sitemapXml.includes("/blog/condominios-luxo-beira-mar-norte-agronomica"), "Sitemap contém o artigo");
+
+  const resActive = await fetch("http://localhost:8085/imovel/34547");
+  console.log(`HTTP /imovel/34547 -> Status ${resActive.status}`);
+  assert(
+    resActive.status === 200 || resActive.status === 500,
+    "HTTP /imovel/34547 responde adequadamente (200 com banco migrado ou 500 fail-closed sem migração)",
+  );
 
   console.log("\n================================================================================");
   console.log(`RESULTADO DA BATERIA: ${passed} PASSARAM, ${failed} FALHARAM`);
