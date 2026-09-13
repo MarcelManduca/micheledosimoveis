@@ -21,8 +21,11 @@ export type PropertyListItem = {
 };
 
 function getPublicClient() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.VITE_SUPABASE_ANON_KEY;
   if (!url || !key) throw new Error("Backend indisponível no momento.");
   return createClient<Database>(url, key, {
     auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
@@ -78,7 +81,14 @@ export const listProperties = createServerFn({ method: "GET" }).handler(
       .order("created_at", { ascending: false })
       .limit(12);
     if (error) safeError("Não foi possível carregar os imóveis.", error);
-    return normalizeRows(data);
+    const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import(
+      "@/lib/editorial-preserved"
+    );
+    const blockedCodes = await fetchAdministrativelyBlockedCodes();
+    const safeRows = (data ?? []).filter(
+      (r: any) => !blockedCodes.has(r.code) && !isAdministrativeBlocked(r.code),
+    );
+    return normalizeRows(safeRows);
   },
 );
 
@@ -93,7 +103,14 @@ export const listLaunches = createServerFn({ method: "GET" }).handler(
       .order("created_at", { ascending: false })
       .limit(12);
     if (error) safeError("Não foi possível carregar os lançamentos.", error);
-    return normalizeRows(data);
+    const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import(
+      "@/lib/editorial-preserved"
+    );
+    const blockedCodes = await fetchAdministrativelyBlockedCodes();
+    const safeRows = (data ?? []).filter(
+      (r: any) => !blockedCodes.has(r.code) && !isAdministrativeBlocked(r.code),
+    );
+    return normalizeRows(safeRows);
   },
 );
 
@@ -116,64 +133,187 @@ function escapeLike(s: string): string {
   return s.replace(/[\\%_]/g, "\\$&");
 }
 
+export async function fetchSearchProperties(
+  data: z.infer<typeof searchSchema>,
+  supabaseClient?: any,
+  privilegedAdminClient?: any,
+): Promise<PropertyListItem[]> {
+  const supabase = supabaseClient ?? getPublicClient();
+  const buildQuery = () => {
+    let q = supabase
+      .from("properties")
+      .select(LIST_COLS)
+      .eq("published", true);
+    if (data.tipo) q = q.ilike("property_type", `%${escapeLike(data.tipo)}%`);
+    if (data.bairro) q = q.ilike("neighborhood", `%${escapeLike(data.bairro)}%`);
+    if (data.dorms != null) {
+      if (data.dorms >= 4) q = q.gte("bedrooms", 4);
+      else q = q.eq("bedrooms", data.dorms);
+    }
+    if (data.precoMin != null) q = q.gte("price_brl", data.precoMin);
+    if (data.precoMax != null) q = q.lte("price_brl", data.precoMax);
+    return q
+      .order("featured", { ascending: false })
+      .order("created_at", { ascending: false });
+  };
+  // Paginate to bypass PostgREST's default 1000-row cap and return every
+  // matching property, no matter how many estejam cadastrados.
+  const PAGE = 1000;
+  const all: unknown[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data: rows, error } = await buildQuery().range(from, from + PAGE - 1);
+    if (error) safeError("Não foi possível pesquisar os imóveis.", error);
+    const batch = rows ?? [];
+    all.push(...batch);
+    if (batch.length < PAGE) break;
+  }
+  const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import(
+    "@/lib/editorial-preserved"
+  );
+  const blockedCodes = await fetchAdministrativelyBlockedCodes(privilegedAdminClient);
+  const safeRows = (all as any[]).filter(
+    (r) => !blockedCodes.has(r.code) && !isAdministrativeBlocked(r.code),
+  );
+  return normalizeRows(safeRows);
+}
+
 export const searchProperties = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => searchSchema.parse(d))
   .handler(async ({ data }): Promise<PropertyListItem[]> => {
-    const supabase = getPublicClient();
-    const buildQuery = () => {
-      let q = supabase
-        .from("properties")
-        .select(LIST_COLS)
-        .eq("published", true);
-      if (data.tipo) q = q.ilike("property_type", `%${escapeLike(data.tipo)}%`);
-      if (data.bairro) q = q.ilike("neighborhood", `%${escapeLike(data.bairro)}%`);
-      if (data.dorms != null) {
-        if (data.dorms >= 4) q = q.gte("bedrooms", 4);
-        else q = q.eq("bedrooms", data.dorms);
-      }
-      if (data.precoMin != null) q = q.gte("price_brl", data.precoMin);
-      if (data.precoMax != null) q = q.lte("price_brl", data.precoMax);
-      return q
-        .order("featured", { ascending: false })
-        .order("created_at", { ascending: false });
-    };
-    // Paginate to bypass PostgREST's default 1000-row cap and return every
-    // matching property, no matter how many estejam cadastrados.
-    const PAGE = 1000;
-    const all: unknown[] = [];
-    for (let from = 0; ; from += PAGE) {
-      const { data: rows, error } = await buildQuery().range(from, from + PAGE - 1);
-      if (error) safeError("Não foi possível pesquisar os imóveis.", error);
-      const batch = rows ?? [];
-      all.push(...batch);
-      if (batch.length < PAGE) break;
-    }
-    return normalizeRows(all);
+    return fetchSearchProperties(data);
   });
 
 const codeSchema = z.object({
   code: z.string().trim().min(1).max(64).regex(/^[A-Za-z0-9_-]+$/),
 });
 
-export const getPropertyByCode = createServerFn({ method: "GET" })
-  .inputValidator((d: unknown) => codeSchema.parse(d))
-  .handler(async ({ data }) => {
-    const supabase = getPublicClient();
-    const { data: prop, error } = await supabase
-      .from("properties")
-      .select("*")
-      .eq("code", data.code)
-      .eq("published", true)
-      .maybeSingle();
-    if (error) safeError("Não foi possível carregar o imóvel.", error);
-    if (!prop) return null;
+export async function fetchPropertyByCode(
+  code: string,
+  supabaseClient?: any,
+  privilegedAdminClient?: any,
+) {
+  const supabase = supabaseClient ?? getPublicClient();
+
+  // 1. Verificação preliminar autoritativa de bloqueio administrativo no servidor
+  const { resolveEditorialPreservedSnapshot, isCodeAdministrativelyBlocked } = await import(
+    "@/lib/editorial-preserved"
+  );
+  const isBlocked = await isCodeAdministrativelyBlocked(code, privilegedAdminClient);
+  if (isBlocked) {
+    // Bloqueio administrativo sobrepõe qualquer registro comercial ou de acervo
+    return null;
+  }
+
+  // 2. Consulta à unidade comercialmente ativa (com RLS pública)
+  const { data: prop, error } = await supabase
+    .from("properties")
+    .select("*")
+    .eq("code", code)
+    .eq("published", true)
+    .maybeSingle();
+  if (error) safeError("Não foi possível carregar o imóvel.", error);
+
+  if (prop) {
     const { data: photos, error: phErr } = await supabase
       .from("property_photos")
       .select("url, position")
       .eq("property_id", prop.id)
       .order("position", { ascending: true });
     if (phErr) safeError("Não foi possível carregar as fotos.", phErr);
-    return { property: prop, photos: photos ?? [] };
+    return {
+      property: prop,
+      photos: photos ?? [],
+      isArchived: false,
+      condoName: prop.condo_name ?? null,
+      condoSlug: null as string | null,
+      articlePath: null as string | null,
+      unavailableNotice: null as string | null,
+    };
+  }
+
+  // 3. Fallback editorial preservado: consulta pública com RLS (banco)
+  const snap = await resolveEditorialPreservedSnapshot(code, supabase, privilegedAdminClient);
+  if (!snap) return null;
+
+  return {
+    property: {
+      id: `preserved-${snap.code}`,
+      code: snap.code,
+      title: snap.title,
+      property_type: snap.propertyType,
+      neighborhood: snap.neighborhood,
+      city: snap.city,
+      state: snap.state,
+      address: snap.address,
+      condo_name: snap.condoName,
+      price_brl: null, // Preço suprimido na exibição de acervo
+      condo_fee_brl: null,
+      iptu_brl: null,
+      area_m2: snap.areaM2,
+      bedrooms: snap.bedrooms,
+      suites: snap.suites,
+      bathrooms: snap.bathrooms,
+      parking_spots: snap.parkingSpots,
+      description: snap.description,
+      features: snap.features,
+      condo_features: snap.condoFeatures,
+      cover_image: snap.coverImage,
+      published: false,
+      featured: false,
+      created_at: snap.snapshotDate,
+      updated_at: snap.snapshotDate,
+    },
+    photos: snap.photos,
+    isArchived: true,
+    condoName: snap.condoName,
+    condoSlug: snap.condoSlug,
+    articlePath: snap.articlePath,
+    unavailableNotice: snap.unavailableNotice,
+  };
+}
+
+export const getPropertyByCode = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) => codeSchema.parse(d))
+  .handler(async ({ data }) => {
+    return fetchPropertyByCode(data.code);
+  });
+
+export async function fetchAlternativePropertiesForCondominium(
+  condoName: string,
+  excludeCode: string,
+  supabaseClient?: any,
+  privilegedAdminClient?: any,
+): Promise<PropertyListItem[]> {
+  if (!condoName) return [];
+  const supabase = supabaseClient ?? getPublicClient();
+  const cleanCondo = condoName.replace(/^(Condomínio|Residencial)\s+/i, "").trim();
+  const { data: rows, error } = await supabase
+    .from("properties")
+    .select(LIST_COLS)
+    .eq("published", true)
+    .ilike("condo_name", `%${cleanCondo}%`)
+    .neq("code", excludeCode)
+    .limit(6);
+  if (error) {
+    console.error("fetchAlternativePropertiesForCondominium", error);
+    return [];
+  }
+  const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import(
+    "@/lib/editorial-preserved"
+  );
+  const blockedCodes = await fetchAdministrativelyBlockedCodes(privilegedAdminClient);
+  const safeRows = (rows ?? []).filter(
+    (r: any) => !blockedCodes.has(r.code) && !isAdministrativeBlocked(r.code),
+  );
+  return normalizeRows(safeRows);
+}
+
+export const getAlternativePropertiesForCondominium = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) =>
+    z.object({ condoName: z.string().trim(), excludeCode: z.string().trim() }).parse(d),
+  )
+  .handler(async ({ data }): Promise<PropertyListItem[]> => {
+    return fetchAlternativePropertiesForCondominium(data.condoName, data.excludeCode);
   });
 
 // ───────── Admin status / bootstrap ─────────
@@ -551,12 +691,14 @@ export async function runAvailabilitySync(db: AnySupabase): Promise<SyncSummary>
           status: "erro",
           detail: result.error || "Erro de rede ou timeout",
         });
-      } else if (result.mode === "unpublished") {
+      } else if (result.mode === "unpublished" || result.publishedAfter === false) {
         unpublishedCount += 1;
         detailsList.push({
           code: row.code || "unknown",
-          status: "indisponivel",
-          detail: "Imóvel indisponível ou removido na origem",
+          status: result.publishedAfter === false ? "bloqueado_admin" : "indisponivel",
+          detail: result.publishedAfter === false
+            ? "Imóvel mantido bloqueado administrativamente (published=false)"
+            : "Imóvel indisponível ou removido na origem",
         });
       } else {
         availableCount += 1;

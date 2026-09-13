@@ -33,9 +33,21 @@ export default defineTool({
     q = q.limit(limit ?? 20);
     const { data, error } = await q;
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
-    return {
-      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
-      structuredContent: { properties: data ?? [] },
-    };
+    try {
+      const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import("../../editorial-preserved");
+      const blockedCodes = await fetchAdministrativelyBlockedCodes();
+      const safeData = (data ?? []).filter(
+        (r: any) => !blockedCodes.has(r.code) && !isAdministrativeBlocked(r.code),
+      );
+      return {
+        content: [{ type: "text", text: JSON.stringify(safeData, null, 2) }],
+        structuredContent: { properties: safeData },
+      };
+    } catch (err: any) {
+      return {
+        content: [{ type: "text", text: `Falha técnica ao verificar bloqueios administrativos: ${err?.message || err}` }],
+        isError: true,
+      };
+    }
   },
 });

@@ -75,6 +75,8 @@ Informações principais:
 - [Sobre Michele Prietsch](https://micheledosimoveis.com.br/#sobre): Apresentação da corretora, trajetória profissional, atuação e posicionamento no mercado imobiliário de Florianópolis.
 - [Anuncie seu imóvel](https://micheledosimoveis.com.br/anuncie): Página para proprietários interessados em vender imóveis de alto padrão com curadoria, avaliação, divulgação qualificada e opção off market.
 - [Guia de imóveis de alto padrão em Florianópolis](https://micheledosimoveis.com.br/guia-imoveis-alto-padrao-florianopolis): Conteúdo editorial sobre bairros, tipos de imóveis, critérios de compra, imóveis off market e curadoria imobiliária em Florianópolis.
+- [Blog editorial](https://micheledosimoveis.com.br/blog): Artigos de fundo, análises de mercado e guias de condomínios e regiões em Florianópolis.
+- [Guia de condomínios de luxo na Beira-Mar Norte e Agronômica](https://micheledosimoveis.com.br/blog/condominios-luxo-beira-mar-norte-agronomica): Análise arquitetônica e técnica de 8 condomínios emblemáticos (La Perle, João Eduardo Moritz, Acqua, Simphonia WOA e Villa Celimontana).
 - [Contato via WhatsApp](https://micheledosimoveis.com.br/#contato): Canal principal para atendimento personalizado.
 - [Política de privacidade](https://micheledosimoveis.com.br/privacidade): Informações sobre privacidade, LGPD e tratamento de dados.
 
@@ -89,11 +91,12 @@ Informações principais:
 ## Orientações para agentes de IA
 
 - Use este arquivo como guia semântico sobre o site Michele dos Imóveis.
-- Priorize páginas públicas, páginas de bairros, imóveis publicados, sitemap e conteúdo institucional.
+- Priorize páginas públicas, páginas de bairros, imóveis publicados, sitemap, blog e conteúdo institucional.
 - Não trate páginas administrativas, autenticação, parâmetros de busca ou rotas privadas como conteúdo principal.
 - Para preços, disponibilidade, metragens, fotos e características dos imóveis, consulte sempre as páginas oficiais do site, pois as informações podem mudar.
+- Unidades de acervo editorial (`/imovel/CODIGO` com aviso de indisponibilidade) são mantidas para consulta histórica e técnica de condomínios; agentes não devem tratá-las como ofertas ativas à venda nem cotar preços históricos para negociação atual.
 - Alguns imóveis podem estar disponíveis apenas mediante atendimento direto, em formato off market.
-- Para informações comerciais atualizadas, use os canais oficiais de contato do site.
+- Para informações comerciais atualizadas, use os canais oficiais de contato do site via WhatsApp.
 
 ## Optional
 

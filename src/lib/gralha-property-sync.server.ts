@@ -1,5 +1,6 @@
 import { parseGralhaPropertyHtml, fetchGralhaApiItem } from "./gralha-scraper.server";
 import { checkGralhaAvailability } from "./gralha-availability.server";
+import { isCodeAdministrativelyBlocked } from "./editorial-preserved";
 
 export type SyncOptions = {
   url: string;
@@ -401,15 +402,27 @@ export async function syncOneGralhaProperty(
       checkField("code", scraped.code, existing.code);
       checkField("source_url", url, existing.source_url);
 
+      const isBlocked = await isCodeAdministrativelyBlocked(realCode, db);
+
       const isRepublishing = existing.published === false;
       if (isRepublishing) {
-        updateData.published = true;
-        updateData.unavailable_since = null;
-        updateData.last_check_status = "available";
+        if (isBlocked) {
+          updateData.published = false;
+          updateData.last_check_status = "administratively_blocked";
+        } else {
+          updateData.published = true;
+          updateData.unavailable_since = null;
+          updateData.last_check_status = "available";
+        }
+      } else if (isBlocked) {
+        updateData.published = false;
+        updateData.last_check_status = "administratively_blocked";
       }
 
       updateData.last_checked_at = now;
-      updateData.last_check_status = "available";
+      if (!isBlocked) {
+        updateData.last_check_status = "available";
+      }
 
       if (Object.keys(updateData).length > 0) {
         const { error: upErr } = await db
@@ -481,11 +494,22 @@ export async function syncOneGralhaProperty(
       }
 
       const hasPhotoChanges = photosAdded > 0 || photosRemoved > 0 || photosReordered > 0;
-      const mode = isRepublishing
-        ? "republished"
-        : (changedFields.length > 0 || hasPhotoChanges)
-        ? "updated"
-        : "no_change";
+      let mode: SyncResult["mode"];
+      if (isBlocked) {
+        if (publishedBefore) {
+          mode = "unpublished";
+        } else if (changedFields.length > 0 || hasPhotoChanges) {
+          mode = "updated";
+        } else {
+          mode = "no_change";
+        }
+      } else if (isRepublishing) {
+        mode = "republished";
+      } else if (changedFields.length > 0 || hasPhotoChanges) {
+        mode = "updated";
+      } else {
+        mode = "no_change";
+      }
 
       return {
         mode,
@@ -494,13 +518,14 @@ export async function syncOneGralhaProperty(
         photosRemoved,
         photosReordered,
         publishedBefore,
-        publishedAfter: true,
+        publishedAfter: isBlocked ? false : true,
         error: null,
         id: existing.id,
         code: scraped.code,
       };
     } else {
       // Criar novo registro
+      const isBlocked = await isCodeAdministrativelyBlocked(scraped.code, db);
       const { data: inserted, error: insErr } = await db
         .from("properties")
         .insert({
@@ -525,11 +550,11 @@ export async function syncOneGralhaProperty(
           features: scraped.features,
           condo_features: scraped.condo_features,
           cover_image: scraped.cover_image,
-          published: true,
+          published: !isBlocked,
           featured,
           is_launch: isLaunch,
           last_checked_at: now,
-          last_check_status: "available",
+          last_check_status: isBlocked ? "administratively_blocked" : "available",
           unavailable_since: null,
         })
         .select("id")
@@ -575,7 +600,7 @@ export async function syncOneGralhaProperty(
         photosRemoved: 0,
         photosReordered: 0,
         publishedBefore: false,
-        publishedAfter: true,
+        publishedAfter: !isBlocked,
         error: null,
         id: inserted.id,
         code: scraped.code,

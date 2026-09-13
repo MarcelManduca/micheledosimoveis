@@ -61,6 +61,7 @@ export function SiteFooter() {
         <div>
           <div className="text-xs uppercase tracking-[0.2em] text-foreground/70">Guias e conteúdos</div>
           <ul className="mt-2 space-y-2 leading-relaxed">
+            <li><Link to="/blog" className="text-foreground/80 hover:text-foreground hover:underline underline-offset-4">Blog: condomínios e endereços</Link></li>
             <li>
               <Link
                 to="/guia-imoveis-alto-padrao-florianopolis"

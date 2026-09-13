@@ -31,6 +31,8 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/imoveis", changefreq: "weekly", priority: "0.9" },
           { path: "/anuncie", changefreq: "monthly", priority: "0.8" },
           { path: "/guia-imoveis-alto-padrao-florianopolis", changefreq: "monthly", priority: "0.8" },
+          { path: "/blog", changefreq: "monthly", priority: "0.8" },
+          { path: "/blog/condominios-luxo-beira-mar-norte-agronomica", changefreq: "monthly", priority: "0.8" },
           { path: "/privacidade", changefreq: "yearly", priority: "0.3" },
           ...NEIGHBORHOODS.map((n) => ({
             path: `/imoveis/${n.slug}`,
@@ -40,27 +42,71 @@ export const Route = createFileRoute("/sitemap.xml")({
         ];
 
         try {
-          const { createClient } = await import("@supabase/supabase-js");
-          const supabase = createClient(
-            process.env.SUPABASE_URL!,
-            process.env.SUPABASE_PUBLISHABLE_KEY!,
-            { auth: { persistSession: false } },
+          const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import(
+            "@/lib/editorial-preserved"
           );
-          const { data } = await supabase
-            .from("properties")
-            .select("code, updated_at, cover_image")
-            .eq("published", true);
+          const existingPaths = new Set(entries.map((e) => e.path));
 
-          for (const row of data ?? []) {
-            entries.push({
-              path: `/imovel/${row.code}`,
-              lastmod: row.updated_at
-                ? new Date(row.updated_at).toISOString().slice(0, 10)
-                : undefined,
-              changefreq: "weekly",
-              priority: "0.8",
-              image: row.cover_image,
-            });
+          // 1. Buscar códigos com bloqueio administrativo de forma autoritativa no servidor
+          const blockedCodes = await fetchAdministrativelyBlockedCodes();
+
+          const { createClient } = await import("@supabase/supabase-js");
+          const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
+          const key =
+            process.env.SUPABASE_PUBLISHABLE_KEY ||
+            process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+            process.env.VITE_SUPABASE_ANON_KEY ||
+            "";
+
+          if (url && key) {
+            const supabase = createClient(url, key, { auth: { persistSession: false } });
+
+            // 2. Consulta a imóveis comerciais ativos publicados
+            const { data } = await supabase
+              .from("properties")
+              .select("code, updated_at, cover_image")
+              .eq("published", true);
+
+            for (const row of data ?? []) {
+              if (blockedCodes.has(row.code) || isAdministrativeBlocked(row.code)) continue;
+              const path = `/imovel/${row.code}`;
+              if (!existingPaths.has(path)) {
+                existingPaths.add(path);
+                entries.push({
+                  path,
+                  lastmod: row.updated_at
+                    ? new Date(row.updated_at).toISOString().slice(0, 10)
+                    : undefined,
+                  changefreq: "weekly",
+                  priority: "0.8",
+                  image: row.cover_image,
+                });
+              }
+            }
+
+            // 3. Consulta às unidades preservadas autorizadas (filtradas por RLS pública)
+            const { data: preservedData, error: presErr } = await supabase
+              .from("editorial_preserved_properties")
+              .select("code, cover_image, created_at, updated_at");
+
+            if (!presErr && preservedData) {
+              for (const row of preservedData) {
+                if (blockedCodes.has(row.code) || isAdministrativeBlocked(row.code)) continue;
+                const path = `/imovel/${row.code}`;
+                if (!existingPaths.has(path)) {
+                  existingPaths.add(path);
+                  entries.push({
+                    path,
+                    lastmod: row.updated_at
+                      ? new Date(row.updated_at).toISOString().slice(0, 10)
+                      : undefined,
+                    changefreq: "monthly",
+                    priority: "0.6",
+                    image: row.cover_image,
+                  });
+                }
+              }
+            }
           }
         } catch {
           // fall through
