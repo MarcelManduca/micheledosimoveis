@@ -260,7 +260,9 @@ export const getAlternativePropertiesForCondominium = createServerFn({ method: "
       console.error("getAlternativePropertiesForCondominium", error);
       return [];
     }
-    return normalizeRows(rows);
+    const { isAdministrativeBlocked } = await import("@/lib/editorial-preserved");
+    const safeRows = (rows ?? []).filter((r: any) => !isAdministrativeBlocked(r.code));
+    return normalizeRows(safeRows);
   });
 
 // ───────── Admin status / bootstrap ─────────

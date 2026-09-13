@@ -57,6 +57,7 @@ export const Route = createFileRoute("/sitemap.xml")({
             .eq("published", true);
 
           for (const row of data ?? []) {
+            if (isAdministrativeBlocked(row.code)) continue;
             const path = `/imovel/${row.code}`;
             if (!existingPaths.has(path)) {
               existingPaths.add(path);
@@ -72,16 +73,49 @@ export const Route = createFileRoute("/sitemap.xml")({
             }
           }
 
-          for (const [code, item] of Object.entries(EDITORIAL_PRESERVED_CATALOG)) {
-            const path = `/imovel/${code}`;
-            if (item.isPreserved && !isAdministrativeBlocked(code) && !existingPaths.has(path)) {
-              existingPaths.add(path);
-              entries.push({
-                path,
-                changefreq: "monthly",
-                priority: "0.6",
-                image: item.coverImage,
-              });
+          // Consulta às unidades preservadas (banco primeiro, semente apenas se tabela não migrada)
+          const { data: preservedData, error: presErr } = await supabase
+            .from("editorial_preserved_properties")
+            .select("code, cover_image, created_at, updated_at");
+
+          if (!presErr && preservedData) {
+            for (const row of preservedData) {
+              if (isAdministrativeBlocked(row.code)) continue;
+              const path = `/imovel/${row.code}`;
+              if (!existingPaths.has(path)) {
+                existingPaths.add(path);
+                entries.push({
+                  path,
+                  lastmod: row.updated_at
+                    ? new Date(row.updated_at).toISOString().slice(0, 10)
+                    : undefined,
+                  changefreq: "monthly",
+                  priority: "0.6",
+                  image: row.cover_image,
+                });
+              }
+            }
+          } else if (
+            presErr &&
+            (presErr.code === "42P01" ||
+              presErr.code === "PGRST205" ||
+              presErr.message?.includes("does not exist") ||
+              presErr.message?.includes("Could not find the table") ||
+              presErr.message?.includes("schema cache"))
+          ) {
+            for (const [code, item] of Object.entries(EDITORIAL_PRESERVED_CATALOG)) {
+              if (isAdministrativeBlocked(code) || !item.isPreserved) continue;
+              const path = `/imovel/${code}`;
+              if (!existingPaths.has(path)) {
+                existingPaths.add(path);
+                entries.push({
+                  path,
+                  lastmod: item.snapshotDate,
+                  changefreq: "monthly",
+                  priority: "0.6",
+                  image: item.coverImage,
+                });
+              }
             }
           }
         } catch {

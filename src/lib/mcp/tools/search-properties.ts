@@ -33,9 +33,11 @@ export default defineTool({
     q = q.limit(limit ?? 20);
     const { data, error } = await q;
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
+    const { isAdministrativeBlocked } = await import("../../editorial-preserved");
+    const safeData = (data ?? []).filter((r: any) => !isAdministrativeBlocked(r.code));
     return {
-      content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
-      structuredContent: { properties: data ?? [] },
+      content: [{ type: "text", text: JSON.stringify(safeData, null, 2) }],
+      structuredContent: { properties: safeData },
     };
   },
 });

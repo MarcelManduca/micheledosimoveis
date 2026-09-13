@@ -4,12 +4,14 @@
  * acessíveis com aviso de indisponibilidade e CTA contextual, sem abrir
  * leitura indiscriminada a todos os imóveis com published=false.
  *
- * Fonte persistente de verdade:
- * - Prioridade 1: Tabela `editorial_preserved_properties` no Supabase (quando disponível).
- *   Se o registro no banco tiver `is_preserved = false` ou `is_admin_blocked = true`,
- *   a unidade é considerada revogada e NÃO é exibida.
- * - Prioridade 2: Catálogo semente estático (`EDITORIAL_PRESERVED_CATALOG`), utilizado
- *   como fallback seguro antes da migração do banco.
+ * Modelo de Resolução e RLS:
+ * 1. O banco de dados (tabela `editorial_preserved_properties`) é a fonte de verdade persistente.
+ * 2. Sob RLS pública (`USING (is_preserved = true AND is_admin_blocked = false)`), registros revogados
+ *    ou bloqueados retornam `data = null`.
+ * 3. Quando a tabela existe e retorna `data = null` (sem erro), o resolvedor retorna `null` (404),
+ *    NUNCA recorrendo ao catálogo semente estático para ressuscitar uma unidade revogada.
+ * 4. O catálogo semente `EDITORIAL_PRESERVED_CATALOG` atua exclusivamente no estágio de pré-migração
+ *    (quando o erro for 42P01 - relation does not exist) ou como base inicial para importação.
  */
 
 export interface EditorialPreservedProperty {
@@ -268,7 +270,7 @@ export const EDITORIAL_PRESERVED_CATALOG: Record<string, EditorialPreservedPrope
 };
 
 /**
- * Consulta síncrona ao catálogo estático (para contextos síncronos/UI).
+ * Consulta síncrona ao catálogo estático (para contextos estáticos/UI sem Supabase).
  */
 export function getEditorialPreservedSnapshot(code: string): EditorialPreservedProperty | null {
   const item = EDITORIAL_PRESERVED_CATALOG[code];
@@ -281,94 +283,92 @@ export function isPreservedCode(code: string): boolean {
   return Boolean(item?.isPreserved && !item.isAdminBlocked);
 }
 
+export function isAdministrativeBlocked(code: string, _supabase?: any): boolean {
+  return Boolean(EDITORIAL_PRESERVED_CATALOG[code]?.isAdminBlocked);
+}
+
+export const isCodeAdministrativelyBlocked = isAdministrativeBlocked;
+
 /**
- * Resolução persistente completa (DB primeiro, catálogo semente como fallback).
- * Garante que revogar ou bloquear no banco de dados impeça definitivamente
- * o reaparecimento pelo catálogo estático.
+ * Resolução persistente com respeito estrito à RLS.
+ * 
+ * Regra:
+ * - Se o Supabase estiver disponível e responder sem erro:
+ *   * `data` presente: retorna snapshot do banco (respeitando RLS).
+ *   * `data === null`: o imóvel NÃO está disponível/preservado ou foi revogado no banco.
+ *     Retorna `null` (HTTP 404). JAMAIS ressuscita pelo catálogo estático.
+ * - Se o Supabase retornar erro 42P01 (tabela ainda não existe no ambiente pré-migração):
+ *   * Utiliza o catálogo semente estático de contingência.
+ * - Se retornar qualquer outro erro técnico de banco (timeout, network, 5xx):
+ *   * Propaga o erro (não mascara como fallback nem 404).
  */
 export async function resolveEditorialPreservedSnapshot(
   code: string,
   supabase?: any,
 ): Promise<EditorialPreservedProperty | null> {
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from("editorial_preserved_properties")
-        .select("*")
-        .eq("code", code)
-        .maybeSingle();
+  if (isAdministrativeBlocked(code)) return null;
 
-      if (!error && data) {
-        // Registro encontrado no banco de dados (fonte persistente prioritária)
-        if (data.is_preserved === false || data.is_admin_blocked === true) {
-          // Explicitamente revogado ou bloqueado administrativamente no banco
-          return null;
-        }
-        return {
-          code: data.code,
-          condoName: data.condo_name,
-          condoSlug: data.condo_slug,
-          articlePath: `/blog/${data.article_slug ?? "condominios-luxo-beira-mar-norte-agronomica"}`,
-          title: data.title,
-          propertyType: data.property_type ?? "apartamento",
-          neighborhood: data.neighborhood ?? "",
-          city: data.city ?? "Florianópolis",
-          state: data.state ?? "SC",
-          address: data.address ?? "",
-          areaM2: Number(data.area_m2) || 0,
-          bedrooms: data.bedrooms ?? 0,
-          suites: data.suites ?? 0,
-          bathrooms: data.bathrooms ?? 0,
-          parkingSpots: data.parking_spots ?? 0,
-          description: data.description ?? "",
-          features: data.features ?? [],
-          condoFeatures: data.condo_features ?? [],
-          coverImage: data.cover_image ?? "",
-          photos: Array.isArray(data.photos) ? data.photos : [],
-          isPreserved: Boolean(data.is_preserved),
-          isAdminBlocked: Boolean(data.is_admin_blocked),
-          unavailableNotice: data.unavailable_notice ?? "Esta unidade não está disponível para venda no momento.",
-          snapshotDate: data.created_at ? new Date(data.created_at).toISOString().slice(0, 10) : "2026-09-12",
-        };
-      }
-    } catch {
-      // Tabela ainda não existente no runtime, prossegue para o catálogo semente
+  if (supabase) {
+    const { data, error } = await supabase
+      .from("editorial_preserved_properties")
+      .select("*")
+      .eq("code", code)
+      .maybeSingle();
+
+    if (!error) {
+      // Sob RLS: se a unidade for is_preserved = false ou is_admin_blocked = true,
+      // Postgres retorna data = null. Nesse caso, a decisão do banco é autoritativa:
+      // A unidade NÃO deve ser exibida. Retornamos null.
+      if (!data) return null;
+
+      return {
+        code: data.code,
+        condoName: data.condo_name,
+        condoSlug: data.condo_slug,
+        articlePath: `/blog/${data.article_slug ?? "condominios-luxo-beira-mar-norte-agronomica"}`,
+        title: data.title,
+        propertyType: data.property_type ?? "apartamento",
+        neighborhood: data.neighborhood ?? "",
+        city: data.city ?? "Florianópolis",
+        state: data.state ?? "SC",
+        address: data.address ?? "",
+        areaM2: Number(data.area_m2) || 0,
+        bedrooms: data.bedrooms ?? 0,
+        suites: data.suites ?? 0,
+        bathrooms: data.bathrooms ?? 0,
+        parkingSpots: data.parking_spots ?? 0,
+        description: data.description ?? "",
+        features: data.features ?? [],
+        condoFeatures: data.condo_features ?? [],
+        coverImage: data.cover_image ?? "",
+        photos: Array.isArray(data.photos) ? data.photos : [],
+        isPreserved: Boolean(data.is_preserved),
+        isAdminBlocked: Boolean(data.is_admin_blocked),
+        unavailableNotice: data.unavailable_notice ?? "Esta unidade não está disponível para venda no momento.",
+        snapshotDate: data.created_at ? new Date(data.created_at).toISOString().slice(0, 10) : "2026-09-12",
+      };
     }
+
+    // Identificação precisa de tabela inexistente (fase de homologação/pré-migração)
+    const isTableMissing =
+      error.code === "42P01" ||
+      error.code === "PGRST205" ||
+      error.message?.includes("relation \"public.editorial_preserved_properties\" does not exist") ||
+      error.message?.includes("Could not find the table") ||
+      error.message?.includes("schema cache") ||
+      error.message?.includes("does not exist");
+
+    if (isTableMissing) {
+      const seed = EDITORIAL_PRESERVED_CATALOG[code];
+      if (!seed || !seed.isPreserved || seed.isAdminBlocked) return null;
+      return seed;
+    }
+
+    // Para erros reais de conectividade ou falha interna, dispara erro
+    throw new Error(`Falha de consulta ao acervo editorial: ${error.message} (código: ${error.code})`);
   }
 
-  // Fallback para o catálogo semente
   const seed = EDITORIAL_PRESERVED_CATALOG[code];
   if (!seed || !seed.isPreserved || seed.isAdminBlocked) return null;
   return seed;
 }
-
-/**
- * Checagem centralizada de bloqueio administrativo.
- * Retorna true se o código estiver explicitamente bloqueado para exibição pública.
- */
-export async function isCodeAdministrativelyBlocked(
-  code: string,
-  supabase?: any,
-): Promise<boolean> {
-  if (supabase) {
-    try {
-      const { data, error } = await supabase
-        .from("editorial_preserved_properties")
-        .select("is_admin_blocked, is_preserved")
-        .eq("code", code)
-        .maybeSingle();
-      if (!error && data) {
-        return Boolean(data.is_admin_blocked);
-      }
-    } catch {
-      // Fall through
-    }
-  }
-  const seed = EDITORIAL_PRESERVED_CATALOG[code];
-  return Boolean(seed?.isAdminBlocked);
-}
-
-export function isAdministrativeBlocked(code: string): boolean {
-  return Boolean(EDITORIAL_PRESERVED_CATALOG[code]?.isAdminBlocked);
-}
-
