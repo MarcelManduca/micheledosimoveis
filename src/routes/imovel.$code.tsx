@@ -25,6 +25,8 @@ import {
   Send,
 } from "lucide-react";
 
+import { PropertyCard } from "@/components/PropertyCard";
+
 export const Route = createFileRoute("/imovel/$code")({
   loader: async ({ params }) => {
     const result = await getPropertyByCode({ data: { code: params.code } });
@@ -34,6 +36,7 @@ export const Route = createFileRoute("/imovel/$code")({
       property_type: string | null;
       price_brl: number | null;
       bedrooms: number | null;
+      condo_name: string | null;
     };
     const links = await getPropertyInternalLinks({
       data: {
@@ -51,26 +54,38 @@ export const Route = createFileRoute("/imovel/$code")({
       condominiums: [],
       similar: [],
     }));
-    return { ...result, links };
+
+    let alternatives: import("@/lib/properties.functions").PropertyListItem[] = [];
+    if (p.condo_name) {
+      const { getAlternativePropertiesForCondominium } = await import("@/lib/properties.functions");
+      alternatives = await getAlternativePropertiesForCondominium({
+        data: { condoName: p.condo_name, excludeCode: params.code },
+      }).catch(() => []);
+    }
+
+    return { ...result, links, alternatives };
   },
   head: ({ params, loaderData }) => {
     if (!loaderData) return { meta: [{ title: "Imóvel · Michele Prietsch" }] };
     const p = loaderData.property as any;
+    const isArchived = Boolean(loaderData.isArchived);
     const url = `https://micheledosimoveis.com.br/imovel/${params.code}`;
     const localizacao = [p.neighborhood, p.city].filter(Boolean).join(", ");
-    const titleSeo = `${p.title}${p.neighborhood ? ` — ${p.neighborhood}` : ""}, Florianópolis | Michele dos Imóveis`;
-    const descAuto = [
-      p.bedrooms ? `${p.bedrooms} dormitórios` : null,
-      p.bathrooms ? `${p.bathrooms} banheiros` : null,
-      p.area_m2 ? `${p.area_m2}m²` : null,
-      p.price_brl
-        ? `R$ ${Number(p.price_brl).toLocaleString("pt-BR")}`
-        : null,
-      localizacao || null,
-      "Atendimento Michele Prietsch.",
-    ]
-      .filter(Boolean)
-      .join(" · ");
+    const titleSeo = isArchived
+      ? `${p.title}${p.neighborhood ? ` — ${p.neighborhood}` : ""}, Florianópolis | Acervo Michele dos Imóveis`
+      : `${p.title}${p.neighborhood ? ` — ${p.neighborhood}` : ""}, Florianópolis | Michele dos Imóveis`;
+    const descAuto = isArchived
+      ? `Registro de acervo: ${p.title} no ${p.condo_name || "condomínio"}. ${p.bedrooms ? `${p.bedrooms} dorms, ` : ""}${p.area_m2 ? `${p.area_m2}m². ` : ""}Consulte opções disponíveis com Michele dos Imóveis.`
+      : [
+          p.bedrooms ? `${p.bedrooms} dormitórios` : null,
+          p.bathrooms ? `${p.bathrooms} banheiros` : null,
+          p.area_m2 ? `${p.area_m2}m²` : null,
+          p.price_brl ? `R$ ${Number(p.price_brl).toLocaleString("pt-BR")}` : null,
+          localizacao || null,
+          "Atendimento Michele Prietsch.",
+        ]
+          .filter(Boolean)
+          .join(" · ");
     const description = (p.description?.slice(0, 160) || descAuto).trim();
     const photos = (loaderData.photos as Array<{ url: string }> | undefined) ?? [];
     const images = photos.map((x) => x.url).filter(Boolean);
@@ -128,7 +143,7 @@ export const Route = createFileRoute("/imovel/$code")({
             },
           }
         : {}),
-      offers: p.price_brl
+      offers: !isArchived && p.price_brl
         ? {
             "@type": "Offer",
             price: p.price_brl,
@@ -178,12 +193,12 @@ export const Route = createFileRoute("/imovel/$code")({
         { name: "description", content: description },
         { property: "og:title", content: titleSeo },
         { property: "og:description", content: description },
-        { property: "og:type", content: "product" },
+        { property: "og:type", content: isArchived ? "article" : "product" },
         { property: "og:url", content: url },
         ...(p.cover_image ? [{ property: "og:image" as const, content: p.cover_image }] : []),
         ...(p.cover_image ? [{ name: "twitter:image" as const, content: p.cover_image }] : []),
-        ...(p.price_brl ? [{ property: "product:price:amount" as const, content: String(p.price_brl) }] : []),
-        ...(p.price_brl ? [{ property: "product:price:currency" as const, content: "BRL" }] : []),
+        ...(!isArchived && p.price_brl ? [{ property: "product:price:amount" as const, content: String(p.price_brl) }] : []),
+        ...(!isArchived && p.price_brl ? [{ property: "product:price:currency" as const, content: "BRL" }] : []),
       ],
       links: [{ rel: "canonical", href: url }],
       scripts: [
@@ -225,7 +240,8 @@ function brl(n: number | null) {
 }
 
 function PropertyPage() {
-  const { property: p, photos, links } = Route.useLoaderData();
+  const loaderData = Route.useLoaderData();
+  const { property: p, photos, links, alternatives, isArchived } = loaderData;
   const photoList = photos as Photo[];
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const open = lightboxIndex !== null;
@@ -254,9 +270,14 @@ function PropertyPage() {
   }, [open, prev, next]);
 
   const whatsappText = encodeURIComponent(
-    `Olá Michele! Tenho interesse no imóvel cód. ${p.code} — ${p.title}. ${typeof window !== "undefined" ? window.location.href : ""}`,
+    isArchived
+      ? `Olá Michele! Vi o imóvel cód. ${p.code} no ${p.condo_name || "condomínio"}, que está indisponível, e gostaria de conhecer outras opções nesse condomínio.`
+      : `Olá Michele! Tenho interesse no imóvel cód. ${p.code} — ${p.title}. ${typeof window !== "undefined" ? window.location.href : ""}`,
   );
   const whatsapp = `https://api.whatsapp.com/send?phone=5548991828828&text=${whatsappText}`;
+  const whatsappCondo = `https://api.whatsapp.com/send?phone=5548991828828&text=${encodeURIComponent(
+    `Olá Michele! Vi o imóvel cód. ${p.code} no ${p.condo_name || "condomínio"}, que está indisponível, e gostaria de conhecer outras opções nesse condomínio.`,
+  )}`;
   const [scheduleOpen, setScheduleOpen] = useState(false);
 
   const mapQuery = [p.address, p.neighborhood, p.city, p.state]
@@ -266,18 +287,35 @@ function PropertyPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
+      {isArchived && (
+        <div className="bg-amber-50 dark:bg-amber-950/50 border-b border-amber-200 dark:border-amber-800/60 px-5 py-3 text-center text-sm text-amber-900 dark:text-amber-200 flex flex-wrap items-center justify-center gap-2">
+          <span className="font-semibold px-2 py-0.5 rounded-full bg-amber-200/70 dark:bg-amber-900/60 text-xs uppercase tracking-wide">
+            Acervo
+          </span>
+          <span>{loaderData.unavailableNotice || "Esta unidade não está disponível para venda no momento."}</span>
+          {loaderData.articlePath && (
+            <Link
+              to={loaderData.articlePath}
+              className="underline font-medium hover:text-amber-950 dark:hover:text-white transition ml-1"
+            >
+              Ver no guia do blog →
+            </Link>
+          )}
+        </div>
+      )}
+
       <header className="border-b border-border">
         <div className="mx-auto max-w-6xl px-6 sm:px-10 py-5 flex items-center justify-between">
           <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> Voltar para Michele dos Imóveis
           </Link>
           <a
-            href={whatsapp}
+            href={isArchived ? whatsappCondo : whatsapp}
             target="_blank"
             rel="noreferrer"
             className="rounded-full bg-foreground text-background px-5 py-2 text-sm font-medium hover:bg-foreground/90 transition"
           >
-            Falar com Michele
+            {isArchived ? "Consultar opções" : "Falar com Michele"}
           </a>
         </div>
       </header>
@@ -343,26 +381,50 @@ function PropertyPage() {
       {/* CTAs */}
       <section className="mx-auto max-w-6xl px-4 sm:px-10 pt-6">
         <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-          <button
-            type="button"
-            onClick={() => setScheduleOpen(true)}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition w-full sm:w-auto"
-          >
-            <CalendarCheck className="h-4 w-4" />
-            Agendar visita
-          </button>
-          <a
-            href={whatsapp}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition w-full sm:w-auto"
-          >
-            Tirar dúvidas no WhatsApp
-          </a>
+          {isArchived ? (
+            <>
+              <a
+                href={whatsappCondo}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition w-full sm:w-auto"
+              >
+                <Send className="h-4 w-4" />
+                Consultar outras unidades no {p.condo_name || "condomínio"}
+              </a>
+              {loaderData.condoSlug && (
+                <Link
+                  to="/condominio/$slug"
+                  params={{ slug: loaderData.condoSlug }}
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition w-full sm:w-auto"
+                >
+                  <Building2 className="h-4 w-4" />
+                  Ver página do condomínio
+                </Link>
+              )}
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setScheduleOpen(true)}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition w-full sm:w-auto"
+              >
+                <CalendarCheck className="h-4 w-4" />
+                Agendar visita
+              </button>
+              <a
+                href={whatsapp}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition w-full sm:w-auto"
+              >
+                Tirar dúvidas no WhatsApp
+              </a>
+            </>
+          )}
         </div>
       </section>
-
-
 
       {/* Body */}
       <section className="mx-auto max-w-6xl px-4 sm:px-10 py-8 sm:py-10 grid gap-10 lg:gap-12 lg:grid-cols-[1.7fr,1fr]">
@@ -370,9 +432,9 @@ function PropertyPage() {
           <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Cód. {p.code}
             {p.property_type ? ` · ${p.property_type}` : ""}
+            {isArchived ? " · Acervo Editorial" : ""}
           </div>
           <h1 className="mt-3 font-display font-light text-[clamp(1.8rem,6vw,3rem)] tracking-tight leading-[1.05]">
-
             {p.title}
           </h1>
           <div className="mt-4 flex items-center gap-2 text-muted-foreground">
@@ -429,7 +491,7 @@ function PropertyPage() {
             </div>
           )}
 
-          {p.features.length > 0 && (
+          {p.features && p.features.length > 0 && (
             <div className="mt-10">
               <h2 className="font-display text-2xl tracking-tight">Diferenciais do imóvel</h2>
               <ul className="mt-4 grid sm:grid-cols-2 gap-2 text-sm">
@@ -442,7 +504,7 @@ function PropertyPage() {
             </div>
           )}
 
-          {p.condo_features.length > 0 && (
+          {p.condo_features && p.condo_features.length > 0 && (
             <div className="mt-10">
               <h2 className="font-display text-2xl tracking-tight">Estrutura do condomínio</h2>
               <ul className="mt-4 grid sm:grid-cols-2 gap-2 text-sm">
@@ -469,6 +531,23 @@ function PropertyPage() {
                 >
                   <LeafletMap query={mapQuery} title={p.title} />
                 </Suspense>
+              </div>
+            </div>
+          )}
+
+          {/* Alternative units in same condominium if available */}
+          {alternatives && alternatives.length > 0 && (
+            <div className="mt-12 rounded-3xl border border-border p-6 sm:p-8 bg-secondary/20">
+              <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                Opções disponíveis
+              </div>
+              <h2 className="mt-2 font-display text-2xl sm:text-3xl tracking-tight">
+                Outras unidades no {p.condo_name}
+              </h2>
+              <div className="mt-6 grid sm:grid-cols-2 gap-6">
+                {alternatives.map((alt) => (
+                  <PropertyCard key={alt.id} p={alt} />
+                ))}
               </div>
             </div>
           )}
@@ -518,28 +597,62 @@ function PropertyPage() {
         {/* Sidebar */}
         <aside className="lg:sticky lg:top-8 self-start">
           <div className="rounded-3xl bg-card ring-1 ring-black/5 p-6 shadow-xl">
-            <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-              Valor de venda
-            </div>
-            <div className="mt-2 font-display text-4xl">{brl(p.price_brl)}</div>
-            <div className="mt-3 space-y-1 text-sm text-muted-foreground">
-              {p.condo_fee_brl != null && <div>Condomínio: {brl(p.condo_fee_brl)}/mês</div>}
-              {p.iptu_brl != null && <div>IPTU: {brl(p.iptu_brl)}/mês</div>}
-            </div>
-            <a
-              href={whatsapp}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-6 block w-full text-center rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition"
-            >
-              Falar com Michele pelo WhatsApp
-            </a>
-            <a
-              href="tel:+5548991828828"
-              className="mt-3 block w-full text-center rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition"
-            >
-              Ligar agora
-            </a>
+            {isArchived ? (
+              <>
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 dark:bg-amber-950/60 px-3 py-1 text-xs font-medium text-amber-800 dark:text-amber-300">
+                  Unidade Indisponível
+                </div>
+                <div className="mt-4 font-display text-2xl tracking-tight leading-snug">
+                  Gostou deste condomínio?
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  Consulte com a Michele outras unidades que possam estar disponíveis no {p.condo_name || "condomínio"}.
+                </p>
+                <a
+                  href={whatsappCondo}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-6 block w-full text-center rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition"
+                >
+                  Consultar outras unidades
+                </a>
+                {loaderData.condoSlug && (
+                  <Link
+                    to="/condominio/$slug"
+                    params={{ slug: loaderData.condoSlug }}
+                    className="mt-3 block w-full text-center rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition"
+                  >
+                    Página do condomínio
+                  </Link>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                  Valor de venda
+                </div>
+                <div className="mt-2 font-display text-4xl">{brl(p.price_brl)}</div>
+                <div className="mt-3 space-y-1 text-sm text-muted-foreground">
+                  {p.condo_fee_brl != null && <div>Condomínio: {brl(p.condo_fee_brl)}/mês</div>}
+                  {p.iptu_brl != null && <div>IPTU: {brl(p.iptu_brl)}/mês</div>}
+                </div>
+                <a
+                  href={whatsapp}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-6 block w-full text-center rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition"
+                >
+                  Falar com Michele pelo WhatsApp
+                </a>
+                <a
+                  href="tel:+5548991828828"
+                  className="mt-3 block w-full text-center rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition"
+                >
+                  Ligar agora
+                </a>
+              </>
+            )}
+
             {p.address && (
               <div className="mt-6 pt-6 border-t border-border text-sm">
                 <div className="text-xs uppercase tracking-wider text-muted-foreground mb-1">

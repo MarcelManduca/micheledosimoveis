@@ -21,8 +21,11 @@ export type PropertyListItem = {
 };
 
 function getPublicClient() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_PUBLISHABLE_KEY;
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_PUBLISHABLE_KEY ||
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.VITE_SUPABASE_ANON_KEY;
   if (!url || !key) throw new Error("Backend indisponível no momento.");
   return createClient<Database>(url, key, {
     auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
@@ -166,14 +169,87 @@ export const getPropertyByCode = createServerFn({ method: "GET" })
       .eq("published", true)
       .maybeSingle();
     if (error) safeError("Não foi possível carregar o imóvel.", error);
-    if (!prop) return null;
-    const { data: photos, error: phErr } = await supabase
-      .from("property_photos")
-      .select("url, position")
-      .eq("property_id", prop.id)
-      .order("position", { ascending: true });
-    if (phErr) safeError("Não foi possível carregar as fotos.", phErr);
-    return { property: prop, photos: photos ?? [] };
+
+    if (prop) {
+      const { data: photos, error: phErr } = await supabase
+        .from("property_photos")
+        .select("url, position")
+        .eq("property_id", prop.id)
+        .order("position", { ascending: true });
+      if (phErr) safeError("Não foi possível carregar as fotos.", phErr);
+      return {
+        property: prop,
+        photos: photos ?? [],
+        isArchived: false,
+        condoName: prop.condo_name ?? null,
+        condoSlug: null as string | null,
+        articlePath: null as string | null,
+        unavailableNotice: null as string | null,
+      };
+    }
+
+    // Fallback editorial preservado: verificar se a unidade possui snapshot registrado
+    const { getEditorialPreservedSnapshot } = await import("@/lib/editorial-preserved");
+    const snap = getEditorialPreservedSnapshot(data.code);
+    if (!snap) return null;
+
+    return {
+      property: {
+        id: `preserved-${snap.code}`,
+        code: snap.code,
+        title: snap.title,
+        property_type: snap.propertyType,
+        neighborhood: snap.neighborhood,
+        city: snap.city,
+        state: snap.state,
+        address: snap.address,
+        condo_name: snap.condoName,
+        price_brl: null, // Preço suprimido na exibição de acervo
+        condo_fee_brl: null,
+        iptu_brl: null,
+        area_m2: snap.areaM2,
+        bedrooms: snap.bedrooms,
+        suites: snap.suites,
+        bathrooms: snap.bathrooms,
+        parking_spots: snap.parkingSpots,
+        description: snap.description,
+        features: snap.features,
+        condo_features: snap.condoFeatures,
+        cover_image: snap.coverImage,
+        published: false,
+        featured: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      photos: snap.photos,
+      isArchived: true,
+      condoName: snap.condoName,
+      condoSlug: snap.condoSlug,
+      articlePath: snap.articlePath,
+      unavailableNotice: snap.unavailableNotice,
+    };
+  });
+
+export const getAlternativePropertiesForCondominium = createServerFn({ method: "GET" })
+  .inputValidator((d: unknown) =>
+    z.object({ condoName: z.string().trim(), excludeCode: z.string().trim() }).parse(d),
+  )
+  .handler(async ({ data }): Promise<PropertyListItem[]> => {
+    if (!data.condoName) return [];
+    const supabase = getPublicClient();
+    const cleanCondo = data.condoName.replace(/^(Condomínio|Residencial)\s+/i, "").trim();
+    const { data: rows, error } = await supabase
+      .from("properties")
+      .select(LIST_COLS)
+      .eq("published", true)
+      .ilike("condo_name", `%${cleanCondo}%`)
+      .neq("code", data.excludeCode)
+      .limit(6);
+    if (error) {
+      console.error("getAlternativePropertiesForCondominium", error);
+      return [];
+    }
+    return normalizeRows(rows);
   });
 
 // ───────── Admin status / bootstrap ─────────
