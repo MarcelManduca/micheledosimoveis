@@ -50,17 +50,22 @@ function assert(cond: boolean, msg: string) {
   }
 }
 
-async function runContingencyTest() {
+async function runContingencyAndSyncTest() {
   console.log("================================================================================");
-  console.log("TESTE DE CONTINGÊNCIA E PROTEÇÃO DE SINCRONIZAÇÃO");
+  console.log("TESTE REAL DE CONTINGÊNCIA E SINCRONIZADOR COM syncOneGralhaProperty");
   console.log("================================================================================\n");
 
+  const originalFetch = globalThis.fetch;
+
   try {
-    // 1. Configurar estado com is_admin_blocked=true na tabela editorial e published=true na properties
+    const adminSupabase = createClient(POSTGREST_GATEWAY_URL, SERVICE_ROLE_KEY);
+
+    // 1. Configurar estado inicial da unidade 34547 no banco de homologação
+    // Imóvel com is_admin_blocked = true no acervo editorial e previamente published = false
     psql(`
-      INSERT INTO public.properties (code, title, neighborhood, city, state, address, condo_name, price_brl, area_m2, published)
-      VALUES ('34547', 'Apartamento La Perle Teste Bloqueio', 'Agronômica', 'Florianópolis', 'SC', 'Av. Irineu Bornhausen, 3600', 'La Perle', 8900000.00, 316, true)
-      ON CONFLICT (code) DO UPDATE SET published = true;
+      INSERT INTO public.properties (code, title, neighborhood, city, state, address, condo_name, price_brl, area_m2, published, source_url)
+      VALUES ('34547', 'Apartamento La Perle Sincronizacao', 'Agronômica', 'Florianópolis', 'SC', 'Av. Irineu Bornhausen, 3600', 'La Perle', 8900000.00, 316, false, 'https://www.gralhaimoveis.com.br/imovel/apartamento-3-quartos-agronomica-florianopolis-sc/34547')
+      ON CONFLICT (code) DO UPDATE SET published = false, source_url = 'https://www.gralhaimoveis.com.br/imovel/apartamento-3-quartos-agronomica-florianopolis-sc/34547';
     `);
 
     psql(`
@@ -73,38 +78,117 @@ async function runContingencyTest() {
     // 2. Testar Inacessibilidade da Unidade (fetchPropertyByCode e HTTP)
     const { fetchPropertyByCode, fetchSearchProperties } = await import("../src/lib/properties.functions");
     const result = await fetchPropertyByCode("34547");
-    assert(result === null, "Contingência: fetchPropertyByCode retorna null para imóvel bloqueado mesmo com properties.published=true");
+    assert(result === null, "Contingência: fetchPropertyByCode retorna null para imóvel com is_admin_blocked=true");
 
     const httpRes = await fetch(`${APP_SERVER_URL}/imovel/34547`);
-    assert(httpRes.status === 404, "Contingência HTTP: GET /imovel/34547 retorna HTTP 404 mesmo com properties.published=true");
+    assert(httpRes.status === 404, "Contingência HTTP: GET /imovel/34547 retorna HTTP 404 para imóvel bloqueado");
 
     const searchRes = await fetchSearchProperties({});
     assert(!searchRes.some((p) => p.code === "34547"), "Contingência Busca: fetchSearchProperties exclui unidade bloqueada dos resultados");
 
-    // 3. Testar Proteção do Sincronizador (Gralha Sync)
-    // Simular que o scraper encontrou a unidade ativa na fonte externa
-    const { isCodeAdministrativelyBlocked } = await import("../src/lib/editorial-preserved");
-    const isBlocked = await isCodeAdministrativelyBlocked("34547");
-    assert(isBlocked === true, "Sincronizador: isCodeAdministrativelyBlocked detecta bloqueio autoritativo persistido no servidor");
+    // 3. Execução REAL da função syncOneGralhaProperty com Scraper Mockado Ativo
+    console.log("\n--- Executando syncOneGralhaProperty real com origem externa controlada ---");
 
-    // Simulação do payload que o sync grava no banco:
-    const syncTargetPublished = !isBlocked;
-    const syncStatus = isBlocked ? "admin_blocked" : "available";
+    const mockGralhaHtml = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Apartamento com 3 Quartos à Venda, 316 m² por R$ 8.900.000 - Agronômica - Florianópolis/SC</title>
+          <meta property="og:title" content="Apartamento La Perle Alto Padrão - R$ 8.900.000" />
+          <meta property="og:description" content="Apartamento à venda no La Perle em Florianópolis" />
+          <meta property="og:image" content="https://cdn.gralhaimoveis.com.br/fotos/34547-1.jpg" />
+        </head>
+        <body>
+          <span class="codigo-imovel">Código: 34547</span>
+          <h1 class="titulo-imovel">Apartamento La Perle Alto Padrão</h1>
+          <span class="preco-imovel">R$ 8.900.000</span>
+          <span class="bairro">Agronômica</span>
+          <span class="cidade">Florianópolis</span>
+          <span class="estado">SC</span>
+          <span class="endereco">Avenida Governador Irineu Bornhausen, 3600</span>
+          <span class="area">316 m²</span>
+          <span class="quartos">3</span>
+          <span class="suites">3</span>
+          <span class="banheiros">6</span>
+          <span class="vagas">4</span>
+          <div class="fotos">
+            <img src="https://cdn.gralhaimoveis.com.br/fotos/34547-1.jpg" alt="Foto 1" />
+            <img src="https://cdn.gralhaimoveis.com.br/fotos/34547-2.jpg" alt="Foto 2" />
+          </div>
+        </body>
+      </html>
+    `;
 
-    assert(syncTargetPublished === false, "Sincronizador: Flag 'published' é forçada para false pelo sincronizador");
-    assert(syncStatus === "admin_blocked", "Sincronizador: 'last_check_status' é definido como 'admin_blocked'");
+    const targetUrl = "https://www.gralhaimoveis.com.br/imovel/apartamento-3-quartos-agronomica-florianopolis-sc/34547";
 
-    // Atualizar banco simulando ação do sync
-    psql(`
-      UPDATE public.properties
-      SET published = ${syncTargetPublished}, last_check_status = '${syncStatus}'
-      WHERE code = '34547';
-    `);
+    // Mockar globalThis.fetch apenas para chamadas externas à Gralha Imóveis (usando startsWith)
+    globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const urlStr = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+      
+      if (
+        urlStr.startsWith("https://www.gralhaimoveis.com.br/api/anuncios/search") ||
+        urlStr.startsWith("https://gralhaimoveis.com.br/api/anuncios/search")
+      ) {
+        const jsonBody = JSON.stringify({
+          items: [
+            {
+              codigo: "34547",
+              id: "34547",
+              valorVenda: 8900000,
+              areaPrivativa: 316,
+              quartos: 3,
+              suites: 3,
+              banheiros: 6,
+              garagens: 4,
+              bairro: "Agronômica",
+              cidade: "Florianópolis",
+            },
+          ],
+        });
+        const res = new Response(jsonBody, {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+        Object.defineProperty(res, "url", { value: urlStr });
+        return res;
+      }
 
-    const dbPublished = psql("SELECT published::text || ',' || last_check_status FROM public.properties WHERE code = '34547';");
-    assert(dbPublished === "false,admin_blocked", "Sincronizador: Banco confirma que a sincronização NÃO republica imóvel bloqueado");
+      if (
+        urlStr.startsWith("https://www.gralhaimoveis.com.br") ||
+        urlStr.startsWith("https://gralhaimoveis.com.br")
+      ) {
+        const res = new Response(mockGralhaHtml, {
+          status: 200,
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        });
+        Object.defineProperty(res, "url", { value: targetUrl });
+        return res;
+      }
+
+      return originalFetch(input, init);
+    };
+
+    const { syncOneGralhaProperty } = await import("../src/lib/gralha-property-sync.server");
+    const syncResult = await syncOneGralhaProperty(adminSupabase, {
+      url: targetUrl,
+    });
+
+    console.log("Resultado retornado pelo syncOneGralhaProperty:", {
+      mode: syncResult.mode,
+      publishedBefore: syncResult.publishedBefore,
+      publishedAfter: syncResult.publishedAfter,
+      error: syncResult.error,
+    });
+
+    // 4. Validação direta do registro no banco após execução do sync real
+    const dbRecord = psql("SELECT published::text || '|' || last_check_status FROM public.properties WHERE code = '34547';");
+    console.log("Estado no banco de dados PostgreSQL após o sync:", dbRecord);
+
+    assert(dbRecord.startsWith("false|administratively_blocked"), "Sincronizador Real: O syncOneGralhaProperty gravou published=false e last_check_status='administratively_blocked'");
+    assert(syncResult.error === null, "Sincronizador Real: A execução foi concluída sem erro fatal");
 
   } finally {
+    globalThis.fetch = originalFetch;
     // Restauração de segurança
     psql("UPDATE public.editorial_preserved_properties SET is_preserved = true, is_admin_blocked = false WHERE code = '34547';");
     psql("DELETE FROM public.properties WHERE code = '34547';");
@@ -113,11 +197,11 @@ async function runContingencyTest() {
   }
 
   console.log("\n================================================================================");
-  console.log(`RESULTADO DO TESTE DE CONTINGÊNCIA: ${passed} PASSARAM, ${failed} FALHARAM`);
+  console.log(`RESULTADO DO TESTE: ${passed} PASSARAM, ${failed} FALHARAM`);
   console.log("================================================================================\n");
 }
 
-runContingencyTest().catch((err) => {
-  console.error("Erro no teste de contingência:", err);
+runContingencyAndSyncTest().catch((err) => {
+  console.error("Erro no teste:", err);
   process.exit(1);
 });
