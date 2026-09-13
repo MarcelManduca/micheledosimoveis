@@ -5,6 +5,13 @@ import { MapPin, Search, Building2, ArrowRight, Phone } from "lucide-react";
 import { listCondominiums, listBairros } from "@/lib/condominiums.functions";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const SITE = "https://micheledosimoveis.com.br";
 const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
@@ -165,18 +172,22 @@ function CondominiosIndex() {
                 className="w-full rounded-lg border border-input bg-background pl-9 pr-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring"
               />
             </div>
-            <select
-              value={bairroSlug}
-              onChange={(e) => setBairroSlug(e.target.value)}
-              className="rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-ring sm:w-64"
+            <Select
+              value={bairroSlug || "__all__"}
+              onValueChange={(val) => setBairroSlug(val === "__all__" ? "" : val)}
             >
-              <option value="">Todos os bairros</option>
-              {(bairros.data ?? []).map((b) => (
-                <option key={b.bairro_slug} value={b.bairro_slug}>
-                  {b.normalized_neighborhood} ({b.count})
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-auto rounded-lg border-input px-3 py-2.5 text-sm sm:w-64">
+                <SelectValue placeholder="Todos os bairros" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">Todos os bairros</SelectItem>
+                {(bairros.data ?? []).map((b) => (
+                  <SelectItem key={b.bairro_slug} value={b.bairro_slug}>
+                    {b.normalized_neighborhood} ({b.count})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="mb-4 text-xs text-muted-foreground">
