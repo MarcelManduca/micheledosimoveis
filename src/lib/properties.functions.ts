@@ -81,7 +81,14 @@ export const listProperties = createServerFn({ method: "GET" }).handler(
       .order("created_at", { ascending: false })
       .limit(12);
     if (error) safeError("Não foi possível carregar os imóveis.", error);
-    return normalizeRows(data);
+    const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import(
+      "@/lib/editorial-preserved"
+    );
+    const blockedCodes = await fetchAdministrativelyBlockedCodes();
+    const safeRows = (data ?? []).filter(
+      (r: any) => !blockedCodes.has(r.code) && !isAdministrativeBlocked(r.code),
+    );
+    return normalizeRows(safeRows);
   },
 );
 
@@ -96,7 +103,14 @@ export const listLaunches = createServerFn({ method: "GET" }).handler(
       .order("created_at", { ascending: false })
       .limit(12);
     if (error) safeError("Não foi possível carregar os lançamentos.", error);
-    return normalizeRows(data);
+    const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import(
+      "@/lib/editorial-preserved"
+    );
+    const blockedCodes = await fetchAdministrativelyBlockedCodes();
+    const safeRows = (data ?? []).filter(
+      (r: any) => !blockedCodes.has(r.code) && !isAdministrativeBlocked(r.code),
+    );
+    return normalizeRows(safeRows);
   },
 );
 
@@ -119,39 +133,54 @@ function escapeLike(s: string): string {
   return s.replace(/[\\%_]/g, "\\$&");
 }
 
+export async function fetchSearchProperties(
+  data: z.infer<typeof searchSchema>,
+  supabaseClient?: any,
+  privilegedAdminClient?: any,
+): Promise<PropertyListItem[]> {
+  const supabase = supabaseClient ?? getPublicClient();
+  const buildQuery = () => {
+    let q = supabase
+      .from("properties")
+      .select(LIST_COLS)
+      .eq("published", true);
+    if (data.tipo) q = q.ilike("property_type", `%${escapeLike(data.tipo)}%`);
+    if (data.bairro) q = q.ilike("neighborhood", `%${escapeLike(data.bairro)}%`);
+    if (data.dorms != null) {
+      if (data.dorms >= 4) q = q.gte("bedrooms", 4);
+      else q = q.eq("bedrooms", data.dorms);
+    }
+    if (data.precoMin != null) q = q.gte("price_brl", data.precoMin);
+    if (data.precoMax != null) q = q.lte("price_brl", data.precoMax);
+    return q
+      .order("featured", { ascending: false })
+      .order("created_at", { ascending: false });
+  };
+  // Paginate to bypass PostgREST's default 1000-row cap and return every
+  // matching property, no matter how many estejam cadastrados.
+  const PAGE = 1000;
+  const all: unknown[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data: rows, error } = await buildQuery().range(from, from + PAGE - 1);
+    if (error) safeError("Não foi possível pesquisar os imóveis.", error);
+    const batch = rows ?? [];
+    all.push(...batch);
+    if (batch.length < PAGE) break;
+  }
+  const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import(
+    "@/lib/editorial-preserved"
+  );
+  const blockedCodes = await fetchAdministrativelyBlockedCodes(privilegedAdminClient);
+  const safeRows = (all as any[]).filter(
+    (r) => !blockedCodes.has(r.code) && !isAdministrativeBlocked(r.code),
+  );
+  return normalizeRows(safeRows);
+}
+
 export const searchProperties = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => searchSchema.parse(d))
   .handler(async ({ data }): Promise<PropertyListItem[]> => {
-    const supabase = getPublicClient();
-    const buildQuery = () => {
-      let q = supabase
-        .from("properties")
-        .select(LIST_COLS)
-        .eq("published", true);
-      if (data.tipo) q = q.ilike("property_type", `%${escapeLike(data.tipo)}%`);
-      if (data.bairro) q = q.ilike("neighborhood", `%${escapeLike(data.bairro)}%`);
-      if (data.dorms != null) {
-        if (data.dorms >= 4) q = q.gte("bedrooms", 4);
-        else q = q.eq("bedrooms", data.dorms);
-      }
-      if (data.precoMin != null) q = q.gte("price_brl", data.precoMin);
-      if (data.precoMax != null) q = q.lte("price_brl", data.precoMax);
-      return q
-        .order("featured", { ascending: false })
-        .order("created_at", { ascending: false });
-    };
-    // Paginate to bypass PostgREST's default 1000-row cap and return every
-    // matching property, no matter how many estejam cadastrados.
-    const PAGE = 1000;
-    const all: unknown[] = [];
-    for (let from = 0; ; from += PAGE) {
-      const { data: rows, error } = await buildQuery().range(from, from + PAGE - 1);
-      if (error) safeError("Não foi possível pesquisar os imóveis.", error);
-      const batch = rows ?? [];
-      all.push(...batch);
-      if (batch.length < PAGE) break;
-    }
-    return normalizeRows(all);
+    return fetchSearchProperties(data);
   });
 
 const codeSchema = z.object({
@@ -161,20 +190,21 @@ const codeSchema = z.object({
 export async function fetchPropertyByCode(
   code: string,
   supabaseClient?: any,
+  privilegedAdminClient?: any,
 ) {
   const supabase = supabaseClient ?? getPublicClient();
 
-  // 1. Verificação preliminar centralizada de bloqueio administrativo
+  // 1. Verificação preliminar autoritativa de bloqueio administrativo no servidor
   const { resolveEditorialPreservedSnapshot, isCodeAdministrativelyBlocked } = await import(
     "@/lib/editorial-preserved"
   );
-  const isBlocked = await isCodeAdministrativelyBlocked(code, supabase);
+  const isBlocked = await isCodeAdministrativelyBlocked(code, privilegedAdminClient);
   if (isBlocked) {
     // Bloqueio administrativo sobrepõe qualquer registro comercial ou de acervo
     return null;
   }
 
-  // 2. Consulta à unidade comercialmente ativa
+  // 2. Consulta à unidade comercialmente ativa (com RLS pública)
   const { data: prop, error } = await supabase
     .from("properties")
     .select("*")
@@ -201,8 +231,8 @@ export async function fetchPropertyByCode(
     };
   }
 
-  // 3. Fallback editorial preservado: consulta persistente (DB com RLS)
-  const snap = await resolveEditorialPreservedSnapshot(code, supabase);
+  // 3. Fallback editorial preservado: consulta pública com RLS (banco)
+  const snap = await resolveEditorialPreservedSnapshot(code, supabase, privilegedAdminClient);
   if (!snap) return null;
 
   return {
@@ -252,6 +282,7 @@ export async function fetchAlternativePropertiesForCondominium(
   condoName: string,
   excludeCode: string,
   supabaseClient?: any,
+  privilegedAdminClient?: any,
 ): Promise<PropertyListItem[]> {
   if (!condoName) return [];
   const supabase = supabaseClient ?? getPublicClient();
@@ -267,12 +298,13 @@ export async function fetchAlternativePropertiesForCondominium(
     console.error("fetchAlternativePropertiesForCondominium", error);
     return [];
   }
-  const { isCodeAdministrativelyBlocked } = await import("@/lib/editorial-preserved");
-  const safeRows: any[] = [];
-  for (const r of rows ?? []) {
-    if (await isCodeAdministrativelyBlocked(r.code, supabase)) continue;
-    safeRows.push(r);
-  }
+  const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import(
+    "@/lib/editorial-preserved"
+  );
+  const blockedCodes = await fetchAdministrativelyBlockedCodes(privilegedAdminClient);
+  const safeRows = (rows ?? []).filter(
+    (r: any) => !blockedCodes.has(r.code) && !isAdministrativeBlocked(r.code),
+  );
   return normalizeRows(safeRows);
 }
 

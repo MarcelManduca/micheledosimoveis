@@ -10,66 +10,66 @@ Na **Etapa 2**, foi autorizada e implementada a entrega do **Aprofundamento de C
 
 ## 2. Entrega A — Conteúdo Aprofundado e Fontes por Condomínio
 
-O artigo em `/blog/condominios-luxo-beira-mar-norte-agronomica` foi estruturado com análise individualizada dos 8 condomínios. Todas as informações derivam de fontes primárias das construtoras, fabricantes técnicos e do catálogo documental verificado de Michele dos Imóveis:
+O artigo em `/blog/condominios-luxo-beira-mar-norte-agronomica` foi estruturado com análise individualizada dos 8 condomínios. As informações derivam dos registros cadastrais do acervo histórico da imobiliária e de dados institucionais públicos dos incorporadores e fabricantes:
 
 1. **La Perle Beira Mar**:
    - Localização: Av. Governador Irineu Bornhausen, 3600, Agronômica.
    - Arquitetura: Empreendimento icônico de alto padrão com recuo frontal e living panorâmico para a Baía Norte.
-   - Tipologias: ~316 m² privativos, 3 a 4 suítes, 4 vagas de garagem.
+   - Tipologias: ~316 m² privativos (planta de 3 suítes e 4 vagas no acervo).
    - Lazer: Piscinas adulto/infantil, piscina térmica/spa coberto, sauna, fitness center, salão de festas e jogos.
    - Links: Imóvel do acervo `/imovel/34547`, integração de vídeo YouTube Short (`IHZm4uwTuds`) e CTA WhatsApp.
-   - Fontes: Vistoria presencial e acervo de captação documental de Michele dos Imóveis.
+   - Fontes: Cadastro histórico da unidade 34547 no acervo de Michele dos Imóveis e endereço público do condomínio.
 
 2. **João Eduardo Moritz Residence**:
-   - Construtora: Lumis Construtora (https://lumisconstrutora.com.br).
+   - Construtora: Lumis Construtora.
    - Localização: Av. Jornalista Rubens de Arruda Ramos, 2354, Beira-Mar Norte.
-   - Arquitetura: Fachada executada com esquadrias de alta performance desenvolvidas pela Lohn Esquadrias (https://lohn.com.br). Um apartamento por andar com hall privativo.
+   - Arquitetura: Fachada executada com esquadrias de alta performance desenvolvidas pela Lohn Esquadrias. Exclusividade de um apartamento por andar com hall privativo.
    - Tipologias: 4 suítes (~280 m² a 350 m² privativos).
-   - Fontes: Lumis Construtora e catálogo técnico da Lohn Esquadrias.
+   - Fontes: Dados institucionais Lumis Construtora e catálogo técnico de soluções acústicas da Lohn Esquadrias.
 
 3. **Acqua**:
-   - Construtora / Incorporadora: CFL Imóveis (https://cfl.com.br).
+   - Construtora / Incorporadora: CFL Imóveis.
    - Localização: Praça Gov. Celso Ramos / Rua Frei Caneca, 17, Agronômica.
    - Arquitetura: Conceito contemporâneo CFL integrando a arborização da praça com a orla.
    - Tipologias: 3 e 4 suítes (~221 m² a 353 m² privativos).
    - Links: Página permanente `/condominio/condominio-acqua-agronomica-florianopolis` e imóvel do acervo `/imovel/31776`.
-   - Fontes: CFL Imóveis e acervo documental de Michele dos Imóveis.
+   - Fontes: Material de divulgação institucional CFL e cadastro da unidade 31776 no acervo histórico.
 
 4. **Opera House (Simphonia WOA Beiramar)**:
-   - Construtora: WOA Empreendimentos Imobiliários (https://woa.com.br).
-   - Arquitetura: Fachada ventilada com painéis Fundermax (https://fundermax.at) para conforto termoacústico e durabilidade litorânea.
+   - Construtora: WOA Empreendimentos Imobiliários.
+   - Arquitetura: Fachada ventilada com painéis Fundermax para conforto termoacústico e proteção contra intempéries litorâneas.
    - Tipologias: 4 suítes (~250 m² a 380 m² privativos) com living envidraçado.
    - Lazer: Piscina térmica, piscina externa, fitness, lounge gourmet privativo da torre.
-   - Fontes: WOA Empreendimentos Imobiliários e especificações Fundermax.
+   - Fontes: Material institucional do complexo Simphonia WOA Beiramar e especificações técnicas de painéis Fundermax.
 
 5. **Sonata Place (Simphonia WOA Beiramar)**:
-   - Construtora: WOA Empreendimentos Imobiliários (https://woa.com.br).
+   - Construtora: WOA Empreendimentos Imobiliários.
    - Localização: Rua Comandante Constantino Nicolau Spyrides, 4152, Agronômica.
    - Tipologias: 3 suítes (~131 m² a 175 m² privativos, 2 a 3 vagas).
    - Links: Página permanente `/condominio/condominio-sonata-place-agronomica-florianopolis` e imóvel do acervo `/imovel/30870`.
-   - Fontes: WOA Empreendimentos Imobiliários.
+   - Fontes: Material institucional Simphonia WOA Beiramar e cadastro da unidade 30870 no acervo.
 
 6. **Jazz Club (Simphonia WOA Beiramar)**:
-   - Construtora: WOA Empreendimentos Imobiliários (https://woa.com.br).
+   - Construtora: WOA Empreendimentos Imobiliários.
    - Localização: Servidão Paulo Zimmer, 101, Agronômica.
    - Tipologias: 2 a 3 suítes (~99 m² a 135 m² privativos, 2 vagas).
    - Links: Página permanente `/condominio/condominio-jazz-club-agronomica-florianopolis` e imóvel do acervo `/imovel/22461`.
-   - Fontes: WOA Empreendimentos Imobiliários.
+   - Fontes: Material institucional Simphonia WOA Beiramar e cadastro da unidade 22461 no acervo.
 
 7. **Soprano Hall (Simphonia WOA Beiramar)**:
-   - Construtora: WOA Empreendimentos Imobiliários (https://woa.com.br).
+   - Construtora: WOA Empreendimentos Imobiliários.
    - Localização: Servidão Paulo Zimmer, 55, Agronômica.
    - Tipologias: 3 a 4 suítes (~168 m² a 237 m² privativos, 3 a 4 vagas).
    - Links: Página permanente `/condominio/condominio-soprano-hall-agronomica-florianopolis` e imóvel do acervo `/imovel/44022`.
-   - Fontes: WOA Empreendimentos Imobiliários.
+   - Fontes: Material institucional Simphonia WOA Beiramar e cadastro da unidade 44022 no acervo.
 
 8. **Villa Celimontana**:
-   - Construtora: Construtora Fontana (https://construtorafontana.com.br).
+   - Construtora: Construtora Fontana.
    - Localização: Travessa Felipe Godinho e Silva, 30 (esq. Rua Sidnei Nocetti), Agronômica.
    - Arquitetura: Home Club com lazer completo (conclusão em dezembro de 2023).
    - Tipologias: 2 e 3 dormitórios (1 ou 2 suítes, ~79 m² a 134 m² privativos).
    - Links: Página permanente `/condominio/residencial-villa-celimontana-agronomica-florianopolis` e imóvel do acervo `/imovel/43575`.
-   - Fontes: Construtora Fontana (comunicado institucional de conclusão e entrega).
+   - Fontes: Comunicado público institucional de entrega da Construtora Fontana e cadastro da unidade 43575 no acervo.
 
 ---
 

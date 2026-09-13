@@ -42,53 +42,33 @@ export const Route = createFileRoute("/sitemap.xml")({
         ];
 
         try {
-          const { createClient } = await import("@supabase/supabase-js");
-          const { isAdministrativeBlocked } = await import("@/lib/editorial-preserved");
+          const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import(
+            "@/lib/editorial-preserved"
+          );
           const existingPaths = new Set(entries.map((e) => e.path));
 
-          const supabase = createClient(
-            process.env.SUPABASE_URL!,
-            process.env.SUPABASE_PUBLISHABLE_KEY!,
-            { auth: { persistSession: false } },
-          );
+          // 1. Buscar códigos com bloqueio administrativo de forma autoritativa no servidor
+          const blockedCodes = await fetchAdministrativelyBlockedCodes();
 
-          // Buscar códigos com bloqueio administrativo em lote único
-          const { data: blockedRows } = await supabase
-            .from("editorial_preserved_properties")
-            .select("code")
-            .eq("is_admin_blocked", true);
-          const blockedCodes = new Set((blockedRows ?? []).map((r: any) => r.code));
+          const { createClient } = await import("@supabase/supabase-js");
+          const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || "";
+          const key =
+            process.env.SUPABASE_PUBLISHABLE_KEY ||
+            process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+            process.env.VITE_SUPABASE_ANON_KEY ||
+            "";
 
-          const { data } = await supabase
-            .from("properties")
-            .select("code, updated_at, cover_image")
-            .eq("published", true);
+          if (url && key) {
+            const supabase = createClient(url, key, { auth: { persistSession: false } });
 
-          for (const row of data ?? []) {
-            if (blockedCodes.has(row.code) || isAdministrativeBlocked(row.code)) continue;
-            const path = `/imovel/${row.code}`;
-            if (!existingPaths.has(path)) {
-              existingPaths.add(path);
-              entries.push({
-                path,
-                lastmod: row.updated_at
-                  ? new Date(row.updated_at).toISOString().slice(0, 10)
-                  : undefined,
-                changefreq: "weekly",
-                priority: "0.8",
-                image: row.cover_image,
-              });
-            }
-          }
+            // 2. Consulta a imóveis comerciais ativos publicados
+            const { data } = await supabase
+              .from("properties")
+              .select("code, updated_at, cover_image")
+              .eq("published", true);
 
-          // Consulta às unidades preservadas exclusivamente no banco de dados
-          const { data: preservedData, error: presErr } = await supabase
-            .from("editorial_preserved_properties")
-            .select("code, cover_image, created_at, updated_at, is_admin_blocked, is_preserved");
-
-          if (!presErr && preservedData) {
-            for (const row of preservedData) {
-              if (row.is_admin_blocked || !row.is_preserved || isAdministrativeBlocked(row.code)) continue;
+            for (const row of data ?? []) {
+              if (blockedCodes.has(row.code) || isAdministrativeBlocked(row.code)) continue;
               const path = `/imovel/${row.code}`;
               if (!existingPaths.has(path)) {
                 existingPaths.add(path);
@@ -97,10 +77,34 @@ export const Route = createFileRoute("/sitemap.xml")({
                   lastmod: row.updated_at
                     ? new Date(row.updated_at).toISOString().slice(0, 10)
                     : undefined,
-                  changefreq: "monthly",
-                  priority: "0.6",
+                  changefreq: "weekly",
+                  priority: "0.8",
                   image: row.cover_image,
                 });
+              }
+            }
+
+            // 3. Consulta às unidades preservadas autorizadas (filtradas por RLS pública)
+            const { data: preservedData, error: presErr } = await supabase
+              .from("editorial_preserved_properties")
+              .select("code, cover_image, created_at, updated_at");
+
+            if (!presErr && preservedData) {
+              for (const row of preservedData) {
+                if (blockedCodes.has(row.code) || isAdministrativeBlocked(row.code)) continue;
+                const path = `/imovel/${row.code}`;
+                if (!existingPaths.has(path)) {
+                  existingPaths.add(path);
+                  entries.push({
+                    path,
+                    lastmod: row.updated_at
+                      ? new Date(row.updated_at).toISOString().slice(0, 10)
+                      : undefined,
+                    changefreq: "monthly",
+                    priority: "0.6",
+                    image: row.cover_image,
+                  });
+                }
               }
             }
           }

@@ -279,12 +279,69 @@ export function getEditorialPreservedSnapshot(code: string): EditorialPreservedP
 }
 
 /**
- * Checagem persistente e centralizada de bloqueio administrativo.
+ * Consulta autoritativa em lote de códigos com bloqueio administrativo.
+ * Executada exclusivamente no servidor via cliente com privilégio de leitura administrativa
+ * para não sofrer ocultação pela política RLS pública.
+ */
+export async function fetchAdministrativelyBlockedCodes(
+  privilegedClient?: any,
+): Promise<Set<string>> {
+  const blockedSet = new Set<string>();
+
+  // 1. Bloqueios explícitos em memória (override de emergência)
+  for (const [code, item] of Object.entries(EDITORIAL_PRESERVED_CATALOG)) {
+    if (item.isAdminBlocked) {
+      blockedSet.add(code);
+    }
+  }
+
+  // 2. Consulta autoritativa no servidor (supabaseAdmin ou mock privilegiado)
+  let client = privilegedClient;
+  if (!client && typeof window === "undefined") {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      client = supabaseAdmin;
+    } catch {
+      // Ambiente sem admin client
+    }
+  }
+
+  if (client) {
+    const { data, error } = await client
+      .from("editorial_preserved_properties")
+      .select("code")
+      .eq("is_admin_blocked", true);
+
+    if (error) {
+      const isMissingTable =
+        error.code === "42P01" ||
+        error.code === "PGRST205" ||
+        error.message?.includes("does not exist") ||
+        error.message?.includes("Could not find the table");
+
+      if (!isMissingTable) {
+        throw new Error(
+          `Falha técnica na consulta autoritativa de bloqueios: ${error.message} (código: ${error.code})`,
+        );
+      }
+    } else if (data) {
+      for (const row of data) {
+        if (row.code) blockedSet.add(row.code);
+      }
+    }
+  }
+
+  return blockedSet;
+}
+
+/**
+ * Checagem persistente e autoritativa de bloqueio administrativo para um código.
  * Prevalece sobre properties.published = true e impede qualquer exibição comercial ou de acervo.
+ * Executa exclusivamente no servidor via cliente privilegiado ou mock fornecido.
  */
 export async function isCodeAdministrativelyBlocked(
   code: string,
-  supabase?: any,
+  privilegedClient?: any,
 ): Promise<boolean> {
   if (!code) return false;
 
@@ -293,8 +350,8 @@ export async function isCodeAdministrativelyBlocked(
     return true;
   }
 
-  // 2. Consulta persistente ao banco de dados
-  let client = supabase;
+  // 2. Consulta autoritativa ao banco no servidor
+  let client = privilegedClient;
   if (!client && typeof window === "undefined") {
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -305,25 +362,33 @@ export async function isCodeAdministrativelyBlocked(
   }
 
   if (client) {
-    try {
-      const { data, error } = await client
-        .from("editorial_preserved_properties")
-        .select("is_admin_blocked")
-        .eq("code", code)
-        .maybeSingle();
+    const { data, error } = await client
+      .from("editorial_preserved_properties")
+      .select("is_admin_blocked")
+      .eq("code", code)
+      .maybeSingle();
 
-      if (!error && data) {
-        return Boolean(data.is_admin_blocked);
+    if (error) {
+      const isMissingTable =
+        error.code === "42P01" ||
+        error.code === "PGRST205" ||
+        error.message?.includes("does not exist") ||
+        error.message?.includes("Could not find the table");
+
+      if (!isMissingTable) {
+        throw new Error(
+          `Falha técnica na checagem de bloqueio administrativo: ${error.message} (código: ${error.code})`,
+        );
       }
-    } catch {
-      // Falhas de consulta não disparam falso positivo de bloqueio
+    } else if (data) {
+      return Boolean(data.is_admin_blocked);
     }
   }
 
   return false;
 }
 
-export function isAdministrativeBlocked(code: string, supabase?: any): boolean {
+export function isAdministrativeBlocked(code: string, _supabase?: any): boolean {
   if (EDITORIAL_PRESERVED_CATALOG[code]?.isAdminBlocked) return true;
   return false;
 }
@@ -343,11 +408,12 @@ export function isAdministrativeBlocked(code: string, supabase?: any): boolean {
 export async function resolveEditorialPreservedSnapshot(
   code: string,
   supabase?: any,
+  privilegedAdminClient?: any,
 ): Promise<EditorialPreservedProperty | null> {
   if (!code) return null;
 
-  // 1. Bloqueio administrativo total (prevalece e encerra resolução imediatamente)
-  if (await isCodeAdministrativelyBlocked(code, supabase)) {
+  // 1. Bloqueio administrativo total autoritativo (prevalece e encerra resolução imediatamente)
+  if (await isCodeAdministrativelyBlocked(code, privilegedAdminClient)) {
     return null;
   }
 

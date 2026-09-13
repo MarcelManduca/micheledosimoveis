@@ -16,7 +16,7 @@ export default defineTool({
     const { isCodeAdministrativelyBlocked, resolveEditorialPreservedSnapshot } = await import(
       "../../editorial-preserved"
     );
-    const isBlocked = await isCodeAdministrativelyBlocked(code, sb);
+    const isBlocked = await isCodeAdministrativelyBlocked(code);
     if (isBlocked) {
       return { content: [{ type: "text", text: `No published or preserved property with code ${code}` }] };
     }

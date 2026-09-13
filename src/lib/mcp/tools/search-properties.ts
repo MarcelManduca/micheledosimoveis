@@ -33,12 +33,11 @@ export default defineTool({
     q = q.limit(limit ?? 20);
     const { data, error } = await q;
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
-    const { isCodeAdministrativelyBlocked } = await import("../../editorial-preserved");
-    const safeData: any[] = [];
-    for (const r of data ?? []) {
-      if (await isCodeAdministrativelyBlocked(r.code, sb)) continue;
-      safeData.push(r);
-    }
+    const { fetchAdministrativelyBlockedCodes, isAdministrativeBlocked } = await import("../../editorial-preserved");
+    const blockedCodes = await fetchAdministrativelyBlockedCodes();
+    const safeData = (data ?? []).filter(
+      (r: any) => !blockedCodes.has(r.code) && !isAdministrativeBlocked(r.code),
+    );
     return {
       content: [{ type: "text", text: JSON.stringify(safeData, null, 2) }],
       structuredContent: { properties: safeData },

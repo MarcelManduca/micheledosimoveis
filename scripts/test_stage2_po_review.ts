@@ -68,27 +68,27 @@ async function runRigorousTests() {
   }
 
   // ---------------------------------------------------------------------------
-  // TESTE 1: Defeito Real — Bloqueio Administrativo Persistente com Semente Ativa
+  // TESTE 1: Defeito Real — Bloqueio Administrativo Persistente com Semente Ativa e RLS Pública
   // ---------------------------------------------------------------------------
-  console.log("--- TESTE 1: Bloqueio Administrativo Persistente vs Semente e properties.published=true ---");
+  console.log("--- TESTE 1: Separação de Consulta Pública (RLS oculta) e Consulta Autoritativa Servidor ---");
   
   // Garantir que na semente estática o imóvel NÃO está bloqueado
   EDITORIAL_PRESERVED_CATALOG["34547"].isAdminBlocked = false;
 
-  // Mock DB:
+  // 1. Mock Público sob RLS:
   // - properties: unidade 34547 está com published = true
-  // - editorial_preserved_properties: unidade 34547 está com is_admin_blocked = true
-  const mockPersistentBlockedClient: any = {
+  // - editorial_preserved_properties: RLS pública oculta o registro bloqueado -> retorna { data: null, error: null }
+  const mockPublicRlsClient: any = {
     from: (table: string) => ({
       select: (cols?: string) => ({
         eq: (col: string, val: any) => ({
           ilike: (c: string, v: string) => ({
             neq: (nc: string, nv: string) => ({
               limit: async (l: number) => {
-                // Para getAlternativePropertiesForCondominium: retorna lista contendo a unidade 34547
+                // Para busca / recomendações: properties contém 34547 e OK_999
                 return {
                   data: [
-                    { code: "34547", title: "Unidade La Perle", published: true, condo_name: "La Perle" },
+                    { code: "34547", title: "Unidade La Perle Comercial", published: true, condo_name: "La Perle" },
                     { code: "OK_999", title: "Outro Imovel La Perle", published: true, condo_name: "La Perle" },
                   ],
                   error: null,
@@ -96,11 +96,20 @@ async function runRigorousTests() {
               },
             }),
           }),
+          order: () => ({
+            order: () => ({
+              range: async () => ({
+                data: [
+                  { code: "34547", title: "Unidade La Perle Comercial", published: true },
+                  { code: "OK_999", title: "Outro Imovel La Perle", published: true },
+                ],
+                error: null,
+              }),
+            }),
+          }),
           maybeSingle: async () => {
             if (table === "editorial_preserved_properties") {
-              if (val === "34547") {
-                return { data: { code: "34547", is_admin_blocked: true, is_preserved: true }, error: null };
-              }
+              // Sob RLS pública, registro com is_admin_blocked=true é ocultado: data = null
               return { data: null, error: null };
             }
             if (table === "properties") {
@@ -109,7 +118,7 @@ async function runRigorousTests() {
                   data: {
                     id: "p-34547",
                     code: "34547",
-                    title: "La Perle Ativo Comercial",
+                    title: "La Perle Ativo Comercial (properties.published=true)",
                     published: true,
                     condo_name: "La Perle Beira Mar",
                   },
@@ -125,25 +134,71 @@ async function runRigorousTests() {
     }),
   };
 
-  // 1.1 Checagem persistente
-  const isPersistentlyBlocked = await isCodeAdministrativelyBlocked("34547", mockPersistentBlockedClient);
+  // 2. Mock Autoritativo Servidor (supabaseAdmin com bypass de RLS):
+  const mockAuthoritativeAdminClient: any = {
+    from: (table: string) => ({
+      select: (cols?: string) => ({
+        eq: (col: string, val: any) => {
+          if (col === "is_admin_blocked" && val === true) {
+            // Consulta em lote de bloqueios: retorna lista de códigos bloqueados
+            return Promise.resolve({
+              data: [{ code: "34547" }],
+              error: null,
+            });
+          }
+          return {
+            maybeSingle: async () => {
+              if (table === "editorial_preserved_properties" && val === "34547") {
+                return { data: { code: "34547", is_admin_blocked: true, is_preserved: true }, error: null };
+              }
+              return { data: null, error: null };
+            },
+          };
+        },
+      }),
+    }),
+  };
+
+  // 1.1 Checagem autoritativa no servidor: detecta o bloqueio
+  const isAuthoritativelyBlocked = await isCodeAdministrativelyBlocked("34547", mockAuthoritativeAdminClient);
   assert(
-    isPersistentlyBlocked === true,
-    "isCodeAdministrativelyBlocked consulta a fonte persistente e detecta is_admin_blocked=true mesmo com semente isAdminBlocked=false",
+    isAuthoritativelyBlocked === true,
+    "isCodeAdministrativelyBlocked com cliente autoritativo detecta is_admin_blocked=true persistido",
   );
 
-  // 1.2 Consumidor Detalhe: fetchPropertyByCode deve retornar null mesmo com properties.published=true
-  const propResult = await fetchPropertyByCode("34547", mockPersistentBlockedClient);
+  // 1.2 Detalhe de Imóvel: fetchPropertyByCode deve recusar 34547 mesmo com properties.published=true no cliente público
+  const propResult = await fetchPropertyByCode("34547", mockPublicRlsClient, mockAuthoritativeAdminClient);
   assert(
     propResult === null,
-    "fetchPropertyByCode recusa imóvel bloqueado na fonte persistente mesmo com properties.published=true",
+    "fetchPropertyByCode recusa imóvel bloqueado na fonte autoritativa mesmo com properties.published=true no cliente público",
   );
 
-  // 1.3 Consumidor Recomendações: fetchAlternativePropertiesForCondominium deve chamar a função real e excluir 34547
-  const altResult = await fetchAlternativePropertiesForCondominium("La Perle", "OTHER_CODE", mockPersistentBlockedClient);
+  // 1.3 Recomendações: fetchAlternativePropertiesForCondominium exclui 34547
+  const altResult = await fetchAlternativePropertiesForCondominium(
+    "La Perle",
+    "OTHER_CODE",
+    mockPublicRlsClient,
+    mockAuthoritativeAdminClient,
+  );
   assert(
     Array.isArray(altResult) && altResult.length === 1 && altResult[0].code === "OK_999",
-    "fetchAlternativePropertiesForCondominium (função real) filtra e exclui unidade bloqueada na fonte persistente",
+    "fetchAlternativePropertiesForCondominium exclui unidade bloqueada autoritativamente da lista de alternativas",
+  );
+
+  // 1.4 Consulta em Lote Autoritativa: fetchAdministrativelyBlockedCodes
+  const { fetchAdministrativelyBlockedCodes } = await import("../src/lib/editorial-preserved");
+  const blockedSet = await fetchAdministrativelyBlockedCodes(mockAuthoritativeAdminClient);
+  assert(
+    blockedSet.has("34547") === true,
+    "fetchAdministrativelyBlockedCodes retorna lote com código 34547 bloqueado",
+  );
+
+  // 1.5 Busca de Imóveis: fetchSearchProperties exclui unidade bloqueada
+  const { fetchSearchProperties } = await import("../src/lib/properties.functions");
+  const searchResults = await fetchSearchProperties({}, mockPublicRlsClient, mockAuthoritativeAdminClient);
+  assert(
+    searchResults.length === 1 && searchResults[0].code === "OK_999",
+    "fetchSearchProperties filtra e remove unidade bloqueada autoritativamente dos resultados de busca",
   );
 
   // ---------------------------------------------------------------------------
