@@ -24,21 +24,21 @@ O artigo em `/blog/condominios-luxo-beira-mar-norte-agronomica` foi estruturado 
    - Construtora: Lumis Construtora.
    - Localização: Av. Jornalista Rubens de Arruda Ramos, 2354, Beira-Mar Norte.
    - Arquitetura: Fachada executada com esquadrias de alta performance desenvolvidas pela Lohn Esquadrias. Exclusividade de um apartamento por andar com hall privativo.
-   - Tipologias: 4 suítes (~280 m² a 350 m² privativos).
+   - Tipologias: 4 suítes em torre exclusiva de um apartamento por andar.
    - Fontes: Dados institucionais Lumis Construtora e catálogo técnico de soluções acústicas da Lohn Esquadrias.
 
 3. **Acqua**:
    - Construtora / Incorporadora: CFL Imóveis.
    - Localização: Praça Gov. Celso Ramos / Rua Frei Caneca, 17, Agronômica.
    - Arquitetura: Conceito contemporâneo CFL integrando a arborização da praça com a orla.
-   - Tipologias: 3 e 4 suítes (~221 m² a 353 m² privativos).
+   - Tipologias: 3 e 4 suítes (unidade 31776 no acervo histórico com 221 m² privativos).
    - Links: Página permanente `/condominio/condominio-acqua-agronomica-florianopolis` e imóvel do acervo `/imovel/31776`.
    - Fontes: Material de divulgação institucional CFL e cadastro da unidade 31776 no acervo histórico.
 
 4. **Opera House (Simphonia WOA Beiramar)**:
    - Construtora: WOA Empreendimentos Imobiliários.
    - Arquitetura: Fachada ventilada com painéis Fundermax para conforto termoacústico e proteção contra intempéries litorâneas.
-   - Tipologias: 4 suítes (~250 m² a 380 m² privativos) com living envidraçado.
+   - Tipologias: Apartamentos de 4 suítes com áreas privativas amplas de grande porte e living envidraçado voltado para a baía.
    - Lazer: Piscina térmica, piscina externa, fitness, lounge gourmet privativo da torre.
    - Fontes: Material institucional do complexo Simphonia WOA Beiramar e especificações técnicas de painéis Fundermax.
 

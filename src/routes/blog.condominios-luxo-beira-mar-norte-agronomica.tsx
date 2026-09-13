@@ -62,7 +62,7 @@ const SECTIONS: readonly CondominiumSection[] = [
     architecture:
       "Projetado pela Lumis Construtora, o João Eduardo Moritz Residence opera no conceito de um apartamento por andar com hall privativo. A fachada foi executada com sistemas de esquadrias de alta performance desenvolvidos pela Lohn Esquadrias para atenuação acústica e conforto térmico.",
     typologies:
-      "Apartamentos de 4 suítes, com registros cadastrais no catálogo em torno de 280 m² a 350 m² privativos. As plantas privilegiam living integrado com vista frontal da orla da Beira-Mar Norte e vagas de garagem.",
+      "Apartamentos de 4 suítes em torre exclusiva de um apartamento por andar. As plantas privilegiam living integrado com vista frontal da orla da Beira-Mar Norte e vagas de garagem.",
     amenities:
       "O condomínio oferece espaço gourmet, salão de festas, piscina aquecida, fitness center e portaria 24 horas com controle de acesso.",
     coastRelation:
@@ -114,7 +114,7 @@ const SECTIONS: readonly CondominiumSection[] = [
     architecture:
       "Torre de grande porte do complexo Simphonia WOA Beiramar. O edifício emprega fachada ventilada com painéis Fundermax, proporcionando eficiência energética, conforto térmico e proteção contra intempéries litorâneas.",
     typologies:
-      "Apartamentos de 4 suítes com áreas privativas amplas (~250 m² a 380 m²), projetados com aberturas envidraçadas no living social e sacada com churrasqueira.",
+      "Apartamentos de 4 suítes com áreas privativas amplas de grande porte, projetados com aberturas envidraçadas no living social e sacada com churrasqueira voltada para a baía.",
     amenities:
       "Infraestrutura de lazer privativa para a torre: piscina térmica coberta, piscina externa, academia, salão de festas com espaço gourmet e portaria 24 horas.",
     coastRelation:
