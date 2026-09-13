@@ -43,7 +43,7 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         try {
           const { createClient } = await import("@supabase/supabase-js");
-          const { EDITORIAL_PRESERVED_CATALOG, isAdministrativeBlocked } = await import("@/lib/editorial-preserved");
+          const { isAdministrativeBlocked } = await import("@/lib/editorial-preserved");
           const existingPaths = new Set(entries.map((e) => e.path));
 
           const supabase = createClient(
@@ -51,13 +51,21 @@ export const Route = createFileRoute("/sitemap.xml")({
             process.env.SUPABASE_PUBLISHABLE_KEY!,
             { auth: { persistSession: false } },
           );
+
+          // Buscar códigos com bloqueio administrativo em lote único
+          const { data: blockedRows } = await supabase
+            .from("editorial_preserved_properties")
+            .select("code")
+            .eq("is_admin_blocked", true);
+          const blockedCodes = new Set((blockedRows ?? []).map((r: any) => r.code));
+
           const { data } = await supabase
             .from("properties")
             .select("code, updated_at, cover_image")
             .eq("published", true);
 
           for (const row of data ?? []) {
-            if (isAdministrativeBlocked(row.code)) continue;
+            if (blockedCodes.has(row.code) || isAdministrativeBlocked(row.code)) continue;
             const path = `/imovel/${row.code}`;
             if (!existingPaths.has(path)) {
               existingPaths.add(path);
@@ -73,14 +81,14 @@ export const Route = createFileRoute("/sitemap.xml")({
             }
           }
 
-          // Consulta às unidades preservadas (banco primeiro, semente apenas se tabela não migrada)
+          // Consulta às unidades preservadas exclusivamente no banco de dados
           const { data: preservedData, error: presErr } = await supabase
             .from("editorial_preserved_properties")
-            .select("code, cover_image, created_at, updated_at");
+            .select("code, cover_image, created_at, updated_at, is_admin_blocked, is_preserved");
 
           if (!presErr && preservedData) {
             for (const row of preservedData) {
-              if (isAdministrativeBlocked(row.code)) continue;
+              if (row.is_admin_blocked || !row.is_preserved || isAdministrativeBlocked(row.code)) continue;
               const path = `/imovel/${row.code}`;
               if (!existingPaths.has(path)) {
                 existingPaths.add(path);
@@ -92,28 +100,6 @@ export const Route = createFileRoute("/sitemap.xml")({
                   changefreq: "monthly",
                   priority: "0.6",
                   image: row.cover_image,
-                });
-              }
-            }
-          } else if (
-            presErr &&
-            (presErr.code === "42P01" ||
-              presErr.code === "PGRST205" ||
-              presErr.message?.includes("does not exist") ||
-              presErr.message?.includes("Could not find the table") ||
-              presErr.message?.includes("schema cache"))
-          ) {
-            for (const [code, item] of Object.entries(EDITORIAL_PRESERVED_CATALOG)) {
-              if (isAdministrativeBlocked(code) || !item.isPreserved) continue;
-              const path = `/imovel/${code}`;
-              if (!existingPaths.has(path)) {
-                existingPaths.add(path);
-                entries.push({
-                  path,
-                  lastmod: item.snapshotDate,
-                  changefreq: "monthly",
-                  priority: "0.6",
-                  image: item.coverImage,
                 });
               }
             }

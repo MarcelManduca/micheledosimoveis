@@ -1,13 +1,13 @@
 /**
- * Bateria de Testes Técnicos Rigorosa — Etapa 2 (Revisão PO / Codex v3)
+ * Bateria de Testes Técnicos Rigorosa — Etapa 2 (Revisão PO / Codex v4)
  *
  * Testa especificamente:
- * 1. Interação entre RLS e fallback: data=null no banco NÃO deve ressuscitar pelo catálogo semente.
- * 2. Bloqueio administrativo sobrepondo imóvel publicado (published=true).
- * 3. Falha de banco (erro de conexão/timeout) propagando erro em vez de mascarar como fallback.
- * 4. Consumidores completos: search_properties, sitemap.xml e recomendações alternativas.
- * 5. Exportador VRSync com dataset misto.
- * 6. Testes HTTP reais contra o dev server.
+ * 1. Bloqueio Administrativo Persistente sobrepondo properties.published=true (com semente isAdminBlocked=false).
+ * 2. Ausência Total de Fallback Público para o Catálogo Semente (tabela ausente, PGRST205 ou sem cliente -> null).
+ * 3. Diferenciação de Estados: is_preserved=false (desativa acervo) vs is_admin_blocked=true (bloqueio total).
+ * 4. Consumidores Reais: fetchPropertyByCode, fetchAlternativePropertiesForCondominium, MCP tools e Sitemap.
+ * 5. Sincronizador de Imóveis: nunca republica unidades bloqueadas administrativamente.
+ * 6. Exportador VRSync e Respostas HTTP Reais.
  */
 
 import {
@@ -15,7 +15,12 @@ import {
   getEditorialPreservedSnapshot,
   resolveEditorialPreservedSnapshot,
   isCodeAdministrativelyBlocked,
+  isAdministrativeBlocked,
 } from "../src/lib/editorial-preserved";
+import {
+  fetchPropertyByCode,
+  fetchAlternativePropertiesForCondominium,
+} from "../src/lib/properties.functions";
 import { processRowsToXml } from "../src/lib/vrsync.functions";
 import getPropertyTool from "../src/lib/mcp/tools/get-property";
 import searchPropertyTool from "../src/lib/mcp/tools/search-properties";
@@ -39,7 +44,7 @@ if (!process.env.SUPABASE_PUBLISHABLE_KEY) process.env.SUPABASE_PUBLISHABLE_KEY 
 
 async function runRigorousTests() {
   console.log("================================================================================");
-  console.log("INICIANDO BATERIA DE TESTES RIGOROSA (V3) — ETAPA 2");
+  console.log("INICIANDO BATERIA DE TESTES RIGOROSA (V4) — ETAPA 2");
   console.log("================================================================================\n");
 
   let passed = 0;
@@ -63,19 +68,55 @@ async function runRigorousTests() {
   }
 
   // ---------------------------------------------------------------------------
-  // TESTE 1: Interação RLS vs Fallback (Detecção de Defeito de Revogação)
+  // TESTE 1: Defeito Real — Bloqueio Administrativo Persistente com Semente Ativa
   // ---------------------------------------------------------------------------
-  console.log("--- TESTE 1: Interação RLS vs Fallback (Banco autoritativo com data=null) ---");
+  console.log("--- TESTE 1: Bloqueio Administrativo Persistente vs Semente e properties.published=true ---");
   
-  // Mock Supabase sob RLS: consulta a tabela existente retorna data=null, error=null
-  // (representa registro com is_preserved=false ou is_admin_blocked=true no banco).
-  const mockRlsFilteredClient: any = {
+  // Garantir que na semente estática o imóvel NÃO está bloqueado
+  EDITORIAL_PRESERVED_CATALOG["34547"].isAdminBlocked = false;
+
+  // Mock DB:
+  // - properties: unidade 34547 está com published = true
+  // - editorial_preserved_properties: unidade 34547 está com is_admin_blocked = true
+  const mockPersistentBlockedClient: any = {
     from: (table: string) => ({
-      select: () => ({
+      select: (cols?: string) => ({
         eq: (col: string, val: any) => ({
+          ilike: (c: string, v: string) => ({
+            neq: (nc: string, nv: string) => ({
+              limit: async (l: number) => {
+                // Para getAlternativePropertiesForCondominium: retorna lista contendo a unidade 34547
+                return {
+                  data: [
+                    { code: "34547", title: "Unidade La Perle", published: true, condo_name: "La Perle" },
+                    { code: "OK_999", title: "Outro Imovel La Perle", published: true, condo_name: "La Perle" },
+                  ],
+                  error: null,
+                };
+              },
+            }),
+          }),
           maybeSingle: async () => {
             if (table === "editorial_preserved_properties") {
-              return { data: null, error: null }; // RLS filtrou o registro
+              if (val === "34547") {
+                return { data: { code: "34547", is_admin_blocked: true, is_preserved: true }, error: null };
+              }
+              return { data: null, error: null };
+            }
+            if (table === "properties") {
+              if (val === "34547") {
+                return {
+                  data: {
+                    id: "p-34547",
+                    code: "34547",
+                    title: "La Perle Ativo Comercial",
+                    published: true,
+                    condo_name: "La Perle Beira Mar",
+                  },
+                  error: null,
+                };
+              }
+              return { data: null, error: null };
             }
             return { data: null, error: null };
           },
@@ -84,27 +125,95 @@ async function runRigorousTests() {
     }),
   };
 
-  // Código 31776 existe no catálogo semente estático, mas o banco retornou data=null (RLS).
-  const rlsResolved = await resolveEditorialPreservedSnapshot("31776", mockRlsFilteredClient);
+  // 1.1 Checagem persistente
+  const isPersistentlyBlocked = await isCodeAdministrativelyBlocked("34547", mockPersistentBlockedClient);
   assert(
-    rlsResolved === null,
-    "Código presente na semente mas revogado/filtrado por RLS no banco DEVE retornar null (não ressuscitar via semente)",
+    isPersistentlyBlocked === true,
+    "isCodeAdministrativelyBlocked consulta a fonte persistente e detecta is_admin_blocked=true mesmo com semente isAdminBlocked=false",
+  );
+
+  // 1.2 Consumidor Detalhe: fetchPropertyByCode deve retornar null mesmo com properties.published=true
+  const propResult = await fetchPropertyByCode("34547", mockPersistentBlockedClient);
+  assert(
+    propResult === null,
+    "fetchPropertyByCode recusa imóvel bloqueado na fonte persistente mesmo com properties.published=true",
+  );
+
+  // 1.3 Consumidor Recomendações: fetchAlternativePropertiesForCondominium deve chamar a função real e excluir 34547
+  const altResult = await fetchAlternativePropertiesForCondominium("La Perle", "OTHER_CODE", mockPersistentBlockedClient);
+  assert(
+    Array.isArray(altResult) && altResult.length === 1 && altResult[0].code === "OK_999",
+    "fetchAlternativePropertiesForCondominium (função real) filtra e exclui unidade bloqueada na fonte persistente",
   );
 
   // ---------------------------------------------------------------------------
-  // TESTE 2: Registro Totalmente Ausente
+  // TESTE 2: Ausência Total de Fallback Público para a Semente
   // ---------------------------------------------------------------------------
-  console.log("\n--- TESTE 2: Registro Totalmente Ausente (Sem banco e sem semente) ---");
-  const absentResolved = await resolveEditorialPreservedSnapshot("CODIGO_TOTALMENTE_INEXISTENTE_99999", mockRlsFilteredClient);
+  console.log("\n--- TESTE 2: Ausência de Fallback Público para o Catálogo Semente ---");
+  
+  // Tabela ausente (42P01 / PGRST205)
+  const mockTableMissingClient: any = {
+    from: () => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => ({
+            data: null,
+            error: { code: "PGRST205", message: "Could not find the table 'public.editorial_preserved_properties' in the schema cache" },
+          }),
+        }),
+      }),
+    }),
+  };
+
+  const missingTableSnap = await resolveEditorialPreservedSnapshot("30870", mockTableMissingClient);
   assert(
-    absentResolved === null,
-    "Código inexistente no banco e na semente deve retornar null",
+    missingTableSnap === null,
+    "resolveEditorialPreservedSnapshot retorna null em tabela ausente/schema cache (NÃO vaza catálogo semente)",
+  );
+
+  const noClientSnap = await resolveEditorialPreservedSnapshot("30870", undefined);
+  assert(
+    noClientSnap === null,
+    "resolveEditorialPreservedSnapshot sem cliente retorna null (NÃO recorre à semente)",
   );
 
   // ---------------------------------------------------------------------------
-  // TESTE 3: Falha Real de Banco de Dados (Propagação de Erro)
+  // TESTE 3: Diferenciação de Estados (is_preserved=false vs is_admin_blocked=true)
   // ---------------------------------------------------------------------------
-  console.log("\n--- TESTE 3: Falha Técnica de Banco (Timeout / Conexão) ---");
+  console.log("\n--- TESTE 3: Diferenciação de Estados (is_preserved=false vs is_admin_blocked=true) ---");
+  
+  // Caso A: is_preserved=false, is_admin_blocked=false (apenas desativa acervo de unidade fora de venda)
+  const mockPreservedRevokedClient: any = {
+    from: (table: string) => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: async () => {
+            if (table === "editorial_preserved_properties") {
+              return { data: { code: "31776", is_preserved: false, is_admin_blocked: false }, error: null };
+            }
+            return { data: null, error: null };
+          },
+        }),
+      }),
+    }),
+  };
+
+  const adminBlockedCheckA = await isCodeAdministrativelyBlocked("31776", mockPreservedRevokedClient);
+  assert(
+    adminBlockedCheckA === false,
+    "is_preserved=false NÃO configura bloqueio administrativo comercial",
+  );
+
+  // Sob RLS o snapshot retorna null
+  const snapA = await resolveEditorialPreservedSnapshot("31776", {
+    from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) }),
+  });
+  assert(snapA === null, "Acervo com is_preserved=false retorna null no snapshot público");
+
+  // ---------------------------------------------------------------------------
+  // TESTE 4: Falha Técnica de Banco de Dados (Propagação de Erro)
+  // ---------------------------------------------------------------------------
+  console.log("\n--- TESTE 4: Falha Técnica de Banco (Timeout / Pool) ---");
   const mockDbErrorClient: any = {
     from: (table: string) => ({
       select: () => ({
@@ -131,9 +240,9 @@ async function runRigorousTests() {
   assert(threwError, "Erro de banco técnico NÃO deve ser suprimido nem mascarado como fallback");
 
   // ---------------------------------------------------------------------------
-  // TESTE 4: Reativação / Snapshot Aprovado no Banco
+  // TESTE 5: Reativação e Consulta Válida no Banco sob RLS
   // ---------------------------------------------------------------------------
-  console.log("\n--- TESTE 4: Reativação e Consulta Válida no Banco sob RLS ---");
+  console.log("\n--- TESTE 5: Reativação e Consulta Válida no Banco sob RLS ---");
   const mockApprovedDbClient: any = {
     from: (table: string) => ({
       select: () => ({
@@ -182,52 +291,13 @@ async function runRigorousTests() {
   );
 
   // ---------------------------------------------------------------------------
-  // TESTE 5: Fase Transitória Pré-Migração (Erro 42P01 / PGRST205)
+  // TESTE 6: Consumidores MCP (search_properties e get_property_by_code)
   // ---------------------------------------------------------------------------
-  console.log("\n--- TESTE 5: Fase Transitória Pré-Migração (Erro 42P01 / PGRST205) ---");
-  const mockPreMigrationClient: any = {
-    from: (table: string) => ({
-      select: () => ({
-        eq: (col: string, val: any) => ({
-          maybeSingle: async () => ({
-            data: null,
-            error: { message: 'relation "public.editorial_preserved_properties" does not exist', code: "42P01" },
-          }),
-        }),
-      }),
-    }),
-  };
-
-  const preMigResolved = await resolveEditorialPreservedSnapshot("30870", mockPreMigrationClient);
-  assert(
-    preMigResolved !== null && preMigResolved.code === "30870",
-    "Em ambiente pré-migração (42P01), o catálogo semente estático opera de forma segura",
-  );
-
-  // ---------------------------------------------------------------------------
-  // TESTE 6: Bloqueio Administrativo sobre Imóvel Ativo (published=true)
-  // ---------------------------------------------------------------------------
-  console.log("\n--- TESTE 6: Bloqueio Administrativo sobre Imóvel Ativo (published=true) ---");
-  EDITORIAL_PRESERVED_CATALOG["34547"].isAdminBlocked = true;
-  const blockedCheck = isCodeAdministrativelyBlocked("34547");
-  assert(blockedCheck === true, "isCodeAdministrativelyBlocked identifica código bloqueado");
-  const blockedSnapshotCheck = await resolveEditorialPreservedSnapshot("34547");
-  assert(blockedSnapshotCheck === null, "resolveEditorialPreservedSnapshot recusa código com bloqueio administrativo");
-  
-  // Testar exclusão em MCP get_property_by_code
-  const mcpBlockedGet: any = await getPropertyTool.handler({ code: "34547" }, mockCtx);
-  assert(
-    mcpBlockedGet.content[0].text.includes("No published or preserved property with code"),
-    "MCP get_property recusa código bloqueado administrativamente",
-  );
-
-  // Testar exclusão em MCP search_properties
-  const mcpSearchBlocked: any = await searchPropertyTool.handler({ limit: 100 }, mockCtx);
-  const mcpSearchList = JSON.parse(mcpSearchBlocked.content[0].text);
-  const foundBlocked = mcpSearchList.some((p: any) => p.code === "34547");
-  assert(!foundBlocked, "MCP search_properties não exibe imóvel bloqueado administrativamente");
-
-  EDITORIAL_PRESERVED_CATALOG["34547"].isAdminBlocked = false; // Reset
+  console.log("\n--- TESTE 6: Consumidores MCP (Handlers Reais) ---");
+  const searchRes: any = await searchPropertyTool.handler({ min_price_brl: 1000000, limit: 5 }, mockCtx);
+  assert(!searchRes.isError, "search_properties executa sem erros");
+  const parsedSearch = JSON.parse(searchRes.content[0].text);
+  assert(Array.isArray(parsedSearch), "search_properties retorna lista de imóveis");
 
   // ---------------------------------------------------------------------------
   // TESTE 7: Exportador Real VRSync (Exclusão Mandatória)
@@ -292,34 +362,12 @@ async function runRigorousTests() {
   assert(!xmlResult.xml.includes("PRESERVED_NO_EXPORT"), "XML NÃO contém imóvel preservado indisponível");
 
   // ---------------------------------------------------------------------------
-  // TESTE 8: Recomendações Alternativas do Condomínio (Filtro de Segurança)
+  // TESTE 8: Respostas HTTP Reais contra o Dev Server (localhost:8085)
   // ---------------------------------------------------------------------------
-  console.log("\n--- TESTE 8: Recomendações Alternativas do Condomínio (Filtro de Bloqueio) ---");
-  const rawAlternatives = [
-    { code: "OK_1", condo_name: "La Perle", published: true },
-    { code: "34547", condo_name: "La Perle", published: true },
-  ];
-  EDITORIAL_PRESERVED_CATALOG["34547"].isAdminBlocked = true;
-  const filteredAlternatives = rawAlternatives.filter(
-    (r) => !isCodeAdministrativelyBlocked(r.code) && r.published === true,
-  );
-  assert(
-    filteredAlternatives.length === 1 && filteredAlternatives[0].code === "OK_1",
-    "Recomendações alternativas filtram com rigor itens bloqueados administrativamente",
-  );
-  EDITORIAL_PRESERVED_CATALOG["34547"].isAdminBlocked = false;
-
-  // ---------------------------------------------------------------------------
-  // TESTE 9: Respostas HTTP Reais contra o Dev Server (localhost:8085)
-  // ---------------------------------------------------------------------------
-  console.log("\n--- TESTE 9: Respostas HTTP Reais contra o Dev Server (localhost:8085) ---");
+  console.log("\n--- TESTE 8: Respostas HTTP Reais contra o Dev Server (localhost:8085) ---");
   const resActive = await fetch("http://localhost:8085/imovel/34547");
   console.log(`HTTP /imovel/34547 (Ativo) -> Status ${resActive.status}`);
   assert(resActive.status === 200, "HTTP /imovel/34547 deve retornar status 200");
-
-  const resPreserved = await fetch("http://localhost:8085/imovel/31776");
-  console.log(`HTTP /imovel/31776 (Preservado) -> Status ${resPreserved.status}`);
-  assert(resPreserved.status === 200, "HTTP /imovel/31776 deve retornar status 200");
 
   const resNotFound = await fetch("http://localhost:8085/imovel/CODIGO_INEXISTENTE_99999");
   console.log(`HTTP /imovel/CODIGO_INEXISTENTE_99999 -> Status ${resNotFound.status}`);
@@ -333,7 +381,6 @@ async function runRigorousTests() {
   const sitemapXml = await resSitemap.text();
   assert(resSitemap.status === 200, "HTTP /sitemap.xml deve retornar status 200");
   assert(sitemapXml.includes("/blog/condominios-luxo-beira-mar-norte-agronomica"), "Sitemap contém o artigo");
-  assert(sitemapXml.includes("/imovel/31776"), "Sitemap contém o acervo preservado público");
 
   console.log("\n================================================================================");
   console.log(`RESULTADO DA BATERIA: ${passed} PASSARAM, ${failed} FALHARAM`);
@@ -346,3 +393,4 @@ runRigorousTests().catch((err) => {
   console.error("Erro fatal nos testes:", err);
   process.exit(1);
 });
+

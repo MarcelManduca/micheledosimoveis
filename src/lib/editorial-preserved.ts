@@ -278,78 +278,92 @@ export function getEditorialPreservedSnapshot(code: string): EditorialPreservedP
   return item;
 }
 
-export function isPreservedCode(code: string): boolean {
-  const item = EDITORIAL_PRESERVED_CATALOG[code];
-  return Boolean(item?.isPreserved && !item.isAdminBlocked);
+/**
+ * Checagem persistente e centralizada de bloqueio administrativo.
+ * Prevalece sobre properties.published = true e impede qualquer exibição comercial ou de acervo.
+ */
+export async function isCodeAdministrativelyBlocked(
+  code: string,
+  supabase?: any,
+): Promise<boolean> {
+  if (!code) return false;
+
+  // 1. Verificação explícita em catálogo estático local (override de emergência)
+  if (EDITORIAL_PRESERVED_CATALOG[code]?.isAdminBlocked) {
+    return true;
+  }
+
+  // 2. Consulta persistente ao banco de dados
+  let client = supabase;
+  if (!client && typeof window === "undefined") {
+    try {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      client = supabaseAdmin;
+    } catch {
+      // Ignora se não for ambiente de servidor
+    }
+  }
+
+  if (client) {
+    try {
+      const { data, error } = await client
+        .from("editorial_preserved_properties")
+        .select("is_admin_blocked")
+        .eq("code", code)
+        .maybeSingle();
+
+      if (!error && data) {
+        return Boolean(data.is_admin_blocked);
+      }
+    } catch {
+      // Falhas de consulta não disparam falso positivo de bloqueio
+    }
+  }
+
+  return false;
 }
 
-export function isAdministrativeBlocked(code: string, _supabase?: any): boolean {
-  return Boolean(EDITORIAL_PRESERVED_CATALOG[code]?.isAdminBlocked);
+export function isAdministrativeBlocked(code: string, supabase?: any): boolean {
+  if (EDITORIAL_PRESERVED_CATALOG[code]?.isAdminBlocked) return true;
+  return false;
 }
-
-export const isCodeAdministrativelyBlocked = isAdministrativeBlocked;
 
 /**
  * Resolução persistente com respeito estrito à RLS.
  * 
  * Regra:
- * - Se o Supabase estiver disponível e responder sem erro:
- *   * `data` presente: retorna snapshot do banco (respeitando RLS).
- *   * `data === null`: o imóvel NÃO está disponível/preservado ou foi revogado no banco.
- *     Retorna `null` (HTTP 404). JAMAIS ressuscita pelo catálogo estático.
- * - Se o Supabase retornar erro 42P01 (tabela ainda não existe no ambiente pré-migração):
- *   * Utiliza o catálogo semente estático de contingência.
- * - Se retornar qualquer outro erro técnico de banco (timeout, network, 5xx):
- *   * Propaga o erro (não mascara como fallback nem 404).
+ * - O banco de dados (editorial_preserved_properties) é a ÚNICA fonte de verdade pública.
+ * - Sob RLS: se a unidade for is_preserved = false ou is_admin_blocked = true, o PostgreSQL
+ *   retorna data = null. Nesse caso, a decisão do banco é autoritativa: retorna null (HTTP 404).
+ * - Tabela inexistente, erro de schema cache ou ausência de cliente retornam null (NÃO recorre ao catálogo semente).
+ * - O catálogo semente estático serve exclusivamente para carga inicial via script/migração,
+ *   NUNCA como fallback público no runtime.
+ * - Erros técnicos de infraestrutura (timeout, pool esgotado, rede) disparam exceção para não mascarar falhas.
  */
 export async function resolveEditorialPreservedSnapshot(
   code: string,
   supabase?: any,
 ): Promise<EditorialPreservedProperty | null> {
-  if (isAdministrativeBlocked(code)) return null;
+  if (!code) return null;
 
-  if (supabase) {
-    const { data, error } = await supabase
-      .from("editorial_preserved_properties")
-      .select("*")
-      .eq("code", code)
-      .maybeSingle();
+  // 1. Bloqueio administrativo total (prevalece e encerra resolução imediatamente)
+  if (await isCodeAdministrativelyBlocked(code, supabase)) {
+    return null;
+  }
 
-    if (!error) {
-      // Sob RLS: se a unidade for is_preserved = false ou is_admin_blocked = true,
-      // Postgres retorna data = null. Nesse caso, a decisão do banco é autoritativa:
-      // A unidade NÃO deve ser exibida. Retornamos null.
-      if (!data) return null;
+  if (!supabase) {
+    // Sem cliente de banco de dados, não publica dados estáticos não confirmados
+    return null;
+  }
 
-      return {
-        code: data.code,
-        condoName: data.condo_name,
-        condoSlug: data.condo_slug,
-        articlePath: `/blog/${data.article_slug ?? "condominios-luxo-beira-mar-norte-agronomica"}`,
-        title: data.title,
-        propertyType: data.property_type ?? "apartamento",
-        neighborhood: data.neighborhood ?? "",
-        city: data.city ?? "Florianópolis",
-        state: data.state ?? "SC",
-        address: data.address ?? "",
-        areaM2: Number(data.area_m2) || 0,
-        bedrooms: data.bedrooms ?? 0,
-        suites: data.suites ?? 0,
-        bathrooms: data.bathrooms ?? 0,
-        parkingSpots: data.parking_spots ?? 0,
-        description: data.description ?? "",
-        features: data.features ?? [],
-        condoFeatures: data.condo_features ?? [],
-        coverImage: data.cover_image ?? "",
-        photos: Array.isArray(data.photos) ? data.photos : [],
-        isPreserved: Boolean(data.is_preserved),
-        isAdminBlocked: Boolean(data.is_admin_blocked),
-        unavailableNotice: data.unavailable_notice ?? "Esta unidade não está disponível para venda no momento.",
-        snapshotDate: data.created_at ? new Date(data.created_at).toISOString().slice(0, 10) : "2026-09-12",
-      };
-    }
+  const { data, error } = await supabase
+    .from("editorial_preserved_properties")
+    .select("*")
+    .eq("code", code)
+    .maybeSingle();
 
-    // Identificação precisa de tabela inexistente (fase de homologação/pré-migração)
+  if (error) {
+    // Tabela ausente ou erro de schema cache: retorna null de forma segura sem vazar fallback
     const isTableMissing =
       error.code === "42P01" ||
       error.code === "PGRST205" ||
@@ -359,16 +373,40 @@ export async function resolveEditorialPreservedSnapshot(
       error.message?.includes("does not exist");
 
     if (isTableMissing) {
-      const seed = EDITORIAL_PRESERVED_CATALOG[code];
-      if (!seed || !seed.isPreserved || seed.isAdminBlocked) return null;
-      return seed;
+      return null;
     }
 
-    // Para erros reais de conectividade ou falha interna, dispara erro
+    // Para erros reais de conectividade ou falha interna de pool, propaga erro
     throw new Error(`Falha de consulta ao acervo editorial: ${error.message} (código: ${error.code})`);
   }
 
-  const seed = EDITORIAL_PRESERVED_CATALOG[code];
-  if (!seed || !seed.isPreserved || seed.isAdminBlocked) return null;
-  return seed;
+  // Se data === null (registro ausente, is_preserved=false ou is_admin_blocked=true sob RLS):
+  if (!data) return null;
+
+  return {
+    code: data.code,
+    condoName: data.condo_name,
+    condoSlug: data.condo_slug,
+    articlePath: `/blog/${data.article_slug ?? "condominios-luxo-beira-mar-norte-agronomica"}`,
+    title: data.title,
+    propertyType: data.property_type ?? "apartamento",
+    neighborhood: data.neighborhood ?? "",
+    city: data.city ?? "Florianópolis",
+    state: data.state ?? "SC",
+    address: data.address ?? "",
+    areaM2: Number(data.area_m2) || 0,
+    bedrooms: data.bedrooms ?? 0,
+    suites: data.suites ?? 0,
+    bathrooms: data.bathrooms ?? 0,
+    parkingSpots: data.parking_spots ?? 0,
+    description: data.description ?? "",
+    features: data.features ?? [],
+    condoFeatures: data.condo_features ?? [],
+    coverImage: data.cover_image ?? "",
+    photos: Array.isArray(data.photos) ? data.photos : [],
+    isPreserved: Boolean(data.is_preserved),
+    isAdminBlocked: Boolean(data.is_admin_blocked),
+    unavailableNotice: data.unavailable_notice ?? "Esta unidade não está disponível para venda no momento.",
+    snapshotDate: data.created_at ? new Date(data.created_at).toISOString().slice(0, 10) : "2026-09-12",
+  };
 }

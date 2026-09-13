@@ -158,111 +158,130 @@ const codeSchema = z.object({
   code: z.string().trim().min(1).max(64).regex(/^[A-Za-z0-9_-]+$/),
 });
 
+export async function fetchPropertyByCode(
+  code: string,
+  supabaseClient?: any,
+) {
+  const supabase = supabaseClient ?? getPublicClient();
+
+  // 1. Verificação preliminar centralizada de bloqueio administrativo
+  const { resolveEditorialPreservedSnapshot, isCodeAdministrativelyBlocked } = await import(
+    "@/lib/editorial-preserved"
+  );
+  const isBlocked = await isCodeAdministrativelyBlocked(code, supabase);
+  if (isBlocked) {
+    // Bloqueio administrativo sobrepõe qualquer registro comercial ou de acervo
+    return null;
+  }
+
+  // 2. Consulta à unidade comercialmente ativa
+  const { data: prop, error } = await supabase
+    .from("properties")
+    .select("*")
+    .eq("code", code)
+    .eq("published", true)
+    .maybeSingle();
+  if (error) safeError("Não foi possível carregar o imóvel.", error);
+
+  if (prop) {
+    const { data: photos, error: phErr } = await supabase
+      .from("property_photos")
+      .select("url, position")
+      .eq("property_id", prop.id)
+      .order("position", { ascending: true });
+    if (phErr) safeError("Não foi possível carregar as fotos.", phErr);
+    return {
+      property: prop,
+      photos: photos ?? [],
+      isArchived: false,
+      condoName: prop.condo_name ?? null,
+      condoSlug: null as string | null,
+      articlePath: null as string | null,
+      unavailableNotice: null as string | null,
+    };
+  }
+
+  // 3. Fallback editorial preservado: consulta persistente (DB com RLS)
+  const snap = await resolveEditorialPreservedSnapshot(code, supabase);
+  if (!snap) return null;
+
+  return {
+    property: {
+      id: `preserved-${snap.code}`,
+      code: snap.code,
+      title: snap.title,
+      property_type: snap.propertyType,
+      neighborhood: snap.neighborhood,
+      city: snap.city,
+      state: snap.state,
+      address: snap.address,
+      condo_name: snap.condoName,
+      price_brl: null, // Preço suprimido na exibição de acervo
+      condo_fee_brl: null,
+      iptu_brl: null,
+      area_m2: snap.areaM2,
+      bedrooms: snap.bedrooms,
+      suites: snap.suites,
+      bathrooms: snap.bathrooms,
+      parking_spots: snap.parkingSpots,
+      description: snap.description,
+      features: snap.features,
+      condo_features: snap.condoFeatures,
+      cover_image: snap.coverImage,
+      published: false,
+      featured: false,
+      created_at: snap.snapshotDate,
+      updated_at: snap.snapshotDate,
+    },
+    photos: snap.photos,
+    isArchived: true,
+    condoName: snap.condoName,
+    condoSlug: snap.condoSlug,
+    articlePath: snap.articlePath,
+    unavailableNotice: snap.unavailableNotice,
+  };
+}
+
 export const getPropertyByCode = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => codeSchema.parse(d))
   .handler(async ({ data }) => {
-    const supabase = getPublicClient();
-
-    // 1. Verificação preliminar centralizada de bloqueio administrativo
-    const { resolveEditorialPreservedSnapshot, isCodeAdministrativelyBlocked } = await import(
-      "@/lib/editorial-preserved"
-    );
-    const isBlocked = await isCodeAdministrativelyBlocked(data.code, supabase);
-    if (isBlocked) {
-      // Bloqueio administrativo sobrepõe qualquer registro comercial ou de acervo
-      return null;
-    }
-
-    // 2. Consulta à unidade comercialmente ativa
-    const { data: prop, error } = await supabase
-      .from("properties")
-      .select("*")
-      .eq("code", data.code)
-      .eq("published", true)
-      .maybeSingle();
-    if (error) safeError("Não foi possível carregar o imóvel.", error);
-
-    if (prop) {
-      const { data: photos, error: phErr } = await supabase
-        .from("property_photos")
-        .select("url, position")
-        .eq("property_id", prop.id)
-        .order("position", { ascending: true });
-      if (phErr) safeError("Não foi possível carregar as fotos.", phErr);
-      return {
-        property: prop,
-        photos: photos ?? [],
-        isArchived: false,
-        condoName: prop.condo_name ?? null,
-        condoSlug: null as string | null,
-        articlePath: null as string | null,
-        unavailableNotice: null as string | null,
-      };
-    }
-
-    // 3. Fallback editorial preservado: consulta persistente (DB primeiro, semente em fallback)
-    const snap = await resolveEditorialPreservedSnapshot(data.code, supabase);
-    if (!snap) return null;
-
-    return {
-      property: {
-        id: `preserved-${snap.code}`,
-        code: snap.code,
-        title: snap.title,
-        property_type: snap.propertyType,
-        neighborhood: snap.neighborhood,
-        city: snap.city,
-        state: snap.state,
-        address: snap.address,
-        condo_name: snap.condoName,
-        price_brl: null, // Preço suprimido na exibição de acervo
-        condo_fee_brl: null,
-        iptu_brl: null,
-        area_m2: snap.areaM2,
-        bedrooms: snap.bedrooms,
-        suites: snap.suites,
-        bathrooms: snap.bathrooms,
-        parking_spots: snap.parkingSpots,
-        description: snap.description,
-        features: snap.features,
-        condo_features: snap.condoFeatures,
-        cover_image: snap.coverImage,
-        published: false,
-        featured: false,
-        created_at: snap.snapshotDate,
-        updated_at: snap.snapshotDate,
-      },
-      photos: snap.photos,
-      isArchived: true,
-      condoName: snap.condoName,
-      condoSlug: snap.condoSlug,
-      articlePath: snap.articlePath,
-      unavailableNotice: snap.unavailableNotice,
-    };
+    return fetchPropertyByCode(data.code);
   });
+
+export async function fetchAlternativePropertiesForCondominium(
+  condoName: string,
+  excludeCode: string,
+  supabaseClient?: any,
+): Promise<PropertyListItem[]> {
+  if (!condoName) return [];
+  const supabase = supabaseClient ?? getPublicClient();
+  const cleanCondo = condoName.replace(/^(Condomínio|Residencial)\s+/i, "").trim();
+  const { data: rows, error } = await supabase
+    .from("properties")
+    .select(LIST_COLS)
+    .eq("published", true)
+    .ilike("condo_name", `%${cleanCondo}%`)
+    .neq("code", excludeCode)
+    .limit(6);
+  if (error) {
+    console.error("fetchAlternativePropertiesForCondominium", error);
+    return [];
+  }
+  const { isCodeAdministrativelyBlocked } = await import("@/lib/editorial-preserved");
+  const safeRows: any[] = [];
+  for (const r of rows ?? []) {
+    if (await isCodeAdministrativelyBlocked(r.code, supabase)) continue;
+    safeRows.push(r);
+  }
+  return normalizeRows(safeRows);
+}
 
 export const getAlternativePropertiesForCondominium = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) =>
     z.object({ condoName: z.string().trim(), excludeCode: z.string().trim() }).parse(d),
   )
   .handler(async ({ data }): Promise<PropertyListItem[]> => {
-    if (!data.condoName) return [];
-    const supabase = getPublicClient();
-    const cleanCondo = data.condoName.replace(/^(Condomínio|Residencial)\s+/i, "").trim();
-    const { data: rows, error } = await supabase
-      .from("properties")
-      .select(LIST_COLS)
-      .eq("published", true)
-      .ilike("condo_name", `%${cleanCondo}%`)
-      .neq("code", data.excludeCode)
-      .limit(6);
-    if (error) {
-      console.error("getAlternativePropertiesForCondominium", error);
-      return [];
-    }
-    const { isAdministrativeBlocked } = await import("@/lib/editorial-preserved");
-    const safeRows = (rows ?? []).filter((r: any) => !isAdministrativeBlocked(r.code));
-    return normalizeRows(safeRows);
+    return fetchAlternativePropertiesForCondominium(data.condoName, data.excludeCode);
   });
 
 // ───────── Admin status / bootstrap ─────────
