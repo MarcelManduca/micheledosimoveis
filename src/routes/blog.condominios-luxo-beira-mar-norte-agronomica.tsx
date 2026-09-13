@@ -2,8 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, ArrowUpRight, Building2, ExternalLink, HelpCircle, MapPin, MessageCircle } from "lucide-react";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import { ArticleGallery } from "@/components/blog/ArticleGallery";
-import { InstagramReel } from "@/components/blog/InstagramReel";
-import { ARTICLE_PATH, CONDOMINIUM_MEDIA, LA_PERLE_REEL_URL } from "@/lib/blog/beira-mar-media";
+import { YouTubeShort } from "@/components/blog/YouTubeShort";
+import { ARTICLE_PATH, CONDOMINIUM_MEDIA, LA_PERLE_YOUTUBE_ID } from "@/lib/blog/beira-mar-media";
 import { SITE, buildWhatsAppUrl } from "@/lib/site-config";
 import hero from "@/assets/hero-beiramar-1280.webp";
 import heroSmall from "@/assets/hero-beiramar-720.webp";
@@ -513,8 +513,8 @@ function BeiraMarArticle() {
                     </div>
                   )}
 
-                  {/* Reel integration for La Perle */}
-                  {section.id === "la-perle" && <InstagramReel url={LA_PERLE_REEL_URL} />}
+                  {/* Video integration for La Perle */}
+                  {section.id === "la-perle" && <YouTubeShort videoId={LA_PERLE_YOUTUBE_ID} title="La Perle em vídeo" />}
 
                   {/* Action links */}
                   <div className="mt-6 flex flex-wrap items-center gap-4 text-sm">
