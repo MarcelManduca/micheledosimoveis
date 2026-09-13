@@ -74,11 +74,19 @@ async function runHomologation() {
     psql("GRANT anon, authenticated, service_role TO test_runner;");
     psql("GRANT ALL ON ALL TABLES IN SCHEMA public TO test_runner;");
     
-    // Configurar estado inicial da unidade 34547
+    // Configurar estado inicial das unidades de teste
+    // Unidade 34547 (La Perle)
     psql(`
       INSERT INTO public.properties (code, title, neighborhood, city, state, address, condo_name, price_brl, area_m2, bedrooms, suites, bathrooms, parking_spots, description, cover_image, published)
       VALUES ('34547', 'Apartamento La Perle Homolog', 'Agronômica', 'Florianópolis', 'SC', 'Av. Irineu Bornhausen, 3600', 'La Perle Beira Mar', 8900000.00, 316, 3, 3, 6, 4, 'Apartamento de alto padrão com vista mar frontal.', '/blog/beira-mar-norte/la-perle.webp', true)
       ON CONFLICT (code) DO UPDATE SET published = true, price_brl = 8900000.00;
+    `);
+
+    // Unidade 31776 (Acqua - permitida/ativa)
+    psql(`
+      INSERT INTO public.properties (code, title, neighborhood, city, state, address, condo_name, price_brl, area_m2, bedrooms, suites, bathrooms, parking_spots, description, cover_image, published)
+      VALUES ('31776', 'Apartamento Acqua Homolog', 'Agronômica', 'Florianópolis', 'SC', 'Rua Frei Caneca, 17', 'Condomínio Acqua', 4500000.00, 221, 3, 3, 4, 3, 'Apartamento no Condomínio Acqua frente praça.', '/blog/beira-mar-norte/acqua.webp', true)
+      ON CONFLICT (code) DO UPDATE SET published = true, price_brl = 4500000.00;
     `);
 
     // Inserir registro no acervo editorial
@@ -93,6 +101,21 @@ async function runHomologation() {
         'Florianópolis', 'SC', 'Avenida Governador Irineu Bornhausen, 3600', 316, 3, 3, 6, 4,
         'Apartamento à beira-mar no La Perle.', ARRAY['Vista Mar', 'Alto Padrão'], ARRAY['Piscina', 'Portaria 24h'],
         '/blog/beira-mar-norte/la-perle.webp', '[{"url":"/blog/beira-mar-norte/la-perle.webp","position":0}]'::jsonb,
+        true, false, 'Esta unidade não está disponível para venda no momento.'
+      ) ON CONFLICT (code) DO UPDATE SET is_preserved = true, is_admin_blocked = false;
+    `);
+
+    psql(`
+      INSERT INTO public.editorial_preserved_properties (
+        code, condo_name, article_slug, title, property_type, neighborhood, city, state, address,
+        area_m2, bedrooms, suites, bathrooms, parking_spots, description, features, condo_features,
+        cover_image, photos, is_preserved, is_admin_blocked, unavailable_notice
+      ) VALUES (
+        '31776', 'Condomínio Acqua', 'condominios-luxo-beira-mar-norte-agronomica',
+        'Apartamento em Agronômica com 3 suítes, 221m² — Acqua', 'apartamento', 'Agronômica',
+        'Florianópolis', 'SC', 'Rua Frei Caneca, 17', 221, 3, 3, 4, 3,
+        'Apartamento no Condomínio Acqua.', ARRAY['Vista Praça', 'Alto Padrão'], ARRAY['Piscina', 'Portaria 24h'],
+        '/blog/beira-mar-norte/acqua.webp', '[{"url":"/blog/beira-mar-norte/acqua.webp","position":0}]'::jsonb,
         true, false, 'Esta unidade não está disponível para venda no momento.'
       ) ON CONFLICT (code) DO UPDATE SET is_preserved = true, is_admin_blocked = false;
     `);
@@ -237,21 +260,45 @@ async function runHomologation() {
     // Busca Real (fetchSearchProperties)
     const { fetchSearchProperties } = await import("../src/lib/properties.functions");
     const searchResult = await fetchSearchProperties({});
-    assert(!searchResult.some((item) => item.code === "34547"), "Busca: Unidade bloqueada administrativamente é EXCLUÍDA dos resultados de busca");
+    assert(!searchResult.some((item) => item.code === "34547"), "Busca: Unidade bloqueada administrativamente (34547) é EXCLUÍDA dos resultados de busca");
+    assert(searchResult.some((item) => item.code === "31776"), "Busca: Unidade permitida (31776) PERMANECE presente nos resultados de busca");
 
-    // MCP Real (get_property_by_code)
+    // Contexto de autenticação simulado para invocação direta dos handlers de ferramentas MCP
+    // (Nota: Executa a lógica de aplicação dos handlers MCP via ToolContext emulado, sem transporte de rede MCP)
     const mockCtx = {
       isAuthenticated: () => true,
       getToken: () => ANON_KEY,
     } as any;
-    const getPropertyTool = (await import("../src/lib/mcp/tools/get-property")).default;
-    const mcpBlockedRes = await (getPropertyTool as any).handler({ code: "34547" }, mockCtx);
-    assert(mcpBlockedRes.isError === true || mcpBlockedRes.content[0].text.includes("No published or preserved property"), "MCP: Ferramenta get_property_by_code recusa unidade bloqueada com erro controlado");
 
-    // MCP Real (search_properties)
+    const getPropertyTool = (await import("../src/lib/mcp/tools/get-property")).default;
     const searchTool = (await import("../src/lib/mcp/tools/search-properties")).default;
-    const mcpSearchRes = await (searchTool as any).handler({ query: "34547" }, mockCtx);
-    assert(!mcpSearchRes.content[0].text.includes("34547") || mcpSearchRes.content[0].text.includes("Nenhum imóvel encontrado"), "MCP: Ferramenta search_properties exclui unidade bloqueada administrativamente");
+
+    // Teste MCP 1: Busca em ambiente saudável com duas unidades (31776 permitida, 34547 bloqueada)
+    const mcpSearchRes = await (searchTool as any).handler({ neighborhood: "Agronômica" }, mockCtx);
+    assert(!mcpSearchRes.isError, "MCP search_properties: isError é false/indefinido em ambiente saudável");
+    assert(mcpSearchRes.structuredContent?.properties?.some((p: any) => p.code === "31776"), "MCP search_properties: Retorno estruturado MANTÉM unidade permitida (31776)");
+    assert(!mcpSearchRes.structuredContent?.properties?.some((p: any) => p.code === "34547"), "MCP search_properties: Retorno estruturado EXCLUI unidade bloqueada (34547)");
+
+    // Teste MCP 2: Detalhe de unidade permitida (31776)
+    const mcpAllowedRes = await (getPropertyTool as any).handler({ code: "31776" }, mockCtx);
+    assert(!mcpAllowedRes.isError, "MCP get_property_by_code: isError é false/indefinido para unidade permitida");
+    assert(mcpAllowedRes.content[0].text.includes("31776") && mcpAllowedRes.content[0].text.includes("Acqua"), "MCP get_property_by_code: Retorna payload estruturado completo da unidade permitida");
+
+    // Teste MCP 3: Detalhe de unidade bloqueada (34547) - Distingue bloqueio de falha técnica
+    const mcpBlockedRes = await (getPropertyTool as any).handler({ code: "34547" }, mockCtx);
+    assert(!mcpBlockedRes.isError, "MCP get_property_by_code: isError é false/indefinido para unidade bloqueada (não é falha técnica)");
+    assert(mcpBlockedRes.content[0].text.includes("No published or preserved property with code 34547"), "MCP get_property_by_code: Retorna mensagem de bloqueio/não encontrado controlada");
+
+    // Teste MCP 4: Detalhe sob falha técnica administrativa (induzida)
+    psql("ALTER TABLE public.editorial_preserved_properties RENAME TO editorial_preserved_properties_temp;");
+    await reloadPostgrestSchema();
+    const mcpFailureRes = await (getPropertyTool as any).handler({ code: "34547" }, mockCtx);
+    assert(mcpFailureRes.isError === true, "MCP get_property_by_code: isError é TRUE sob falha técnica administrativa induzida");
+    assert(mcpFailureRes.content[0].text.includes("Falha técnica ao verificar bloqueio administrativo"), "MCP get_property_by_code: Retorna mensagem explícita de erro técnico administrativo");
+
+    // Restaurar imediatamente
+    psql("ALTER TABLE public.editorial_preserved_properties_temp RENAME TO editorial_preserved_properties;");
+    await reloadPostgrestSchema();
 
   } finally {
     // --------------------------------------------------------------------------
@@ -268,13 +315,13 @@ async function runHomologation() {
           END IF;
         END ';
       `);
-      // Restaurar 34547 para estado preservado padrão
+      // Restaurar 34547 e 31776 para estado preservado padrão
       psql(`
         UPDATE public.editorial_preserved_properties
         SET is_preserved = true, is_admin_blocked = false
-        WHERE code = '34547';
+        WHERE code IN ('34547', '31776');
       `);
-      psql("DELETE FROM public.properties WHERE code = '34547';");
+      psql("DELETE FROM public.properties WHERE code IN ('34547', '31776');");
       await reloadPostgrestSchema();
       console.log("[OK] Ambiente restaurado para o estado canônico do acervo editorial.");
     } catch (e: any) {
