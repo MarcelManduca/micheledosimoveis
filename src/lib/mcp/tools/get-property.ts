@@ -20,7 +20,56 @@ export default defineTool({
       .eq("published", true)
       .maybeSingle();
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
-    if (!data) return { content: [{ type: "text", text: `No published property with code ${code}` }] };
+    if (!data) {
+      const { getEditorialPreservedSnapshot } = await import("../../editorial-preserved");
+      const snap = getEditorialPreservedSnapshot(code);
+      if (snap) {
+        const preservedPayload = {
+          code: snap.code,
+          title: snap.title,
+          property_type: snap.propertyType,
+          neighborhood: snap.neighborhood,
+          city: snap.city,
+          state: snap.state,
+          address: snap.address,
+          condo_name: snap.condoName,
+          price_brl: null,
+          area_m2: snap.areaM2,
+          bedrooms: snap.bedrooms,
+          suites: snap.suites,
+          bathrooms: snap.bathrooms,
+          parking_spots: snap.parkingSpots,
+          description: snap.description,
+          features: snap.features,
+          condo_features: snap.condoFeatures,
+          cover_image: snap.coverImage,
+          published: false,
+          is_archived: true,
+          available_for_sale: false,
+          unavailable_notice: snap.unavailableNotice,
+          consultation_cta: "Consulte com a Michele outras unidades que possam estar disponíveis neste condomínio.",
+          article_path: snap.articlePath,
+        };
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  status: "unavailable_preserved",
+                  notice: snap.unavailableNotice,
+                  property: preservedPayload,
+                },
+                null,
+                2,
+              ),
+            },
+          ],
+          structuredContent: { property: preservedPayload },
+        };
+      }
+      return { content: [{ type: "text", text: `No published or preserved property with code ${code}` }] };
+    }
     return {
       content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
       structuredContent: { property: data },

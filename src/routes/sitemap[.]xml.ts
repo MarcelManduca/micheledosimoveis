@@ -43,7 +43,7 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         try {
           const { createClient } = await import("@supabase/supabase-js");
-          const { EDITORIAL_PRESERVED_CATALOG } = await import("@/lib/editorial-preserved");
+          const { EDITORIAL_PRESERVED_CATALOG, isAdministrativeBlocked } = await import("@/lib/editorial-preserved");
           const existingPaths = new Set(entries.map((e) => e.path));
 
           const supabase = createClient(
@@ -74,7 +74,7 @@ export const Route = createFileRoute("/sitemap.xml")({
 
           for (const [code, item] of Object.entries(EDITORIAL_PRESERVED_CATALOG)) {
             const path = `/imovel/${code}`;
-            if (item.isPreserved && !existingPaths.has(path)) {
+            if (item.isPreserved && !isAdministrativeBlocked(code) && !existingPaths.has(path)) {
               existingPaths.add(path);
               entries.push({
                 path,

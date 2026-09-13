@@ -242,12 +242,26 @@ export const EDITORIAL_PRESERVED_CATALOG: Record<string, EditorialPreservedPrope
   },
 };
 
+/**
+ * Lista de códigos revogados explicitamente por decisão administrativa ou solicitação de privacidade.
+ * Qualquer código nesta lista sofre bloqueio absoluto no site, sobrepondo qualquer fallback,
+ * impedindo a renderização do imóvel, suprimindo metadados e excluindo do sitemap.
+ */
+export const ADMINISTRATIVE_REVOKED_CODES = new Set<string>([]);
+
+export function isAdministrativeBlocked(code: string): boolean {
+  return ADMINISTRATIVE_REVOKED_CODES.has(code);
+}
+
 export function getEditorialPreservedSnapshot(code: string): EditorialPreservedProperty | null {
+  if (isAdministrativeBlocked(code)) return null;
   const item = EDITORIAL_PRESERVED_CATALOG[code];
   if (!item || !item.isPreserved) return null;
   return item;
 }
 
 export function isPreservedCode(code: string): boolean {
+  if (isAdministrativeBlocked(code)) return false;
   return Boolean(EDITORIAL_PRESERVED_CATALOG[code]?.isPreserved);
 }
+
