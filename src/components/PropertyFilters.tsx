@@ -1,6 +1,13 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Search } from "lucide-react";
 import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const BAIRROS = [
   "Centro / Beira Mar Norte",
@@ -41,6 +48,11 @@ export type FiltersValue = {
   code?: string;
 };
 
+// Radix Select não aceite value="" em Item — usamos sentinelas para as
+// opções "sem filtro" (Todos / Indiferente / Qualquer) e convertemos
+// de volta para undefined no estado.
+const ALL = "__all__";
+
 export function PropertyFilters({
   initial,
   variant = "light",
@@ -52,13 +64,18 @@ export function PropertyFilters({
   const [v, setV] = useState<FiltersValue>(initial ?? {});
 
   const isDark = variant === "dark";
-  const fieldCls = `w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 ${
+  const triggerCls = `w-full h-auto justify-between rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 ${
     isDark
-      ? "bg-white/10 border-white/20 text-white placeholder-white/50 focus:ring-white/30"
+      ? "bg-white/10 border-white/20 text-white data-[placeholder]:text-white/50 focus:ring-white/30 [&_svg]:text-white/70"
       : "bg-background border-border focus:ring-foreground/20"
   }`;
   const labelCls = `block text-[10px] uppercase tracking-[0.18em] mb-1.5 ${
     isDark ? "text-white/60" : "text-muted-foreground"
+  }`;
+  const fieldCls = `w-full rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 ${
+    isDark
+      ? "bg-white/10 border-white/20 text-white placeholder-white/50 focus:ring-white/30"
+      : "bg-background border-border focus:ring-foreground/20"
   }`;
 
   return (
@@ -84,78 +101,82 @@ export function PropertyFilters({
       }`}
     >
       <div>
-        <label htmlFor="filtro-tipo" className={labelCls}>Tipo de imóvel</label>
-        <select
-          id="filtro-tipo"
-          aria-label="Tipo de imóvel"
-          className={fieldCls}
-          value={v.tipo ?? ""}
-          onChange={(e) => setV({ ...v, tipo: e.target.value || undefined })}
+        <label id="filtro-tipo-label" className={labelCls}>Tipo de imóvel</label>
+        <Select
+          value={v.tipo ?? ALL}
+          onValueChange={(val) => setV({ ...v, tipo: val === ALL ? undefined : val })}
         >
-          <option value="">Todos</option>
-          {TIPOS.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger aria-labelledby="filtro-tipo-label" className={triggerCls}>
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Todos</SelectItem>
+            {TIPOS.map((t) => (
+              <SelectItem key={t} value={t}>
+                {t}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div>
-        <label htmlFor="filtro-bairro" className={labelCls}>Bairro</label>
-        <select
-          id="filtro-bairro"
-          aria-label="Bairro"
-          className={fieldCls}
-          value={v.bairro ?? ""}
-          onChange={(e) => setV({ ...v, bairro: e.target.value || undefined })}
+        <label id="filtro-bairro-label" className={labelCls}>Bairro</label>
+        <Select
+          value={v.bairro ?? ALL}
+          onValueChange={(val) => setV({ ...v, bairro: val === ALL ? undefined : val })}
         >
-          <option value="">Todos</option>
-          {BAIRROS.map((b) => (
-            <option key={b} value={b}>
-              {b}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger aria-labelledby="filtro-bairro-label" className={triggerCls}>
+            <SelectValue placeholder="Todos" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Todos</SelectItem>
+            {BAIRROS.map((b) => (
+              <SelectItem key={b} value={b}>
+                {b}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div>
-        <label htmlFor="filtro-dorms" className={labelCls}>Dormitórios</label>
-        <select
-          id="filtro-dorms"
-          aria-label="Número de dormitórios"
-          className={fieldCls}
-          value={v.dorms ?? ""}
-          onChange={(e) =>
-            setV({ ...v, dorms: e.target.value === "" ? undefined : Number(e.target.value) })
-          }
+        <label id="filtro-dorms-label" className={labelCls}>Dormitórios</label>
+        <Select
+          value={v.dorms != null ? String(v.dorms) : ALL}
+          onValueChange={(val) => setV({ ...v, dorms: val === ALL ? undefined : Number(val) })}
         >
-          <option value="">Indiferente</option>
-          <option value={1}>1</option>
-          <option value={2}>2</option>
-          <option value={3}>3</option>
-          <option value={4}>4+</option>
-        </select>
+          <SelectTrigger aria-labelledby="filtro-dorms-label" className={triggerCls}>
+            <SelectValue placeholder="Indiferente" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Indiferente</SelectItem>
+            <SelectItem value="1">1</SelectItem>
+            <SelectItem value="2">2</SelectItem>
+            <SelectItem value="3">3</SelectItem>
+            <SelectItem value="4">4+</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <div>
-        <label htmlFor="filtro-faixa" className={labelCls}>Faixa de preço</label>
-        <select
-          id="filtro-faixa"
-          aria-label="Faixa de preço"
-          className={fieldCls}
-          value={v.faixa ?? ""}
-          onChange={(e) =>
-            setV({ ...v, faixa: e.target.value === "" ? undefined : Number(e.target.value) })
-          }
+        <label id="filtro-faixa-label" className={labelCls}>Faixa de preço</label>
+        <Select
+          value={v.faixa != null ? String(v.faixa) : ALL}
+          onValueChange={(val) => setV({ ...v, faixa: val === ALL ? undefined : Number(val) })}
         >
-          <option value="">Qualquer</option>
-          {PRECO_FAIXAS.map((f, i) => (
-            <option key={f.label} value={i}>
-              {f.label}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger aria-labelledby="filtro-faixa-label" className={triggerCls}>
+            <SelectValue placeholder="Qualquer" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>Qualquer</SelectItem>
+            {PRECO_FAIXAS.map((f, i) => (
+              <SelectItem key={f.label} value={String(i)}>
+                {f.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div>

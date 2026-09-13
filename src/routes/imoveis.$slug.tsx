@@ -9,6 +9,13 @@ import {
 } from "@/lib/neighborhoods";
 import { PropertyCard } from "@/components/PropertyCard";
 import { ChromaGridShell } from "@/components/ChromaGridShell";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 
 const SITE = "https://micheledosimoveis.com.br";
@@ -535,19 +542,24 @@ function PropertiesSection({
                 </>
               )}
             </p>
-            <label className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Ordenar por</span>
-              <select
-                value={sort}
-                onChange={(e) => setSort(e.target.value as SortKey)}
-                className="rounded-full ring-1 ring-black/10 bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-foreground/20"
-                aria-label="Ordenar imóveis por preço"
-              >
-                <option value="relevance">Relevância</option>
-                <option value="price-desc">Maior preço</option>
-                <option value="price-asc">Menor preço</option>
-              </select>
-            </label>
+            <div className="flex items-center gap-2 text-sm">
+              <span id="ordenar-imoveis-label" className="text-muted-foreground">
+                Ordenar por
+              </span>
+              <Select value={sort} onValueChange={(val) => setSort(val as SortKey)}>
+                <SelectTrigger
+                  aria-labelledby="ordenar-imoveis-label"
+                  className="h-auto rounded-full ring-1 ring-black/10 border-transparent bg-background px-3 py-1.5 text-sm focus:ring-2 focus:ring-foreground/20"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="relevance">Relevância</SelectItem>
+                  <SelectItem value="price-desc">Maior preço</SelectItem>
+                  <SelectItem value="price-asc">Menor preço</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="mt-6">

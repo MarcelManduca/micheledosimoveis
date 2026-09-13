@@ -10,6 +10,13 @@ import { LaunchCard, STAGE_LABELS } from "@/components/launches/LaunchCard";
 import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import { WHATSAPP_URL } from "@/lib/site-config";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const SITE = "https://micheledosimoveis.com.br";
 const PAGE_SIZE = 12;
@@ -156,8 +163,8 @@ function LancamentosIndex() {
   const update = (patch: Partial<LaunchSearch>) =>
     navigate({ search: (prev: LaunchSearch) => ({ ...prev, ...patch, pagina: patch.pagina ?? 1 }) });
 
-  const selectClass =
-    "h-11 rounded-xl border border-border bg-background px-3 text-sm text-foreground";
+  const triggerClass =
+    "h-11 w-full justify-between rounded-xl border-border bg-background px-3 text-sm text-foreground";
 
   return (
     <div className="min-h-screen bg-background">
@@ -191,75 +198,90 @@ function LancamentosIndex() {
             />
           </label>
 
-          <select
-            className={selectClass}
-            value={search.bairro}
-            onChange={(e) => update({ bairro: e.target.value })}
-            aria-label="Filtrar por bairro"
+          <Select
+            value={search.bairro || "__all__"}
+            onValueChange={(val) => update({ bairro: val === "__all__" ? "" : val })}
           >
-            <option value="">Todos os bairros</option>
-            {facets?.neighborhoods.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger aria-label="Filtrar por bairro" className={triggerClass}>
+              <SelectValue placeholder="Todos os bairros" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Todos os bairros</SelectItem>
+              {facets?.neighborhoods.map((n) => (
+                <SelectItem key={n} value={n}>
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <select
-            className={selectClass}
-            value={search.construtora}
-            onChange={(e) => update({ construtora: e.target.value })}
-            aria-label="Filtrar por construtora"
+          <Select
+            value={search.construtora || "__all__"}
+            onValueChange={(val) => update({ construtora: val === "__all__" ? "" : val })}
           >
-            <option value="">Todas as construtoras</option>
-            {facets?.developers.map((d) => (
-              <option key={d.slug} value={d.slug}>
-                {d.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger aria-label="Filtrar por construtora" className={triggerClass}>
+              <SelectValue placeholder="Todas as construtoras" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Todas as construtoras</SelectItem>
+              {facets?.developers.map((d) => (
+                <SelectItem key={d.slug} value={d.slug}>
+                  {d.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <select
-            className={selectClass}
-            value={search.estagio}
-            onChange={(e) => update({ estagio: e.target.value })}
-            aria-label="Filtrar por estágio"
+          <Select
+            value={search.estagio || "__all__"}
+            onValueChange={(val) => update({ estagio: val === "__all__" ? "" : val })}
           >
-            <option value="">Todos os estágios</option>
-            {Object.entries(STAGE_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger aria-label="Filtrar por estágio" className={triggerClass}>
+              <SelectValue placeholder="Todos os estágios" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Todos os estágios</SelectItem>
+              {Object.entries(STAGE_LABELS).map(([value, label]) => (
+                <SelectItem key={value} value={value}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <select
-            className={selectClass}
-            value={search.entrega}
-            onChange={(e) => update({ entrega: e.target.value })}
-            aria-label="Filtrar por previsão de entrega"
+          <Select
+            value={search.entrega || "__all__"}
+            onValueChange={(val) => update({ entrega: val === "__all__" ? "" : val })}
           >
-            <option value="">Qualquer entrega</option>
-            {facets?.deliveries.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger aria-label="Filtrar por previsão de entrega" className={triggerClass}>
+              <SelectValue placeholder="Qualquer entrega" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Qualquer entrega</SelectItem>
+              {facets?.deliveries.map((d) => (
+                <SelectItem key={d} value={d}>
+                  {d}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <select
-            className={selectClass}
-            value={search.dorms === null ? "" : String(search.dorms)}
-            onChange={(e) => update({ dorms: e.target.value ? Number(e.target.value) : null })}
-            aria-label="Filtrar por dormitórios"
+          <Select
+            value={search.dorms === null ? "__all__" : String(search.dorms)}
+            onValueChange={(val) => update({ dorms: val === "__all__" ? null : Number(val) })}
           >
-            <option value="">Dormitórios</option>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <option key={n} value={n}>
-                {n}+ dormitórios
-              </option>
-            ))}
-          </select>
+            <SelectTrigger aria-label="Filtrar por dormitórios" className={triggerClass}>
+              <SelectValue placeholder="Dormitórios" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__all__">Dormitórios</SelectItem>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n}+ dormitórios
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
           <div className="grid grid-cols-2 gap-2">
             <input
@@ -280,16 +302,16 @@ function LancamentosIndex() {
             />
           </div>
 
-          <select
-            className={selectClass}
-            value={search.ordem}
-            onChange={(e) => update({ ordem: e.target.value })}
-            aria-label="Ordenar"
-          >
-            <option value="relevance">Mais relevantes</option>
-            <option value="recent">Lançamento recente</option>
-            <option value="delivery">Entrega mais próxima</option>
-          </select>
+          <Select value={search.ordem} onValueChange={(val) => update({ ordem: val })}>
+            <SelectTrigger aria-label="Ordenar" className={triggerClass}>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="relevance">Mais relevantes</SelectItem>
+              <SelectItem value="recent">Lançamento recente</SelectItem>
+              <SelectItem value="delivery">Entrega mais próxima</SelectItem>
+            </SelectContent>
+          </Select>
         </section>
 
         <p className="mt-6 text-sm text-muted-foreground">
