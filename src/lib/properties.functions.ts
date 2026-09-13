@@ -162,6 +162,18 @@ export const getPropertyByCode = createServerFn({ method: "GET" })
   .inputValidator((d: unknown) => codeSchema.parse(d))
   .handler(async ({ data }) => {
     const supabase = getPublicClient();
+
+    // 1. Verificação preliminar centralizada de bloqueio administrativo
+    const { resolveEditorialPreservedSnapshot, isCodeAdministrativelyBlocked } = await import(
+      "@/lib/editorial-preserved"
+    );
+    const isBlocked = await isCodeAdministrativelyBlocked(data.code, supabase);
+    if (isBlocked) {
+      // Bloqueio administrativo sobrepõe qualquer registro comercial ou de acervo
+      return null;
+    }
+
+    // 2. Consulta à unidade comercialmente ativa
     const { data: prop, error } = await supabase
       .from("properties")
       .select("*")
@@ -188,9 +200,8 @@ export const getPropertyByCode = createServerFn({ method: "GET" })
       };
     }
 
-    // Fallback editorial preservado: verificar se a unidade possui snapshot registrado
-    const { getEditorialPreservedSnapshot } = await import("@/lib/editorial-preserved");
-    const snap = getEditorialPreservedSnapshot(data.code);
+    // 3. Fallback editorial preservado: consulta persistente (DB primeiro, semente em fallback)
+    const snap = await resolveEditorialPreservedSnapshot(data.code, supabase);
     if (!snap) return null;
 
     return {
@@ -218,8 +229,8 @@ export const getPropertyByCode = createServerFn({ method: "GET" })
         cover_image: snap.coverImage,
         published: false,
         featured: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_at: snap.snapshotDate,
+        updated_at: snap.snapshotDate,
       },
       photos: snap.photos,
       isArchived: true,

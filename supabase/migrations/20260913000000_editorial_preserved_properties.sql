@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS public.editorial_preserved_properties (
   cover_image TEXT,
   photos JSONB NOT NULL DEFAULT '[]'::jsonb,
   is_preserved BOOLEAN NOT NULL DEFAULT true,
+  is_admin_blocked BOOLEAN NOT NULL DEFAULT false,
   unavailable_notice TEXT NOT NULL DEFAULT 'Esta unidade não está disponível para venda no momento.',
   preserved_since TIMESTAMPTZ NOT NULL DEFAULT now(),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -42,7 +43,7 @@ ALTER TABLE public.editorial_preserved_properties ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public can view preserved editorial properties"
   ON public.editorial_preserved_properties FOR SELECT
   TO anon, authenticated
-  USING (is_preserved = true);
+  USING (is_preserved = true AND is_admin_blocked = false);
 
 CREATE POLICY "Admins can manage preserved editorial properties"
   ON public.editorial_preserved_properties FOR ALL

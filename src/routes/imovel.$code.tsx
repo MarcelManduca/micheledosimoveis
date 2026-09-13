@@ -75,7 +75,7 @@ export const Route = createFileRoute("/imovel/$code")({
       ? `${p.title}${p.neighborhood ? ` — ${p.neighborhood}` : ""}, Florianópolis | Acervo Michele dos Imóveis`
       : `${p.title}${p.neighborhood ? ` — ${p.neighborhood}` : ""}, Florianópolis | Michele dos Imóveis`;
     const descAuto = isArchived
-      ? `Registro de acervo: ${p.title} no ${p.condo_name || "condomínio"}. ${p.bedrooms ? `${p.bedrooms} dorms, ` : ""}${p.area_m2 ? `${p.area_m2}m². ` : ""}Consulte opções disponíveis com Michele dos Imóveis.`
+      ? `${loaderData.unavailableNotice || "Esta unidade não está disponível para venda no momento."} ${p.title}${p.condo_name ? ` no ${p.condo_name}` : ""}. Consulte opções disponíveis com Michele dos Imóveis.`
       : [
           p.bedrooms ? `${p.bedrooms} dormitórios` : null,
           p.bathrooms ? `${p.bathrooms} banheiros` : null,
@@ -86,10 +86,22 @@ export const Route = createFileRoute("/imovel/$code")({
         ]
           .filter(Boolean)
           .join(" · ");
-    const description = (p.description?.slice(0, 160) || descAuto).trim();
+    const description = isArchived
+      ? descAuto
+      : (p.description?.slice(0, 160) || descAuto).trim();
+
+    const toAbsoluteUrl = (u: string) => {
+      if (!u) return "";
+      if (u.startsWith("http://") || u.startsWith("https://")) return u;
+      return new URL(u, "https://micheledosimoveis.com.br").href;
+    };
+
     const photos = (loaderData.photos as Array<{ url: string }> | undefined) ?? [];
-    const images = photos.map((x) => x.url).filter(Boolean);
-    if (p.cover_image && !images.includes(p.cover_image)) images.unshift(p.cover_image);
+    const images = photos.map((x) => toAbsoluteUrl(x.url)).filter(Boolean);
+    if (p.cover_image) {
+      const absCover = toAbsoluteUrl(p.cover_image);
+      if (!images.includes(absCover)) images.unshift(absCover);
+    }
 
     const nbForBread = findNeighborhoodByName(p.neighborhood);
     const amenityProps = [

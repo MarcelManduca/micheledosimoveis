@@ -13,6 +13,14 @@ export default defineTool({
   handler: async ({ code }, ctx) => {
     if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const sb = supabaseForUser(ctx);
+    const { isCodeAdministrativelyBlocked, resolveEditorialPreservedSnapshot } = await import(
+      "../../editorial-preserved"
+    );
+    const isBlocked = await isCodeAdministrativelyBlocked(code, sb);
+    if (isBlocked) {
+      return { content: [{ type: "text", text: `No published or preserved property with code ${code}` }] };
+    }
+
     const { data, error } = await sb
       .from("properties")
       .select("*")
@@ -21,8 +29,7 @@ export default defineTool({
       .maybeSingle();
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
     if (!data) {
-      const { getEditorialPreservedSnapshot } = await import("../../editorial-preserved");
-      const snap = getEditorialPreservedSnapshot(code);
+      const snap = await resolveEditorialPreservedSnapshot(code, sb);
       if (snap) {
         const preservedPayload = {
           code: snap.code,
