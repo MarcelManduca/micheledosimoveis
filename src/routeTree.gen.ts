@@ -26,6 +26,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as LancamentosIndexRouteImport } from './routes/lancamentos.index'
 import { Route as ImoveisIndexRouteImport } from './routes/imoveis.index'
 import { Route as CondominiosIndexRouteImport } from './routes/condominios.index'
+import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as VrsyncChar123slugChar125DotxmlRouteImport } from './routes/vrsync.{$slug}[.]xml'
 import { Route as LancamentosSlugRouteImport } from './routes/lancamentos.$slug'
 import { Route as ImovelCodeRouteImport } from './routes/imovel.$code'
@@ -33,6 +34,7 @@ import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as ConstrutorasSlugRouteImport } from './routes/construtoras.$slug'
 import { Route as CondominiosBairroRouteImport } from './routes/condominios.$bairro'
 import { Route as CondominioSlugRouteImport } from './routes/condominio.$slug'
+import { Route as BlogCondominiosLuxoBeiraMarNorteAgronomicaRouteImport } from './routes/blog.condominios-luxo-beira-mar-norte-agronomica'
 import { Route as AdminLancamentosRouteImport } from './routes/admin.lancamentos'
 import { Route as AdminInteligenciaPortfolioRouteImport } from './routes/admin.inteligencia-portfolio'
 import { Route as AdminConstrutorasRouteImport } from './routes/admin.construtoras'
@@ -130,6 +132,11 @@ const CondominiosIndexRoute = CondominiosIndexRouteImport.update({
   path: '/condominios/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const VrsyncChar123slugChar125DotxmlRoute =
   VrsyncChar123slugChar125DotxmlRouteImport.update({
     id: '/vrsync/{$slug}.xml',
@@ -166,6 +173,12 @@ const CondominioSlugRoute = CondominioSlugRouteImport.update({
   path: '/condominio/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute =
+  BlogCondominiosLuxoBeiraMarNorteAgronomicaRouteImport.update({
+    id: '/blog/condominios-luxo-beira-mar-norte-agronomica',
+    path: '/blog/condominios-luxo-beira-mar-norte-agronomica',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminLancamentosRoute = AdminLancamentosRouteImport.update({
   id: '/lancamentos',
   path: '/lancamentos',
@@ -232,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/admin/lancamentos': typeof AdminLancamentosRoute
+  '/blog/condominios-luxo-beira-mar-norte-agronomica': typeof BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/construtoras/$slug': typeof ConstrutorasSlugRoute
@@ -239,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/imovel/$code': typeof ImovelCodeRoute
   '/lancamentos/$slug': typeof LancamentosSlugRoute
   '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
+  '/blog/': typeof BlogIndexRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
   '/lancamentos/': typeof LancamentosIndexRoute
@@ -266,6 +281,7 @@ export interface FileRoutesByTo {
   '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/admin/lancamentos': typeof AdminLancamentosRoute
+  '/blog/condominios-luxo-beira-mar-norte-agronomica': typeof BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/construtoras/$slug': typeof ConstrutorasSlugRoute
@@ -273,6 +289,7 @@ export interface FileRoutesByTo {
   '/imovel/$code': typeof ImovelCodeRoute
   '/lancamentos/$slug': typeof LancamentosSlugRoute
   '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
+  '/blog': typeof BlogIndexRoute
   '/condominios': typeof CondominiosIndexRoute
   '/imoveis': typeof ImoveisIndexRoute
   '/lancamentos': typeof LancamentosIndexRoute
@@ -301,6 +318,7 @@ export interface FileRoutesById {
   '/admin/construtoras': typeof AdminConstrutorasRoute
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/admin/lancamentos': typeof AdminLancamentosRoute
+  '/blog/condominios-luxo-beira-mar-norte-agronomica': typeof BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/construtoras/$slug': typeof ConstrutorasSlugRoute
@@ -308,6 +326,7 @@ export interface FileRoutesById {
   '/imovel/$code': typeof ImovelCodeRoute
   '/lancamentos/$slug': typeof LancamentosSlugRoute
   '/vrsync/{$slug}.xml': typeof VrsyncChar123slugChar125DotxmlRoute
+  '/blog/': typeof BlogIndexRoute
   '/condominios/': typeof CondominiosIndexRoute
   '/imoveis/': typeof ImoveisIndexRoute
   '/lancamentos/': typeof LancamentosIndexRoute
@@ -337,6 +356,7 @@ export interface FileRouteTypes {
     | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
     | '/admin/lancamentos'
+    | '/blog/condominios-luxo-beira-mar-norte-agronomica'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/construtoras/$slug'
@@ -344,6 +364,7 @@ export interface FileRouteTypes {
     | '/imovel/$code'
     | '/lancamentos/$slug'
     | '/vrsync/{$slug}.xml'
+    | '/blog/'
     | '/condominios/'
     | '/imoveis/'
     | '/lancamentos/'
@@ -371,6 +392,7 @@ export interface FileRouteTypes {
     | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
     | '/admin/lancamentos'
+    | '/blog/condominios-luxo-beira-mar-norte-agronomica'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/construtoras/$slug'
@@ -378,6 +400,7 @@ export interface FileRouteTypes {
     | '/imovel/$code'
     | '/lancamentos/$slug'
     | '/vrsync/{$slug}.xml'
+    | '/blog'
     | '/condominios'
     | '/imoveis'
     | '/lancamentos'
@@ -405,6 +428,7 @@ export interface FileRouteTypes {
     | '/admin/construtoras'
     | '/admin/inteligencia-portfolio'
     | '/admin/lancamentos'
+    | '/blog/condominios-luxo-beira-mar-norte-agronomica'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/construtoras/$slug'
@@ -412,6 +436,7 @@ export interface FileRouteTypes {
     | '/imovel/$code'
     | '/lancamentos/$slug'
     | '/vrsync/{$slug}.xml'
+    | '/blog/'
     | '/condominios/'
     | '/imoveis/'
     | '/lancamentos/'
@@ -437,6 +462,7 @@ export interface RootRouteChildren {
   VrsyncDotxmlRoute: typeof VrsyncDotxmlRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute: typeof BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute
   CondominioSlugRoute: typeof CondominioSlugRoute
   CondominiosBairroRoute: typeof CondominiosBairroRoute
   ConstrutorasSlugRoute: typeof ConstrutorasSlugRoute
@@ -444,6 +470,7 @@ export interface RootRouteChildren {
   ImovelCodeRoute: typeof ImovelCodeRoute
   LancamentosSlugRoute: typeof LancamentosSlugRoute
   VrsyncChar123slugChar125DotxmlRoute: typeof VrsyncChar123slugChar125DotxmlRoute
+  BlogIndexRoute: typeof BlogIndexRoute
   CondominiosIndexRoute: typeof CondominiosIndexRoute
   ImoveisIndexRoute: typeof ImoveisIndexRoute
   LancamentosIndexRoute: typeof LancamentosIndexRoute
@@ -573,6 +600,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CondominiosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/': {
+      id: '/blog/'
+      path: '/blog'
+      fullPath: '/blog/'
+      preLoaderRoute: typeof BlogIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/vrsync/{$slug}.xml': {
       id: '/vrsync/{$slug}.xml'
       path: '/vrsync/{$slug}.xml'
@@ -620,6 +654,13 @@ declare module '@tanstack/react-router' {
       path: '/condominio/$slug'
       fullPath: '/condominio/$slug'
       preLoaderRoute: typeof CondominioSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog/condominios-luxo-beira-mar-norte-agronomica': {
+      id: '/blog/condominios-luxo-beira-mar-norte-agronomica'
+      path: '/blog/condominios-luxo-beira-mar-norte-agronomica'
+      fullPath: '/blog/condominios-luxo-beira-mar-norte-agronomica'
+      preLoaderRoute: typeof BlogCondominiosLuxoBeiraMarNorteAgronomicaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/lancamentos': {
@@ -714,6 +755,8 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
+  BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute:
+    BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute,
   CondominioSlugRoute: CondominioSlugRoute,
   CondominiosBairroRoute: CondominiosBairroRoute,
   ConstrutorasSlugRoute: ConstrutorasSlugRoute,
@@ -721,6 +764,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImovelCodeRoute: ImovelCodeRoute,
   LancamentosSlugRoute: LancamentosSlugRoute,
   VrsyncChar123slugChar125DotxmlRoute: VrsyncChar123slugChar125DotxmlRoute,
+  BlogIndexRoute: BlogIndexRoute,
   CondominiosIndexRoute: CondominiosIndexRoute,
   ImoveisIndexRoute: ImoveisIndexRoute,
   LancamentosIndexRoute: LancamentosIndexRoute,
