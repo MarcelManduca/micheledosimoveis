@@ -43,6 +43,9 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         try {
           const { createClient } = await import("@supabase/supabase-js");
+          const { EDITORIAL_PRESERVED_CATALOG } = await import("@/lib/editorial-preserved");
+          const existingPaths = new Set(entries.map((e) => e.path));
+
           const supabase = createClient(
             process.env.SUPABASE_URL!,
             process.env.SUPABASE_PUBLISHABLE_KEY!,
@@ -54,15 +57,32 @@ export const Route = createFileRoute("/sitemap.xml")({
             .eq("published", true);
 
           for (const row of data ?? []) {
-            entries.push({
-              path: `/imovel/${row.code}`,
-              lastmod: row.updated_at
-                ? new Date(row.updated_at).toISOString().slice(0, 10)
-                : undefined,
-              changefreq: "weekly",
-              priority: "0.8",
-              image: row.cover_image,
-            });
+            const path = `/imovel/${row.code}`;
+            if (!existingPaths.has(path)) {
+              existingPaths.add(path);
+              entries.push({
+                path,
+                lastmod: row.updated_at
+                  ? new Date(row.updated_at).toISOString().slice(0, 10)
+                  : undefined,
+                changefreq: "weekly",
+                priority: "0.8",
+                image: row.cover_image,
+              });
+            }
+          }
+
+          for (const [code, item] of Object.entries(EDITORIAL_PRESERVED_CATALOG)) {
+            const path = `/imovel/${code}`;
+            if (item.isPreserved && !existingPaths.has(path)) {
+              existingPaths.add(path);
+              entries.push({
+                path,
+                changefreq: "monthly",
+                priority: "0.6",
+                image: item.coverImage,
+              });
+            }
           }
         } catch {
           // fall through
