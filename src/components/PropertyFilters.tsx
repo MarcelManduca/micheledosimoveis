@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { useState } from "react";
 import {
   Select,
@@ -63,6 +63,7 @@ export function PropertyFilters({
   const navigate = useNavigate();
   const [v, setV] = useState<FiltersValue>(initial ?? {});
 
+  const [isSearching, setIsSearching] = useState(false);
   const isDark = variant === "dark";
   const triggerCls = `w-full h-auto justify-between rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-offset-0 ${
     isDark
@@ -80,11 +81,14 @@ export function PropertyFilters({
 
   return (
     <form
-      onSubmit={(e) => {
+      onSubmit={async (e) => {
         e.preventDefault();
+        if (isSearching) return;
+        setIsSearching(true);
+        try {
         const trimmedCode = v.code?.trim();
         if (trimmedCode) {
-          navigate({ to: "/imovel/$code", params: { code: trimmedCode } });
+          await navigate({ to: "/imovel/$code", params: { code: trimmedCode } });
           return;
         }
         const search: Record<string, string | number> = {};
@@ -92,7 +96,10 @@ export function PropertyFilters({
         if (v.bairro) search.bairro = v.bairro;
         if (v.dorms != null) search.dorms = v.dorms;
         if (v.faixa != null) search.faixa = v.faixa;
-        navigate({ to: "/buscar", search });
+        await navigate({ to: "/buscar", search });
+        } finally {
+          setIsSearching(false);
+        }
       }}
       className={`grid gap-3 sm:grid-cols-2 lg:grid-cols-6 lg:items-end p-4 sm:p-5 rounded-2xl ${
         isDark
@@ -199,13 +206,16 @@ export function PropertyFilters({
 
       <button
         type="submit"
-        className={`group inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition ${
+        disabled={isSearching}
+        aria-busy={isSearching}
+        className={`group cursor-pointer disabled:cursor-wait disabled:opacity-70 active:scale-[0.98] inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium transition ${
           isDark
             ? "bg-white text-foreground hover:bg-white/90"
             : "bg-foreground text-background hover:bg-foreground/90"
         }`}
       >
-        <Search className="h-4 w-4" /> Buscar imóveis
+        {isSearching ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> : <Search className="h-4 w-4" aria-hidden="true" />}
+        <span aria-live="polite">{isSearching ? "Buscando…" : "Buscar imóveis"}</span>
       </button>
     </form>
   );
