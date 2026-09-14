@@ -145,7 +145,11 @@ export async function fetchSearchProperties(
       .select(LIST_COLS)
       .eq("published", true);
     if (data.tipo) q = q.ilike("property_type", `%${escapeLike(data.tipo)}%`);
-    if (data.bairro) q = q.ilike("neighborhood", `%${escapeLike(data.bairro)}%`);
+    if (data.bairro === "Centro / Beira Mar Norte") {
+      q = q.in("neighborhood", ["Centro", "Beira Mar Norte"]);
+    } else if (data.bairro) {
+      q = q.ilike("neighborhood", `%${escapeLike(data.bairro)}%`);
+    }
     if (data.dorms != null) {
       if (data.dorms >= 4) q = q.gte("bedrooms", 4);
       else q = q.eq("bedrooms", data.dorms);
