@@ -18,7 +18,7 @@ export function PropertyCard({ p, lockAfter = 3 }: { p: PropertyListItem; lockAf
       className="group block overflow-hidden rounded-2xl bg-card ring-1 ring-black/5 transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:ring-black/10"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-secondary">
-        <PropertyImageCarousel images={images} alt={p.title} className="h-full w-full" lockAfter={lockAfter} />
+        <PropertyImageCarousel images={images} alt={p.title} className="h-full w-full" lockAfter={lockAfter} loadOnDemand />
       </div>
       <div className="p-5">
         <div className="flex items-center justify-between gap-3">

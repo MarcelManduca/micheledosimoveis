@@ -3,6 +3,8 @@ import { ChevronLeft, ChevronRight, ImageIcon } from "lucide-react";
 
 type Props = {
   images: string[];
+  /** Carrega fotos secundárias apenas ao navegar pelo carrossel. */
+  loadOnDemand?: boolean;
   alt: string;
   className?: string;
   /** Limita o carrossel às N primeiras fotos e mostra um CTA "Ver mais fotos" ao chegar na última. */
@@ -15,7 +17,7 @@ type Props = {
  * Carrossel de imagens com transição horizontal suave (translateX),
  * seta circular sobre a imagem e suporte a swipe no mobile.
  */
-export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLabel = "Ver mais fotos" }: Props) {
+export function PropertyImageCarousel({ images, alt, className, lockAfter, loadOnDemand = false, ctaLabel = "Ver mais fotos" }: Props) {
   const filtered = images.filter(Boolean);
   const list = lockAfter ? filtered.slice(0, lockAfter) : filtered;
   const [index, setIndex] = useState(0);
@@ -35,7 +37,7 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
   // Inforce/Gralha no carregamento inicial). Desktop mantém preview ao
   // entrar em ≥60% do viewport para o hover feel.
   useEffect(() => {
-    if (total <= 1 || revealed >= total) return;
+    if (loadOnDemand || total <= 1 || revealed >= total) return;
     if (typeof window === "undefined") return;
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     if (isMobile) return;
@@ -55,26 +57,26 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [total, revealed, revealAll]);
+  }, [total, revealed, revealAll, loadOnDemand]);
 
 
 
   const goTo = useCallback(
     (next: number) => {
       if (total === 0) return;
-      revealAll();
-      if (lockAfter) {
-        setIndex(Math.max(0, Math.min(total - 1, next)));
-        return;
-      }
-      setIndex(((next % total) + total) % total);
+      const target = lockAfter
+        ? Math.max(0, Math.min(total - 1, next))
+        : ((next % total) + total) % total;
+      if (loadOnDemand) setRevealed((r) => Math.max(r, target + 1));
+      else revealAll();
+      setIndex(target);
     },
-    [total, lockAfter, revealAll],
+    [total, lockAfter, revealAll, loadOnDemand],
   );
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (!hasMany) return;
-    revealAll();
+    if (!loadOnDemand) revealAll();
     dragStartX.current = e.clientX;
     dragDelta.current = 0;
   };
@@ -107,7 +109,7 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerUp}
-      onMouseEnter={hasMany ? revealAll : undefined}
+      onMouseEnter={hasMany && !loadOnDemand ? revealAll : undefined}
     >
       <div
         className="flex h-full w-full touch-pan-y will-change-transform"
@@ -122,7 +124,7 @@ export function PropertyImageCarousel({ images, alt, className, lockAfter, ctaLa
               <img
                 src={src}
                 alt={`${alt} — foto ${i + 1}`}
-                loading="lazy"
+                loading={loadOnDemand && i === index && i > 0 ? "eager" : "lazy"}
                 fetchPriority="low"
                 decoding="async"
                 draggable={false}
