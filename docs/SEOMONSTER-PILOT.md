@@ -41,8 +41,10 @@ which uvx
 uvx --from seo-monster seo-monster --help
 ```
 
-A configuração do servidor para VS Code/Codex compatível está em
-`.vscode/mcp.json`. Se o aplicativo gráfico não localizar `uvx`, substitua
+A configuração do servidor para clientes compatíveis com o formato do VS Code está em
+`.vscode/mcp.json`. No Codex, a configuração equivalente deve ser adicionada a
+`~/.codex/config.toml`, conforme a documentação oficial do SEOMonster. Se o
+aplicativo gráfico não localizar `uvx`, substitua
 `"command": "uvx"` pelo caminho absoluto retornado por `which uvx`. Essa
 alteração deve permanecer local quando o caminho for específico de uma máquina.
 
