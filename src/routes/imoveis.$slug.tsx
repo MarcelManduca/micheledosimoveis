@@ -52,38 +52,6 @@ export const Route = createFileRoute("/imoveis/$slug")({
           name: p.title,
         })),
     };
-    const localBusiness = {
-      "@context": "https://schema.org",
-      "@type": "RealEstateAgent",
-      name: "Michele dos Imóveis",
-      image: "https://micheledosimoveis.com.br/michele-dos-imoveis-og.png",
-      url,
-      telephone: "+5548991828828",
-      priceRange: "$$$$",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "R. Alves de Brito, 285",
-        addressLocality: "Florianópolis",
-        addressRegion: "SC",
-        postalCode: "88015-440",
-        addressCountry: "BR",
-      },
-      areaServed: {
-        "@type": "Place",
-        name: `${n.name}, Florianópolis`,
-        ...(n.geo
-          ? { geo: { "@type": "GeoCoordinates", latitude: n.geo.lat, longitude: n.geo.lng } }
-          : {}),
-      },
-      knowsAbout: [
-        "Imóveis de alto padrão",
-        "Apartamentos frente mar",
-        "Coberturas",
-        "Casas em condomínio fechado",
-        "Lançamentos imobiliários",
-        n.name,
-      ],
-    };
     const breadcrumbs = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -151,7 +119,6 @@ export const Route = createFileRoute("/imoveis/$slug")({
       ],
       links: [{ rel: "canonical", href: url }],
       scripts: [
-        { type: "application/ld+json", children: JSON.stringify(localBusiness) },
         { type: "application/ld+json", children: JSON.stringify(itemList) },
         { type: "application/ld+json", children: JSON.stringify(breadcrumbs) },
         { type: "application/ld+json", children: JSON.stringify(faq) },
