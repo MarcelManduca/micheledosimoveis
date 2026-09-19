@@ -20,9 +20,16 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# SEOMonster / Google OAuth (local only)
+.seo-monster/
+seo-monster*.toml
+client_secret*.json
+token.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/mcp.json
 .idea
 .DS_Store
 *.suo
