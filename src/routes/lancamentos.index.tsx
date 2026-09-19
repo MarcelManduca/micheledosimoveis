@@ -117,13 +117,6 @@ export const Route = createFileRoute("/lancamentos/")({
                 { "@type": "ListItem", position: 2, name: "Lançamentos", item: url },
               ],
             },
-            {
-              "@context": "https://schema.org",
-              "@type": "RealEstateAgent",
-              name: "Michele dos Imóveis",
-              url: SITE,
-              areaServed: "Florianópolis, SC",
-            },
           ]),
         },
       ],
