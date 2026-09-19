@@ -87,13 +87,6 @@ export const Route = createFileRoute("/construtoras/$slug")({
                 : {}),
               sameAs: [dev.website, dev.instagram].filter(Boolean),
             },
-            {
-              "@context": "https://schema.org",
-              "@type": "RealEstateAgent",
-              name: "Michele dos Imóveis",
-              url: SITE,
-              areaServed: "Florianópolis, SC",
-            },
           ]),
         },
       ],

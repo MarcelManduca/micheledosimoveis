@@ -204,16 +204,6 @@ export const Route = createFileRoute("/condominio/$slug")({
       inLanguage: "pt-BR",
     };
 
-    const realEstateAgent = {
-      "@context": "https://schema.org",
-      "@type": "RealEstateAgent",
-      name: "Michele dos Imóveis",
-      url: SITE,
-      telephone: "+55-48-99182-8828",
-      areaServed: { "@type": "Place", name: `${bairro}, Florianópolis - SC` },
-      description: "Atendimento imobiliário para compradores e proprietários na região.",
-    };
-
     const faq = buildFaq(condo, false);
     const faqPage = {
       "@context": "https://schema.org",
@@ -245,7 +235,6 @@ export const Route = createFileRoute("/condominio/$slug")({
         { type: "application/ld+json", children: JSON.stringify(webPage) },
         { type: "application/ld+json", children: JSON.stringify(breadcrumb) },
         { type: "application/ld+json", children: JSON.stringify(apartmentComplex) },
-        { type: "application/ld+json", children: JSON.stringify(realEstateAgent) },
         { type: "application/ld+json", children: JSON.stringify(faqPage) },
       ],
     };
