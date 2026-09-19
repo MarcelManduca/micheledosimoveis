@@ -1,0 +1,14 @@
+{
+  "servers": {
+    "seomonster": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["seo-monster"],
+      "env": {
+        "SEO_MCP_GSC_DEFAULT_SITE": "sc-domain:micheledosimoveis.com.br",
+        "SEO_MCP_DATA_STATE": "final",
+        "SEO_MCP_ALLOW_DESTRUCTIVE": "false"
+      }
+    }
+  }
+}
