@@ -104,14 +104,6 @@ export const Route = createFileRoute("/lancamentos/$slug")({
           : {}),
         ...(d.units.length ? { numberOfAvailableAccommodationUnits: d.stats.units_available } : {}),
       },
-      {
-        "@context": "https://schema.org",
-        "@type": "RealEstateAgent",
-        name: "Michele dos Imóveis",
-        url: SITE,
-        telephone: SITE_INFO.phoneDisplay,
-        areaServed: "Florianópolis, SC",
-      },
     ];
 
     if (d.developer) {
