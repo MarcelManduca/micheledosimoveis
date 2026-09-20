@@ -83,7 +83,7 @@ function PrivacyPage() {
             <p className="mt-2">
               Os imóveis exibidos são oriundos do portal parceiro Gralha Imóveis. Operadores
               técnicos utilizados: provedor de hospedagem do site, provedor de banco de dados e
-              autenticação (Lovable Cloud / Supabase) e provedor de mapas (OpenStreetMap via
+              autenticação (Supabase) e provedor de mapas (OpenStreetMap via
               Leaflet). Não vendemos dados pessoais.
             </p>
           </div>
