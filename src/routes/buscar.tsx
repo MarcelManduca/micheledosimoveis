@@ -1,5 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { z } from "zod";
 import { ArrowLeft } from "lucide-react";
 import { searchProperties, type PropertyListItem } from "@/lib/properties.functions";
@@ -8,6 +9,7 @@ import { PropertyCard } from "@/components/PropertyCard";
 import { ChromaGridShell } from "@/components/ChromaGridShell";
 import { findNeighborhoodByName } from "@/lib/neighborhoods";
 import { buildWhatsAppUrl } from "@/lib/site-config";
+import { trackSearch } from "@/lib/tracking";
 
 // Parser resiliente — nunca lança erro para o usuário final.
 // Motivo: `@tanstack/zod-adapter`'s `fallback()` usa `z.custom().pipe(...)` e
@@ -176,6 +178,16 @@ function BuscarPage() {
     initialData: initial,
   });
   const results = live.data ?? [];
+
+  useEffect(() => {
+    trackSearch({
+      tipo: search.tipo,
+      bairro: search.bairro,
+      dorms: search.dorms,
+      faixa: search.faixa,
+      resultsCount: results.length,
+    });
+  }, [search.tipo, search.bairro, search.dorms, search.faixa, results.length]);
 
   const initialFilters: FiltersValue = {
     tipo: search.tipo,

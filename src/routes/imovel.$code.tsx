@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 
 import { PropertyCard } from "@/components/PropertyCard";
+import { trackViewItem, trackWhatsAppClick } from "@/lib/tracking";
 
 export const Route = createFileRoute("/imovel/$code")({
   loader: async ({ params }) => {
@@ -297,6 +298,16 @@ function PropertyPage() {
     .join(", ");
   const hasMap = mapQuery.length > 0;
 
+  useEffect(() => {
+    trackViewItem({
+      code: p.code,
+      title: p.title,
+      priceBrl: p.price_brl,
+      neighborhood: p.neighborhood,
+      propertyType: p.property_type,
+    });
+  }, [p.code, p.title, p.price_brl, p.neighborhood, p.property_type]);
+
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
       {isArchived && (
@@ -325,6 +336,13 @@ function PropertyPage() {
             href={isArchived ? whatsappCondo : whatsapp}
             target="_blank"
             rel="noreferrer"
+            onClick={() =>
+              trackWhatsAppClick({
+                ctaLocation: "property_detail_primary",
+                propertyCode: p.code,
+                neighborhood: p.neighborhood,
+              })
+            }
             className="rounded-full bg-foreground text-background px-5 py-2 text-sm font-medium hover:bg-foreground/90 transition"
           >
             {isArchived ? "Consultar opções" : "Falar com Michele"}

@@ -4,10 +4,12 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { lazy, Suspense, type ReactNode } from "react";
+import { useEffect, lazy, Suspense, type ReactNode } from "react";
+import { trackPageView } from "@/lib/tracking";
 
 import appCss from "../styles.css?url";
 // Preload the LATIN variable-font subsets that carry the LCP typography.
@@ -232,6 +234,11 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const locationHref = useRouterState({ select: (s) => s.location.href });
+
+  useEffect(() => {
+    trackPageView(window.location.href, document.title);
+  }, [locationHref]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -244,6 +251,5 @@ function RootComponent() {
         <CookieConsent />
       </Suspense>
     </QueryClientProvider>
-
   );
 }
