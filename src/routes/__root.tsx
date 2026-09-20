@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 // Preload the LATIN variable-font subsets that carry the LCP typography.
@@ -15,7 +15,6 @@ import appCss from "../styles.css?url";
 // critical request chain. Vite emits hashed URLs.
 import frauncesLatinWoff2 from "@fontsource-variable/fraunces/files/fraunces-latin-wght-normal.woff2?url";
 import interTightLatinWoff2 from "@fontsource-variable/inter-tight/files/inter-tight-latin-wght-normal.woff2?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 
 // Deferred: not needed for first paint. Cuts initial JS.
 const ImageProtection = lazy(() =>
@@ -50,9 +49,6 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
-  }, [error]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
