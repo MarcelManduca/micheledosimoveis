@@ -38,7 +38,7 @@ function createSupabaseAdminClient() {
       ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
       ...(!SUPABASE_ADMIN_KEY ? ['SUPABASE_SECRET_KEY'] : []),
     ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Configure the Supabase runtime environment.`;
+    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Please configure Supabase environment variables.`;
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }

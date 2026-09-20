@@ -2,9 +2,9 @@
 
 ## 1. Arquitetura de Branches e Promoção para Produção
 
-Para impedir que alterações intermediárias ou rascunhos do Lovable cheguem diretamente ao ambiente ao vivo, estabelecemos o isolamento estrito entre integração e produção:
+Para manter um fluxo rigoroso e seguro entre desenvolvimento e o ambiente ao vivo, estabelecemos o isolamento estrito entre integração e produção:
 
-* **`main` (Integração & Lovable):** Branch de integração contínua conectada ao Lovable. Toda edição realizada no editor Lovable sincroniza diretamente com a branch `main`.
+* **`main` (Integração):** Branch principal de integração contínua e desenvolvimento.
 * **`production` (Produção Hostinger):** Branch exclusiva implantada pelo ambiente da Hostinger. A Hostinger **não deve acompanhar a branch `main`**.
 * **Promoção Controlada:** Nenhuma alteração é publicada em produção sem passar pelo fluxo de validação e ser promovida da branch `main` para a `production` via Pull Request.
 * **Preservação de Histórico:** É estritamente proibido realizar `force push`, `rebase`, `amend` ou `squash` em commits já publicados.
@@ -29,7 +29,7 @@ Uma tarefa classificada como **Funcional (A)** não pode incluir alterações na
 Todas as versões enviadas ao ambiente de produção devem cumprir a sequência:
 
 ```text
-main (desenvolvimento / Lovable)
+main (integração e desenvolvimento)
   └──► CI Aprovado (GitHub Actions: production-contract.yml)
         └──► Revisão de Diff de Código
               └──► Validação de Preview via Chrome DevTools MCP
@@ -106,7 +106,7 @@ Os seguintes arquivos pertencem à categoria de Infraestrutura e não podem ser 
 
 ## 8. Prompt-Base para Agentes de IA
 
-Ao solicitar novas tarefas a agentes de IA (Antigravity ou Lovable), utilize:
+Ao solicitar novas tarefas a agentes de IA, utilize:
 
 ```text
 [CONTEXTO E ESCOPO DA TAREFA - Categoria: A (Funcional) | B (Dados) | C (Infraestrutura)]

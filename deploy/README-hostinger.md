@@ -1,4 +1,4 @@
-# Runbook — Deploy Nativo Lovable → GitHub → Hostinger
+# Runbook — Deploy Nativo GitHub → Hostinger
 
 ## 1. Configuração Oficial de Produção (Hostinger)
 

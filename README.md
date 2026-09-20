@@ -6,18 +6,18 @@ Site institucional e plataforma de captação imobiliária da corretora **Michel
 
 * **Framework Principal:** TanStack Start (React 19 + Nitro 3)
 * **Estilização:** Tailwind CSS v4
-* **Backend e Banco de Dados:** Supabase independente (PostgreSQL, autenticação, armazenamento e funções server-side)
+* **Backend e Banco de Dados:** Supabase para banco, autenticação, armazenamento e funções server-side
 * **Ambiente de Produção Oficial:** Hostinger (Node.js 22 + Phusion Passenger / LiteSpeed)
-* **Branch de Integração (Lovable):** `main`
+* **Branch de Integração:** `main`
 * **Branch de Produção (Hostinger):** `production`
 
 ---
 
 ## Estrutura de Publicação e Arquitetura de Branches
 
-Para garantir a estabilidade do site ao vivo e evitar que rascunhos ou edições intermediárias do Lovable afetem a produção:
+Para garantir a estabilidade do site ao vivo e manter um fluxo seguro de entregas:
 
-* **Branch `main` (Integração):** Conectada ao editor Lovable. Todas as alterações feitas no Lovable chegam automaticamente a esta branch.
+* **Branch `main` (Integração):** Branch principal de integração contínua e desenvolvimento.
 * **Branch `production` (Produção Hostinger):** A Hostinger compila e publica exclusivamente a partir da branch `production`. A Hostinger **não deve acompanhar a branch `main`**.
 * **Fluxo de Promoção:** As alterações da `main` são promovidas para a `production` através de Pull Requests, após aprovação do CI e validação no Chrome DevTools MCP.
 * **Histórico Git Protegido:** Nunca realizar `force push`, `rebase`, `amend` ou `squash` em commits já publicados.

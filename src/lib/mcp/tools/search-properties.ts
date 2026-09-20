@@ -1,5 +1,5 @@
-import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
+import { defineTool } from "../types";
 import { supabaseForUser } from "../supabase";
 
 export default defineTool({
@@ -17,7 +17,6 @@ export default defineTool({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ neighborhood, property_type, min_price_brl, max_price_brl, min_bedrooms, limit }, ctx) => {
-    if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const sb = supabaseForUser(ctx);
     let q = sb
       .from("properties")
@@ -25,12 +24,14 @@ export default defineTool({
       .eq("published", true)
       .order("featured", { ascending: false })
       .order("price_brl", { ascending: false });
+
     if (neighborhood) q = q.ilike("neighborhood", `%${neighborhood}%`);
     if (property_type) q = q.ilike("property_type", `%${property_type}%`);
     if (typeof min_price_brl === "number") q = q.gte("price_brl", min_price_brl);
     if (typeof max_price_brl === "number") q = q.lte("price_brl", max_price_brl);
     if (typeof min_bedrooms === "number") q = q.gte("bedrooms", min_bedrooms);
     q = q.limit(limit ?? 20);
+
     const { data, error } = await q;
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
     try {
