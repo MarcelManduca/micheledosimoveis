@@ -2,8 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-// TanStack Router escapes literal dots with [.]; do not use a filename starting with '.'.
-export const Route = createFileRoute("/.lovable/oauth/consent")({
+export const Route = createFileRoute("/oauth/consent")({
   ssr: false,
   validateSearch: (s: Record<string, unknown>) => ({
     authorization_id: typeof s.authorization_id === "string" ? s.authorization_id : "",
@@ -23,7 +22,7 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
         getAuthorizationDetails: (id: string) => Promise<{ data: any; error: any }>;
       };
     }).oauth;
-    const { data, error } = await oauth.getAuthorizationDetails(authorizationId);
+    const { data, error } = await oauth?.getAuthorizationDetails(authorizationId);
     if (error) throw error;
     const immediate = data?.redirect_url ?? data?.redirect_to;
     if (immediate && !data?.client) throw redirect({ href: immediate });
