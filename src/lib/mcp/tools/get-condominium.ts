@@ -1,5 +1,5 @@
-import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
+import { defineTool } from "../types";
 import { supabaseForUser } from "../supabase";
 
 export default defineTool({
@@ -11,7 +11,6 @@ export default defineTool({
   },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ slug }, ctx) => {
-    if (!ctx.isAuthenticated()) return { content: [{ type: "text", text: "Not authenticated" }], isError: true };
     const sb = supabaseForUser(ctx);
     const { data, error } = await sb
       .from("condominiums")
@@ -19,8 +18,10 @@ export default defineTool({
       .eq("slug", slug)
       .eq("is_active", true)
       .maybeSingle();
+
     if (error) return { content: [{ type: "text", text: error.message }], isError: true };
     if (!data) return { content: [{ type: "text", text: `No published condominium with slug ${slug}` }] };
+
     return {
       content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
       structuredContent: { condominium: data },
