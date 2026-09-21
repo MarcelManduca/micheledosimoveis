@@ -27,6 +27,7 @@ import {
 
 import { PropertyCard } from "@/components/PropertyCard";
 import { trackViewItem, trackWhatsAppClick } from "@/lib/tracking";
+import { getCookieConsent } from "@/components/CookieConsent";
 
 export const Route = createFileRoute("/imovel/$code")({
   loader: async ({ params }) => {
@@ -298,7 +299,16 @@ function PropertyPage() {
     .join(", ");
   const hasMap = mapQuery.length > 0;
 
+  const [consent, setConsent] = useState(getCookieConsent);
+
   useEffect(() => {
+    const handleConsent = () => setConsent(getCookieConsent());
+    window.addEventListener("cookie-consent", handleConsent);
+    return () => window.removeEventListener("cookie-consent", handleConsent);
+  }, []);
+
+  useEffect(() => {
+    if (consent !== "all") return;
     trackViewItem({
       code: p.code,
       title: p.title,
@@ -306,7 +316,7 @@ function PropertyPage() {
       neighborhood: p.neighborhood,
       propertyType: p.property_type,
     });
-  }, [p.code, p.title, p.price_brl, p.neighborhood, p.property_type]);
+  }, [p.code, p.title, p.price_brl, p.neighborhood, p.property_type, consent]);
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
@@ -417,6 +427,13 @@ function PropertyPage() {
                 href={whatsappCondo}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() =>
+                  trackWhatsAppClick({
+                    ctaLocation: "property_detail_secondary",
+                    propertyCode: p.code,
+                    neighborhood: p.neighborhood,
+                  })
+                }
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition w-full sm:w-auto"
               >
                 <Send className="h-4 w-4" />
@@ -447,6 +464,13 @@ function PropertyPage() {
                 href={whatsapp}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() =>
+                  trackWhatsAppClick({
+                    ctaLocation: "property_detail_secondary",
+                    propertyCode: p.code,
+                    neighborhood: p.neighborhood,
+                  })
+                }
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium hover:bg-secondary transition w-full sm:w-auto"
               >
                 Tirar dúvidas no WhatsApp
@@ -642,6 +666,13 @@ function PropertyPage() {
                   href={whatsappCondo}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() =>
+                    trackWhatsAppClick({
+                      ctaLocation: "property_detail_secondary",
+                      propertyCode: p.code,
+                      neighborhood: p.neighborhood,
+                    })
+                  }
                   className="mt-6 block w-full text-center rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition"
                 >
                   Consultar outras unidades
@@ -670,6 +701,13 @@ function PropertyPage() {
                   href={whatsapp}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() =>
+                    trackWhatsAppClick({
+                      ctaLocation: "property_detail_primary",
+                      propertyCode: p.code,
+                      neighborhood: p.neighborhood,
+                    })
+                  }
                   className="mt-6 block w-full text-center rounded-full bg-foreground text-background px-6 py-3 text-sm font-medium hover:bg-foreground/90 transition"
                 >
                   Falar com Michele pelo WhatsApp
@@ -777,6 +815,13 @@ function PropertyPage() {
         target="_blank"
         rel="noreferrer"
         aria-label="Falar com Michele no WhatsApp"
+        onClick={() =>
+          trackWhatsAppClick({
+            ctaLocation: "floating_button",
+            propertyCode: p.code,
+            neighborhood: p.neighborhood,
+          })
+        }
         className="fixed bottom-5 right-5 sm:bottom-7 sm:right-7 z-50 inline-flex items-center gap-2 rounded-full bg-[#25D366] text-white pl-4 pr-5 py-3 text-sm font-medium shadow-2xl ring-1 ring-black/10 hover:bg-[#1ebe57] transition"
       >
         <span className="relative grid h-6 w-6 place-items-center">

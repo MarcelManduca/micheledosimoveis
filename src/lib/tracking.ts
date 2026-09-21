@@ -1,11 +1,12 @@
 /**
- * Camada de telemetria e medição comercial de dados.
+ * Camada de telemetria e medição comercial de dados (dataLayer).
  *
- * Diretrizes:
- * 1. Respeito estrito à LGPD: eventos analíticos só disparam com consentimento ("all").
- * 2. Ausência total de dados pessoais (PII) em parâmetros e payloads.
- * 3. Separação rigorosa entre intenção de contato (whatsapp_click) e lead confirmado (generate_lead).
- * 4. Deduplicação de visualização de página (page_view) para SPAs.
+ * Diretrizes de Privacidade e Arquitetura:
+ * 1. Respeito estrito à LGPD: eventos analíticos só disparam com consentimento explícito ("all").
+ * 2. Sanitização rigorosa de URLs: remoção de fragmentos (#) e filtragem de parâmetros via allowlist estrita (zero PII).
+ * 3. Fallback seguro: se o parsing da URL falhar, nunca expõe a URL bruta.
+ * 4. Separação rigorosa entre intenção de contato (whatsapp_click) e lead confirmado (generate_lead).
+ * 5. Deduplicação de page_view para SPAs (uma única emissão por mudança efetiva de rota).
  */
 
 import { getCookieConsent } from "@/components/CookieConsent";
@@ -13,6 +14,89 @@ import { getCookieConsent } from "@/components/CookieConsent";
 declare global {
   interface Window {
     dataLayer?: Record<string, unknown>[];
+  }
+}
+
+/**
+ * Lista de parâmetros de URL autorizados para rastreamento analítico.
+ * Qualquer parâmetro não listado (e.g. email, nome, telefone, cpf) é descartado para proteção de PII.
+ */
+const ALLOWED_QUERY_PARAMS = new Set([
+  "tipo",
+  "bairro",
+  "dorms",
+  "faixa",
+  "ordenar",
+  "pagina",
+  "q",
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_term",
+  "utm_content",
+  "gclid",
+  "fbclid",
+]);
+
+const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
+const CPF_REGEX = /(?:\d{3}\.?\d{3}\.?\d{3}-?\d{2})|(?:\b\d{11}\b)/;
+
+/**
+ * Verifica se um valor de parâmetro contém padrões de dados pessoais (PII).
+ */
+export function containsPii(value: string): boolean {
+  if (!value) return false;
+  if (EMAIL_REGEX.test(value)) return true;
+  if (CPF_REGEX.test(value)) return true;
+  const digits = value.replace(/\D/g, "");
+  if (digits.length >= 10 && digits.length <= 13) return true;
+  return false;
+}
+
+/**
+ * Sanitiza uma URL removendo fragmentos (#), parâmetros fora da allowlist e valores com PII.
+ */
+export function sanitizeTrackingUrl(locationHref: string): { pageLocation: string; pagePath: string } {
+  try {
+    const origin =
+      typeof window !== "undefined" && window.location.origin
+        ? window.location.origin
+        : "https://micheledosimoveis.com.br";
+    const parsed = new URL(locationHref, origin);
+
+    // Remove fragmento/hash explicitamente
+    parsed.hash = "";
+
+    // Filtra parâmetros de consulta usando a allowlist explícita e valida ausência de PII no valor
+    const cleanParams = new URLSearchParams();
+    parsed.searchParams.forEach((value, key) => {
+      const lowerKey = key.toLowerCase();
+      if (ALLOWED_QUERY_PARAMS.has(lowerKey) && !containsPii(value)) {
+        cleanParams.set(lowerKey, value);
+      }
+    });
+
+    const queryString = cleanParams.toString();
+    const cleanSearch = queryString ? `?${queryString}` : "";
+    const pagePath = `${parsed.pathname}${cleanSearch}`;
+    const pageLocation = `${parsed.origin}${pagePath}`;
+
+    return { pageLocation, pagePath };
+  } catch {
+    // Fallback estrito: nunca retorna a string locationHref bruta
+    const safePath =
+      typeof window !== "undefined" && window.location.pathname
+        ? window.location.pathname
+        : "/";
+    const origin =
+      typeof window !== "undefined" && window.location.origin
+        ? window.location.origin
+        : "https://micheledosimoveis.com.br";
+
+    return {
+      pageLocation: `${origin}${safePath}`,
+      pagePath: safePath,
+    };
   }
 }
 
@@ -33,27 +117,53 @@ export function trackConsentUpdate(consent: "all" | "essential"): void {
   });
 }
 
+let lastTrackedLocation: string | null = null;
+let lastTrackedNavKey: string | number | null = null;
+
 /**
- * Emite page_view exatamente uma vez por carregamento ou transição de rota no cliente.
+ * Reseta o estado interno de deduplicação (usado em testes).
  */
-export function trackPageView(locationHref: string, pageTitle: string): void {
-  if (getCookieConsent() !== "all") return;
-  try {
-    const url = new URL(locationHref, window.location.origin);
-    pushDataLayer({
-      event: "page_view",
-      page_location: url.href,
-      page_path: url.pathname + url.search,
-      page_title: pageTitle,
-    });
-  } catch {
-    pushDataLayer({
-      event: "page_view",
-      page_location: locationHref,
-      page_path: window.location.pathname,
-      page_title: pageTitle,
-    });
+export function resetTrackingState(): void {
+  lastTrackedLocation = null;
+  lastTrackedNavKey = null;
+}
+
+/**
+ * Emite page_view sanitizado exatamente uma vez por ocorrência de navegação no cliente.
+ * Ignora qualquer disparo subsequente dentro da mesma ocorrência (mesma navigationKey).
+ */
+export function trackPageView(
+  locationHref: string,
+  pageTitle: string,
+  navigationKey?: string | number,
+): boolean {
+  if (getCookieConsent() !== "all") return false;
+
+  const { pageLocation, pagePath } = sanitizeTrackingUrl(locationHref);
+
+  // Garante exatamente uma única emissão por ocorrência de navegação:
+  // Se a chave de navegação for informada, qualquer chamada subsequente com a mesma chave é ignorada.
+  if (navigationKey != null) {
+    if (lastTrackedNavKey === navigationKey) {
+      return false;
+    }
+  } else {
+    if (lastTrackedLocation === pageLocation) {
+      return false;
+    }
   }
+
+  lastTrackedLocation = pageLocation;
+  lastTrackedNavKey = navigationKey ?? null;
+
+  pushDataLayer({
+    event: "page_view",
+    page_location: pageLocation,
+    page_path: pagePath,
+    page_title: pageTitle,
+  });
+
+  return true;
 }
 
 export interface SearchTrackParams {
@@ -66,9 +176,11 @@ export interface SearchTrackParams {
 
 /**
  * Emite evento de busca com filtros e total de resultados encontrados.
+ * Retorna boolean indicando se o evento foi efetivamente enviado.
  */
-export function trackSearch(params: SearchTrackParams): void {
-  if (getCookieConsent() !== "all") return;
+export function trackSearch(params: SearchTrackParams): boolean {
+  if (getCookieConsent() !== "all") return false;
+
   pushDataLayer({
     event: "search",
     filter_type: params.tipo ?? "all",
@@ -77,6 +189,8 @@ export function trackSearch(params: SearchTrackParams): void {
     filter_price_tier: params.faixa != null ? String(params.faixa) : "all",
     results_count: params.resultsCount,
   });
+
+  return true;
 }
 
 export interface ViewItemTrackParams {
@@ -107,8 +221,10 @@ export interface WhatsAppClickTrackParams {
     | "floating_button"
     | "site_header"
     | "hero_home"
+    | "contact_section"
     | "property_detail_primary"
     | "property_detail_secondary"
+    | "property_detail_mobile_bar"
     | "condominium_buyer"
     | "condominium_owner"
     | "condominium_alert"

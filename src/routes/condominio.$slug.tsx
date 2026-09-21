@@ -16,6 +16,7 @@ import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import MapPlaceholder from "@/components/MapPlaceholder";
 import { formatNeighborhoodWithPreposition } from "@/lib/format";
+import { trackWhatsAppClick } from "@/lib/tracking";
 
 const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
@@ -365,6 +366,13 @@ function CondominioPage() {
                 href={buyerLink}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() =>
+                  trackWhatsAppClick({
+                    ctaLocation: "condominium_buyer",
+                    condoSlug: condo.slug,
+                    neighborhood: bairro,
+                  })
+                }
                 className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
               >
                 <Phone className="h-4 w-4" /> Tenho interesse nesse condomínio
@@ -373,6 +381,13 @@ function CondominioPage() {
                 href={ownerLink}
                 target="_blank"
                 rel="noreferrer"
+                onClick={() =>
+                  trackWhatsAppClick({
+                    ctaLocation: "condominium_owner",
+                    condoSlug: condo.slug,
+                    neighborhood: bairro,
+                  })
+                }
                 className="inline-flex items-center gap-2 rounded-lg border border-input bg-background px-4 py-2.5 text-sm font-medium"
               >
                 Quero vender imóvel neste condomínio
@@ -512,6 +527,13 @@ function CondominioPage() {
                     href={alertLink}
                     target="_blank"
                     rel="noreferrer"
+                    onClick={() =>
+                      trackWhatsAppClick({
+                        ctaLocation: "condominium_alert",
+                        condoSlug: condo.slug,
+                        neighborhood: bairro,
+                      })
+                    }
                     className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
                   >
                     <Phone className="h-4 w-4" /> Avise-me quando surgir imóvel neste condomínio

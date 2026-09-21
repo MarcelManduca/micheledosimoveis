@@ -1,6 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { ArrowLeft } from "lucide-react";
 import { searchProperties, type PropertyListItem } from "@/lib/properties.functions";
@@ -10,6 +10,7 @@ import { ChromaGridShell } from "@/components/ChromaGridShell";
 import { findNeighborhoodByName } from "@/lib/neighborhoods";
 import { buildWhatsAppUrl } from "@/lib/site-config";
 import { trackSearch } from "@/lib/tracking";
+import { getCookieConsent } from "@/components/CookieConsent";
 
 // Parser resiliente — nunca lança erro para o usuário final.
 // Motivo: `@tanstack/zod-adapter`'s `fallback()` usa `z.custom().pipe(...)` e
@@ -178,16 +179,55 @@ function BuscarPage() {
     initialData: initial,
   });
   const results = live.data ?? [];
+  const lastEmittedRef = useRef<string | null>(null);
+  const [consent, setConsent] = useState(getCookieConsent);
 
   useEffect(() => {
-    trackSearch({
+    const handleConsent = () => setConsent(getCookieConsent());
+    window.addEventListener("cookie-consent", handleConsent);
+    return () => window.removeEventListener("cookie-consent", handleConsent);
+  }, []);
+
+  useEffect(() => {
+    // Exige conclusão bem-sucedida da consulta (sem erro) e estabilização de fetching.
+    // Em caso de falha na consulta, não registra busca (evita falsos 'zero resultados').
+    if (!live.isSuccess || live.isLoading || live.isFetching || !live.data) return;
+
+    // Se o consentimento ainda não foi concedido, não marca a busca como emitida
+    if (consent !== "all") return;
+
+    const signature = JSON.stringify({
+      t: search.tipo ?? "all",
+      b: search.bairro ?? "all",
+      d: search.dorms ?? null,
+      f: search.faixa != null ? String(search.faixa) : "all",
+      c: live.data.length,
+    });
+
+    if (lastEmittedRef.current === signature) return;
+
+    const sent = trackSearch({
       tipo: search.tipo,
       bairro: search.bairro,
       dorms: search.dorms,
       faixa: search.faixa,
-      resultsCount: results.length,
+      resultsCount: live.data.length,
     });
-  }, [search.tipo, search.bairro, search.dorms, search.faixa, results.length]);
+
+    if (sent) {
+      lastEmittedRef.current = signature;
+    }
+  }, [
+    search.tipo,
+    search.bairro,
+    search.dorms,
+    search.faixa,
+    live.isSuccess,
+    live.isLoading,
+    live.isFetching,
+    live.data,
+    consent,
+  ]);
 
   const initialFilters: FiltersValue = {
     tipo: search.tipo,

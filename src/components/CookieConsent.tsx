@@ -34,11 +34,8 @@ export function CookieConsent() {
     } catch {}
     setOpen(false);
     window.dispatchEvent(new CustomEvent("cookie-consent", { detail: value }));
-    import("@/lib/tracking").then(({ trackConsentUpdate, trackPageView }) => {
+    import("@/lib/tracking").then(({ trackConsentUpdate }) => {
       trackConsentUpdate(value);
-      if (value === "all") {
-        trackPageView(window.location.href, document.title);
-      }
     });
   };
 

@@ -8,8 +8,9 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, lazy, Suspense, type ReactNode } from "react";
+import { useEffect, useState, lazy, Suspense, type ReactNode } from "react";
 import { trackPageView } from "@/lib/tracking";
+import { getCookieConsent } from "@/components/CookieConsent";
 
 import appCss from "../styles.css?url";
 // Preload the LATIN variable-font subsets that carry the LCP typography.
@@ -234,11 +235,40 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const locationHref = useRouterState({ select: (s) => s.location.href });
+  const [consent, setConsent] = useState(getCookieConsent);
+  const routerState = useRouterState({
+    select: (s) => ({
+      href: s.location.href,
+      status: s.status,
+      isLoading: s.isLoading,
+      navKey:
+        (s.location.state as { __TSR_key?: string; key?: string })?.__TSR_key ??
+        (s.location.state as { __TSR_key?: string; key?: string })?.key ??
+        s.location.href,
+    }),
+  });
 
   useEffect(() => {
-    trackPageView(window.location.href, document.title);
-  }, [locationHref]);
+    const handleConsent = () => setConsent(getCookieConsent());
+    window.addEventListener("cookie-consent", handleConsent);
+    return () => window.removeEventListener("cookie-consent", handleConsent);
+  }, []);
+
+  useEffect(() => {
+    // Unificação da emissão de page_view: requer consentimento concedido
+    if (consent !== "all") return;
+
+    // Dispara apenas quando a transição estiver totalmente concluída (status 'idle' e !isLoading)
+    // Se o consentimento for aceito durante o carregamento, aguarda até o status ser 'idle'.
+    if (routerState.isLoading || routerState.status !== "idle") return;
+
+    // Aguarda o flush do DOM e renderização do HeadContent para sincronizar URL e document.title com metadados finais
+    const rafId = requestAnimationFrame(() => {
+      trackPageView(window.location.href, document.title, routerState.navKey);
+    });
+
+    return () => cancelAnimationFrame(rafId);
+  }, [routerState.href, routerState.status, routerState.isLoading, routerState.navKey, consent]);
 
   return (
     <QueryClientProvider client={queryClient}>

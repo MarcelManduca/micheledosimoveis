@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { trackWhatsAppClick } from "@/lib/tracking";
 
 
 const SITE = "https://micheledosimoveis.com.br";
@@ -213,6 +214,12 @@ function NeighborhoodPage() {
               href={waUrl}
               target="_blank"
               rel="noreferrer"
+              onClick={() =>
+                trackWhatsAppClick({
+                  ctaLocation: "neighborhood_hero",
+                  neighborhood: n.name,
+                })
+              }
               className="inline-flex items-center gap-2 rounded-full bg-foreground text-background px-5 py-2.5 text-sm hover:opacity-90 transition"
             >
               <Phone className="h-4 w-4" />

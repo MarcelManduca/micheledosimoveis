@@ -3,6 +3,7 @@ import { ArrowRight, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { WHATSAPP_URL } from "@/lib/site-config";
 import { ENABLE_LAUNCHES_VERTICAL } from "@/lib/feature-flags";
+import { trackWhatsAppClick } from "@/lib/tracking";
 import logoWhite from "@/assets/brand/logo-white.webp";
 import logoWhite160 from "@/assets/brand/logo-white-160.webp";
 import logoWhite320 from "@/assets/brand/logo-white-320.webp";
@@ -81,6 +82,7 @@ export function SiteHeader({ variant = "dark" }: { variant?: Variant } = {}) {
               href={WHATSAPP_URL}
               target="_blank"
               rel="noreferrer"
+              onClick={() => trackWhatsAppClick({ ctaLocation: "site_header" })}
               className="group inline-flex items-center gap-2 rounded-full bg-foreground text-background pl-4 pr-2 py-2 text-sm font-medium shadow-lg hover:bg-foreground/90 transition"
             >
               <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" />
@@ -163,6 +165,10 @@ export function SiteHeader({ variant = "dark" }: { variant?: Variant } = {}) {
               href={WHATSAPP_URL}
               target="_blank"
               rel="noreferrer"
+              onClick={() => {
+                setMobileOpen(false);
+                trackWhatsAppClick({ ctaLocation: "site_header" });
+              }}
               className="m-6 inline-flex items-center justify-center gap-2 rounded-full bg-foreground text-background px-5 py-3 text-sm font-medium hover:bg-foreground/90 transition"
             >
               Falar no WhatsApp

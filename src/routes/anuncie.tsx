@@ -10,6 +10,7 @@ import {
   Lock,
   EyeOff,
 } from "lucide-react";
+import { trackWhatsAppClick } from "@/lib/tracking";
 
 const ANUNCIE_FAQ = [
   {
@@ -135,6 +136,7 @@ function AnunciePage() {
                   href={WHATSAPP_ANUNCIE}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => trackWhatsAppClick({ ctaLocation: "anuncie_primary" })}
                   className="group inline-flex items-center gap-3 rounded-full bg-background text-foreground pl-6 pr-2 py-2 text-sm font-medium hover:bg-background/95 transition"
                 >
                   Quero anunciar meu imóvel
@@ -146,6 +148,7 @@ function AnunciePage() {
                   href={WHATSAPP_OFFMARKET}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => trackWhatsAppClick({ ctaLocation: "anuncie_offmarket" })}
                   className="text-sm text-background/85 underline-offset-4 hover:underline px-2 py-2"
                 >
                   Tenho interesse em venda Off Market
@@ -244,6 +247,7 @@ function AnunciePage() {
                   href={WHATSAPP_OFFMARKET}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => trackWhatsAppClick({ ctaLocation: "anuncie_offmarket" })}
                   className="group mt-8 inline-flex items-center gap-3 rounded-full bg-[#C8A464] text-black pl-6 pr-2 py-2 text-sm font-medium hover:bg-[#d4b478] transition"
                 >
                   Conversar sobre venda Off Market

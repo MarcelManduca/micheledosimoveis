@@ -1,5 +1,6 @@
 import { ArrowRight, Instagram, Mail, MapPin, Phone } from "lucide-react";
 import { SITE, WHATSAPP_URL } from "@/lib/site-config";
+import { trackWhatsAppClick } from "@/lib/tracking";
 
 export function ContactSection() {
   return (
@@ -24,6 +25,7 @@ export function ContactSection() {
               href={WHATSAPP_URL}
               target="_blank"
               rel="noreferrer"
+              onClick={() => trackWhatsAppClick({ ctaLocation: "contact_section" })}
               className="mt-8 inline-flex items-center gap-3 rounded-full bg-background text-foreground pl-6 pr-2 py-2 text-sm font-medium hover:bg-background/90 transition"
             >
               Falar no WhatsApp
