@@ -35,6 +35,7 @@ import { Route as ImoveisSlugRouteImport } from './routes/imoveis.$slug'
 import { Route as ConstrutorasSlugRouteImport } from './routes/construtoras.$slug'
 import { Route as CondominiosBairroRouteImport } from './routes/condominios.$bairro'
 import { Route as CondominioSlugRouteImport } from './routes/condominio.$slug'
+import { Route as BlogMichelePrietschTop5GralhaPrime2026RouteImport } from './routes/blog.michele-prietsch-top-5-gralha-prime-2026'
 import { Route as BlogCondominiosLuxoBeiraMarNorteAgronomicaRouteImport } from './routes/blog.condominios-luxo-beira-mar-norte-agronomica'
 import { Route as AdminLancamentosRouteImport } from './routes/admin.lancamentos'
 import { Route as AdminInteligenciaPortfolioRouteImport } from './routes/admin.inteligencia-portfolio'
@@ -178,6 +179,12 @@ const CondominioSlugRoute = CondominioSlugRouteImport.update({
   path: '/condominio/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BlogMichelePrietschTop5GralhaPrime2026Route =
+  BlogMichelePrietschTop5GralhaPrime2026RouteImport.update({
+    id: '/blog/michele-prietsch-top-5-gralha-prime-2026',
+    path: '/blog/michele-prietsch-top-5-gralha-prime-2026',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute =
   BlogCondominiosLuxoBeiraMarNorteAgronomicaRouteImport.update({
     id: '/blog/condominios-luxo-beira-mar-norte-agronomica',
@@ -246,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/admin/lancamentos': typeof AdminLancamentosRoute
   '/blog/condominios-luxo-beira-mar-norte-agronomica': typeof BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute
+  '/blog/michele-prietsch-top-5-gralha-prime-2026': typeof BlogMichelePrietschTop5GralhaPrime2026Route
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/construtoras/$slug': typeof ConstrutorasSlugRoute
@@ -282,6 +290,7 @@ export interface FileRoutesByTo {
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/admin/lancamentos': typeof AdminLancamentosRoute
   '/blog/condominios-luxo-beira-mar-norte-agronomica': typeof BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute
+  '/blog/michele-prietsch-top-5-gralha-prime-2026': typeof BlogMichelePrietschTop5GralhaPrime2026Route
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/construtoras/$slug': typeof ConstrutorasSlugRoute
@@ -319,6 +328,7 @@ export interface FileRoutesById {
   '/admin/inteligencia-portfolio': typeof AdminInteligenciaPortfolioRoute
   '/admin/lancamentos': typeof AdminLancamentosRoute
   '/blog/condominios-luxo-beira-mar-norte-agronomica': typeof BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute
+  '/blog/michele-prietsch-top-5-gralha-prime-2026': typeof BlogMichelePrietschTop5GralhaPrime2026Route
   '/condominio/$slug': typeof CondominioSlugRoute
   '/condominios/$bairro': typeof CondominiosBairroRoute
   '/construtoras/$slug': typeof ConstrutorasSlugRoute
@@ -357,6 +367,7 @@ export interface FileRouteTypes {
     | '/admin/inteligencia-portfolio'
     | '/admin/lancamentos'
     | '/blog/condominios-luxo-beira-mar-norte-agronomica'
+    | '/blog/michele-prietsch-top-5-gralha-prime-2026'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/construtoras/$slug'
@@ -393,6 +404,7 @@ export interface FileRouteTypes {
     | '/admin/inteligencia-portfolio'
     | '/admin/lancamentos'
     | '/blog/condominios-luxo-beira-mar-norte-agronomica'
+    | '/blog/michele-prietsch-top-5-gralha-prime-2026'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/construtoras/$slug'
@@ -429,6 +441,7 @@ export interface FileRouteTypes {
     | '/admin/inteligencia-portfolio'
     | '/admin/lancamentos'
     | '/blog/condominios-luxo-beira-mar-norte-agronomica'
+    | '/blog/michele-prietsch-top-5-gralha-prime-2026'
     | '/condominio/$slug'
     | '/condominios/$bairro'
     | '/construtoras/$slug'
@@ -463,6 +476,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute: typeof BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute
+  BlogMichelePrietschTop5GralhaPrime2026Route: typeof BlogMichelePrietschTop5GralhaPrime2026Route
   CondominioSlugRoute: typeof CondominioSlugRoute
   CondominiosBairroRoute: typeof CondominiosBairroRoute
   ConstrutorasSlugRoute: typeof ConstrutorasSlugRoute
@@ -663,6 +677,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CondominioSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/blog/michele-prietsch-top-5-gralha-prime-2026': {
+      id: '/blog/michele-prietsch-top-5-gralha-prime-2026'
+      path: '/blog/michele-prietsch-top-5-gralha-prime-2026'
+      fullPath: '/blog/michele-prietsch-top-5-gralha-prime-2026'
+      preLoaderRoute: typeof BlogMichelePrietschTop5GralhaPrime2026RouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/blog/condominios-luxo-beira-mar-norte-agronomica': {
       id: '/blog/condominios-luxo-beira-mar-norte-agronomica'
       path: '/blog/condominios-luxo-beira-mar-norte-agronomica'
@@ -757,6 +778,8 @@ const rootRouteChildren: RootRouteChildren = {
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute:
     BlogCondominiosLuxoBeiraMarNorteAgronomicaRoute,
+  BlogMichelePrietschTop5GralhaPrime2026Route:
+    BlogMichelePrietschTop5GralhaPrime2026Route,
   CondominioSlugRoute: CondominioSlugRoute,
   CondominiosBairroRoute: CondominiosBairroRoute,
   ConstrutorasSlugRoute: ConstrutorasSlugRoute,

@@ -33,6 +33,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/guia-imoveis-alto-padrao-florianopolis", changefreq: "monthly", priority: "0.8" },
           { path: "/blog", changefreq: "monthly", priority: "0.8" },
           { path: "/blog/condominios-luxo-beira-mar-norte-agronomica", changefreq: "monthly", priority: "0.8" },
+          { path: "/blog/michele-prietsch-top-5-gralha-prime-2026", lastmod: "2026-09-25", changefreq: "monthly", priority: "0.8", image: `${BASE_URL}/images/blog/michele-prietsch-gralha-prime-top-5-2026.webp` },
           { path: "/privacidade", changefreq: "yearly", priority: "0.3" },
           ...NEIGHBORHOODS.map((n) => ({
             path: `/imoveis/${n.slug}`,

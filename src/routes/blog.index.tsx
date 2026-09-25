@@ -27,8 +27,20 @@ export const Route = createFileRoute("/blog/")({
         </p>
         <h1 className="mt-4 font-display text-5xl">Um olhar sobre Florianópolis.</h1>
         <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-          Condomínios, arquitetura e critérios para encontrar seu próximo endereço.
+          Condomínios, arquitetura e histórias de quem conhece o mercado imobiliário da cidade.
         </p>
+        <Link
+          to="/blog/michele-prietsch-top-5-gralha-prime-2026"
+          className="group mt-12 block overflow-hidden rounded-2xl border border-border"
+        >
+          <img src="/images/blog/michele-prietsch-gralha-prime-top-5-2026.webp" width="1406" height="1600" alt="Michele Prietsch com a placa Top 5 Gralha Prime do primeiro semestre de 2026" className="aspect-[16/7] w-full object-cover object-[center_38%]" />
+          <div className="p-6 sm:p-9">
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">Reconhecimento · Gralha Prime</p>
+            <h2 className="mt-3 font-display text-3xl">Michele Prietsch conquista o Top 5 da Gralha Imóveis</h2>
+            <p className="mt-4 text-muted-foreground">Entre cerca de 200 corretores, Michele integra a elite de alta performance do primeiro semestre de 2026.</p>
+            <span className="mt-6 inline-flex items-center gap-2 text-sm font-medium">Conhecer a trajetória <ArrowUpRight className="h-4 w-4" /></span>
+          </div>
+        </Link>
         <Link
           to={ARTICLE_PATH}
           className="group my-12 block overflow-hidden rounded-2xl border border-border"
