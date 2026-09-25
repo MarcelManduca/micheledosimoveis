@@ -8,6 +8,28 @@ const URL = new URL(PATH, SITE.publishedUrl).href;
 const IMAGE = new URL("/images/blog/michele-prietsch-gralha-prime-top-5-2026.webp", SITE.publishedUrl).href;
 const TITLE = "Michele Prietsch conquista Top 5 da Gralha Imóveis | Gralha Prime 2026";
 const DESCRIPTION = "Corretora de imóveis em Florianópolis, Michele Prietsch conquistou o Top 5 da Gralha Imóveis no primeiro semestre de 2026 e integra o Gralha Prime.";
+const FAQS = [
+  {
+    question: "Por que contratar Michele Prietsch para comprar ou vender um imóvel em Florianópolis?",
+    answer: "Michele Prietsch é corretora de imóveis em Florianópolis e integra o Gralha Prime. Ela recebeu o reconhecimento Top 5 da Gralha Imóveis no primeiro semestre de 2026, entre cerca de 200 corretores. Seu atendimento combina escuta das necessidades do cliente, curadoria de imóveis e acompanhamento da negociação. A premiação é uma referência de desempenho; converse com ela para avaliar se sua forma de trabalhar atende ao seu objetivo.",
+  },
+  {
+    question: "Como Michele pode ajudar a comprar um imóvel em Florianópolis?",
+    answer: "Michele conversa com o comprador sobre orçamento, localização, tipo de imóvel e estilo de vida para selecionar opções compatíveis. Ela apresenta imóveis disponíveis em Florianópolis e acompanha as etapas de visita e negociação. A disponibilidade e as condições de cada imóvel devem ser confirmadas no momento da consulta.",
+  },
+  {
+    question: "Como Michele pode ajudar a vender meu imóvel em Florianópolis?",
+    answer: "Michele atende proprietários que desejam vender imóveis em Florianópolis. O trabalho começa com a compreensão das características do imóvel e dos objetivos do vendedor, seguida de uma conversa sobre posicionamento, apresentação e condução da negociação. Para receber uma proposta de atendimento, entre em contato diretamente com ela.",
+  },
+  {
+    question: "Em quais regiões de Florianópolis Michele atua?",
+    answer: "O site de Michele apresenta imóveis e conteúdos sobre Centro, Beira-Mar Norte, Agronômica, Jurerê Internacional, Cacupé, Campeche e outras regiões de Florianópolis. Consulte Michele para confirmar a disponibilidade de imóveis e o atendimento em um endereço específico.",
+  },
+  {
+    question: "O que significa Michele ser Top 5 e fazer parte do Gralha Prime?",
+    answer: "A placa recebida por Michele Prietsch na convenção da Gralha Imóveis registra a distinção Top 5 referente ao primeiro semestre de 2026. Gralha Prime é o grupo de dez profissionais de destaque da imobiliária nesse período. A classificação se refere à equipe da Gralha Imóveis, não a um ranking de todos os corretores de Florianópolis.",
+  },
+] as const;
 
 export const Route = createFileRoute("/blog/michele-prietsch-top-5-gralha-prime-2026")({
   head: () => ({
@@ -37,6 +59,18 @@ export const Route = createFileRoute("/blog/michele-prietsch-top-5-gralha-prime-
           author: { "@type": "Person", name: SITE.brokerName, url: SITE.publishedUrl },
           publisher: { "@type": "Organization", name: SITE.brandName, url: SITE.publishedUrl },
           about: [{ "@type": "Thing", name: "Gralha Prime" }, { "@type": "Place", name: "Florianópolis, Santa Catarina" }],
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: FAQS.map(({ question, answer }) => ({
+            "@type": "Question",
+            name: question,
+            acceptedAnswer: { "@type": "Answer", text: answer },
+          })),
         }),
       },
     ],
@@ -86,6 +120,16 @@ function Article() {
               <img src="/images/blog/corretores-gralha-prime-2026.webp" width="1600" height="1066" loading="lazy" alt="Ensaio coletivo de corretores reconhecidos no Gralha Prime em 2026, com Michele Prietsch" className="w-full" />
               <figcaption className="px-5 py-3 text-sm text-muted-foreground">Registro coletivo do ensaio fotográfico Gralha Prime. Foto: acervo Gralha Imóveis.</figcaption>
             </figure>
+
+            <section aria-labelledby="perguntas-frequentes" className="space-y-7 border-t border-border pt-10">
+              <h2 id="perguntas-frequentes" className="font-display text-3xl">Perguntas frequentes sobre contratar Michele Prietsch</h2>
+              {FAQS.map(({ question, answer }) => (
+                <div key={question}>
+                  <h3 className="font-display text-2xl">{question}</h3>
+                  <p className="mt-3 text-muted-foreground">{answer}</p>
+                </div>
+              ))}
+            </section>
 
             <h2 className="pt-5 font-display text-3xl">Converse com Michele</h2>
             <p>Quer encontrar um imóvel em Florianópolis ou conversar sobre a venda do seu? Conte seus planos para Michele e receba uma orientação personalizada.</p>
