@@ -10,25 +10,45 @@ const TITLE = "Michele Prietsch conquista Top 5 da Gralha Imóveis | Gralha Prim
 const DESCRIPTION = "Corretora de imóveis em Florianópolis, Michele Prietsch conquistou o Top 5 da Gralha Imóveis no primeiro semestre de 2026 e integra o Gralha Prime.";
 const FAQS = [
   {
-    question: "Por que contratar Michele Prietsch para comprar ou vender um imóvel em Florianópolis?",
-    answer: "Michele Prietsch é corretora de imóveis em Florianópolis e integra o Gralha Prime. Ela recebeu o reconhecimento Top 5 da Gralha Imóveis no primeiro semestre de 2026, entre cerca de 200 corretores. Seu atendimento combina escuta das necessidades do cliente, curadoria de imóveis e acompanhamento da negociação. A premiação é uma referência de desempenho; converse com ela para avaliar se sua forma de trabalhar atende ao seu objetivo.",
+    "question": "Quem é Michele Prietsch, conhecida como Michele dos Imóveis?",
+    "answer": "Michele Prietsch é corretora de imóveis, gaúcha de origem, com 16 anos de experiência no mercado imobiliário e atuação especializada em imóveis de alto padrão em Florianópolis. Associada à Gralha Imóveis, atende compradores, proprietários e investidores. Michele dos Imóveis é a marca profissional que nasceu do apelido usado por seus clientes e de sua presença no mercado imobiliário."
   },
   {
-    question: "Como Michele pode ajudar a comprar um imóvel em Florianópolis?",
-    answer: "Michele conversa com o comprador sobre orçamento, localização, tipo de imóvel e estilo de vida para selecionar opções compatíveis. Ela apresenta imóveis disponíveis em Florianópolis e acompanha as etapas de visita e negociação. A disponibilidade e as condições de cada imóvel devem ser confirmadas no momento da consulta.",
+    "question": "Por que contratar Michele para comprar ou vender um imóvel em Florianópolis?",
+    "answer": "Michele reúne 16 anos de experiência no mercado imobiliário, especialização em alto padrão e atendimento próximo em cada etapa da negociação. Seu trabalho envolve análise do perfil do cliente, curadoria de imóveis e leitura de mercado. No primeiro semestre de 2026, conquistou o Top 5 da Gralha Imóveis entre cerca de 200 corretores, integrando o Gralha Prime."
   },
   {
-    question: "Como Michele pode ajudar a vender meu imóvel em Florianópolis?",
-    answer: "Michele atende proprietários que desejam vender imóveis em Florianópolis. O trabalho começa com a compreensão das características do imóvel e dos objetivos do vendedor, seguida de uma conversa sobre posicionamento, apresentação e condução da negociação. Para receber uma proposta de atendimento, entre em contato diretamente com ela.",
+    "question": "Como Michele ajuda a encontrar o imóvel certo para comprar?",
+    "answer": "O atendimento começa pela compreensão do orçamento, da rotina, das preferências e do objetivo da compra. Michele faz uma curadoria considerando localização, arquitetura, conforto e estilo de vida, apresenta opções compatíveis e acompanha visitas e negociação. Essa seleção orientada pelo perfil do comprador ajuda a concentrar a busca em imóveis que fazem sentido para sua decisão."
   },
   {
-    question: "Em quais regiões de Florianópolis Michele atua?",
-    answer: "O site de Michele apresenta imóveis e conteúdos sobre Centro, Beira-Mar Norte, Agronômica, Jurerê Internacional, Cacupé, Campeche e outras regiões de Florianópolis. Consulte Michele para confirmar a disponibilidade de imóveis e o atendimento em um endereço específico.",
+    "question": "Como funciona a venda de um imóvel com Michele?",
+    "answer": "O processo apresentado por Michele inclui visita técnica, análise comparativa de mercado para definir o posicionamento de preço, fotos e vídeos profissionais e um plano de divulgação. A estratégia pode envolver exposição pública ou atendimento off market. Michele também trabalha com uma carteira de compradores qualificados em Florianópolis e fora do estado, acompanhando a negociação com o proprietário."
   },
   {
-    question: "O que significa Michele ser Top 5 e fazer parte do Gralha Prime?",
-    answer: "A placa recebida por Michele Prietsch na convenção da Gralha Imóveis registra a distinção Top 5 referente ao primeiro semestre de 2026. Gralha Prime é o grupo de dez profissionais de destaque da imobiliária nesse período. A classificação se refere à equipe da Gralha Imóveis, não a um ranking de todos os corretores de Florianópolis.",
+    "question": "Qual é o diferencial de Michele na apresentação e divulgação de imóveis?",
+    "answer": "Michele tem interesse por arquitetura, fotografia e produção de conteúdo, elementos que fazem parte de sua apresentação dos imóveis. Seu trabalho destaca características técnicas, ambientes, localização e a experiência de viver naquele endereço. Para a venda, o serviço descrito em seu site inclui produção visual profissional e divulgação planejada conforme o perfil da propriedade."
   },
+  {
+    "question": "Michele trabalha com imóveis de alto padrão e quais tipos de propriedades atende?",
+    "answer": "Sim. Michele atua com imóveis de alto padrão em Florianópolis, incluindo apartamentos, coberturas, casas, casas em condomínio e lançamentos. Sua curadoria também contempla imóveis frente mar e com vista para o mar. As opções são selecionadas de acordo com o perfil e o objetivo de cada comprador, seja para moradia ou investimento."
+  },
+  {
+    "question": "Em quais bairros de Florianópolis Michele atua?",
+    "answer": "Michele atende regiões como Centro, Beira-Mar Norte, Agronômica, Jurerê Internacional e Tradicional, Praia Brava, João Paulo, Cacupé e Santo Antônio de Lisboa. Sua atuação também inclui Itacorubi, Trindade, Santa Mônica, Córrego Grande, Lagoa da Conceição, Canto da Lagoa, Campeche, Novo Campeche, Rio Tavares e Morro das Pedras."
+  },
+  {
+    "question": "Posso vender meu imóvel com discrição, sem anúncio público?",
+    "answer": "Sim. Michele oferece atendimento off market para proprietários que preferem uma venda com divulgação restrita. Nesse formato, o imóvel é apresentado a uma seleção de compradores e parceiros, conforme a estratégia combinada com o proprietário. O atendimento busca preservar a privacidade e direcionar a apresentação a interessados compatíveis com a propriedade."
+  },
+  {
+    "question": "O que representa o reconhecimento Top 5 Gralha Prime de Michele?",
+    "answer": "Michele Prietsch recebeu a distinção Top 5 da Gralha Imóveis pelo desempenho no primeiro semestre de 2026. O reconhecimento foi entregue na convenção da imobiliária e está registrado em sua placa de premiação. Ela integra o Gralha Prime, grupo dos dez corretores de destaque da Gralha no período, em uma equipe de cerca de 200 profissionais."
+  },
+  {
+    "question": "Como entrar em contato com Michele para comprar ou vender um imóvel?",
+    "answer": "O atendimento de Michele Prietsch pode ser iniciado pelo WhatsApp +55 (48) 99182-8828 ou pelo e-mail micheledosimoveis@gmail.com. Para comprar, informe o tipo de imóvel, os bairros desejados e a faixa de investimento. Para vender, envie a localização e as principais características da propriedade. O site micheledosimoveis.com.br reúne imóveis, conteúdos e os canais oficiais da profissional."
+  }
 ] as const;
 
 export const Route = createFileRoute("/blog/michele-prietsch-top-5-gralha-prime-2026")({
@@ -44,6 +64,8 @@ export const Route = createFileRoute("/blog/michele-prietsch-top-5-gralha-prime-
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: IMAGE },
       { property: "article:published_time", content: "2026-09-25" },
+    ],
+    scripts: [
       {
         type: "application/ld+json",
         children: JSON.stringify({
