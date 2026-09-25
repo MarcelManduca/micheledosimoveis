@@ -4,7 +4,7 @@ import { SiteFooter } from "@/components/home/SiteFooter";
 import { SITE, buildWhatsAppUrl } from "@/lib/site-config";
 
 const PATH = "/blog/michele-prietsch-top-5-gralha-prime-2026";
-const URL = new URL(PATH, SITE.publishedUrl).href;
+const CANONICAL = new URL(PATH, SITE.publishedUrl).href;
 const IMAGE = new URL("/images/blog/michele-prietsch-gralha-prime-top-5-2026.webp", SITE.publishedUrl).href;
 const TITLE = "Michele Prietsch conquista Top 5 da Gralha Imóveis | Gralha Prime 2026";
 const DESCRIPTION = "Corretora de imóveis em Florianópolis, Michele Prietsch conquistou o Top 5 da Gralha Imóveis no primeiro semestre de 2026 e integra o Gralha Prime.";
@@ -59,7 +59,7 @@ export const Route = createFileRoute("/blog/michele-prietsch-top-5-gralha-prime-
       { property: "og:type", content: "article" },
       { property: "og:title", content: TITLE },
       { property: "og:description", content: DESCRIPTION },
-      { property: "og:url", content: URL },
+      { property: "og:url", content: CANONICAL },
       { property: "og:image", content: IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: IMAGE },
@@ -76,7 +76,7 @@ export const Route = createFileRoute("/blog/michele-prietsch-top-5-gralha-prime-
           datePublished: "2026-09-25",
           dateModified: "2026-09-25",
           inLanguage: "pt-BR",
-          mainEntityOfPage: URL,
+          mainEntityOfPage: CANONICAL,
           image: IMAGE,
           author: { "@type": "Person", name: SITE.brokerName, url: SITE.publishedUrl },
           publisher: { "@type": "Organization", name: SITE.brandName, url: SITE.publishedUrl },
@@ -96,7 +96,7 @@ export const Route = createFileRoute("/blog/michele-prietsch-top-5-gralha-prime-
         }),
       },
     ],
-    links: [{ rel: "canonical", href: URL }],
+    links: [{ rel: "canonical", href: CANONICAL }],
   }),
   component: Article,
 });
