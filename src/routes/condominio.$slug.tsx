@@ -25,6 +25,8 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "avenida-afonso-delambert-neto-926-lagoa-da-conceicao-florianopolis":
+    "solaris-residence-lagoa-da-conceicao-florianopolis",
   "rua-manoel-severino-de-oliveira-345-lagoa-da-conceicao-florianopolis":
     "residencial-dunas-lagoa-da-conceicao-florianopolis",
   "rua-rita-lourenco-da-silveira-371-lagoa-da-conceicao-florianopolis":
