@@ -25,6 +25,12 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "rua-frei-caneca-290-agronomica-florianopolis":
+    "edificio-canaan-agronomica-florianopolis",
+  "rua-rui-barbosa-35-agronomica-florianopolis":
+    "condominio-ponta-do-coral-agronomica-florianopolis",
+  "rua-sidney-nocetti-23-agronomica-florianopolis":
+    "edificio-rui-barbosa-agronomica-florianopolis",
   "avenida-afonso-delambert-neto-926-lagoa-da-conceicao-florianopolis":
     "solaris-residence-lagoa-da-conceicao-florianopolis",
   "rua-manoel-severino-de-oliveira-345-lagoa-da-conceicao-florianopolis":
