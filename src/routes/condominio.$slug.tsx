@@ -25,6 +25,28 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "estrada-haroldo-soares-glavan-1760-cacupe-florianopolis":
+    "viva-residence-cacupe-florianopolis",
+  "estrada-haroldo-soares-glavan-3375-cacupe-florianopolis":
+    "condominio-morada-de-cacupe-florianopolis",
+  "estrada-haroldo-soares-glavan-3400-cacupe-florianopolis":
+    "condominio-reserva-cacupe-florianopolis",
+  "avenida-das-lagostas-1008-jurere-tradicional-florianopolis":
+    "residencial-versailles-jurere-internacional-florianopolis",
+  "avenida-das-lagostas-950-jurere-tradicional-florianopolis":
+    "residencial-solar-das-lagostas-jurere-internacional-florianopolis",
+  "avenida-das-raias-104-jurere-tradicional-florianopolis":
+    "residencial-portal-das-raias-jurere-internacional-florianopolis",
+  "avenida-das-raias-230-jurere-tradicional-florianopolis":
+    "residencial-sunset-jurere-internacional-florianopolis",
+  "avenida-das-raias-711-jurere-tradicional-florianopolis":
+    "edificio-summer-place-jurere-internacional-florianopolis",
+  "avenida-dos-buzios-470-jurere-tradicional-florianopolis":
+    "hotel-residencial-aguas-de-jurere-internacional-florianopolis",
+  "avenida-dos-dourados-779-jurere-tradicional-florianopolis":
+    "edificio-vila-dourados-jurere-internacional-florianopolis",
+  "avenida-dos-salmoes-405-jurere-tradicional-florianopolis":
+    "residencial-vila-do-lago-jurere-internacional-florianopolis",
   "avenida-jornalista-rubens-de-arruda-ramos-2192-centro-florianopolis":
     "edificio-beiramar-centro-florianopolis",
   "avenida-jornalista-rubens-de-arruda-ramos-1892-centro-florianopolis":
