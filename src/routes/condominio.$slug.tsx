@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { useQuery, queryOptions } from "@tanstack/react-query";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { MapPin, Phone, ArrowRight, Building2, ExternalLink } from "lucide-react";
@@ -16,12 +16,129 @@ import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import MapPlaceholder from "@/components/MapPlaceholder";
 import { formatNeighborhoodWithPreposition } from "@/lib/format";
+import { getCondominiumPhotos } from "@/lib/condominium-media";
 
 const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
 
 const SITE = "https://micheledosimoveis.com.br";
 const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
+
+// Endereços publicados antes da identificação do nome próprio do condomínio.
+const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "rua-joao-henrique-goncalves-132-lagoa-da-conceicao-florianopolis":
+    "condominio-loft-lagoa-lagoa-da-conceicao-florianopolis",
+  "rua-padre-lourenco-r-de-andrade-307-santo-antonio-de-lisboa-florianopolis":
+    "condominio-moradas-do-santo-antonio-florianopolis",
+  "rua-padre-lourenco-r-de-andrade-423-santo-antonio-de-lisboa-florianopolis":
+    "saint-garden-santo-antonio-de-lisboa-florianopolis",
+  "rua-professor-manoel-do-lago-almeida-123-jurere-tradicional-florianopolis":
+    "puerto-madero-jurere-florianopolis",
+  "rua-desembargador-alves-pedrosa-17-joao-paulo-florianopolis":
+    "residencial-villa-isadora-joao-paulo-florianopolis",
+  "rua-julio-vieira-237-joao-paulo-florianopolis":
+    "harmonie-residencial-joao-paulo-florianopolis",
+  "avenida-das-raias-651-jurere-tradicional-florianopolis":
+    "terrazas-de-jurere-jurere-internacional-florianopolis",
+  "avenida-dos-salmoes-874-jurere-tradicional-florianopolis":
+    "condominio-pinamar-jurere-internacional-florianopolis",
+  "rua-deputado-walter-gomes-580-santo-antonio-de-lisboa-florianopolis":
+    "condominio-cachoeira-de-santo-antonio-iii-florianopolis",
+  "rua-deputado-walter-gomes-660-santo-antonio-de-lisboa-florianopolis":
+    "condominio-residencial-cachoeira-de-santo-antonio-florianopolis",
+  "rua-jurere-tradicional-300-jurere-tradicional-florianopolis":
+    "residencial-piemonte-jurere-tradicional-florianopolis",
+  "rodovia-tertuliano-brito-xavier-3150-jurere-tradicional-florianopolis":
+    "edificio-jurere-iate-residence-florianopolis",
+  "rodovia-tertuliano-brito-xavier-3308-jurere-tradicional-florianopolis":
+    "condominio-saint-malo-residence-jurere-florianopolis",
+  "rua-antonio-carlos-ferreira-196-agronomica-florianopolis":
+    "residencial-janauba-agronomica-florianopolis",
+  "rua-frei-caneca-290-agronomica-florianopolis":
+    "edificio-canaan-agronomica-florianopolis",
+  "rua-rui-barbosa-35-agronomica-florianopolis":
+    "condominio-ponta-do-coral-agronomica-florianopolis",
+  "rua-sidney-nocetti-23-agronomica-florianopolis":
+    "edificio-rui-barbosa-agronomica-florianopolis",
+  "avenida-afonso-delambert-neto-926-lagoa-da-conceicao-florianopolis":
+    "solaris-residence-lagoa-da-conceicao-florianopolis",
+  "rua-manoel-severino-de-oliveira-345-lagoa-da-conceicao-florianopolis":
+    "residencial-dunas-lagoa-da-conceicao-florianopolis",
+  "rua-rita-lourenco-da-silveira-371-lagoa-da-conceicao-florianopolis":
+    "residencial-ponta-da-areia-lagoa-da-conceicao-florianopolis",
+  "rua-rita-lourenco-da-silveira-391-lagoa-da-conceicao-florianopolis":
+    "residencial-lagoa-lagoa-da-conceicao-florianopolis",
+  "rua-joao-pacheco-da-costa-855-lagoa-da-conceicao-florianopolis":
+    "residencial-forte-da-lagoa-lagoa-da-conceicao-florianopolis",
+  "rua-laurindo-januario-da-silveira-954-lagoa-da-conceicao-florianopolis":
+    "condominio-botanique-lagoa-da-conceicao-florianopolis",
+  "rua-antonio-da-silveira-75-lagoa-da-conceicao-florianopolis":
+    "edificio-riviera-lagoa-da-conceicao-florianopolis",
+  "rua-crisogono-vieira-da-cruz-141-lagoa-da-conceicao-florianopolis":
+    "residencial-porto-icaro-lagoa-da-conceicao-florianopolis",
+  "rua-das-araras-380-lagoa-da-conceicao-florianopolis":
+    "edificio-residencial-catamaranes-lagoa-da-conceicao-florianopolis",
+  "rua-das-piraunas-1435-jurere-tradicional-florianopolis":
+    "residencial-velazques-ii-jurere-internacional-florianopolis",
+  "rua-dos-polvos-185-jurere-tradicional-florianopolis":
+    "residencial-ana-emilia-jurere-tradicional-florianopolis",
+  "rua-dos-acaras-40-jurere-tradicional-florianopolis":
+    "residencial-vox-jurere-tradicional-florianopolis",
+  "rua-das-tainhotas-133-jurere-tradicional-florianopolis":
+    "residencial-vale-nevado-jurere-tradicional-florianopolis",
+  "rua-dos-chernes-45-jurere-tradicional-florianopolis":
+    "residencial-alameda-r-jurere-tradicional-florianopolis",
+  "avenida-afonso-delambert-neto-978-lagoa-da-conceicao-florianopolis":
+    "residencial-morada-da-lagoa-lagoa-da-conceicao-florianopolis",
+  "rua-das-algas-1081-jurere-tradicional-florianopolis":
+    "residencial-ilha-do-frances-jurere-tradicional-florianopolis",
+  "avenida-dos-salmoes-650-jurere-tradicional-florianopolis":
+    "edificio-marbella-jurere-internacional-florianopolis",
+  "rua-das-algas-285-jurere-tradicional-florianopolis":
+    "edificio-ilha-dos-macucos-jurere-tradicional-florianopolis",
+  "rua-das-algas-955-jurere-tradicional-florianopolis":
+    "residencial-villagio-di-mare-jurere-tradicional-florianopolis",
+  "rua-das-algas-991-jurere-tradicional-florianopolis":
+    "residencial-porto-dos-acores-jurere-tradicional-florianopolis",
+  "estrada-haroldo-soares-glavan-1760-cacupe-florianopolis":
+    "viva-residence-cacupe-florianopolis",
+  "estrada-haroldo-soares-glavan-3375-cacupe-florianopolis":
+    "condominio-morada-de-cacupe-florianopolis",
+  "estrada-haroldo-soares-glavan-3400-cacupe-florianopolis":
+    "condominio-reserva-cacupe-florianopolis",
+  "avenida-das-lagostas-1008-jurere-tradicional-florianopolis":
+    "residencial-versailles-jurere-internacional-florianopolis",
+  "avenida-das-lagostas-950-jurere-tradicional-florianopolis":
+    "residencial-solar-das-lagostas-jurere-internacional-florianopolis",
+  "avenida-das-raias-104-jurere-tradicional-florianopolis":
+    "residencial-portal-das-raias-jurere-internacional-florianopolis",
+  "avenida-das-raias-230-jurere-tradicional-florianopolis":
+    "residencial-sunset-jurere-internacional-florianopolis",
+  "avenida-das-raias-711-jurere-tradicional-florianopolis":
+    "edificio-summer-place-jurere-internacional-florianopolis",
+  "avenida-dos-buzios-470-jurere-tradicional-florianopolis":
+    "hotel-residencial-aguas-de-jurere-internacional-florianopolis",
+  "avenida-dos-dourados-779-jurere-tradicional-florianopolis":
+    "edificio-vila-dourados-jurere-internacional-florianopolis",
+  "avenida-dos-salmoes-405-jurere-tradicional-florianopolis":
+    "residencial-vila-do-lago-jurere-internacional-florianopolis",
+  "avenida-jornalista-rubens-de-arruda-ramos-2192-centro-florianopolis":
+    "edificio-beiramar-centro-florianopolis",
+  "avenida-jornalista-rubens-de-arruda-ramos-1892-centro-florianopolis":
+    "edificio-solar-da-baia-norte-centro-florianopolis",
+  "avenida-jornalista-rubens-de-arruda-ramos-2508-centro-florianopolis":
+    "edificio-paradissos-centro-florianopolis",
+  "avenida-professor-othon-gama-d-eca-873-centro-florianopolis":
+    "edificio-atlantico-norte-centro-florianopolis",
+  "avenida-trompowsky-366-centro-florianopolis":
+    "residencial-flamboville-centro-florianopolis",
+  "rua-bocaiuva-2245-centro-florianopolis":
+    "edificio-professor-telmo-ribeiro-centro-florianopolis",
+  "avenida-jornalista-rubens-de-arruda-ramos-1784-centro-florianopolis":
+    "edificio-saint-claude-centro-florianopolis",
+  "rua-dos-polvos-61-jurere-tradicional-florianopolis":
+    "residencial-verona-jurere-florianopolis",
+};
 
 function condoQO(slug: string) {
   return queryOptions({
@@ -118,6 +235,15 @@ function buildFaq(condo: CondominiumDetail, hasProperties: boolean) {
 
 export const Route = createFileRoute("/condominio/$slug")({
   loader: async ({ params, context }) => {
+    const canonicalSlug = LEGACY_CONDO_SLUGS[params.slug];
+    if (canonicalSlug) {
+      throw redirect({
+        to: "/condominio/$slug",
+        params: { slug: canonicalSlug },
+        statusCode: 301,
+        replace: true,
+      });
+    }
     const condo = await context.queryClient.ensureQueryData(condoQO(params.slug));
     if (!condo) throw notFound();
     const nInfo = getNeighborhood(condo.bairro_slug ?? "");
@@ -148,7 +274,10 @@ export const Route = createFileRoute("/condominio/$slug")({
     const url = `${SITE}/condominio/${params.slug}`;
     const title = `${condo.name} em ${bairro}, Florianópolis | Michele dos Imóveis`;
     const description = `Conheça o ${condo.name}, em ${bairro}, Florianópolis. Veja localização, comodidades, imóveis próximos e fale com Michele dos Imóveis.`;
-    const ogImage = `${SITE}/michele-dos-imoveis-og.png`;
+    const photos = getCondominiumPhotos(condo.slug, condo.address);
+    const ogImage = photos.length > 0
+      ? `${SITE}${photos[0].src}`
+      : `${SITE}/michele-dos-imoveis-og.png`;
 
     const apartmentComplex: Record<string, unknown> = {
       "@context": "https://schema.org",
@@ -171,6 +300,15 @@ export const Route = createFileRoute("/condominio/$slug")({
       })),
       mainEntityOfPage: url,
     };
+    if (photos.length > 0) {
+      apartmentComplex.image = photos.map((photo) => ({
+        "@type": "ImageObject",
+        contentUrl: `${SITE}${photo.src}`,
+        caption: photo.caption,
+        width: photo.width,
+        height: photo.height,
+      }));
+    }
     if (condo.latitude != null && condo.longitude != null) {
       apartmentComplex.geo = {
         "@type": "GeoCoordinates",
@@ -225,6 +363,7 @@ export const Route = createFileRoute("/condominio/$slug")({
         { property: "og:type", content: "website" },
         { property: "og:url", content: url },
         { property: "og:image", content: ogImage },
+        { property: "og:image:alt", content: photos[0]?.alt ?? condo.name },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
@@ -268,6 +407,7 @@ function CondominioPage() {
   const props = useQuery(propsQO(k));
   const nearby = useQuery(nearbyCondosQO(condo.bairro_slug, condo.slug));
   const facts = useMemo(() => getCondominiumFacts(condo), [condo]);
+  const photos = getCondominiumPhotos(condo.slug, condo.address);
   const [showMap, setShowMap] = useState(false);
 
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
@@ -379,6 +519,29 @@ function CondominioPage() {
               </a>
             </div>
           </header>
+
+          {photos.length > 0 && (
+            <section aria-label={`Fotos do condomínio ${condo.name}`} className="mb-10">
+              <div className="grid gap-4 md:grid-cols-[1.15fr_1fr]">
+                {photos.map((photo, index) => (
+                  <figure key={photo.src} className="overflow-hidden rounded-2xl bg-secondary">
+                    <img
+                      src={photo.src}
+                      alt={photo.alt}
+                      width={photo.width}
+                      height={photo.height}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                      className="h-72 w-full object-cover sm:h-96"
+                    />
+                    <figcaption className="px-4 py-3 text-sm text-muted-foreground">
+                      {photo.caption}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Intro semântica */}
           <section className="prose prose-sm max-w-none">
@@ -819,7 +982,6 @@ function CondoFactsSection({
 }) {
   const items: { label: string; value: string }[] = [];
   if (facts.condoFeeLabel) items.push({ label: "Condomínio", value: facts.condoFeeLabel });
-  if (facts.iptuLabel) items.push({ label: "IPTU", value: facts.iptuLabel });
   if (facts.areaLabel) items.push({ label: "Área das unidades", value: facts.areaLabel });
   if (facts.bedroomsLabel) items.push({ label: "Dormitórios", value: facts.bedroomsLabel });
   if (facts.bathroomsLabel) items.push({ label: "Banheiros", value: facts.bathroomsLabel });
@@ -861,5 +1023,3 @@ function CondoFactsSection({
     </section>
   );
 }
-
-
