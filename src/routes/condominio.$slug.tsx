@@ -25,6 +25,10 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "rua-joao-pacheco-da-costa-855-lagoa-da-conceicao-florianopolis":
+    "residencial-forte-da-lagoa-lagoa-da-conceicao-florianopolis",
+  "rua-laurindo-januario-da-silveira-954-lagoa-da-conceicao-florianopolis":
+    "condominio-botanique-lagoa-da-conceicao-florianopolis",
   "rua-antonio-da-silveira-75-lagoa-da-conceicao-florianopolis":
     "edificio-riviera-lagoa-da-conceicao-florianopolis",
   "rua-crisogono-vieira-da-cruz-141-lagoa-da-conceicao-florianopolis":
