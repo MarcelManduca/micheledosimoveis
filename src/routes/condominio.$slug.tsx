@@ -25,6 +25,8 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "rua-professor-manoel-do-lago-almeida-123-jurere-tradicional-florianopolis":
+    "puerto-madero-jurere-florianopolis",
   "rua-desembargador-alves-pedrosa-17-joao-paulo-florianopolis":
     "residencial-villa-isadora-joao-paulo-florianopolis",
   "rua-julio-vieira-237-joao-paulo-florianopolis":
