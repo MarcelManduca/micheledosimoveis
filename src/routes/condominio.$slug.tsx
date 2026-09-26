@@ -129,11 +129,11 @@ export const Route = createFileRoute("/condominio/$slug")({
       neighborhood: condo.normalized_neighborhood,
       nQuery,
     };
-    await Promise.all([
+    const [properties, nearbyCondominiums] = await Promise.all([
       context.queryClient.ensureQueryData(propsQO(k)),
       context.queryClient.ensureQueryData(nearbyCondosQO(condo.bairro_slug, condo.slug)),
     ]);
-    return { condo };
+    return { condo, properties, nearbyCondominiums };
   },
   head: ({ params, loaderData }) => {
     const condo = loaderData?.condo;
@@ -270,7 +270,7 @@ export const Route = createFileRoute("/condominio/$slug")({
 });
 
 function CondominioPage() {
-  const { condo } = Route.useLoaderData();
+  const { condo, properties, nearbyCondominiums } = Route.useLoaderData();
   const nInfo = getNeighborhood(condo.bairro_slug ?? "");
   const nQuery = nInfo?.query ?? condo.normalized_neighborhood ?? undefined;
   const k: CondoQueryKeys = {
@@ -281,6 +281,10 @@ function CondominioPage() {
   };
   const props = useQuery(propsQO(k));
   const nearby = useQuery(nearbyCondosQO(condo.bairro_slug, condo.slug));
+  // O cache React Query do servidor não é serializado para o cliente. O resultado
+  // do loader mantém o primeiro render idêntico em ambos antes da revalidação.
+  const propertyData = props.data ?? properties;
+  const nearbyData = nearby.data ?? nearbyCondominiums;
   const facts = useMemo(() => getCondominiumFacts(condo), [condo]);
   const photos = getCondominiumPhotos(condo.slug, condo.address);
   const [showMap, setShowMap] = useState(false);
@@ -288,8 +292,8 @@ function CondominioPage() {
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
   const bairroPrep = formatNeighborhoodWithPreposition(bairro);
   const cep = formatCep(condo.postal_code);
-  const inCondoCount = props.data?.inCondo.length ?? 0;
-  const nearbyPropsCount = props.data?.nearby.length ?? 0;
+  const inCondoCount = propertyData.inCondo.length;
+  const nearbyPropsCount = propertyData.nearby.length;
   const hasProps = inCondoCount > 0;
   const faq = useMemo(() => buildFaq(condo, hasProps), [condo, hasProps]);
 
@@ -449,9 +453,7 @@ function CondominioPage() {
               <SummaryCard
                 label="Imóveis publicados neste condomínio"
                 value={
-                  props.isLoading
-                    ? "—"
-                    : inCondoCount > 0
+                  inCondoCount > 0
                       ? `${inCondoCount} ${inCondoCount === 1 ? "imóvel" : "imóveis"}`
                       : "Nenhum imóvel publicado no momento"
                 }
@@ -459,9 +461,7 @@ function CondominioPage() {
               <SummaryCard
                 label={`Imóveis próximos ${bairroPrep}`}
                 value={
-                  props.isLoading
-                    ? "—"
-                    : nearbyPropsCount > 0
+                  nearbyPropsCount > 0
                       ? `${nearbyPropsCount} ${nearbyPropsCount === 1 ? "imóvel" : "imóveis"}`
                       : "Nenhum no momento"
                 }
@@ -530,11 +530,9 @@ function CondominioPage() {
                 endereço (logradouro e número).
               </p>
             )}
-            {props.isLoading ? (
-              <p className="mt-3 text-sm text-muted-foreground">Carregando…</p>
-            ) : hasProps ? (
+            {hasProps ? (
               <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {props.data!.inCondo.map((p) => (
+                {propertyData.inCondo.map((p) => (
                   <PropertyCard key={p.id} p={p} />
                 ))}
               </div>
@@ -579,7 +577,7 @@ function CondominioPage() {
                 necessariamente pertencem ao {condo.name}.
               </p>
               <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {props.data!.nearby.slice(0, 6).map((p) => (
+                {propertyData.nearby.slice(0, 6).map((p) => (
                   <PropertyCard key={p.id} p={p} />
                 ))}
               </div>
@@ -716,14 +714,14 @@ function CondominioPage() {
           </section>
 
           {/* Condomínios próximos */}
-          {(nearby.data?.items.length ?? 0) > 0 && (
+          {nearbyData.items.length > 0 && (
             <section className="mt-14">
               <h2 className="font-display text-2xl tracking-tight">Condomínios próximos</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Outros condomínios cadastrados no mesmo bairro ou em regiões próximas.
               </p>
               <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {nearby.data!.items.map((c) => (
+                {nearbyData.items.map((c) => (
                   <Link
                     key={c.id}
                     to="/condominio/$slug"
@@ -898,5 +896,4 @@ function CondoFactsSection({
     </section>
   );
 }
-
 
