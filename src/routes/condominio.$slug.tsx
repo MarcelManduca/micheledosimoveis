@@ -16,6 +16,7 @@ import { SiteHeader } from "@/components/home/SiteHeader";
 import { SiteFooter } from "@/components/home/SiteFooter";
 import MapPlaceholder from "@/components/MapPlaceholder";
 import { formatNeighborhoodWithPreposition } from "@/lib/format";
+import { getCondominiumPhotos } from "@/lib/condominium-media";
 
 const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
@@ -271,7 +272,10 @@ export const Route = createFileRoute("/condominio/$slug")({
     const url = `${SITE}/condominio/${params.slug}`;
     const title = `${condo.name} em ${bairro}, Florianópolis | Michele dos Imóveis`;
     const description = `Conheça o ${condo.name}, em ${bairro}, Florianópolis. Veja localização, comodidades, imóveis próximos e fale com Michele dos Imóveis.`;
-    const ogImage = `${SITE}/michele-dos-imoveis-og.png`;
+    const photos = getCondominiumPhotos(condo.slug, condo.address);
+    const ogImage = photos.length > 0
+      ? `${SITE}${photos[0].src}`
+      : `${SITE}/michele-dos-imoveis-og.png`;
 
     const apartmentComplex: Record<string, unknown> = {
       "@context": "https://schema.org",
@@ -294,6 +298,15 @@ export const Route = createFileRoute("/condominio/$slug")({
       })),
       mainEntityOfPage: url,
     };
+    if (photos.length > 0) {
+      apartmentComplex.image = photos.map((photo) => ({
+        "@type": "ImageObject",
+        contentUrl: `${SITE}${photo.src}`,
+        caption: photo.caption,
+        width: photo.width,
+        height: photo.height,
+      }));
+    }
     if (condo.latitude != null && condo.longitude != null) {
       apartmentComplex.geo = {
         "@type": "GeoCoordinates",
@@ -348,6 +361,7 @@ export const Route = createFileRoute("/condominio/$slug")({
         { property: "og:type", content: "website" },
         { property: "og:url", content: url },
         { property: "og:image", content: ogImage },
+        { property: "og:image:alt", content: photos[0]?.alt ?? condo.name },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
@@ -391,6 +405,7 @@ function CondominioPage() {
   const props = useQuery(propsQO(k));
   const nearby = useQuery(nearbyCondosQO(condo.bairro_slug, condo.slug));
   const facts = useMemo(() => getCondominiumFacts(condo), [condo]);
+  const photos = getCondominiumPhotos(condo.slug, condo.address);
   const [showMap, setShowMap] = useState(false);
 
   const bairro = condo.normalized_neighborhood ?? "Florianópolis";
@@ -502,6 +517,29 @@ function CondominioPage() {
               </a>
             </div>
           </header>
+
+          {photos.length > 0 && (
+            <section aria-label={`Fotos do condomínio ${condo.name}`} className="mb-10">
+              <div className="grid gap-4 md:grid-cols-[1.15fr_1fr]">
+                {photos.map((photo, index) => (
+                  <figure key={photo.src} className="overflow-hidden rounded-2xl bg-secondary">
+                    <img
+                      src={photo.src}
+                      alt={photo.alt}
+                      width={photo.width}
+                      height={photo.height}
+                      loading={index === 0 ? "eager" : "lazy"}
+                      decoding="async"
+                      className="h-72 w-full object-cover sm:h-96"
+                    />
+                    <figcaption className="px-4 py-3 text-sm text-muted-foreground">
+                      {photo.caption}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Intro semântica */}
           <section className="prose prose-sm max-w-none">
