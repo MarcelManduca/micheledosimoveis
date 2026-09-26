@@ -25,6 +25,18 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "avenida-jornalista-rubens-de-arruda-ramos-2192-centro-florianopolis":
+    "edificio-beiramar-centro-florianopolis",
+  "avenida-jornalista-rubens-de-arruda-ramos-1892-centro-florianopolis":
+    "edificio-solar-da-baia-norte-centro-florianopolis",
+  "avenida-jornalista-rubens-de-arruda-ramos-2508-centro-florianopolis":
+    "edificio-paradissos-centro-florianopolis",
+  "avenida-professor-othon-gama-d-eca-873-centro-florianopolis":
+    "edificio-atlantico-norte-centro-florianopolis",
+  "avenida-trompowsky-366-centro-florianopolis":
+    "residencial-flamboville-centro-florianopolis",
+  "rua-bocaiuva-2245-centro-florianopolis":
+    "edificio-professor-telmo-ribeiro-centro-florianopolis",
   "avenida-jornalista-rubens-de-arruda-ramos-1784-centro-florianopolis":
     "edificio-saint-claude-centro-florianopolis",
   "rua-dos-polvos-61-jurere-tradicional-florianopolis":
