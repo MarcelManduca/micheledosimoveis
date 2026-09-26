@@ -1,0 +1,90 @@
+{
+  "request": {
+    "site_url": "sc-domain:micheledosimoveis.com.br",
+    "start_date": "2026-08-22",
+    "end_date": "2026-09-18",
+    "dimensions": ["page"],
+    "data_state": "final",
+    "row_limit": 10
+  },
+  "response": {
+    "site_url": "sc-domain:micheledosimoveis.com.br",
+    "start_date": "2026-08-22",
+    "end_date": "2026-09-18",
+    "dimensions": ["page"],
+    "data_state": "final",
+    "row_count": 10,
+    "rows": [
+      {
+        "keys": ["https://micheledosimoveis.com.br/"],
+        "clicks": 18,
+        "impressions": 99,
+        "ctr": 0.18181818181818182,
+        "position": 7.181818181818182
+      },
+      {
+        "keys": ["https://micheledosimoveis.com.br/condominio/condominio-coral-tower-coqueiros-florianopolis"],
+        "clicks": 10,
+        "impressions": 65,
+        "ctr": 0.15384615384615385,
+        "position": 7.184615384615385
+      },
+      {
+        "keys": ["https://micheledosimoveis.com.br/condominio/residencial-palmas-de-maiorka-pantanal-florianopolis"],
+        "clicks": 7,
+        "impressions": 96,
+        "ctr": 0.07291666666666667,
+        "position": 6.65625
+      },
+      {
+        "keys": ["https://micheledosimoveis.com.br/condominio/condominio-aguas-do-atlantico-ingleses-florianopolis"],
+        "clicks": 4,
+        "impressions": 27,
+        "ctr": 0.14814814814814814,
+        "position": 6.814814814814815
+      },
+      {
+        "keys": ["https://micheledosimoveis.com.br/condominio/condominio-mar-azul-estreito-florianopolis"],
+        "clicks": 3,
+        "impressions": 21,
+        "ctr": 0.14285714285714285,
+        "position": 6.857142857142857
+      },
+      {
+        "keys": ["https://micheledosimoveis.com.br/condominio/residencial-peninsula-lagoa-lagoa-da-conceicao-florianopolis"],
+        "clicks": 3,
+        "impressions": 17,
+        "ctr": 0.17647058823529413,
+        "position": 7.529411764705882
+      },
+      {
+        "keys": ["https://micheledosimoveis.com.br/condominio/condominio-adalberto-costa-centro-florianopolis"],
+        "clicks": 2,
+        "impressions": 42,
+        "ctr": 0.047619047619047616,
+        "position": 7.904761904761905
+      },
+      {
+        "keys": ["https://micheledosimoveis.com.br/condominio/condominio-aguas-da-cachoeira-cachoeira-do-bom-jesus-florianopolis"],
+        "clicks": 2,
+        "impressions": 5,
+        "ctr": 0.4,
+        "position": 4.4
+      },
+      {
+        "keys": ["https://micheledosimoveis.com.br/condominio/condominio-allure-residence-club-balneario-florianopolis"],
+        "clicks": 2,
+        "impressions": 14,
+        "ctr": 0.14285714285714285,
+        "position": 7.642857142857143
+      },
+      {
+        "keys": ["https://micheledosimoveis.com.br/condominio/condominio-atenas-agronomica-florianopolis"],
+        "clicks": 2,
+        "impressions": 35,
+        "ctr": 0.05714285714285714,
+        "position": 7.885714285714286
+      }
+    ]
+  }
+}

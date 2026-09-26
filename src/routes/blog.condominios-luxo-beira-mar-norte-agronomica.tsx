@@ -5,6 +5,7 @@ import { ArticleGallery } from "@/components/blog/ArticleGallery";
 import { YouTubeShort } from "@/components/blog/YouTubeShort";
 import { ARTICLE_PATH, CONDOMINIUM_MEDIA, LA_PERLE_YOUTUBE_ID } from "@/lib/blog/beira-mar-media";
 import { SITE, buildWhatsAppUrl } from "@/lib/site-config";
+import { trackWhatsAppClick } from "@/lib/tracking";
 import hero from "@/assets/hero-beiramar-1280.webp";
 import heroSmall from "@/assets/hero-beiramar-720.webp";
 import portrait from "@/assets/michele-portrait-800.webp";
@@ -544,6 +545,12 @@ function BeiraMarArticle() {
                       )}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() =>
+                        trackWhatsAppClick({
+                          ctaLocation: "blog_article",
+                          neighborhood: "Beira-Mar Norte",
+                        })
+                      }
                       className="inline-flex items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400 hover:underline underline-offset-4"
                     >
                       <MessageCircle className="h-4 w-4" /> Consultar opções com Michele
@@ -637,6 +644,12 @@ function BeiraMarArticle() {
                 )}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  trackWhatsAppClick({
+                    ctaLocation: "blog_article",
+                    neighborhood: "Beira-Mar Norte",
+                  })
+                }
                 className="mt-6 inline-flex items-center gap-2 rounded-full bg-background px-6 py-3 text-sm font-medium text-foreground hover:bg-background/90 transition"
               >
                 <MessageCircle className="h-4 w-4" />

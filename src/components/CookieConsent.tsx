@@ -34,6 +34,9 @@ export function CookieConsent() {
     } catch {}
     setOpen(false);
     window.dispatchEvent(new CustomEvent("cookie-consent", { detail: value }));
+    import("@/lib/tracking").then(({ trackConsentUpdate }) => {
+      trackConsentUpdate(value);
+    });
   };
 
   if (!open) return null;
