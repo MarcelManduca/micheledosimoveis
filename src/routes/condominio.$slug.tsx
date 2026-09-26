@@ -942,7 +942,6 @@ function CondoFactsSection({
 }) {
   const items: { label: string; value: string }[] = [];
   if (facts.condoFeeLabel) items.push({ label: "Condomínio", value: facts.condoFeeLabel });
-  if (facts.iptuLabel) items.push({ label: "IPTU", value: facts.iptuLabel });
   if (facts.areaLabel) items.push({ label: "Área das unidades", value: facts.areaLabel });
   if (facts.bedroomsLabel) items.push({ label: "Dormitórios", value: facts.bedroomsLabel });
   if (facts.bathroomsLabel) items.push({ label: "Banheiros", value: facts.bathroomsLabel });
