@@ -25,6 +25,10 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "rua-padre-lourenco-r-de-andrade-307-santo-antonio-de-lisboa-florianopolis":
+    "condominio-moradas-do-santo-antonio-florianopolis",
+  "rua-padre-lourenco-r-de-andrade-423-santo-antonio-de-lisboa-florianopolis":
+    "saint-garden-santo-antonio-de-lisboa-florianopolis",
   "rua-professor-manoel-do-lago-almeida-123-jurere-tradicional-florianopolis":
     "puerto-madero-jurere-florianopolis",
   "rua-desembargador-alves-pedrosa-17-joao-paulo-florianopolis":
