@@ -1,4 +1,4 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { useQuery, queryOptions } from "@tanstack/react-query";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { MapPin, Phone, ArrowRight, Building2, ExternalLink } from "lucide-react";
@@ -22,6 +22,14 @@ const LeafletMap = lazy(() => import("@/components/LeafletMap"));
 
 const SITE = "https://micheledosimoveis.com.br";
 const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
+
+// Endereços publicados antes da identificação do nome próprio do condomínio.
+const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "avenida-jornalista-rubens-de-arruda-ramos-1784-centro-florianopolis":
+    "edificio-saint-claude-centro-florianopolis",
+  "rua-dos-polvos-61-jurere-tradicional-florianopolis":
+    "residencial-verona-jurere-florianopolis",
+};
 
 function condoQO(slug: string) {
   return queryOptions({
@@ -118,6 +126,15 @@ function buildFaq(condo: CondominiumDetail, hasProperties: boolean) {
 
 export const Route = createFileRoute("/condominio/$slug")({
   loader: async ({ params, context }) => {
+    const canonicalSlug = LEGACY_CONDO_SLUGS[params.slug];
+    if (canonicalSlug) {
+      throw redirect({
+        to: "/condominio/$slug",
+        params: { slug: canonicalSlug },
+        statusCode: 301,
+        replace: true,
+      });
+    }
     const condo = await context.queryClient.ensureQueryData(condoQO(params.slug));
     if (!condo) throw notFound();
     const nInfo = getNeighborhood(condo.bairro_slug ?? "");
@@ -861,5 +878,4 @@ function CondoFactsSection({
     </section>
   );
 }
-
 
