@@ -58,6 +58,23 @@ const ACQUA_PHOTOS: readonly CondominiumPhoto[] = [
   },
 ];
 
+const SOPRANO_PHOTOS: readonly CondominiumPhoto[] = [
+  {
+    src: "/condominios/soprano-hall/fachada.webp",
+    alt: "Fachada do condomínio Soprano Hall na Agronômica, Florianópolis",
+    caption: "Fachada do Soprano Hall · fonte: Mantovani e Rita Arquitetura",
+    width: 1066,
+    height: 1600,
+  },
+  {
+    src: "/condominios/soprano-hall/piscina.webp",
+    alt: "Piscina e área externa do condomínio Soprano Hall na Agronômica",
+    caption: "Piscina do Soprano Hall · fonte: Mantovani e Rita Arquitetura",
+    width: 1600,
+    height: 1066,
+  },
+];
+
 // Original files: Drive/SONATA/Fachada 1 and Piscina 1.
 // https://drive.google.com/drive/folders/1i6HXssEd7Fy6XtLsiVptLshHicjKeV9g
 // Jazz Club photos: architectural project's portfolio (2016), not the marked Drive copies.
@@ -68,6 +85,10 @@ const ACQUA_PHOTOS: readonly CondominiumPhoto[] = [
 // https://cflimoveis.com.br/acqua/
 // https://cflimoveis.com.br/wp-content/uploads/2024/07/Acqua-CFL-19.jpg
 // https://cflimoveis.com.br/wp-content/uploads/2024/07/Acqua-CFL-13-scaled.jpg
+// Soprano Hall photos: architectural project's portfolio.
+// https://mantovanierita.com.br/projetos/soprano-hall/
+// https://mantovanierita.com.br/wp-content/uploads/501_10_Frente.jpg
+// https://mantovanierita.com.br/wp-content/uploads/501_08_Piscina.jpg
 // The listing-unit photos in the blog are deliberately excluded.
 export function getCondominiumPhotos(slug: string, address: string | null): readonly CondominiumPhoto[] {
   if (!address) return [];
@@ -85,6 +106,11 @@ export function getCondominiumPhotos(slug: string, address: string | null): read
   if (slug === "condominio-acqua-agronomica-florianopolis") {
     return /frei\s+caneca/.test(normalized) && /\b17\b/.test(normalized)
       ? ACQUA_PHOTOS
+      : [];
+  }
+  if (slug === "condominio-soprano-hall-agronomica-florianopolis") {
+    return /paulo\s+zimmer/.test(normalized) && /\b55\b/.test(normalized)
+      ? SOPRANO_PHOTOS
       : [];
   }
   return [];
