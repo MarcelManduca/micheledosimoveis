@@ -25,6 +25,24 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "rua-desembargador-alves-pedrosa-17-joao-paulo-florianopolis":
+    "residencial-villa-isadora-joao-paulo-florianopolis",
+  "rua-julio-vieira-237-joao-paulo-florianopolis":
+    "harmonie-residencial-joao-paulo-florianopolis",
+  "avenida-das-raias-651-jurere-tradicional-florianopolis":
+    "terrazas-de-jurere-jurere-internacional-florianopolis",
+  "avenida-dos-salmoes-874-jurere-tradicional-florianopolis":
+    "condominio-pinamar-jurere-internacional-florianopolis",
+  "rua-deputado-walter-gomes-580-santo-antonio-de-lisboa-florianopolis":
+    "condominio-cachoeira-de-santo-antonio-iii-florianopolis",
+  "rua-deputado-walter-gomes-660-santo-antonio-de-lisboa-florianopolis":
+    "condominio-residencial-cachoeira-de-santo-antonio-florianopolis",
+  "rua-jurere-tradicional-300-jurere-tradicional-florianopolis":
+    "residencial-piemonte-jurere-tradicional-florianopolis",
+  "rodovia-tertuliano-brito-xavier-3150-jurere-tradicional-florianopolis":
+    "edificio-jurere-iate-residence-florianopolis",
+  "rodovia-tertuliano-brito-xavier-3308-jurere-tradicional-florianopolis":
+    "condominio-saint-malo-residence-jurere-florianopolis",
   "rua-antonio-carlos-ferreira-196-agronomica-florianopolis":
     "residencial-janauba-agronomica-florianopolis",
   "rua-frei-caneca-290-agronomica-florianopolis":
@@ -960,4 +978,3 @@ function CondoFactsSection({
     </section>
   );
 }
-
