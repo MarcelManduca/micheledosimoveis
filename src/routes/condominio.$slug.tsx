@@ -25,6 +25,8 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "rua-antonio-carlos-ferreira-196-agronomica-florianopolis":
+    "residencial-janauba-agronomica-florianopolis",
   "rua-frei-caneca-290-agronomica-florianopolis":
     "edificio-canaan-agronomica-florianopolis",
   "rua-rui-barbosa-35-agronomica-florianopolis":
