@@ -25,6 +25,16 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "rua-das-algas-1081-jurere-tradicional-florianopolis":
+    "residencial-ilha-do-frances-jurere-tradicional-florianopolis",
+  "avenida-dos-salmoes-650-jurere-tradicional-florianopolis":
+    "edificio-marbella-jurere-internacional-florianopolis",
+  "rua-das-algas-285-jurere-tradicional-florianopolis":
+    "edificio-ilha-dos-macucos-jurere-tradicional-florianopolis",
+  "rua-das-algas-955-jurere-tradicional-florianopolis":
+    "residencial-villagio-di-mare-jurere-tradicional-florianopolis",
+  "rua-das-algas-991-jurere-tradicional-florianopolis":
+    "residencial-porto-dos-acores-jurere-tradicional-florianopolis",
   "estrada-haroldo-soares-glavan-1760-cacupe-florianopolis":
     "viva-residence-cacupe-florianopolis",
   "estrada-haroldo-soares-glavan-3375-cacupe-florianopolis":
