@@ -533,7 +533,6 @@ export const getCondoValueRefs = createServerFn({ method: "GET" })
 export type CondominiumFacts = {
   postalCode: string | null;
   condoFeeLabel: string | null;
-  iptuLabel: string | null;
   areaLabel: string | null;
   bedroomsLabel: string | null;
   bathroomsLabel: string | null;
@@ -604,7 +603,6 @@ export function getCondominiumFacts(condo: CondominiumDetail): CondominiumFacts 
     "vaga",
   );
   const condoFeeLabel = moneyRefLabel(condo.condo_fee_min_brl, condo.condo_fee_avg_brl);
-  const iptuLabel = moneyRefLabel(condo.iptu_min_brl, condo.iptu_avg_brl);
   const unitsLabel =
     condo.units_count != null && condo.units_count > 0
       ? `${condo.units_count} ${condo.units_count === 1 ? "unidade" : "unidades"}`
@@ -624,7 +622,6 @@ export function getCondominiumFacts(condo: CondominiumDetail): CondominiumFacts 
 
   const hasAnyQuantitativeData = [
     condoFeeLabel,
-    iptuLabel,
     areaLabel,
     bedroomsLabel,
     bathroomsLabel,
@@ -638,7 +635,6 @@ export function getCondominiumFacts(condo: CondominiumDetail): CondominiumFacts 
   return {
     postalCode: formatCepInternal(condo.postal_code),
     condoFeeLabel,
-    iptuLabel,
     areaLabel,
     bedroomsLabel,
     bathroomsLabel,
@@ -650,6 +646,5 @@ export function getCondominiumFacts(condo: CondominiumDetail): CondominiumFacts 
     hasAnyQuantitativeData,
   };
 }
-
 
 
