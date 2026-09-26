@@ -25,6 +25,10 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "rua-das-piraunas-1435-jurere-tradicional-florianopolis":
+    "residencial-velazques-ii-jurere-internacional-florianopolis",
+  "rua-dos-polvos-185-jurere-tradicional-florianopolis":
+    "residencial-ana-emilia-jurere-tradicional-florianopolis",
   "rua-dos-acaras-40-jurere-tradicional-florianopolis":
     "residencial-vox-jurere-tradicional-florianopolis",
   "rua-das-tainhotas-133-jurere-tradicional-florianopolis":
