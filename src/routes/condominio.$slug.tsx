@@ -25,6 +25,14 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "rua-dos-acaras-40-jurere-tradicional-florianopolis":
+    "residencial-vox-jurere-tradicional-florianopolis",
+  "rua-das-tainhotas-133-jurere-tradicional-florianopolis":
+    "residencial-vale-nevado-jurere-tradicional-florianopolis",
+  "rua-dos-chernes-45-jurere-tradicional-florianopolis":
+    "residencial-alameda-r-jurere-tradicional-florianopolis",
+  "avenida-afonso-delambert-neto-978-lagoa-da-conceicao-florianopolis":
+    "residencial-morada-da-lagoa-lagoa-da-conceicao-florianopolis",
   "rua-das-algas-1081-jurere-tradicional-florianopolis":
     "residencial-ilha-do-frances-jurere-tradicional-florianopolis",
   "avenida-dos-salmoes-650-jurere-tradicional-florianopolis":
