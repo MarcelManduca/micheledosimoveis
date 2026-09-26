@@ -25,6 +25,12 @@ const WHATSAPP = "https://api.whatsapp.com/send?phone=5548991828828&text=";
 
 // Endereços publicados antes da identificação do nome próprio do condomínio.
 const LEGACY_CONDO_SLUGS: Record<string, string> = {
+  "rua-antonio-da-silveira-75-lagoa-da-conceicao-florianopolis":
+    "edificio-riviera-lagoa-da-conceicao-florianopolis",
+  "rua-crisogono-vieira-da-cruz-141-lagoa-da-conceicao-florianopolis":
+    "residencial-porto-icaro-lagoa-da-conceicao-florianopolis",
+  "rua-das-araras-380-lagoa-da-conceicao-florianopolis":
+    "edificio-residencial-catamaranes-lagoa-da-conceicao-florianopolis",
   "rua-das-piraunas-1435-jurere-tradicional-florianopolis":
     "residencial-velazques-ii-jurere-internacional-florianopolis",
   "rua-dos-polvos-185-jurere-tradicional-florianopolis":
